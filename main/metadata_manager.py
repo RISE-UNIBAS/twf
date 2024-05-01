@@ -1,15 +1,16 @@
-import time
-
+"""Manages metadata from Google Sheets."""
 from google.oauth2.service_account import Credentials
 from googleapiclient.discovery import build
 
 
 class MetadataManager:
+    """Manages metadata from Google Sheets."""
 
     service = None
 
     @staticmethod
     def initialize_service(service_account_json):
+        """Initializes the Google Sheets service object."""
         if MetadataManager.service is None:
             credentials = Credentials.from_service_account_file(
                                                 service_account_json,
@@ -19,11 +20,13 @@ class MetadataManager:
 
     @staticmethod
     def get_service(service_account_json):
+        """Returns a Google Sheets service object."""
         MetadataManager.initialize_service(service_account_json)
         return MetadataManager.service
 
     @staticmethod
     def get_title_row(service_account_json, spreadsheet_id, range_name):
+        """Returns the title row of a Google Sheet as a list."""
         values = MetadataManager.get_data_from_spreadsheet(service_account_json, spreadsheet_id, range_name)
         if values is not None:
             values = values[0]
@@ -31,14 +34,11 @@ class MetadataManager:
 
     @staticmethod
     def get_data_from_spreadsheet(service_account_json, spreadsheet_id, range_name):
+        """Requests data from a Google Sheet and returns it as a list of lists."""
         sheet = MetadataManager.get_service(service_account_json).spreadsheets()
-        start_time = time.time()
         result = sheet.values().get(spreadsheetId=spreadsheet_id, range=range_name).execute()
-        end_time = time.time()
-        print(f"Time taken to get data: {end_time - start_time} seconds")
         values = result.get('values', [])
 
         if not values:
             return None
         return values
-

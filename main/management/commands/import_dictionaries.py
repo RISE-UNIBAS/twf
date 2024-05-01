@@ -1,6 +1,6 @@
 """Management command to import dictionaries from a CSV file."""
-from django.core.management.base import BaseCommand, CommandError
 from pathlib import Path
+from django.core.management.base import BaseCommand, CommandError
 from main.import_utils import import_dictionary_from_csv
 
 
@@ -9,7 +9,13 @@ class Command(BaseCommand):
     help = 'Imports dictionaries from a CSV file'
 
     def add_arguments(self, parser):
-        """Add arguments to the command."""
+        """Add arguments to the command.
+
+        Args:
+            parser: The parser object
+
+        Returns:
+            None"""
         parser.add_argument('csv_file', type=str, help='The path to the CSV file to import')
         parser.add_argument('--type', type=str, help='The type of the dictionary')
         parser.add_argument('--label', type=str, help='The label of the dictionary')

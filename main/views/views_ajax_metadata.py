@@ -5,17 +5,23 @@ from django.http import JsonResponse, StreamingHttpResponse
 
 from main.metadata_manager import MetadataManager
 from main.models import Project, Document
+from main.views.views_ajax_base import set_progress
+
+PROGRESS_JOB_NAME = "extract-meta-progress"
+DETAIL_JOB_NAME = "extract-meta-progress-detail"
 
 
 async def start_metadata_extraction(request, project_id):
-    cache.set(f'{project_id}_extract-metadata-progress', 0)
+    """This function starts the metadata extraction process."""
+    set_progress(0, project_id, PROGRESS_JOB_NAME)
     create_doc_metadata_async = sync_to_async(create_doc_metadata, thread_sensitive=True)
     await create_doc_metadata_async(project_id, request.user)
     return JsonResponse({'status': 'success'}, status=200)
 
 
 def create_doc_metadata(project_id, extracting_user):
-    auth_json = 'transkribusWorkflow/transkribusworkflow-a213551836b3.json'
+    """This function extracts metadata from a Google Sheet and saves it to the documents in a project."""
+    auth_json = 'transkribusWorkflow/google_key.json'
 
     try:
         # Get the projects to save the documents to
@@ -63,12 +69,3 @@ def stream_metadata_extraction_progress(request, project_id):
             time.sleep(1)  # Sleep for one second before checking again
 
     return StreamingHttpResponse(event_stream(), content_type='text/event-stream')
-
-
-def set_progress(processed_steps, total_steps, project_id):
-    """This function calculates the progress of a process and saves it to the cache."""
-    progress = (processed_steps / total_steps) * 100
-    progress = progress - 30
-    if progress < 0:
-        progress = 0
-    cache.set(f'{project_id}_extract-metadata-progress', progress)

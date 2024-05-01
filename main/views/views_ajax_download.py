@@ -30,7 +30,7 @@ def ajax_transkribus_download_export(request, project_id):
 
     def download_thread():
         """ Download the file in a separate thread."""
-        response = requests.get(url, stream=True)
+        response = requests.get(url, stream=True, timeout=10)
         total_length = response.headers.get('content-length')
         if total_length is not None:
             total_length_int = int(total_length)

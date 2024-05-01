@@ -2,5 +2,6 @@
 .venv/
 media/
 static/
+docs/_build/
 .env
-transkribusWorkflow/transkribusworkflow-a213551836b3.json
+transkribusWorkflow/google_key.json

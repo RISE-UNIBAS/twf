@@ -17,12 +17,13 @@ from main.page_file_meta_data_reader import extract_transkribus_file_metadata
 from main.utils.file_utils import delete_all_in_folder
 from main.views.views_ajax_base import set_progress, set_details, calculate_and_set_progress, add_details
 
-progress_job_name = "extract-progress"
-detail_job_name = "extract-progress-detail"
+PROGRESS_JOB_NAME = "extract-progress"
+DETAIL_JOB_NAME = "extract-progress-detail"
 
 
 async def start_extraction(request, project_id):
-    set_progress(0, project_id, progress_job_name)
+    """This function starts the extraction process."""
+    set_progress(0, project_id, PROGRESS_JOB_NAME)
     extract_zip_export_async = sync_to_async(extract_zip_export, thread_sensitive=True)
     await extract_zip_export_async(project_id, request.user)
     return JsonResponse({'status': 'success'}, status=200)
@@ -58,7 +59,7 @@ def extract_zip_export(project_id, extracting_user):
             # Save the extracted files to the folder
             unique_id = 1
             copied_files = []
-            set_details(f"Extracting {total_files} files.", project_id, detail_job_name)
+            set_details(f"Extracting {total_files} files.", project_id, DETAIL_JOB_NAME)
             for file_info in valid_files:
                 with zip_ref.open(file_info) as file_data:
 
@@ -74,13 +75,13 @@ def extract_zip_export(project_id, extracting_user):
 
                 # Update Processing state
                 processed_steps += 1
-                calculate_and_set_progress(processed_steps, total_steps, project_id, progress_job_name)
-                add_details(f"Extracted file {new_filename}.", project_id, detail_job_name)
+                calculate_and_set_progress(processed_steps, total_steps, project_id, PROGRESS_JOB_NAME)
+                add_details(f"Extracted file {new_filename}.", project_id, DETAIL_JOB_NAME)
 
         #############################
         # Process the extracted files
         created_documents = 0
-        add_details(f"Processing {len(copied_files)} files.", project_id, detail_job_name)
+        add_details(f"Processing {len(copied_files)} files.", project_id, DETAIL_JOB_NAME)
         for file in copied_files:
             # Read the file and extract the Transkribus metadata
             data = extract_transkribus_file_metadata(file)
@@ -109,8 +110,8 @@ def extract_zip_export(project_id, extracting_user):
 
                 # Update Processing state
                 processed_steps += 1
-                calculate_and_set_progress(processed_steps, total_steps, project_id, progress_job_name)
-                add_details(f"Processed Page {page_instance.tk_page_id}", project_id, detail_job_name)
+                calculate_and_set_progress(processed_steps, total_steps, project_id, PROGRESS_JOB_NAME)
+                add_details(f"Processed Page {page_instance.tk_page_id}", project_id, DETAIL_JOB_NAME)
 
             else:
                 print("ERROR")  # TODO: Handle error
@@ -118,7 +119,7 @@ def extract_zip_export(project_id, extracting_user):
         parser_config = {'line_type': 'TextRegion', 'logging': {'level': logging.WARN}}
 
         all_pages = Page.objects.filter(document__project=project).order_by('document__document_id', 'tk_page_number')
-        add_details(f"Parsing {all_pages.count()} pages.", project_id, detail_job_name)
+        add_details(f"Parsing {all_pages.count()} pages.", project_id, DETAIL_JOB_NAME)
         for page in all_pages:
             parse_time = timezone.now()
 
@@ -131,22 +132,22 @@ def extract_zip_export(project_id, extracting_user):
 
             processed_steps += 1
             set_progress(processed_steps, total_steps, project_id)
-            add_details(f"Parsed page {page.tk_page_id} (p. {page.tk_page_number})", project_id, detail_job_name)
+            add_details(f"Parsed page {page.tk_page_id} (p. {page.tk_page_number})", project_id, DETAIL_JOB_NAME)
 
-        set_progress(100, project_id, progress_job_name)
-        set_details("FINISHED", project_id, detail_job_name)
+        set_progress(100, project_id, PROGRESS_JOB_NAME)
+        set_details("FINISHED", project_id, DETAIL_JOB_NAME)
     except Project.DoesNotExist:
-        set_progress(100, project_id, progress_job_name)
-        set_details("Project not found", project_id, detail_job_name)
+        set_progress(100, project_id, PROGRESS_JOB_NAME)
+        set_details("Project not found", project_id, DETAIL_JOB_NAME)
 
 
 def stream_extraction_progress(request, project_id):
     """This function streams the progress of the extraction process to the client."""
-    set_progress(0, project_id, progress_job_name)
+    set_progress(0, project_id, PROGRESS_JOB_NAME)
 
     def event_stream():
         while True:
-            progress = cache.get(f'{project_id}_{progress_job_name}', 0)
+            progress = cache.get(f'{project_id}_{PROGRESS_JOB_NAME}', 0)
             yield f'data: {progress}\n\n'
             if progress >= 100:
                 break
@@ -157,17 +158,17 @@ def stream_extraction_progress(request, project_id):
 
 def stream_extraction_progress_detail(request, project_id):
     """This function streams the details of the extraction process to the client."""
-    add_details("Processing files", project_id, detail_job_name)
+    add_details("Processing files", project_id, DETAIL_JOB_NAME)
 
     def event_stream():
         while True:
-            details = cache.get(f'{project_id}_{detail_job_name}', 'no details available')
+            details = cache.get(f'{project_id}_{DETAIL_JOB_NAME}', 'no details available')
             if details:
                 yield f'data: {details}\n\n'
             if details == "FINISHED":
                 yield 'event: complete\ndata: Process completed.\n\n'
                 break
-            set_details('', project_id, detail_job_name)    # Clear after sending
+            set_details('', project_id, DETAIL_JOB_NAME)    # Clear after sending
             time.sleep(.5)  # Sleep half a second before checking again
 
     return StreamingHttpResponse(event_stream(), content_type='text/event-stream')

@@ -1,3 +1,4 @@
+"""This module contains the functions for the AJAX requests related to the tags."""
 import time
 from asgiref.sync import sync_to_async
 from django.core.cache import cache
@@ -105,8 +106,5 @@ def stream_tag_extraction_progress_detail(request, project_id):
             time.sleep(.5)  # Sleep for one second before checking again
 
     return StreamingHttpResponse(event_stream(), content_type='text/event-stream')
-
-
-
 
 

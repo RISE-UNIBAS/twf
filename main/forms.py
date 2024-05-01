@@ -39,8 +39,9 @@ class AssignToEntryForm(forms.Form):
 
     def __init__(self, *args, **kwargs):
         tag_type = kwargs.pop('tag_type')
-        super(AssignToEntryForm, self).__init__(*args, **kwargs)
-        self.fields['entry'].choices = DictionaryEntry.objects.filter(dictionary__type=tag_type).values_list('id', 'label')
+        super().__init__(*args, **kwargs)
+        self.fields['entry'].choices = DictionaryEntry.objects.filter(
+            dictionary__type=tag_type).values_list('id', 'label')
 
 
 class GoogleDocsSettingsForm(forms.ModelForm):
@@ -54,7 +55,7 @@ class GoogleDocsSettingsForm(forms.ModelForm):
                   'metadata_google_title_column', 'metadata_google_valid_columns']
 
     def __init__(self, *args, **kwargs):
-        super(GoogleDocsSettingsForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.helper = FormHelper()
         self.helper.form_method = 'post'
         self.helper.layout = Layout(

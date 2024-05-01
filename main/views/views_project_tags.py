@@ -1,3 +1,4 @@
+""" Views for the tag assignment of dictionary entries. """
 from django.contrib import messages
 from django.views.generic import TemplateView
 
