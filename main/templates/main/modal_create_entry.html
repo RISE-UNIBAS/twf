@@ -1,0 +1,22 @@
+{% load crispy_forms_filters %}
+
+<div class="modal fade" id="createEntryModal" tabindex="-1" aria-labelledby="createEntryModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="createEntryModalLabel">Create Dictionary Entry</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form action="{% url 'main:assign_tag_to_new_entry' project.id %}" method="post">
+            {% csrf_token %}
+            {{ create_form|crispy }}
+            <input type="hidden" name="new_dict_type" id="new_dict_type">
+            <input type="hidden" name="new_variation" id="new_variation">
+            <input type="hidden" name="new_tag_id" id="new_tag_id">
+            <input type="submit" class="btn btn-primary" value="Create">
+        </form>
+      </div>
+    </div>
+  </div>
+</div>

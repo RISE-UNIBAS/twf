@@ -1,0 +1,17 @@
+python-decouple==3.8
+crispy-bootstrap4==2024.1.0
+django-bootstrap4==24.2
+django-tables2==2.7.0
+django-select2==8.1.2
+psycopg2==2.9.9
+fuzzywuzzy==0.18.0
+google-api-python-client==2.127.0
+django-filter==24.2
+simple-alto-parser==0.0.17
+Django~=5.0.4
+asgiref~=3.8.1
+requests~=2.31.0
+django-crispy-forms~=2.1
+pandas~=2.2.2
+xmltodict~=0.13.0
+python-Levenshtein~=0.25.1
