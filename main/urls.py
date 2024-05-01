@@ -1,5 +1,7 @@
 """Urls for the main app."""
 from django.views.generic import TemplateView
+from django.urls import path
+from django.contrib.auth import views as auth_views
 
 from .views.views_ajax_metadata import start_metadata_extraction, stream_metadata_extraction_progress
 from .views.views_ajax_tags import start_tag_extraction, stream_tag_extraction_progress, \
@@ -15,8 +17,6 @@ from .views.views_project_setup import ProjectSetupView
 from .views.views_project_tags import ProjectGroupTagsView, ProjectGroupWizardView, ProjectParkedTagsView, \
     ProjectSpecialTagsView
 from .views_general import assign_tag, assign_tag_to_new_entry, assign_tag_by_variation
-from django.urls import path
-from django.contrib.auth import views as auth_views
 from .forms import LoginForm
 from .views.views_ajax_download import ajax_transkribus_download_export, download_progress_view
 from .views.views_ajax_export import ajax_transkribus_request_export_status, ajax_transkribus_request_export

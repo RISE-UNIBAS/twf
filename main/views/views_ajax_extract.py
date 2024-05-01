@@ -2,11 +2,9 @@
 files are then processed and saved to the database."""
 import logging
 import os
-import time
 import zipfile
 
 from asgiref.sync import sync_to_async
-from django.core.cache import cache
 from django.core.files.storage import FileSystemStorage
 from django.http import JsonResponse, StreamingHttpResponse
 from django.utils import timezone
@@ -15,7 +13,8 @@ from simple_alto_parser import PageFileParser
 from main.models import Project, Document, Page
 from main.page_file_meta_data_reader import extract_transkribus_file_metadata
 from main.utils.file_utils import delete_all_in_folder
-from main.views.views_ajax_base import set_progress, set_details, calculate_and_set_progress, add_details
+from main.views.views_ajax_base import set_progress, set_details, calculate_and_set_progress, add_details, \
+    base_event_stream, base_detail_event_stream
 
 PROGRESS_JOB_NAME = "extract-progress"
 DETAIL_JOB_NAME = "extract-progress-detail"
@@ -145,30 +144,13 @@ def stream_extraction_progress(request, project_id):
     """This function streams the progress of the extraction process to the client."""
     set_progress(0, project_id, PROGRESS_JOB_NAME)
 
-    def event_stream():
-        while True:
-            progress = cache.get(f'{project_id}_{PROGRESS_JOB_NAME}', 0)
-            yield f'data: {progress}\n\n'
-            if progress >= 100:
-                break
-            time.sleep(1)  # Sleep for one second before checking again
-
-    return StreamingHttpResponse(event_stream(), content_type='text/event-stream')
+    return StreamingHttpResponse(base_event_stream(project_id, PROGRESS_JOB_NAME),
+                                 content_type='text/event-stream')
 
 
 def stream_extraction_progress_detail(request, project_id):
     """This function streams the details of the extraction process to the client."""
     add_details("Processing files", project_id, DETAIL_JOB_NAME)
 
-    def event_stream():
-        while True:
-            details = cache.get(f'{project_id}_{DETAIL_JOB_NAME}', 'no details available')
-            if details:
-                yield f'data: {details}\n\n'
-            if details == "FINISHED":
-                yield 'event: complete\ndata: Process completed.\n\n'
-                break
-            set_details('', project_id, DETAIL_JOB_NAME)    # Clear after sending
-            time.sleep(.5)  # Sleep half a second before checking again
-
-    return StreamingHttpResponse(event_stream(), content_type='text/event-stream')
+    return StreamingHttpResponse(base_detail_event_stream(project_id, DETAIL_JOB_NAME),
+                                 content_type='text/event-stream')

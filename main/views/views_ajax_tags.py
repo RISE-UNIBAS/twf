@@ -1,21 +1,20 @@
 """This module contains the functions for the AJAX requests related to the tags."""
-import time
 from asgiref.sync import sync_to_async
-from django.core.cache import cache
 from django.http import JsonResponse, StreamingHttpResponse
 from django.utils import timezone
 
 from main.models import Page, Project, PageTag
-from main.views.views_ajax_base import add_details, set_details, calculate_and_set_progress, set_progress
+from main.views.views_ajax_base import add_details, set_details, calculate_and_set_progress, set_progress, \
+    base_event_stream, base_detail_event_stream
 
-progress_job_name = "extract-tags-progress"
-detail_job_name = "extract-tags-progress-detail"
+PROGRESS_JOB_NAME = "extract-tags-progress"
+DETAIL_JOB_NAME = "extract-tags-progress-detail"
 
 
 async def start_tag_extraction(request, project_id):
     """This function starts the extraction of tags from the parsed data of the pages."""
 
-    set_progress(0, project_id, progress_job_name)
+    set_progress(0, project_id, PROGRESS_JOB_NAME)
     create_page_tags_async = sync_to_async(create_page_tags, thread_sensitive=True)
     await create_page_tags_async(project_id, request.user)
     return JsonResponse({'status': 'success'}, status=200)
@@ -65,11 +64,11 @@ def create_page_tags(project_id, extracting_user):
             page.save()
 
             processed_pages += 1
-            calculate_and_set_progress(processed_pages, total_pages, project_id, progress_job_name)
-            add_details(f"Extracted Tags for page {page.tk_page_id}.", project_id, detail_job_name)
+            calculate_and_set_progress(processed_pages, total_pages, project_id, PROGRESS_JOB_NAME)
+            add_details(f"Extracted Tags for page {page.tk_page_id}.", project_id, DETAIL_JOB_NAME)
 
-        set_progress(100, project_id, progress_job_name)
-        set_details("Finished extracting tags.", project_id, detail_job_name)
+        set_progress(100, project_id, PROGRESS_JOB_NAME)
+        set_details("Finished extracting tags.", project_id, DETAIL_JOB_NAME)
 
     except Project.DoesNotExist:
         return JsonResponse({'status': 'error', 'message': 'Project not found.'}, status=404)
@@ -77,34 +76,17 @@ def create_page_tags(project_id, extracting_user):
 
 def stream_tag_extraction_progress(request, project_id):
     """This function streams the progress of a process to the client."""
-    set_progress(0, project_id, progress_job_name)
+    set_progress(0, project_id, PROGRESS_JOB_NAME)
 
-    def event_stream():
-        while True:
-            progress = cache.get(f'{project_id}_{progress_job_name}', 0)
-            yield f'data: {progress}\n\n'
-            if progress >= 100:
-                break
-            time.sleep(1)  # Sleep for one second before checking again
-
-    return StreamingHttpResponse(event_stream(), content_type='text/event-stream')
+    return StreamingHttpResponse(base_event_stream(project_id, PROGRESS_JOB_NAME),
+                                 content_type='text/event-stream')
 
 
 def stream_tag_extraction_progress_detail(request, project_id):
     """This function streams the progress of a process to the client."""
-    add_details("Processing files", project_id, detail_job_name)
+    add_details("Processing files", project_id, DETAIL_JOB_NAME)
 
-    def event_stream():
-        while True:
-            details = cache.get(f'{project_id}_{detail_job_name}', 'no details available')
-            if details:
-                yield f'data: {details}\n\n'
-            if details == "FINISHED":
-                yield 'event: complete\ndata: Process completed.\n\n'
-                break
-            set_details('', project_id, detail_job_name)    # Clear after sending
-            time.sleep(.5)  # Sleep for one second before checking again
-
-    return StreamingHttpResponse(event_stream(), content_type='text/event-stream')
+    return StreamingHttpResponse(base_detail_event_stream(project_id, DETAIL_JOB_NAME),
+                                 content_type='text/event-stream')
 
 

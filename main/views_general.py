@@ -6,6 +6,7 @@ from main.models import Dictionary, PageTag, DictionaryEntry, Variation
 
 
 def assign_tag(request, pk, entry_id):
+    """Assign a tag to a dictionary entry."""
     tag = get_object_or_404(PageTag, pk=pk)
     entry = get_object_or_404(DictionaryEntry, pk=entry_id)
     tag.dictionary_entry = entry
@@ -15,6 +16,7 @@ def assign_tag(request, pk, entry_id):
 
 
 def assign_tag_to_new_entry(request, pk):
+    """Assign a tag to a new dictionary entry."""
     if request.method == 'POST':
         form = CreateDictionaryEntryForm(request.POST)
         if form.is_valid():
@@ -40,6 +42,7 @@ def assign_tag_to_new_entry(request, pk):
 
 
 def assign_tag_by_variation(request, pk, variation_id):
+    """Assign a tag to a dictionary entry by variation."""
     tag = get_object_or_404(PageTag, pk=pk)
     variation = get_object_or_404(Variation, pk=variation_id)
     tag.dictionary_entry = variation.entry

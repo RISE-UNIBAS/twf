@@ -1,11 +1,9 @@
-import time
 from asgiref.sync import sync_to_async
-from django.core.cache import cache
 from django.http import JsonResponse, StreamingHttpResponse
 
 from main.metadata_manager import MetadataManager
 from main.models import Project, Document
-from main.views.views_ajax_base import set_progress
+from main.views.views_ajax_base import set_progress, calculate_and_set_progress, base_event_stream
 
 PROGRESS_JOB_NAME = "extract-meta-progress"
 DETAIL_JOB_NAME = "extract-meta-progress-detail"
@@ -49,23 +47,16 @@ def create_doc_metadata(project_id, extracting_user):
                 print("Updated metadata for document", doc_id)
             except Document.DoesNotExist:
                 print(f"Document {doc_id} not found")
-            set_progress(processed_docs, total_documents, project_id)
+            calculate_and_set_progress(processed_docs, total_documents, project_id, PROGRESS_JOB_NAME)
 
-        cache.set(f'{project.id}_extract-metadata-progress', 100)
+        set_progress(100, project_id, PROGRESS_JOB_NAME)
 
     except Project.DoesNotExist:
         return JsonResponse({'status': 'error', 'message': 'Project not found.'}, status=404)
 
 
 def stream_metadata_extraction_progress(request, project_id):
-    cache.set(f'{project_id}_extract-metadata-progress', 0)
+    set_progress(0, project_id, PROGRESS_JOB_NAME)
 
-    def event_stream():
-        while True:
-            progress = cache.get(f'{project_id}_extract-metadata-progress', 0)
-            yield f'data: {progress}\n\n'
-            if progress >= 100:
-                break
-            time.sleep(1)  # Sleep for one second before checking again
-
-    return StreamingHttpResponse(event_stream(), content_type='text/event-stream')
+    return StreamingHttpResponse(base_event_stream(project_id, PROGRESS_JOB_NAME),
+                                 content_type='text/event-stream')

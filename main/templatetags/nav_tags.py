@@ -1,3 +1,4 @@
+"""Custom template tags for the main app."""
 from django import template
 from django.urls import reverse
 
@@ -6,6 +7,7 @@ register = template.Library()
 
 @register.simple_tag(takes_context=True)
 def active(context, url_name, by_path=False):
+    """Returns 'l-active' if the current view is the one specified by url_name, otherwise 'l-inactive'."""
     request = context['request']
     if by_path:
         path = reverse(url_name)
