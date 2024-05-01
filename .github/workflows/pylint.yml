@@ -8,6 +8,20 @@ jobs:
     strategy:
       matrix:
         python-version: ["3.11"]
+
+    services:
+      postgres:
+        image: postgres:13
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: twf
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     steps:
     - uses: actions/checkout@v3
     - name: Set up Python ${{ matrix.python-version }}
@@ -24,7 +38,7 @@ jobs:
       run: |
         echo "DB_NAME=twf" >> .env
         echo "DB_USER=postgres" >> .env
-        echo "DB_PASSWORD=" >> .env
+        echo "DB_PASSWORD=postgres" >> .env
         echo "DB_HOST=localhost" >> .env
         echo "DB_PORT=" >> .env
     - name: Analysing the code with pylint
