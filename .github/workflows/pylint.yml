@@ -32,6 +32,8 @@ jobs:
         pylint --load-plugins pylint_django --django-settings-module=transkribusWorkflow.settings --max-line-length=120 --max-parents=10 --exit-zero --output-format=text:output.txt $(git ls-files '*.py')
     - name: Update README
       run: python extract_pylint_score.py
+    - name: Clean up .env file
+      run: rm .env
     - name: Set up Git Config
       run: |
           git config --local user.email "action@github.com"

@@ -38,3 +38,5 @@ jobs:
     - name: Run Tests
       run: |
         python manage.py test
+    - name: Clean up .env file
+      run: rm .env
