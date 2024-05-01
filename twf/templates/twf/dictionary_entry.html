@@ -1,0 +1,46 @@
+{% extends 'twf/base.html' %}
+
+{% block title %}Dictionary{% endblock %}
+{% block heading %}Dictionary entry {{ entry.label }}{% endblock %}
+
+{% block content %}
+    <div class="container mt-3">
+        <div class="row mb-3">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                       This entry has {{ entry.variations.all.count }} variations and is used {{ entry.get_num_usages }} times in {{ entry.variations.all.count }} documents.
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row mb-3">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        {% for var in entry.variations.all %}
+                            <span class="badge bg-light text-dark">{{ var.variation }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mb-3">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        {% for doc in entry.get_documents.all %}
+                            <div class="row">
+                                <div class="col-12">
+                                    <a href="{% url 'twf:view_document' doc.project.pk doc.id %}">{{ doc.title }}</a>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    
+    </div>
+{% endblock %}

@@ -47,7 +47,7 @@ INSTALLED_APPS = [
     "crispy_bootstrap4",
     "django_tables2",
     "django_select2",
-    "main.apps.MainConfig"
+    "twf.apps.MainConfig"
 ]
 
 MIDDLEWARE = [
@@ -144,7 +144,7 @@ MEDIA_URL = '/media/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap4"
 CRISPY_TEMPLATE_PACK = 'bootstrap4'
-LOGIN_REDIRECT_URL = 'main:home'
+LOGIN_REDIRECT_URL = 'twf:home'
 
 MESSAGE_TAGS = {
     messages_constants.DEBUG: 'alert alert-info',
