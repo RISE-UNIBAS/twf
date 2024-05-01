@@ -51,7 +51,7 @@ jobs:
         git config --local user.name "GitHub Action"
         
         # Add changes to staging
-        git add ./info.json ./ndr_core/VERSION
+        git add ./info.json ./twf/VERSION
         echo "Files added to Git staging"
         
         git commit -m "Bump version to $NEW_VERSION"
