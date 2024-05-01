@@ -20,6 +20,13 @@ jobs:
         pip install pylint
         pip install pylint-django
         pip install -r requirements.txt
+    - name: Create .env file
+      run: |
+        echo "DB_NAME=" >> .env
+        echo "DB_USER=" >> .env
+        echo "DB_PASSWORD=" >> .env
+        echo "DB_HOST=" >> .env
+        echo "DB_PORT=" >> .env
     - name: Analysing the code with pylint
       run: |
         pylint --load-plugins pylint_django --django-settings-module=transkribusWorkflow.settings --max-line-length=120 --max-parents=10 --exit-zero --output-format=text:output.txt $(git ls-files '*.py')
