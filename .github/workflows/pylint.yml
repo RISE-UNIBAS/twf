@@ -40,7 +40,7 @@ jobs:
         echo "DB_USER=postgres" >> .env
         echo "DB_PASSWORD=postgres" >> .env
         echo "DB_HOST=localhost" >> .env
-        echo "DB_PORT=" >> .env
+        echo "DB_PORT=5432" >> .env
     - name: Analysing the code with pylint
       run: |
         pylint --load-plugins pylint_django --django-settings-module=transkribusWorkflow.settings --max-line-length=120 --max-parents=10 --exit-zero --output-format=text:output.txt $(git ls-files '*.py')
@@ -54,6 +54,7 @@ jobs:
           git config --local user.name "GitHub Action"
     - name: Commit and Push Changes
       run: |
+          git pull
           git add README.md
           git diff-index --quiet HEAD || git commit -m "Update Pylint Score Badge"
           git push
