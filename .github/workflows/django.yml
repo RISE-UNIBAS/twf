@@ -23,10 +23,11 @@ jobs:
           POSTGRES_PASSWORD: postgres
           POSTGRES_DB: twf
         options: >-
-          --health-cmd pg_isready
+          --health-cmd pg_isready -U postgres -d twf
           --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
+          --health-timeout 10s
+          --health-retries 10
+          --health-start-period 10s
 
     steps:
     - uses: actions/checkout@v3
@@ -45,6 +46,16 @@ jobs:
         echo "DB_PASSWORD=postgres" >> .env
         echo "DB_HOST=postgres" >> .env
         echo "DB_PORT=5432" >> .env
+    - name: Check .env content
+      run: cat .env
+    - name: Wait for PostgreSQL to be ready
+      run: |
+        echo "Waiting for PostgreSQL to be ready..."
+        until pg_isready -h postgres -U postgres -d twf; do
+          echo "Postgres is unavailable - sleeping"
+          sleep 2
+        done
+        echo "PostgreSQL is ready!"
     - name: Migrate data base
       run: |
         python manage.py migrate
