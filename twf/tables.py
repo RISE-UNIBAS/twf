@@ -83,3 +83,7 @@ class DictionaryEntryTable(tables.Table):
             html += record_html.format(reverse('twf:delete_variation', args=[var.id]), var.variation)
 
         return mark_safe(html)
+
+    def render_label(self, value, record):
+        """Renders the label column with the label and the type of the dictionary."""
+        return mark_safe(f"{value}<br/><span class='small text-muted'>ID: {record.id}</span>")

@@ -20,13 +20,14 @@ class ProjectGroupWizardView(BaseProjectView, TemplateView):
                 dictionary = Dictionary.objects.get(pk=request.POST.get('dictionary_id', None))
                 new_entry = DictionaryEntry(dictionary=dictionary, label=new_entry_label,
                                             notes=self.request.POST.get('notes_on_entry', ''))
-                new_entry.save()
+                new_entry.save(current_user=self.request.user)
 
-                Variation.objects.create(entry=new_entry, variation=tag_to_assign.variation)
+                variation = Variation(entry=new_entry, variation=tag_to_assign.variation)
+                variation.save(current_user=self.request.user)
                 tag_to_assign.dictionary_entry = new_entry
-                tag_to_assign.save()
+                tag_to_assign.save(current_user=self.request.user)
 
-                self.save_other_tags(tag_to_assign, new_entry)
+                self.save_other_tags(tag_to_assign, new_entry, self.request.user)
 
                 messages.success(request, 'New entry created: ' + new_entry_label)
             else:
@@ -34,7 +35,7 @@ class ProjectGroupWizardView(BaseProjectView, TemplateView):
         if 'add_to_existing' in request.POST:
             selected_entry = request.POST.get('selected_entry', None)
             if selected_entry:
-                self.add_variation_to_entry(selected_entry, request.POST.get('tag_id', ''))
+                self.add_variation_to_entry(selected_entry, request.POST.get('tag_id', ''), self.request.user)
             else:
                 messages.error(request, 'Please select an entry to add the tag to.')
         else:
@@ -42,34 +43,35 @@ class ProjectGroupWizardView(BaseProjectView, TemplateView):
                 if key.startswith('add_to_'):
                     selected_entry = key.replace('add_to_', '')
                     if selected_entry:
-                        self.add_variation_to_entry(selected_entry, request.POST.get('tag_id', ''))
+                        self.add_variation_to_entry(selected_entry, request.POST.get('tag_id', ''), self.request.user)
                     else:
                         messages.error(request, 'Please select an entry to add the tag to.')
 
         return super().get(request, *args, **kwargs)
 
-    def add_variation_to_entry(self, entry_id, tag_id):
+    def add_variation_to_entry(self, entry_id, tag_id, user):
         """Add a variation to an existing dictionary entry."""
         try:
             entry = DictionaryEntry.objects.get(pk=entry_id)
             tag = PageTag.objects.get(pk=tag_id)
-            Variation.objects.create(entry=entry, variation=tag.variation)
+            variation = Variation(entry=entry, variation=tag.variation)
+            variation.save(current_user=user)
             tag.dictionary_entry = entry
-            tag.save()
+            tag.save(current_user=user)
 
-            self.save_other_tags(tag, entry)
+            self.save_other_tags(tag, entry, user)
 
             messages.success(self.request, 'Variation added to entry: ' + entry.label)
         except DictionaryEntry.DoesNotExist:
             messages.error(self.request, 'Entry does not exist: ' + entry_id)
 
     @staticmethod
-    def save_other_tags(tag, entry):
+    def save_other_tags(tag, entry, user):
         """Save all other tags of the same variation to the same dictionary entry."""
         other_tags = PageTag.objects.filter(variation=tag.variation, dictionary_entry=None)
         for other_tag in other_tags:
             other_tag.dictionary_entry = entry
-            other_tag.save()
+            other_tag.save(current_user=user)
 
     def get_context_data(self, **kwargs):
         """Add the tag to the context."""
@@ -105,7 +107,13 @@ class ProjectGroupWizardView(BaseProjectView, TemplateView):
 
         # Add: The dictionary type and id to assign the tag to
         context['dict_type'] = dict_type
-        context['dict_id'] = Dictionary.objects.filter(type=dict_type).first().pk
+        try:
+            dict_of_type = Dictionary.objects.get(type=dict_type)
+        except Dictionary.DoesNotExist:
+            dict_of_type = Dictionary(label=dict_type, type=dict_type)
+            dict_of_type.save(current_user=self.request.user)
+            messages.warning(self.request, f'Created new dictionary for type: {dict_type}')
+        context['dict_id'] = dict_of_type.id
 
         # Add: All variations of the selected dictionary type
         all_variations = DictionaryEntry.objects.filter(dictionary__type=dict_type)

@@ -49,11 +49,11 @@ def create_page_tags(project_id, extracting_user):
                         del tag["text"]
                         tag = PageTag(page=page, variation=text, variation_type=tag["type"],
                                       additional_information=tag)
-                        is_assigned = tag.assign_tag()
+                        is_assigned = tag.assign_tag(extracting_user)
                         if is_assigned:
                             assigned_tags += 1
                         total_tags += 1
-                        tag.save()
+                        tag.save(current_user=extracting_user)
 
             page.num_tags = num_tags
 

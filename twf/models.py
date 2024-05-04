@@ -221,10 +221,10 @@ class Page(TimeStampedModel):
 class Dictionary(TimeStampedModel):
     """A dictionary."""
 
-    label = models.CharField(max_length=100)
+    label = models.CharField(max_length=100, unique=True)
     """The label of the dictionary."""
 
-    type = models.CharField(max_length=100)
+    type = models.CharField(max_length=100, unique=True)
     """The type of the dictionary."""
 
     class Meta:
@@ -316,7 +316,7 @@ class PageTag(TimeStampedModel):
         return (f"https://app.transkribus.org/collection/{self.page.document.project.collection_id}/doc/"
                 f"{self.page.document.document_id}/detail/{self.page.tk_page_number}?view=combined")
 
-    def assign_tag(self):
+    def assign_tag(self, user):
         """Assign the tag to a dictionary entry."""
         try:
             dictionary_type = self.variation_type
@@ -324,7 +324,7 @@ class PageTag(TimeStampedModel):
                 dictionary_type = self.page.document.project.tag_type_translator[dictionary_type]
             entry = Variation.objects.get(variation=self.variation, entry__dictionary__type=dictionary_type)
             self.dictionary_entry = entry.entry
-            self.save()
+            self.save(current_user=user)
             return True
         except Variation.DoesNotExist:
             return False

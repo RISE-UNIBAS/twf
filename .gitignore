@@ -1,7 +1,7 @@
 .idea/
 .venv/
 media/
-static/
+/static/
 docs/_build/
 .env
 transkribusWorkflow/google_key.json
