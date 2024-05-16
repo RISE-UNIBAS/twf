@@ -77,13 +77,17 @@ class DictionaryEntryTable(tables.Table):
         """Renders the variations column with a delete button for each variation."""
         variations = record.variations.all()
         html = ""
-        record_html = """<span href="{}" class="badge bg-secondary">{}
-                         <a class="ms-2" href="" style="cursor: pointer; color: red;">&times;</a></span>&nbsp;"""
+        record_html = """<span class="badge bg-secondary">{}
+                         <a class="ms-2" href="{}" style="cursor: pointer; color: red;">&times;</a></span>&nbsp;"""
         for var in variations:
-            html += record_html.format(reverse('twf:delete_variation', args=[var.id]), var.variation)
+            html += record_html.format(var.variation,
+                                       reverse('twf:delete_variation', args=[var.id]))
 
         return mark_safe(html)
 
     def render_label(self, value, record):
         """Renders the label column with the label and the type of the dictionary."""
-        return mark_safe(f"{value}<br/><span class='small text-muted'>ID: {record.id}</span>")
+        formatted_date = record.modified_at.strftime("%a, %d %b %Y %H:%M")
+        return mark_safe(f"{value}<br/>"
+                         f"<span class='small text-muted'>ID: {record.id}</span><br/>"
+                         f"<span class='small text-muted'>{record.modified_by}, {formatted_date}</span>")

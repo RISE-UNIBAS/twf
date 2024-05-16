@@ -2,7 +2,7 @@
 from collections import defaultdict
 from statistics import median
 
-from django.db.models import Count, Avg
+from django.db.models import Count, Avg, Q
 from django.views.generic import TemplateView
 
 from twf.models import Document, Page, PageTag
@@ -37,8 +37,9 @@ class ProjectOverView(BaseProjectView, TemplateView):
                                       .filter(project=project).values_list('num_pagetags', flat=True))
         median_pagetags_per_document = median(pagetags_per_document_list) if pagetags_per_document_list else 0
         total_pagetags = PageTag.objects.filter(page__document__project=project).count()
-        pagetags_with_dictionaryentry = PageTag.objects.filter(page__document__project=project,
-                                                               dictionary_entry__isnull=False).count()
+        pagetags_with_dictionaryentry = PageTag.objects.filter(Q(page__document__project=project) &
+                                                               (Q(dictionary_entry__isnull=False) |
+                                                                Q(date_variation_entry__isnull=False))).count()
         percentage_with_dictionaryentry = (pagetags_with_dictionaryentry / total_pagetags * 100)\
             if total_pagetags > 0 else 0
 
@@ -79,6 +80,37 @@ class ProjectOverView(BaseProjectView, TemplateView):
         for variation in variation_type_counts:
             variation['percentage'] = (variation['count'] / total_pagetags * 100) if total_pagetags > 0 else 0
 
+        # Counting each variation_type in PageTags within a specific project
+        variation_type_edit_counts = PageTag.objects.filter(
+            page__document__project=project
+        ).values('variation_type').annotate(
+            count=Count('variation_type')
+        ).order_by('-count')
+
+        for variation in variation_type_edit_counts:
+            if variation['variation_type'] in self.get_special_tag_types():
+                variation['grouped'] = PageTag.objects.filter(page__document__project=project,
+                                                              variation_type=variation['variation_type'],
+                                                              date_variation_entry__isnull=False).count()
+
+                variation['unresolved'] = PageTag.objects.filter(page__document__project=project,
+                                                                 variation_type=variation['variation_type'],
+                                                                 date_variation_entry__isnull=True, is_parked=False).count()
+            else:
+                variation['grouped'] = PageTag.objects.filter(page__document__project=project,
+                                                              variation_type=variation['variation_type'],
+                                                              dictionary_entry__isnull=False).count()
+                variation['unresolved'] = PageTag.objects.filter(page__document__project=project,
+                                                                 variation_type=variation['variation_type'],
+                                                                 dictionary_entry__isnull=True,
+                                                                 is_parked=False).count()
+
+            variation['grouped_percentage'] = (variation['grouped'] / variation['count'] * 100) if variation['count'] > 0 else 0
+            variation['parked'] = PageTag.objects.filter(page__document__project=project,
+                                                         variation_type=variation['variation_type'],
+                                                         is_parked=True).count()
+            variation['parked_percentage'] = (variation['parked'] / variation['count'] * 100) if variation['count'] > 0 else 0
+
         context['stats'] = {
             'document_count': document_count,
             'page_count': page_count,
@@ -95,6 +127,7 @@ class ProjectOverView(BaseProjectView, TemplateView):
             'percentage_with_dictionaryentry': percentage_with_dictionaryentry,
             'most_used_entries_per_type': dict(top_entries_per_type),
             'variation_type_counts': variation_type_counts,
+            'variation_type_edit_counts': variation_type_edit_counts
         }
 
         return context

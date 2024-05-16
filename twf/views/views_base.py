@@ -20,9 +20,13 @@ class BaseView(LoginRequiredMixin, View):
         """Get all dictionaries."""
         return Dictionary.objects.all()
 
+    def get_special_tag_types(self):
+        """Get all special tag types."""
+        return ['date', 'print_date']
+
     def get_excluded_types(self):
         """Get the types that should be excluded from the tag types."""
-        excluded_types = ['date', 'print_date']
+        excluded_types = self.get_special_tag_types()
         try:
             excluded_types.extend(self.get_project().ignored_tag_types["ignored"])
         except KeyError:

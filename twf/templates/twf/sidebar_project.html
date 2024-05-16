@@ -29,11 +29,11 @@
             <li class="nav-item small border mb-1 {% active 'project_group_wizard' %}">
                 <a class="nav-link px-2 py-1 {% active 'project_group_wizard' %}" href="{% url 'twf:project_group_wizard' project.pk %}">Grouping Wizard</a>
             </li>
+           <li class="nav-item small border mb-1 {% active 'project_special_tags' %}">
+               <a class="nav-link px-2 py-1 {% active 'project_special_tags' %}" href="{% url 'twf:project_special_tags' project.pk %}">Special Tags</a>
+            </li>
             <li class="nav-item small border mb-1 {% active 'project_parked_tags' %}">
                 <a class="nav-link px-2 py-1 {% active 'project_parked_tags' %}" href="{% url 'twf:project_parked_tags' project.pk %}">Parked Tags</a>
-            </li>
-            <li class="nav-item small border mb-1 {% active 'project_special_tags' %}">
-                <a class="nav-link px-2 py-1 {% active 'project_special_tags' %}" href="{% url 'twf:project_special_tags' project.pk %}">Special Tags</a>
             </li>
             <li class="nav-item small border mb-1 {% active 'project_collections' %}">
                 <a class="nav-link px-2 py-1 {% active 'project_collections' %}" href="{% url 'twf:project_collections' project.pk %}">Collections</a>

@@ -7,8 +7,10 @@ from .views.views_ajax_metadata import start_metadata_extraction, stream_metadat
 from .views.views_ajax_tags import start_tag_extraction, stream_tag_extraction_progress, \
     stream_tag_extraction_progress_detail
 from .views.views_command import park_tag, unpark_tag
+from .views.views_dict_auth import DictionaryAuthViewWikidata, DictionaryAuthViewGeonames, DictionaryAuthViewGND, \
+    DictionaryAuthViewManual
 from .views.views_dictionaries import DictionaryOverView, DictionaryView, DictionaryEntryView, delete_entry, \
-    delete_variation
+    delete_variation, DictionaryExportView
 from .views.views_project_collections import ProjectCollectionsView
 from .views.views_project_documents import ProjectDocumentView, DocumentView, delete_document
 from .views.views_project_export import ProjectExportView
@@ -53,11 +55,21 @@ urlpatterns = [
     # Dictionaries
     path('dictionaries/', DictionaryOverView.as_view(), name='dictionaries'),
     path('dictionary/<int:pk>/', DictionaryView.as_view(), name='dictionary'),
+    path('dictionary/export/<int:pk>/', DictionaryExportView.as_view(), name='dictionary_export'),
 
     path('dictionaries/entry/delete/<int:pk>/', delete_entry, name='delete_entry'),
     path('dictionaries/entry/view/<int:pk>/', DictionaryEntryView.as_view(), name='view_entry'),
 
     path('dictionaries/variation/delete/<int:pk>/', delete_variation, name='delete_variation'),
+
+
+    path('dictionaries/auth/manual/', DictionaryAuthViewManual.as_view(), name='auth_manual'),
+    path('dictionaries/auth/wikidata/', DictionaryAuthViewWikidata.as_view(), name='auth_wikidata'),
+    path('dictionaries/auth/geonames/', DictionaryAuthViewGeonames.as_view(), name='auth_geonames'),
+    path('dictionaries/auth/gnd/', DictionaryAuthViewGND.as_view(), name='auth_gnd'),
+
+    path('dictionaries/auth/select/<int:pk>/', DictionaryAuthViewWikidata.as_view(), name='auth_select'),
+
 
     #############################
     # AJAX CALLS

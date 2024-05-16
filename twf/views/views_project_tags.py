@@ -3,7 +3,7 @@ from django.contrib import messages
 from django.views.generic import TemplateView
 
 from twf.forms import CreateDictionaryEntryForm, AssignToEntryForm
-from twf.models import PageTag, Dictionary, DictionaryEntry, Variation
+from twf.models import PageTag, Dictionary, DictionaryEntry, Variation, DateVariation
 from twf.views.views_base import BaseProjectView
 
 
@@ -164,14 +164,21 @@ class ProjectParkedTagsView(BaseProjectView, TemplateView):
 
     def get_parked_tags(self):
         """Get all parked tags."""
+        tag_type = self.request.GET.get('tag_type', None)
+        if tag_type is None:
+            tag_type = self.get_tag_types()[0]
+
         return PageTag.objects.filter(page__document__project=self.get_project(),
                                       dictionary_entry=None,
-                                      is_parked=True).exclude(variation_type__in=['date', 'print_date'])
+                                      is_parked=True,
+                                      variation_type=tag_type)
 
     def get_context_data(self, **kwargs):
         """Add the parked tags to the context."""
         context = super().get_context_data(**kwargs)
         context['parked'] = self.get_parked_tags()
+        context['tag_types'] = list(self.get_tag_types()) + ['date', 'print_date']
+        context['selected_type'] = self.request.GET.get('tag_type', None)
         return context
 
 
@@ -179,10 +186,27 @@ class ProjectSpecialTagsView(BaseProjectView, TemplateView):
     """View to display all special tags."""
     template_name = 'twf/special.html'
 
+    def post(self, request, *args, **kwargs):
+        """Handle the post request."""
+        if self.request.POST.get('save_date', None):
+            tag_id = self.request.POST.get('tag_id', None)
+            tag = PageTag.objects.get(pk=tag_id)
+            tag_edtf = self.request.POST.get('tag_edtf', None)
+            d_var = DateVariation(
+                variation=tag.variation,
+                normalized_variation=tag.additional_information,
+                edtf_of_normalized_variation=tag_edtf
+            )
+            d_var.save(current_user=self.request.user)
+            tag.date_variation_entry = d_var
+            tag.save(current_user=self.request.user)
+
+            return super().get(request, *args, **kwargs)
+
     def get_special_tags(self):
         """Get all special tags."""
         return PageTag.objects.filter(page__document__project=self.get_project(),
-                                      dictionary_entry=None,
+                                      date_variation_entry=None,
                                       variation_type__in=['date', 'print_date'],
                                       is_parked=False)[:200]
 

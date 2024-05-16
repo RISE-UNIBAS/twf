@@ -287,8 +287,8 @@ class PageTag(TimeStampedModel):
     additional_information = models.JSONField(default=dict)
     """Additional information about the tag."""
 
-    normalized_variation = models.JSONField(default=dict)
-    """The normalized version of the tag."""
+    date_variation_entry = models.ForeignKey('DateVariation', on_delete=models.CASCADE,
+                                             null=True, blank=True)
 
     is_parked = models.BooleanField(default=False)
     """Whether the tag is parked."""
@@ -364,6 +364,27 @@ class Variation(TimeStampedModel):
 
     variation = models.CharField(max_length=255)
     """The text of the variation."""
+
+    class Meta:
+        """Meta options for the Variation model."""
+        ordering = ['variation']
+
+    def __str__(self):
+        """Return the string representation of the Variation."""
+        return self.variation
+
+
+class DateVariation(TimeStampedModel):
+    """A variation of a dictionary entry."""
+
+    variation = models.CharField(max_length=255)
+    """The text of the variation."""
+
+    normalized_variation = models.JSONField(default=dict)
+    """The normalized version of the variation."""
+
+    edtf_of_normalized_variation = models.CharField(max_length=100)
+    """The EDTF of the normalized variation."""
 
     class Meta:
         """Meta options for the Variation model."""

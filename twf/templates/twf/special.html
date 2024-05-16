@@ -11,22 +11,26 @@
         <div class="card-body">
             <div class="container">
             {% for tag in special %}
-                <div class="row border">
-                    <div class="col-3">
-                        {{ tag.variation }}
+                <form method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="tag_id" value="{{ tag.id }}">
+                    <div class="row border">
+                        <div class="col-3">
+                            {{ tag.variation }}
+                        </div>
+                        <div class="col-4 small">
+                            {{ tag.additional_information }}
+                        </div>
+                        <div class="col-2">
+                            <input type="text" name="tag_edtf" class="form-control" value="{{ tag.get_date }}">
+                        </div>
+                        <div class="col-3">
+                            <input type="submit" name="save_date" class="btn btn-sm btn-primary" value="Save" />&nbsp;
+                            <a href="{% url 'twf:park_tag' tag.id %}" class="btn btn-sm btn-secondary">Park</a>&nbsp;
+                            <a href="{{ tag.get_transkribus_url }}" target="_blank" class="btn btn-sm btn-secondary">Trankribus</a>&nbsp;
+                        </div>
                     </div>
-                    <div class="col-4 small">
-                        {{ tag.additional_information }}
-                    </div>
-                    <div class="col-2">
-                        <input type="text" class="form-control" value="{{ tag.get_date }}">
-                    </div>
-                    <div class="col-3">
-                        <a href="{% url 'twf:park_tag' tag.id %}" class="btn btn-sm btn-primary">Save</a>&nbsp;
-                        <a href="{% url 'twf:park_tag' tag.id %}" class="btn btn-sm btn-secondary">Park</a>&nbsp;
-                        <a href="{{ tag.get_transkribus_url }}" target="_blank" class="btn btn-sm btn-secondary">Trankribus</a>&nbsp;
-                    </div>
-                </div>
+                </form>
             {% endfor %}
             </div>
         </div>

@@ -1,0 +1,11 @@
+{% load crispy_forms_tags %}
+<div class="card mb-3 w-100">
+    <div class="card-header">
+        <h6 class="card-title">Workflow API Details</h6>
+    </div>
+    <div class="card-body">
+        {% if form %}
+            {% crispy form %}
+        {% endif %}
+    </div>
+</div>
