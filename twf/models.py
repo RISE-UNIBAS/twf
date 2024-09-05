@@ -153,13 +153,13 @@ class Project(TimeStampedModel):
                                                'in the user management section.')
     """The members of the project."""
 
-    tag_type_translator = models.JSONField(default=dict,
+    tag_type_translator = models.JSONField(default=dict, blank=True,
                                            verbose_name='Tag Type Translator',
                                            help_text='A dictionary to translate tag types into dictionary types '
                                                      'if they are not equal.')
     """A dictionary to translate tag types."""
 
-    ignored_tag_types = models.JSONField(default=dict,
+    ignored_tag_types = models.JSONField(default=dict, blank=True,
                                          verbose_name='Special Tag Types',
                                          help_text='A list of tag types to ignore and a list of tag types'
                                                    'which are special (e.g. dates).')
@@ -190,12 +190,12 @@ class Project(TimeStampedModel):
                                                    help_text='The dictionaries selected for this project.')
     """The dictionaries selected for this project."""
 
-    document_metadata_fields = models.JSONField(default=dict,
+    document_metadata_fields = models.JSONField(default=dict, blank=True,
                                                 verbose_name='Document Metadata Fields',
                                                 help_text='A dictionary of metadata fields for documents.')
     """A dictionary of metadata fields for documents."""
 
-    page_metadata_fields = models.JSONField(default=dict,
+    page_metadata_fields = models.JSONField(default=dict, blank=True,
                                             verbose_name='Page Metadata Fields',
                                             help_text='A dictionary of metadata fields for pages.')
     """A dictionary of metadata fields for pages."""
@@ -227,7 +227,7 @@ class Document(TimeStampedModel):
     document_id = models.CharField(max_length=30)
     """The Transkribus document ID."""
 
-    metadata = models.JSONField(default=dict)
+    metadata = models.JSONField(default=dict, blank=True)
     """Metadata for the document."""
 
     last_parsed_at = models.DateTimeField(null=True, blank=True)
@@ -262,7 +262,7 @@ class Page(TimeStampedModel):
     document = models.ForeignKey(Document, related_name='pages', on_delete=models.CASCADE)
     """The document this page belongs to."""
 
-    metadata = models.JSONField(default=dict)
+    metadata = models.JSONField(default=dict, blank=True)
     """Metadata for the page."""
 
     xml_file = models.FileField(upload_to=page_directory_path, null=False, blank=False)
@@ -274,7 +274,7 @@ class Page(TimeStampedModel):
     tk_page_number = models.IntegerField(default=0)
     """The page number in the Transkribus document."""
 
-    parsed_data = models.JSONField(default=dict)
+    parsed_data = models.JSONField(default=dict, blank=True)
     """The parsed data of the page."""
 
     num_tags = models.IntegerField(default=0)
@@ -356,7 +356,7 @@ class DictionaryEntry(TimeStampedModel):
     label = models.CharField(max_length=255)
     """The label of the entry."""
 
-    authorization_data = models.JSONField(default=dict)
+    authorization_data = models.JSONField(default=dict, blank=True)
     """Authorization data for the entry."""
 
     notes = models.TextField(blank=True, default='')
@@ -395,7 +395,7 @@ class PageTag(TimeStampedModel):
                                          null=True, blank=True)
     """The dictionary entry this tag is assigned to."""
 
-    additional_information = models.JSONField(default=dict)
+    additional_information = models.JSONField(default=dict, blank=True)
     """Additional information about the tag."""
 
     date_variation_entry = models.ForeignKey('DateVariation', on_delete=models.CASCADE,
@@ -504,7 +504,7 @@ class DateVariation(TimeStampedModel):
     variation = models.CharField(max_length=255)
     """The text of the variation."""
 
-    normalized_variation = models.JSONField(default=dict)
+    normalized_variation = models.JSONField(default=dict, blank=True)
     """The normalized version of the variation."""
 
     edtf_of_normalized_variation = models.CharField(max_length=100)
@@ -544,7 +544,7 @@ class CollectionItem(TimeStampedModel):
     document = models.ForeignKey(Document, related_name='collections', on_delete=models.CASCADE)
     """The document this item belongs to."""
 
-    document_configuration = models.JSONField(default=dict)
+    document_configuration = models.JSONField(default=dict, blank=True)
     """The configuration of the document in the collection."""
 
     title = models.CharField(max_length=100)

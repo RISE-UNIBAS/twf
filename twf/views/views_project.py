@@ -15,7 +15,8 @@ from django_tables2 import SingleTableView
 
 from twf.filters import DocumentFilter
 from twf.forms.dynamic_forms import DynamicForm
-from twf.forms.project_forms import ProjectForm, QueryDatabaseForm, CollectionForm, CollectionAddDocumentForm
+from twf.forms.project_forms import ProjectForm, QueryDatabaseForm, CollectionForm, CollectionAddDocumentForm, \
+    DocumentForm
 from twf.models import Project, Document, TWF_GROUPS, Page, PageTag, Collection, CollectionItem
 from twf.tables.tables import DocumentTable
 from twf.views.views_base import TWFHomeView, TWFView
@@ -113,6 +114,8 @@ class TWFProjectDocumentsView(SingleTableView, FilterView, TWFProjectView):
             {"url": reverse('twf:project_documents'), "value": "Overview"},
             {"url": reverse('twf:create_document'), "value": "Manually Create Document"},
             {"url": reverse('twf:name_documents'), "value": "Name Documents"},
+            {"url": reverse('twf:project_setup'),
+             "value": mark_safe('<i class="fa-solid fa-arrow-right-from-bracket"></i> Import Documents')},
             {"url": reverse('twf:metadata_load_metadata'),
              "value": mark_safe('<i class="fa-solid fa-arrow-right-from-bracket"></i> Load Metadata')},
         ]}
@@ -130,9 +133,23 @@ class TWFProjectDocumentView(TWFProjectView):
         return context
 
 
-class TWFProjectDocumentCreateView(TWFProjectView):
+class TWFProjectDocumentCreateView(FormView, TWFProjectView):
     template_name = 'twf/project/create_document.html'
     page_title = 'Create Document'
+    form_class = DocumentForm
+    success_url = reverse_lazy('twf:project_documents')
+    object = None
+
+    def form_valid(self, form):
+        # Save the form
+        self.object = form.save(commit=False)
+        self.object.project_id = self.request.session.get('project_id')
+        self.object.save(current_user=self.request.user)
+
+        # Add a success message
+        messages.success(self.request, 'Document has been created successfully.')
+        # Redirect to the success URL
+        return super().form_valid(form)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -261,8 +278,9 @@ class TWFProjectSetupView(TWFProjectView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['context_sub_nav'] = {"options": [
-            {"url": reverse('twf:project_tk_export'), "value": "TK Export"},
-            {"url": reverse('twf:project_tk_structure'), "value": "TK Structure"},
+            {"url": reverse('twf:project_setup'), "value": "Setup Overview"},
+            {"url": reverse('twf:project_tk_export'), "value": "Transkribus Export"},
+            {"url": reverse('twf:project_tk_structure'), "value": "Extract Transkribus Data"},
             {"url": reverse('twf:project_sheets_metadata'), "value": "Sheets Metadata"},
         ]}
         return context
