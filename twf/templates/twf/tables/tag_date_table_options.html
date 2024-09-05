@@ -1,0 +1,8 @@
+<div>
+    <form method="post" class="form-control">
+        {% csrf_token %}
+        <input type="hidden" name="tag_id" value="{{ record.id }}">
+        <input type="text" name="tag_edtf" class="form-control" value="{{ record.get_date }}">
+        <input type="submit" name="save_date" class="btn btn-sm btn-dark" value="Save" />&nbsp;
+    </form>
+</div>

@@ -1,0 +1,35 @@
+{% extends 'twf/base/base.html' %}
+
+{% block content %}
+     <div class="border rounded bg-light mt-0 p-3">
+        <h1 class="display-6">Your activity</h1>
+        <p class="lead">Here is a summary of your activity.</p>
+         <div class="table-responsive"> <!-- Responsive table wrapper -->
+            <table class="table table-bordered table-striped table-hover">
+                <tbody>
+                    <tr>
+                        <td></td>
+                        <th>Last Day</th>
+                        <th>Last Week</th>
+                        <th>Last Month</th>
+                        <th>Total</th>
+                    </tr>
+                    <tr>
+                        <th>Created Entries</th>
+                        <td>{{ summary.created_last_day }}</td>
+                        <td>{{ summary.created_last_week }}</td>
+                        <td>{{ summary.created_last_month }}</td>
+                        <td>{{ summary.created_total }}</td>
+                    </tr>
+                    <tr>
+                        <th>Edited Entries</th>
+                        <td>{{ summary.edited_last_day }}</td>
+                        <td>{{ summary.edited_last_week }}</td>
+                        <td>{{ summary.edited_last_month }}</td>
+                        <td>{{ summary.edited_total }}</td>
+                </tbody>
+            </table>
+         </div>
+                
+     </div>
+{% endblock %}

@@ -1,0 +1,20 @@
+{% extends 'twf/base/base.html' %}
+{% load crispy_forms_tags %}
+
+
+{% block content %}
+    <div class="border rounded bg-light mt-0 p-3">
+        <h1 class="display-6">
+            Edit {{ dictionary.label }}
+            <a href="{% url 'twf:dictionaries_view' dictionary.pk %}" class="mt-2 btn btn-outline-dark float-end">Go Back</a>
+        </h1>
+        <hr/>
+        <p class="lead">Change the label without consequences. Changing the type might break tag assignments. </p>
+        {% crispy form %}
+        <h1 class="display-6">
+            Delete {{ dictionary.label }}
+        </h1>
+        <hr/>
+        <a href="" class="mt-2 btn btn-outline-danger">Delete Dictionary {{ dictionary.label }}</a>
+    </div>
+{% endblock %}

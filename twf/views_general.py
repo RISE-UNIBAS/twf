@@ -1,7 +1,7 @@
 from django.contrib import messages
 from django.shortcuts import redirect, get_object_or_404
 
-from twf.forms import CreateDictionaryEntryForm
+from twf.forms.dictionary_forms import CreateDictionaryEntryForm
 from twf.models import Dictionary, PageTag, DictionaryEntry, Variation
 
 

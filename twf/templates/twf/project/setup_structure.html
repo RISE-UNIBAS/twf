@@ -1,0 +1,80 @@
+{% extends 'twf/base/base.html' %}
+{% load static %}
+
+{% block sub_content %}
+    <div>
+        <h1 class="display-6">Structure downloaded data</h1>
+        <p class="lead">This page allows you to extract the downloaded data 
+            from Transkribus and create database objects from it.</p>
+        
+        {% if not project.job_download_url %}
+            <div class="alert alert-warning" role="alert">
+                <h4 class="alert-heading">There is no export</h4>
+                <p>
+                    You need to request an export and download it first.
+                    Please go to the <a href="{% url 'twf:project_tk_export' %}">TK Export</a> page and
+                    start an export.
+                </p>
+            </div>
+        {% endif %}
+        
+        <div class="row">
+            <div class="col-12">
+                <div class="mb-3">
+                    <label for="extractZip" class="form-label">Extract files from zip and create database objects</label>
+                    <input id="extractZip" type="button"  role="button" class="form-control btn btn-dark" value="Extract Downloaded Data">
+                    <div id="transkribusDownloadHelp" class="form-text text-danger">
+                        Depending on the number of your documents, this can take a long time.
+                    </div>
+                    
+                    <div class="col-12 border text-center">
+                        <span>Progress:</span>
+                        <div class="progress">
+                            <div class="progress-bar bg-dark" role="progressbar" 
+                                 style="width: 0;" id="extractProgressBar" aria-valuenow="0" 
+                                 aria-valuemin="0" aria-valuemax="100">0%</div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-12">
+                        <textarea id="extractionLog" style="width: 100%" rows="10"></textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block script %}
+    <script>
+        $(document).ready(function() {
+            let download_file = '{{ project.job_download_url }}';
+            let has_downloaded_file = download_file !== 'None';
+            let project_id = '{{ project.pk }}';
+            
+            if (!has_downloaded_file) {
+                $('#extractZip').prop('disabled', true);
+            } 
+            else {
+                $('#extractZip').prop('disabled', false);
+                $("#extractZip").click(function() {
+                    $('#extractionLog').text(''); // clear log
+                    monitorProgress(project_id);  // Monitor progress using SSE
+                    
+                    // Start the extraction process
+                    $.ajax({
+                        url: '/ajax/transkribus/extract/',
+                        success: function(data) {
+                            console.log("SUCCESS", data);
+                           
+                        },
+                        error: function(data) {
+                            console.log("ERROR", data);
+                        }
+                    });
+                });
+            }
+        });
+    </script>
+    <script src="{% static 'twf/js/transkribus_collector.js' %}" type="text/javascript"></script>
+{% endblock %}

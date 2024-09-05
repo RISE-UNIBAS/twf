@@ -1,4 +1,6 @@
 """ This module contains the functions for the AJAX requests of the setup page. """
+import os
+
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
@@ -9,17 +11,26 @@ from twf.transkribus_collector import get_session_id, start_export, get_export_s
 
 def unpack_request(request):
     """ Unpacks the request and returns the session_id and project. """
-    project_id = request.POST.get('project_id')
-    username = request.POST.get('username')
-    password = request.POST.get('password')
-
-    try:
-        project = Project.objects.get(pk=project_id)
-    except Project.DoesNotExist:
-        project = None
+    project_id = request.session.get('project_id')
+    project = Project.objects.get(pk=project_id)
+    username = project.transkribus_username
+    password = project.transkribus_password
 
     session_id = get_session_id(username, password)
     return session_id, project
+
+
+def ajax_transkribus_reset_export(request):
+    """ Handles the request to reset the export job."""
+    project_id = request.session.get('project_id')
+    project = Project.objects.get(pk=project_id)
+    project.transkribus_job_id = None
+    project.job_download_url = None
+    if os.path.isfile(project.downloaded_zip_file.path):
+        os.remove(project.downloaded_zip_file.path)
+    project.downloaded_zip_file = None
+    project.save(current_user=request.user)
+    return JsonResponse({'status': 'success'}, status=200)
 
 
 @require_http_methods(["POST"])

@@ -1,0 +1,7 @@
+{% for dict in project.selected_dictionaries.all %}
+    {% if selected_dict == dict.type %}
+        <span class="badge bg-light"><a href="?selected_dict={{ dict.type }}" class="text-dark">{{ dict.label }}</a></span>
+    {% else %}
+        <span class="badge bg-dark"><a href="?selected_dict={{ dict.type }}" class="text-light">{{ dict.label }}</a></span>
+    {% endif %}
+{% endfor %}

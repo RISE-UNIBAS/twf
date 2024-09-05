@@ -1,0 +1,23 @@
+{% extends 'twf/base/base.html' %}
+
+
+{% block content %}
+    <div class="border rounded bg-light mt-0 p-3">
+        <h1 class="display-6">Welcome to TWF</h1>
+        {% if request.user.is_authenticated %}
+            <p class="lead">
+                {% if project_set %}
+                    You're ready to start working on your project.
+                {% else %}
+                    Select a project from the menu to get started. If you have no projects assigend,
+                    please contact your project manager.
+                {% endif %}
+            </p>
+        {% else %}
+            <p class="lead">
+                Transkribus Workflow @ <a href="https://rise.unibas.ch" target="_blank">RISE</a>,
+                <a href="https://unibas.ch" target="_blank">University of Basel</a>,
+            </p>
+        {% endif %}
+    </div>
+{% endblock %}

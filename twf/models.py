@@ -4,6 +4,10 @@ from django.db import models
 from django.contrib.auth.models import User
 from fuzzywuzzy import process
 
+from twf.templatetags.tk_tags import tk_iiif_url, tk_bounding_box
+
+TWF_GROUPS = ['Setup Project', 'Group Tags', 'Run Batches', 'Import Dictionaries', 'Manipulate Dictionaries']
+
 
 class TimeStampedModel(models.Model):
     """An abstract base class model that provides self-updating 'created' and 'modified' fields."""
@@ -68,62 +72,133 @@ class Project(TimeStampedModel):
     )
     """The choices for the status of the project."""
 
-    title = models.CharField(max_length=100)
+    title = models.CharField(max_length=100,
+                             verbose_name='Project Title',
+                             help_text='The title of the project. Can be used in data exports.')
     """The title of the project."""
 
-    collection_id = models.CharField(max_length=30)
+    collection_id = models.CharField(max_length=30,
+                                     verbose_name='Transkribus Collection ID',
+                                     help_text='The Transkribus collection ID. '
+                                               'Needed to export your data from Transkribus.')
     """The Transkribus collection ID."""
 
-    transkribus_job_id = models.CharField(max_length=30, blank=True, null=True)
+    transkribus_job_id = models.CharField(max_length=30, blank=True, null=True,
+                                          verbose_name='Transkribus Job ID',
+                                          help_text='This value is set by the system and should only be changed '
+                                                    'to manually point TWF to a finished export job.')
     """The Transkribus job ID of the last requested export."""
 
-    job_download_url = models.URLField(blank=True, null=True)
+    job_download_url = models.URLField(blank=True, null=True,
+                                       verbose_name='Transkribus Job Download URL',
+                                       help_text='The download URL of the last requested export.'
+                                                 'This value is set by the system and should only be changed '
+                                                 'to manually point TWF to a finished export job.')
     """The download URL of the last requested export."""
 
-    downloaded_at = models.DateTimeField(blank=True, null=True)
+    downloaded_at = models.DateTimeField(blank=True, null=True,
+                                         verbose_name='Last Export Downloaded At',
+                                         help_text='The time the last export was downloaded.')
     """The time the last export was downloaded."""
 
-    downloaded_zip_file = models.FileField(upload_to='transkribus_exports/', blank=True, null=True)
+    downloaded_zip_file = models.FileField(upload_to='transkribus_exports/', blank=True, null=True,
+                                           verbose_name='Last Export File',
+                                           help_text='The last downloaded export file.')
     """The last downloaded export file."""
 
     metadata_google_sheet_id = models.CharField(max_length=100, blank=True, null=True,
+                                                verbose_name='Google Sheet ID',
                                                 help_text='The ID of the Google Sheet containing metadata')
     """The ID of the Google Sheet containing metadata."""
 
     metadata_google_sheet_range = models.CharField(max_length=100, blank=True, null=True,
+                                                   verbose_name='Google Sheet Data Range',
                                                    help_text='The range of the Google Sheet containing metadata')
     """The range of the Google Sheet containing metadata."""
 
     metadata_google_doc_id_column = models.CharField(max_length=50, blank=True, null=True,
+                                                     verbose_name='Google Sheet Document ID Column Name',
                                                      help_text='The name of the column containing the document IDs')
     """The name of the column containing the document IDs."""
 
     metadata_google_title_column = models.CharField(max_length=50, blank=True, null=True,
+                                                    verbose_name='Google Sheet Title Column Name',
                                                     help_text='The name of the column containing the document titles')
     """The name of the column containing the document titles."""
 
     metadata_google_valid_columns = models.CharField(max_length=512, blank=True, null=True,
+                                                     verbose_name='Google Sheet Valid Columns',
                                                      help_text='A coma-separated list of valid column names '
                                                                'for metadata. Leave blank for all columns.')
     """A coma-separated list of valid column names for metadata. Leave blank for all columns."""
 
-    description = models.TextField(blank=True, default='')
+    description = models.TextField(blank=True, default='',
+                                   verbose_name='Project Description',
+                                   help_text='The description of the project. Should be brief. '
+                                             'Can be used in data exports.')
     """The description of the project."""
 
-    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='open')
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='open',
+                              verbose_name='Project Status',
+                              help_text='The status of the project.')
     """The status of the project."""
 
-    owner = models.ForeignKey(UserProfile, related_name='owned_projects', on_delete=models.CASCADE)
+    owner = models.ForeignKey(UserProfile, related_name='owned_projects', on_delete=models.CASCADE,
+                              verbose_name='Project Owner')
     """The owner of the project."""
 
-    members = models.ManyToManyField(UserProfile, related_name='projects')
+    members = models.ManyToManyField(UserProfile, related_name='projects',
+                                     verbose_name='Project Members',
+                                     help_text='The members of the project. Their roles can be adjusted'
+                                               'in the user management section.')
     """The members of the project."""
 
-    tag_type_translator = models.JSONField(default=dict)
+    tag_type_translator = models.JSONField(default=dict,
+                                           verbose_name='Tag Type Translator',
+                                           help_text='A dictionary to translate tag types into dictionary types '
+                                                     'if they are not equal.')
     """A dictionary to translate tag types."""
 
-    ignored_tag_types = models.JSONField(default=dict)
+    ignored_tag_types = models.JSONField(default=dict,
+                                         verbose_name='Special Tag Types',
+                                         help_text='A list of tag types to ignore and a list of tag types'
+                                                   'which are special (e.g. dates).')
     """A list of tag types to ignore."""
+
+    transkribus_username = models.CharField(max_length=100, blank=True, null=True,
+                                            verbose_name='Transkribus Username',
+                                            help_text='The username for the Transkribus API.')
+    """The username for the Transkribus API."""
+
+    transkribus_password = models.CharField(max_length=100, blank=True, null=True,
+                                            verbose_name='Transkribus Password',
+                                            help_text='The password for the Transkribus API.')
+    """The password for the Transkribus API."""
+
+    geonames_username = models.CharField(max_length=100, blank=True, null=True,
+                                         verbose_name='Geonames Username',
+                                         help_text='The username for the Geonames API.')
+    """The username for the Geonames API."""
+
+    openai_api_key = models.CharField(max_length=100, blank=True, null=True,
+                                      verbose_name='Open AI API Key',
+                                      help_text='The API key for the Open AI API.')
+    """The API key for the Open AI API."""
+
+    selected_dictionaries = models.ManyToManyField('Dictionary', related_name='selected_projects',
+                                                   blank=True, verbose_name='Selected Dictionaries',
+                                                   help_text='The dictionaries selected for this project.')
+    """The dictionaries selected for this project."""
+
+    document_metadata_fields = models.JSONField(default=dict,
+                                                verbose_name='Document Metadata Fields',
+                                                help_text='A dictionary of metadata fields for documents.')
+    """A dictionary of metadata fields for documents."""
+
+    page_metadata_fields = models.JSONField(default=dict,
+                                            verbose_name='Page Metadata Fields',
+                                            help_text='A dictionary of metadata fields for pages.')
+    """A dictionary of metadata fields for pages."""
 
     def get_valid_cols(self):
         """Return the valid columns for metadata."""
@@ -166,6 +241,10 @@ class Document(TimeStampedModel):
         """Return the URL to the Transkribus document."""
         return f"https://app.transkribus.org/collection/{self.project.collection_id}/doc/{self.document_id}"
 
+    def get_active_pages(self):
+        """Return the active pages of the document."""
+        return self.pages.filter(is_ignored=False)
+
     def __str__(self):
         """Return the string representation of the Document."""
         return f"Document for {self.project.title}"
@@ -207,12 +286,42 @@ class Page(TimeStampedModel):
     class Meta:
         ordering = ['tk_page_number']
 
-    def get_tags(self):
-        tags = []
-        for block in self.parsed_data['elements']:
-            for tag in block['element_data']['custom_list_structure']:
-                tags.append(tag)
-        return tags
+    def get_annotations(self):
+        """Return the annotations of the page."""
+        # print("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX")
+        ret_items = []
+        anno_types = []
+        if 'elements' in self.parsed_data:
+            # print("Elements found ({})".format(len(self.parsed_data['elements'])))
+            for item in self.parsed_data['elements']:
+                ret_item = {}
+                element_data = item['element_data']
+                el_type = None
+                el_coords = None
+
+                ret_item['text'] = "\n".join(element_data['text_lines'])
+
+                if "structure" in element_data['custom_structure']:
+                    el_type = element_data['custom_structure']['structure']['type']
+                    ret_item['type'] = el_type
+                if 'coords' in element_data:
+                    el_coords = element_data['coords']
+
+                try:
+                    file_url = self.parsed_data['file']['imgUrl']
+                    coords = tk_bounding_box(el_coords)
+                    url = tk_iiif_url(file_url, coords=",".join([str(c) for c in coords]), image_size='pct:25')
+                    ret_item['url'] = url
+                except AttributeError:
+                    ret_item['url'] = ''
+                    # print("No file URL found")
+
+                ret_item['id'] = element_data['id']
+
+                ret_items.append(ret_item)
+                anno_types.append(el_type)
+
+        return ret_items
 
     def __str__(self):
         return f"Page {self.tk_page_number} of {self.document.document_id}"
@@ -221,10 +330,12 @@ class Page(TimeStampedModel):
 class Dictionary(TimeStampedModel):
     """A dictionary."""
 
-    label = models.CharField(max_length=100, unique=True)
+    label = models.CharField(max_length=100, unique=True,
+                             help_text='The label of the dictionary. This should be unique and descriptive.')
     """The label of the dictionary."""
 
-    type = models.CharField(max_length=100, unique=True)
+    type = models.CharField(max_length=100,
+                            help_text='The type of the dictionary. This means the Transkribus tag type.')
     """The type of the dictionary."""
 
     class Meta:
@@ -322,7 +433,16 @@ class PageTag(TimeStampedModel):
             dictionary_type = self.variation_type
             if self.page.document.project.tag_type_translator.get(dictionary_type):
                 dictionary_type = self.page.document.project.tag_type_translator[dictionary_type]
-            entry = Variation.objects.get(variation=self.variation, entry__dictionary__type=dictionary_type)
+            try:
+                entry = Variation.objects.get(variation=self.variation,
+                                              entry__dictionary__in=self.page.document.project.selected_dictionaries.all(),
+                                              entry__dictionary__type=dictionary_type)
+            except Variation.MultipleObjectsReturned:
+                # TODO: Handle multiple objects returned
+                entry = Variation.objects.filter(variation=self.variation,
+                                                 entry__dictionary__in=self.page.document.project.selected_dictionaries.all(),
+                                                 entry__dictionary__type=dictionary_type).first()
+
             self.dictionary_entry = entry.entry
             self.save(current_user=user)
             return True
@@ -335,7 +455,9 @@ class PageTag(TimeStampedModel):
         if self.page.document.project.tag_type_translator.get(dict_type):
             dict_type = self.page.document.project.tag_type_translator[dict_type]
 
-        variations = Variation.objects.filter(entry__dictionary__type=dict_type)
+        variations = Variation.objects.filter(
+            entry__dictionary__in=self.page.document.project.selected_dictionaries.all(),
+            entry__dictionary__type=dict_type)
         variations_list = [variation.variation for variation in variations]
 
         # Using fuzzywuzzy to find the top 5 closest matches
@@ -393,3 +515,45 @@ class DateVariation(TimeStampedModel):
     def __str__(self):
         """Return the string representation of the Variation."""
         return self.variation
+
+
+class Collection(TimeStampedModel):
+    """A collection of documents."""
+
+    project = models.ForeignKey(Project, related_name='collections', on_delete=models.CASCADE)
+
+    title = models.CharField(max_length=100)
+    """The title of the collection."""
+
+    description = models.TextField(blank=True, default='')
+    """The description of the collection."""
+
+    def __str__(self):
+        """Return the string representation of the Collection."""
+        return self.title
+
+
+class CollectionItem(TimeStampedModel):
+    """An item in a collection."""
+
+    collection = models.ForeignKey(Collection, related_name='items', on_delete=models.CASCADE)
+    """The collection this item belongs to."""
+
+    document = models.ForeignKey(Document, related_name='collections', on_delete=models.CASCADE)
+    """The document this item belongs to."""
+
+    document_configuration = models.JSONField(default=dict)
+    """The configuration of the document in the collection."""
+
+    title = models.CharField(max_length=100)
+    """The title of the item."""
+
+    marked_as_done = models.BooleanField(default=False)
+    """Whether the item is marked as done."""
+
+    marked_as_faulty = models.BooleanField(default=False)
+    """Whether the item is marked as faulty."""
+
+    def __str__(self):
+        """Return the string representation of the CollectionItem."""
+        return f"{self.collection.title}: {self.title}"

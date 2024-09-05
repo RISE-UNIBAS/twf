@@ -1,0 +1,14 @@
+{% extends 'twf/base/base.html' %}
+
+{% block content %}
+     <div class="border rounded bg-light mt-0 p-3">
+        <h1 class="display-6">Metadata</h1>
+        <p class="lead">Check what metadata is loaded in your project</p>
+        <p>
+            You have <strong>{{ doc_count }}</strong> of {{ doc_total_count }} documents with metadata loaded.
+        </p>
+        <p>
+            You have <strong>{{ page_count }}</strong> of {{ page_total_count }} pages with metadata loaded.
+        </p>
+     </div>
+{% endblock %}

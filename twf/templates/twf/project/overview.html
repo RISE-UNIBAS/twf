@@ -1,0 +1,134 @@
+{% extends 'twf/base/base.html' %}
+
+{% block content %}
+     <div class="border rounded bg-light mt-0 p-3">
+        <h1 class="display-6">{{ project.title }} Overview</h1>
+        <div class="table-responsive"> <!-- Responsive table wrapper -->
+            <table class="table table-bordered table-striped table-hover">
+                <tbody>
+                    <tr>
+                        <th>Title</th>
+                        <td>{{ project.title }}</td>
+                    </tr>
+                    <tr>
+                        <th>Description</th>
+                        <td>{{ project.description }}</td>
+                    </tr>
+                    <tr>
+                        <th>Owner</th>
+                        <td>{{ project.owner }}</td>
+                    </tr>
+                    <tr>
+                        <th>Members</th>
+                        <td>
+                            {% for member in project.members.all %}
+                                {{ member }}
+                                {% if not forloop.last %}, {% endif %}
+                            {% endfor %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Created At</th>
+                        <td>{{ project.created_at }}</td>
+                    </tr>
+                    <tr>
+                        <th>Modified At</th>
+                        <td>{{ project.modified_at }}</td>
+                    </tr>
+                    <tr>
+                        <th>Dictionary Translations</th>
+                        <td>{{ project.tag_type_translator }}</td>
+                    </tr>
+                    <tr>
+                        <th>Special Tag Types</th>
+                        <td>{{ project.ignored_tag_types }}</td>
+                    </tr>
+                    <tr>
+                        <th>Collection ID</th>
+                        <td>{{ project.collection_id }}</td>
+                    </tr>
+                    <tr>
+                        <th>Transkribus Job ID</th>
+                        <td>{{ project.transkribus_job_id }}</td>
+                    </tr>
+                    <tr>
+                        <th>Job Download URL</th>
+                        <td><a href="{{ project.job_download_url }}" target="_blank">{{ project.job_download_url|truncatechars:100 }}</a></td>
+                    </tr>
+                    <tr>
+                        <th>Downloaded At</th>
+                        <td>{{ project.downloaded_at }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+     
+     <h1 class="display-6">Data Counts</h1>
+     <div class="table-responsive"> <!-- Responsive table wrapper -->
+            <table class="table table-bordered table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th>Statistic</th>
+                        <th>Value</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <th>Document Count</th>
+                        <td>{{ stats.document_count }}</td>
+                    </tr>
+                    <tr>
+                        <th>Page Count</th>
+                        <td>{{ stats.page_count }}</td>
+                    </tr>
+                    <tr>
+                        <th>Ignored Pages</th>
+                        <td>{{ stats.ignored_pages }}</td>
+                    </tr>
+                    <tr>
+                        <th>Ignored %</th>
+                        <td>{{ stats.ignored_percentage|floatformat:2 }}%</td>
+                    </tr>
+                    <tr>
+                        <th>Largest Document (most pages)</th>
+                        <td>{{ stats.largest_document.title }} ({{ stats.largest_document.num_pages }} pages)</td>
+                    </tr>
+                    <tr>
+                        <th>Smallest Document (least pages)</th>
+                        <td>{{ stats.smallest_document.title }} ({{ stats.smallest_document.num_pages }} pages)</td>
+                    </tr>
+                    <tr>
+                        <th>PageTag Count</th>
+                        <td>{{ stats.pagetag_count }}</td>
+                    </tr>
+                    <tr>
+                        <th>Unique PageTag Count</th>
+                        <td>{{ stats.unique_pagetag_count }}</td>
+                    </tr>
+                    <tr>
+                        <th>Average PageTags per Document</th>
+                        <td>{{ stats.average_pagetags_per_document|floatformat:2 }}</td>
+                    </tr>
+                    <tr>
+                        <th>Median PageTags per Document</th>
+                        <td>{{ stats.median_pagetags_per_document }}</td>
+                    </tr>
+                    <tr>
+                        <th>Total PageTags</th>
+                        <td>{{ stats.total_pagetags }}</td>
+                    </tr>
+                    <tr>
+                        <th>PageTags with Dictionary Entry</th>
+                        <td>{{ stats.pagetags_with_dictionaryentry }}</td>
+                    </tr>
+                    <tr>
+                        <th>Percentage of PageTags with Dictionary Entry</th>
+                        <td>{{ stats.percentage_with_dictionaryentry|floatformat:2 }}%</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+     </div>
+    
+    
+{% endblock %}

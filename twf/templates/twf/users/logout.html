@@ -1,0 +1,15 @@
+{% extends 'twf/base/base.html' %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+    <div class="border rounded bg-light mt-0 p-3">
+       {% if user.is_authenticated %}
+           <h1 class="display-6">Goodbye, {{ request.user.username }}</h1>
+           <p>Do you want to logout?</p>
+            <form method="post" action="{% url 'twf:logout' %}">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-dark">Logout</button>
+            </form>
+        {% endif %}
+    </div>
+{% endblock %}

@@ -1,0 +1,14 @@
+{% load crispy_forms_filters %}
+
+<form method="get" class="form">
+    <div class="row align-items-end ps-3">
+        {% for field in filter.form %}
+        <div class="col-12 col-md m-0 p-0">
+            {{ field|as_crispy_field }}
+        </div>
+        {% endfor %}
+        <div class="col-12 col-md-auto m-0 p-0 pe-3 pb-1">
+            <button type="submit" class="btn btn-sm btn-dark">Filter</button>
+        </div>
+    </div>
+</form>

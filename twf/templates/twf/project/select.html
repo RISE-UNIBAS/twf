@@ -1,0 +1,26 @@
+{% extends 'twf/base/base.html' %}
+
+{% block content %}
+     <div class="border rounded bg-light mt-0 p-3">
+        <h1 class="display-6">Work on "{{ project.title }}"</h1>
+        <p class="lead">Your role in this project: <strong>{{ user_role }}</strong></p>
+        
+         <table class="table table-striped w-50">
+             <tr>
+                 <th>Action</th>
+                 <th>Permission</th>
+             </tr>
+             {% for group in groups %}
+                 <tr>
+                    <td>{{ group.0.name }}</td>
+                    <td>{{ group.1 }}</td>
+                 </tr>
+             {% endfor %}
+         </table>
+         
+         <form method="post" action="{% url 'twf:project_do_select' project.pk %}">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-dark">Select {{ project.title }}</button>
+        </form>
+     </div>
+{% endblock %}

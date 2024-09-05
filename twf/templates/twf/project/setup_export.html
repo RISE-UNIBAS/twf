@@ -1,0 +1,149 @@
+{% extends 'twf/base/base.html' %}
+{% load static %}
+
+{% block sub_content %}
+    <div>
+        <h1 class="display-6">Transkribus Export</h1>
+        <p class="lead">
+            This page allows you to set up your project. 
+            Your Transkribus collection id is <strong>{{ project.collection_id }}</strong>
+        </p>
+        
+        {% if not project.transkribus_username or not project.transkribus_password %}
+            <div class="alert alert-warning" role="alert">
+                <h4 class="alert-heading">Set up authentication data</h4>
+                <p>
+                    You need to set up your Transkribus authentication data in order to use the export functionality.
+                    Please go to the <a href="{% url 'twf:project_settings' %}">project settings</a> page and
+                    enter your Transkribus username and password.
+                </p>
+            </div>
+        {% endif %}
+        
+        <div class="row">
+            <div class="col-4">
+                <input id="transkribusExport" type="button" role="button" class="btn btn-dark w-100 mb-3" 
+                       value="Start Export Job" onclick="start_export_job({{ project.pk }})">
+                <div class="col-12 border text-center">Current status:</div>
+                <div class="col-12 border text-center" id="requestJobStatus">Unknown</div>
+            </div>
+            <div class="col-4">
+                <input id="transkribusExportStatus" type="button" role="button" class="btn btn-dark w-100 mb-3" 
+                       value="Check Export Status" onclick="check_export_status({{ project.pk }})">
+                <div class="col-12 border text-center">Current status:</div>
+                <div class="col-12 border text-center"><span id="jobStatus">Unknown</span></div>
+            </div>
+            <div class="col-4">
+                <input id="transkribusDownload" type="button"  role="button" class="btn btn-dark w-100 mb-3" 
+                       value="Download Export">
+                <div class="col-12 border text-center">Download status:</div>
+                <div class="progress mt-2">
+                    <div class="progress-bar bg-dark" role="progressbar" 
+                         style="width:0;" id="progressBar" aria-valuenow="0" 
+                         aria-valuemin="0" aria-valuemax="100">0%</div>
+                </div>
+            </div>
+        </div>
+        <div class="row mt-5">
+            <div class="col-12">
+                <div class="border w-100">
+                    {% if project.downloaded_zip_file %}
+                        <div class="alert alert-warning" role="alert">
+                            <h4 class="alert-heading">Restart Import Process</h4>
+                            <p>
+                                You have a downloaded file. You can reset the process and start a new export job.
+                                This will delete the current export file, and you can start a new export job.
+                                This will not overwrite any other information than the export file. 
+                            </p>
+                            <input id="restartExport" type="button" role="button" class="btn btn-dark mb-3" 
+                                   value="Restart Export Job" onclick="restart_export_job({{ project.pk }})">
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block script %}
+    <script>
+        $(document).ready(function() {
+            let tk_job_id = '{{ project.transkribus_job_id }}';
+            let has_job_id = !isNaN(Number(tk_job_id));
+            
+            let tk_username = '{{ project.transkribus_username }}';
+            let tk_password = '{{ project.transkribus_password }}';
+            let has_auth_data = tk_username !== '' && tk_username !== 'None' && tk_password !== '' && tk_password !== 'None';
+            
+            let tk_download_url = '{{ project.downloaded_zip_file }}';
+            let has_download_url = tk_download_url !== '';
+            
+            let tk_export_file = '{{ project.downloaded_zip_file }}';
+            let has_export_file = tk_export_file !== '';
+            
+            let startExportButton = $('#transkribusExport');
+            let checkStatusButton = $('#transkribusExportStatus');
+            let startDownloadButton = $('#transkribusDownload');
+            
+            let downloadProgress = $('#progress');
+            let downloadProgressBar = $('#progressBar');
+            let startExportStatus = $('#requestJobStatus');
+            let exportJobStatus = $('#jobStatus');
+            
+            let resetExportButton = $('#restartExport');
+            
+            startDownloadButton.click(function () {
+                downloadProgress.text('Progress: 0%');
+                // Start the download process
+                $.ajax({
+                    url: '/ajax/transkribus/export/start/download/',
+                    success: function (data) {
+                        console.log(data);
+                        updateProgress(downloadProgress, downloadProgressBar, startDownloadButton);
+                    }
+                });
+            });
+            if(!has_download_url) {
+                startDownloadButton.prop('disabled', true);
+            }
+            if(has_export_file) {
+                checkStatusButton.prop('disabled', true);
+                startDownloadButton.prop('disabled', true);
+                downloadProgressBar.css('width', '100%');
+                downloadProgressBar.text('100%');
+            }
+            
+            resetExportButton.click(function () {
+                $.ajax({
+                    url: '/ajax/transkribus/export/reset/',
+                    success: function (data) {
+                        console.log(data);
+                        window.location.reload();
+                    }
+                });
+            });
+            
+            if(!has_auth_data) {
+                startExportButton.prop('disabled', true);
+                checkStatusButton.prop('disabled', true);
+                startDownloadButton.prop('disabled', true);
+                
+                startExportStatus.text('No Auth Data');
+                exportJobStatus.text('No Auth Data');
+            }
+            else {
+                if (has_job_id) {
+                    startExportButton.prop('disabled', true);
+                    startExportStatus.text('Job ID: {{ project.transkribus_job_id }}');
+                }
+                else {
+                    checkStatusButton.prop('disabled', true);
+                    startDownloadButton.prop('disabled', true);
+                }
+            }
+            
+            
+        });
+    </script>
+    <script src="{% static 'twf/js/transkribus_collector.js' %}" type="text/javascript"></script>
+{% endblock %}

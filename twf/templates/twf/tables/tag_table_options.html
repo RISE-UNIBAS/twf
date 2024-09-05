@@ -1,0 +1,12 @@
+<div>
+    {% if record.dictionary_entry or record.date_variation_entry %}
+        <a href="{% url 'twf:tags_ungroup' record.pk %}" class="btn btn-sm btn-dark btn-sm mb-2" style="width: 100%;">Un-Group</a>
+    {% else %}
+        {% if record.is_parked %}
+            <a href="{% url 'twf:tags_unpark' record.pk %}" class="btn btn-sm btn-dark btn-sm mb-2" style="width: 100%;">Un-Park</a>
+        {% else %}
+            <a href="{% url 'twf:tags_park' record.pk %}" class="btn btn-sm btn-dark btn-sm mb-2" style="width: 100%;">Park</a>
+        {% endif %}
+    {% endif %}
+    <a href="{{ record.get_transkribus_url }}" class="btn btn-sm btn-dark btn-sm" style="width: 100%;">Transkribus</a>
+</div>

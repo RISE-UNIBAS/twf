@@ -1,0 +1,34 @@
+{% extends 'twf/base/base.html' %}
+{% load tk_tags %}
+{% load nav_tags %}
+
+{% block sub_content %}
+     <div class="border rounded bg-light mt-0 p-3">
+        <h1 class="display-6">Collection {{ collection.title }}</h1>
+        <p class="lead">Manage your collection</p>
+         {% for item in items|slice:":10" %}
+            <div>
+                <p>Title <input type="text" value="{{ item.title }}" name="song_title"></p>
+                <p>Document: {{ item.document.title }}, ID: {{ item.document.document_id }}</p>
+                {% for anno in item.document_configuration.annotations %}
+                    <div>
+                        <table>
+                            <tr>
+                                <td><img src="{{ anno.url }}"></td>
+                                <td class="small">{{ anno.text|nl2br }}</td>
+                                <td>{{ anno.type }}, <a href="#">Delete</a></td>
+                            </tr>
+                        </table>
+                    </div>
+                    {%  if not forloop.last %}
+                        <a href="{% url 'twf:project_collections_item_split' item.id forloop.counter %}">&#9986;</a>
+                    {% endif %}
+                {% endfor %}
+            <br/>
+            <input type="button" value="Mark Faulty">
+            <input type="button" value="Mark Correct">
+            </div>
+             <hr>
+         {% endfor %}
+     </div>
+{% endblock %}

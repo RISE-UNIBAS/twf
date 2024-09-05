@@ -1,0 +1,126 @@
+{% extends 'twf/base/base.html' %}
+{% load nav_tags %}
+
+{% block content %}
+     <div class="border rounded bg-light mt-0 p-3">
+        <h1 class="display-6">Where you're at</h1>
+        <p class="lead">This is the overview of the grouped tags in your project</p>
+     
+        {% for dtype, entries in stats.most_used_entries_per_type.items %}
+            <div class="row">
+                <div class="col-8">
+                     <div class="table-responsive">
+                         <table class="table table-bordered table-striped table-hover">
+                            <thead>
+                                <tr>
+                                    <th style="width: 70%">Dictionary Entries of Type '{{ dtype }}</th>
+                                    <th>used # times</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for entry in entries %}
+                                    <tr>
+                                        <td>{{ entry.dictionary_entry__label }}</td>
+                                        <td>{{ entry.count }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody> 
+                         </table>
+                     </div>
+                </div>
+                <div class="col-4">
+                    {% if dtype %}
+                        <canvas id="myPieChart-{{ dtype }}" width="400" height="400"></canvas>
+                        <script>
+                            var ctx = document.getElementById('myPieChart-{{ dtype }}').getContext('2d');
+                            var myPieChart = new Chart(ctx, {
+                                type: 'bar',
+                                data: {
+                                    labels: [{% for entry in entries|limit_to:10 %}'{{ entry.dictionary_entry__label }}',{% endfor %}],
+                                    datasets: [{
+                                        data: [{% for entry in entries|limit_to:10 %}{{ entry.count }},{% endfor %}],
+                                        backgroundColor: [{% for entry in entries %}'{% any_value_to_color entry.count %}',{% endfor %}],
+                                        borderColor: [{% for entry in entries|limit_to:10 %}'black',{% endfor %}]
+                                    }]
+                                },
+                                options: {
+                                    plugins: {
+                                        title: {
+                                            display: true,
+                                            text: '{{dtype|title}}',
+                                            font: {
+                                                size: 18
+                                            },
+                                            padding: {
+                                                top: 10,
+                                                bottom: 10
+                                            },
+                                            color: '#111'  // You can set the color of the title text if you like
+                                        },
+                                        legend: {
+                                            display: false
+                                        }
+                                    },
+                                    responsive: true
+                                }
+                            });
+                        </script>
+                    {% endif %}
+                </div>
+            </div>
+     {% endfor %}
+        
+        <h1 class="display-6">Tag Grouping Status</h1>
+        
+        <div class="table-responsive"> <!-- Responsive table wrapper -->
+            <table class="table table-bordered table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th>Variation Type</th>
+                        <th>Count</th>
+                        <th>Percentage</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for variation in stats.variation_type_counts %}
+                    <tr>
+                        <td>{{ variation.variation_type }}</td>
+                        <td>{{ variation.count }}</td>
+                        <td>{{ variation.percentage|floatformat:2 }}%</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="table-responsive"> <!-- Responsive table wrapper -->
+            <table class="table table-bordered table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th>Variation Type</th>
+                        <th>Total</th>
+                        <th>Grouped</th>
+                        <th>%</th>
+                        <th>Parked</th>
+                        <th>%</th>
+                        <th>Unresolved</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for variation in stats.variation_type_edit_counts %}
+                    <tr>
+                        <td>{{ variation.variation_type }}</td>
+                        <td class="text-end">{{ variation.count }}</td>
+                        <td class="text-end">{{ variation.grouped }}</td>
+                        <td class="text-end">{{ variation.grouped_percentage|floatformat:2 }}</td>
+                        <td class="text-end">{{ variation.parked }}</td>
+                        <td class="text-end">{{ variation.parked_percentage|floatformat:2 }}</td>
+                        <td class="text-end">{{ variation.unresolved }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+     
+     </div>
+{% endblock %}

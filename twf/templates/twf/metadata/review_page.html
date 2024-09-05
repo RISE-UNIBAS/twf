@@ -1,0 +1,65 @@
+{% extends 'twf/base/base.html' %}
+{% load crispy_forms_tags %}
+{% load nav_tags %}
+
+{% block content %}
+     <div class="border rounded bg-light mt-0 p-3">
+        <h1 class="display-6">Metadata</h1>
+        <p class="lead">Review Page Metadata</p>
+        <div class="row">
+            <div class="col-6">
+                {% crispy form %}
+            </div>
+            <div class="col-6">
+                <img src="{{ page.parsed_data.file.imgUrl }}" class="img-fluid" alt="Page image">
+                {{ page.document.document_id }}, {{ page.tk_page_number }}
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12">
+                Raw data:<br/> <code>{{ page.metadata|pretty_json }}</code>
+            </div>
+        </div>
+     </div>
+{% endblock %}
+
+{% block script %}
+    <script>
+        $(document).ready(function() {
+            $('#review-form input').on('input', function() {
+                var inputField = $(this);
+                var fieldName = inputField.attr('name');
+                var fieldValue = inputField.val();
+                
+                // Make an AJAX call to validate the field
+                $.ajax({
+                    url: '/validate_page_field/',  // Define your validation URL
+                    method: 'POST',
+                    data: {
+                        field_name: fieldName,
+                        field_value: fieldValue,
+                        csrfmiddlewaretoken: '{{ csrf_token }}'
+                    },
+                    success: function(response) {
+                        var feedback = $('#' + fieldName + '-feedback');
+                        if (response.is_valid) {
+                            feedback.html('<span class="text-success">&#10004;</span>'); // Tick
+                        } else {
+                            feedback.html('<span class="text-danger">&#10008;</span>'); // Cross
+                        }
+                    }
+                });
+            });
+        });
+        
+        $('#review-form input').each(function() {
+            let inputField = $(this);
+            let feedback = $('#' + inputField.attr('name') + '-feedback');
+            if (inputField.hasClass('is-invalid')) {
+                feedback.html('<span class="text-danger">&#10008;</span>'); // Cross
+            } else if (inputField.val()) {
+                feedback.html('<span class="text-success">&#10004;</span>'); // Tick
+            }
+        });
+    </script>
+{% endblock %}

@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     "crispy_bootstrap4",
     "django_tables2",
     "django_select2",
+    'jsoneditor',
     "twf.apps.MainConfig"
 ]
 
@@ -144,6 +145,8 @@ MEDIA_URL = '/media/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap4"
 CRISPY_TEMPLATE_PACK = 'bootstrap4'
+
+LOGIN_URL = 'twf:login'
 LOGIN_REDIRECT_URL = 'twf:home'
 
 MESSAGE_TAGS = {
@@ -159,3 +162,4 @@ CACHES = {
         'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
     }
 }
+

@@ -1,0 +1,15 @@
+{% extends 'twf/base/base.html' %}
+{% load django_tables2 %}
+
+{% block content %}
+     <div class="border rounded bg-light mt-0 p-3">
+     <h1 class="display-6">Work ahead</h1>
+         <form method="post">
+                {% csrf_token %}
+                <input type="submit" class="btn btn-dark float-end" name="export_tags" value="Export Tags" />
+         </form>
+        <p class="lead">This table shows all tags which not assigned to a dictionary entry, are not parked and are not ignored.</p>
+         {% include 'twf/tables/filter.html' %}
+        {% render_table table %}
+     </div>
+{% endblock %}

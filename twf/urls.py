@@ -1,103 +1,195 @@
 """Urls for the twf app."""
-from django.views.generic import TemplateView
 from django.urls import path
 from django.contrib.auth import views as auth_views
 
-from .views.views_ajax_metadata import start_metadata_extraction, stream_metadata_extraction_progress
-from .views.views_ajax_tags import start_tag_extraction, stream_tag_extraction_progress, \
-    stream_tag_extraction_progress_detail
-from .views.views_command import park_tag, unpark_tag
-from .views.views_dict_auth import DictionaryAuthViewWikidata, DictionaryAuthViewGeonames, DictionaryAuthViewGND, \
-    DictionaryAuthViewManual
-from .views.views_dictionaries import DictionaryOverView, DictionaryView, DictionaryEntryView, delete_entry, \
-    delete_variation, DictionaryExportView
-from .views.views_project_collections import ProjectCollectionsView
-from .views.views_project_documents import ProjectDocumentView, DocumentView, delete_document
-from .views.views_project_export import ProjectExportView
-from .views.views_project_overview import ProjectOverView
-from .views.views_project_setup import ProjectSetupView
-from .views.views_project_tags import ProjectGroupTagsView, ProjectGroupWizardView, ProjectParkedTagsView, \
-    ProjectSpecialTagsView
-from .views_general import assign_tag, assign_tag_to_new_entry, assign_tag_by_variation
-from .forms import LoginForm
-from .views.views_ajax_download import ajax_transkribus_download_export, download_progress_view
-from .views.views_ajax_export import ajax_transkribus_request_export_status, ajax_transkribus_request_export
-from .views.views_ajax_extract import start_extraction, stream_extraction_progress, stream_extraction_progress_detail
+from twf.views.views_ajax_download import ajax_transkribus_download_export, download_progress_view
+from twf.views.views_ajax_export import ajax_transkribus_request_export, ajax_transkribus_request_export_status, \
+    ajax_transkribus_reset_export
+from twf.views.views_ajax_extract import start_extraction, stream_extraction_progress, stream_extraction_progress_detail
+from twf.views.views_ajax_metadata import start_metadata_extraction, stream_metadata_extraction_progress
+from twf.views.views_ajax_validation import validate_page_field, validate_document_field
+from twf.views.views_base import TWFHomeView, TWFHomeLoginView, TWFHomePasswordChangeView, TWFHomeUserOverView, \
+    TWFHomeUserManagementView
+from twf.views.views_command import park_tag, unpark_tag, ungroup_tag, export_tags
+from twf.views.views_dictionaries import TWFDictionaryView, TWFDictionaryOverviewView, TWFDictionaryDictionaryView, \
+    delete_variation, TWFDictionaryDictionaryEditView, TWFDictionaryDictionaryEntryEditView, \
+    TWFDictionaryDictionaryEntryView, TWFDictionaryImportView, TWFDictionaryDictionaryExportView, \
+    TWFDictionaryBatchGeonamesView, TWFDictionaryNormDataView, TWFDictionaryCreateView, skip_entry
+from twf.views.views_metadata import TWFMetadataReviewDocumentsView, \
+    TWFMetadataLoadDataView, TWFMetadataExtractTagsView, TWFMetadataReviewPagesView, TWFMetadataOverviewView
+from twf.views.views_project import TWFSelectProjectView, select_project, TWFProjectView, TWFProjectDocumentsView, \
+    TWFProjectSettingsView, TWFProjectSetupView, TWFProjectDocumentView, TWFProjectQueryView, TWFProjectOverviewView, \
+    TWFProjectCollectionsView, TWFProjectCollectionsCreateView, TWFProjectCollectionsAddDocumentView, \
+    TWFProjectCollectionsDetailView, TWFProjectAIQueryView, cut_collection_item
+from twf.views.views_tags import TWFTagsView, TWFProjectTagsView, TWFProjectTagsOpenView, TWFProjectTagsParkedView, \
+    TWFProjectTagsResolvedView, TWFProjectTagsIgnoredView, TWFTagsDatesView, TWFTagsGroupView, TWFTagsOverviewView
 
 urlpatterns = [
-    # Project
-    path('project/<int:pk>/', ProjectOverView.as_view(), name='project_overview'),
-    path('project/<int:pk>/set_up/', ProjectSetupView.as_view(), name='project'),
-    path('project/<int:pk>/documents/', ProjectDocumentView.as_view(), name='documents'),
+    #############################
+    # FRAMEWORK
+    path('', TWFHomeView.as_view(),
+         name='home'),
+    path('login/', TWFHomeLoginView.as_view(),
+         name='login'),
+    path('logout/confirm/', TWFHomeView.as_view(page_title='Logout', template_name='twf/users/logout.html'),
+         name='user_logout'),
+    path('user/change/password/', TWFHomePasswordChangeView.as_view(),
+         name='user_change_password'),
+    path('user/overview/', TWFHomeUserOverView.as_view(),
+         name='user_overview'),
+    path('user/management/', TWFHomeUserManagementView.as_view(),
+         name='user_management'),
+    path('logout/', auth_views.LogoutView.as_view(next_page='twf:home'),
+         name='logout'),
 
-    path('project/<int:pk>/collections/', ProjectCollectionsView.as_view(), name='project_collections'),
-    path('project/<int:pk>/export/', ProjectExportView.as_view(), name='project_export'),
+    #############################
+    # PROJECT
+    path('project/select/<int:pk>/confirm/', TWFSelectProjectView.as_view(),
+         name='project_select'),
+    path('project/select/<int:pk>', select_project,
+         name='project_do_select'),
+    path('project/overview/', TWFProjectOverviewView.as_view(),
+         name='project_overview'),
+    path('project/setup/', TWFProjectSetupView.as_view(page_title='Project Setup'),
+         name='project_setup'),
+    path('project/setup/tk/export/', TWFProjectSetupView.as_view(template_name='twf/project/setup_export.html',
+                                                                 page_title='Project TK Export'),
+         name='project_tk_export'),
+    path('project/setup/tk/structure/', TWFProjectSetupView.as_view(template_name='twf/project/setup_structure.html',
+                                                                    page_title='Project TK Structure'),
+         name='project_tk_structure'),
+    path('project/setup/sheets/metadata/', TWFProjectSetupView.as_view(template_name='twf/project/setup_metadata.html',
+                                                                       page_title='Project Sheets Metadata'),
+         name='project_sheets_metadata'),
+    path('project/documents/', TWFProjectDocumentsView.as_view(),
+         name='project_documents'),
+    path('project/document/<int:pk>/', TWFProjectDocumentView.as_view(),
+         name='view_document'),
+    path('project/settings/', TWFProjectSettingsView.as_view(),
+         name='project_settings'),
+    path('project/export/', TWFProjectView.as_view(template_name='twf/project/export.html',
+                                                   page_title='Project Export'),
+         name='project_export'),
+    path('project/query/', TWFProjectQueryView.as_view(),
+         name='project_query'),
+    path('project/ai/query/', TWFProjectAIQueryView.as_view(),
+         name='project_ai_query'),
 
-    # Tags
-    path('project/<int:pk>/tags/group/', ProjectGroupTagsView.as_view(), name='project_group_tags'),
-    path('project/<int:pk>/tags/group/wizard/', ProjectGroupWizardView.as_view(), name='project_group_wizard'),
-    path('project/<int:pk>/tags/parked/', ProjectParkedTagsView.as_view(), name='project_parked_tags'),
-    path('project/<int:pk>/tags/special/', ProjectSpecialTagsView.as_view(), name='project_special_tags'),
-    path('project/<int:pk>/tags/group/<str:tag_type>/', ProjectGroupTagsView.as_view(), name='project_group_tags_type'),
+    path('project/batch/openai/', TWFProjectView.as_view(template_name='twf/project/batches/openai.html',
+                                                         page_title='Project Batch OpenAI'),
+         name='project_batch_openai'),
 
+    #############################
+    # COLLECTIONS
+    path('project/collections/', TWFProjectCollectionsView.as_view(),
+         name='project_collections'),
+    path('project/collections/create/', TWFProjectCollectionsCreateView.as_view(),
+         name='project_collections_create'),
+    path('project/collections/<int:pk>/', TWFProjectCollectionsDetailView.as_view(),
+         name='project_collections_view'),
+    path('project/collections/<int:pk>/add/document/', TWFProjectCollectionsAddDocumentView.as_view(),
+         name='project_collections_add_document'),
+    path('project/collections/item/<int:pk>/<int:anno_idx>/', cut_collection_item,
+         name='project_collections_item_split'),
 
-    path('tags/park/<int:pk>/', park_tag, name='park_tag'),
-    path('tags/unpark/<int:pk>/', unpark_tag, name='unpark_tag'),
-    path('tags/assign/<int:pk>/to/<int:entry_id>/', assign_tag, name='assign_tag_to_entry'),
-    path('tags/assign/<int:pk>/to/new/entry', assign_tag_to_new_entry, name='assign_tag_to_new_entry'),
-    path('tags/assign/<int:pk>/by/variation/<int:variation_id>/', assign_tag_by_variation,
-         name='assign_tag_by_variation'),
+    #############################
+    # TAGS
+    path('tags/overview/', TWFTagsOverviewView.as_view(),
+         name='tags_overview'),
+    path('tags/all/', TWFProjectTagsView.as_view(template_name='twf/tags/all_tags.html',
+                                                 page_title='All Tags'),
+         name='tags_all'),
+    path('tags/settings/', TWFTagsView.as_view(template_name='twf/tags/settings.html'),
+         name='tags_settings'),
+    path('tags/group/', TWFTagsGroupView.as_view(),
+         name='tags_group'),
+    path('tags/dates/', TWFTagsDatesView.as_view(),
+         name='tags_dates'),
+    path('tags/view/parked/', TWFProjectTagsParkedView.as_view(),
+         name='tags_view_parked'),
+    path('tags/view/open/', TWFProjectTagsOpenView.as_view(),
+         name='tags_view_open'),
+    path('tags/view/resolved/', TWFProjectTagsResolvedView.as_view(),
+         name='tags_view_resolved'),
+    path('tags/view/ignored/', TWFProjectTagsIgnoredView.as_view(),
+         name='tags_view_ignored'),
+    path('tags/park/<int:pk>/', park_tag,
+         name='tags_park'),
+    path('tags/unpark/<int:pk>/', unpark_tag,
+         name='tags_unpark'),
+    path('tags/ungroup/<int:pk>/', ungroup_tag,
+         name='tags_ungroup'),
+    path('tags/export/', export_tags,
+         name='tags_export'),
 
-    # Documents
-    path('project/<int:pk>/document/<int:doc_pk>/view/', DocumentView.as_view(), name='view_document'),
-    path('project/<int:pk>/document/<int:doc_pk>/delete/', delete_document, name='delete_document'),
+    #############################
+    # DICTIONARIES
+    path('dictionaries/', TWFDictionaryOverviewView.as_view(),
+         name='dictionaries'),
+    path('dictionaries/create/', TWFDictionaryCreateView.as_view(),
+         name='dictionary_create'),
+    path('dictionaries/<int:pk>/', TWFDictionaryDictionaryView.as_view(),
+         name='dictionaries_view'),
+    path('dictionaries/<int:pk>/edit/', TWFDictionaryDictionaryEditView.as_view(),
+         name='dictionaries_edit'),
+    path('dictionaries/<int:pk>/export/', TWFDictionaryDictionaryExportView.as_view(),
+         name='dictionaries_export'),
+    path('dictionaries/entry/<int:pk>/', TWFDictionaryDictionaryEntryView.as_view(),
+         name='dictionaries_entry_view'),
+    path('dictionaries/entry/<int:pk>/skip/', skip_entry,
+         name='dictionaries_entry_skip'),
+    path('dictionaries/entry/<int:pk>/edit/', TWFDictionaryDictionaryEntryEditView.as_view(),
+         name='dictionaries_entry_edit'),
+    path('dictionaries/import/', TWFDictionaryImportView.as_view(),
+         name='dictionaries_import'),
+    path('dictionaries/normalization/wizard/', TWFDictionaryNormDataView.as_view(),
+         name='dictionaries_normalization'),
+    path('dictionaries/variations/delete/<int:pk>/', delete_variation,
+         name='delete_variation'),
 
-    # Dictionaries
-    path('dictionaries/', DictionaryOverView.as_view(), name='dictionaries'),
-    path('dictionary/<int:pk>/', DictionaryView.as_view(), name='dictionary'),
-    path('dictionary/export/<int:pk>/', DictionaryExportView.as_view(), name='dictionary_export'),
-
-    path('dictionaries/entry/delete/<int:pk>/', delete_entry, name='delete_entry'),
-    path('dictionaries/entry/view/<int:pk>/', DictionaryEntryView.as_view(), name='view_entry'),
-
-    path('dictionaries/variation/delete/<int:pk>/', delete_variation, name='delete_variation'),
-
-
-    path('dictionaries/auth/manual/', DictionaryAuthViewManual.as_view(), name='auth_manual'),
-    path('dictionaries/auth/wikidata/', DictionaryAuthViewWikidata.as_view(), name='auth_wikidata'),
-    path('dictionaries/auth/geonames/', DictionaryAuthViewGeonames.as_view(), name='auth_geonames'),
-    path('dictionaries/auth/gnd/', DictionaryAuthViewGND.as_view(), name='auth_gnd'),
-
-    path('dictionaries/auth/select/<int:pk>/', DictionaryAuthViewWikidata.as_view(), name='auth_select'),
+    path('dictionaries/batch/gnd/', TWFDictionaryView.as_view(template_name='twf/dictionaries/batches/gnd.html',
+                                                              page_title='Batch GND'),
+         name='dictionaries_batch_gnd'),
+    path('dictionaries/batch/geonames/', TWFDictionaryBatchGeonamesView.as_view(),
+         name='dictionaries_batch_geonames'),
+    path('dictionaries/batch/wikidata/',
+         TWFDictionaryView.as_view(template_name='twf/dictionaries/batches/wikidata.html',
+                                   page_title='Batch Wikidata'),
+         name='dictionaries_batch_wikidata'),
+    path('dictionaries/batch/openai/', TWFDictionaryView.as_view(template_name='twf/dictionaries/batches/openai.html',
+                                                                 page_title='Batch Manual'),
+         name='dictionaries_batch_openai'),
 
 
     #############################
     # AJAX CALLS
     path('ajax/transkribus/export/request/', ajax_transkribus_request_export, name='ajax_transkribus_request_export'),
+    path('ajax/transkribus/export/reset/', ajax_transkribus_reset_export, name='ajax_transkribus_reset_export'),
     path('ajax/transkribus/export/status/', ajax_transkribus_request_export_status,
          name='ajax_transkribus_request_export__status'),
-    path('ajax/transkribus/export/start/download/<int:project_id>/', ajax_transkribus_download_export,
+    path('ajax/transkribus/export/start/download/', ajax_transkribus_download_export,
          name='ajax_transkribus_download_export'),
     path('ajax/transkribus/export/monitor/download/', download_progress_view, name='download_progress'),
-    path('ajax/transkribus/extract/<int:project_id>/', start_extraction, name='extract_and_process_zip'),
-    path('ajax/transkribus/extract/tags/<int:project_id>/', start_tag_extraction, name='start_tag_extraction'),
-    path('ajax/transkribus/extract/metadata/<int:project_id>/', start_metadata_extraction,
+    path('ajax/transkribus/extract/', start_extraction, name='extract_and_process_zip'),
+    path('ajax/transkribus/extract/metadata/', start_metadata_extraction,
          name='start_metadata_extraction'),
-    path('ajax/transkribus/extract/monitor/<int:project_id>/', stream_extraction_progress,
+    path('ajax/transkribus/extract/monitor/', stream_extraction_progress,
          name='stream_extraction_progress'),
-    path('ajax/transkribus/extract/monitor/<int:project_id>/details/', stream_extraction_progress_detail,
+    path('ajax/transkribus/extract/monitor/details/', stream_extraction_progress_detail,
          name='stream_extraction_progress_detail'),
-    path('ajax/transkribus/extract/tags/monitor/<int:project_id>/', stream_tag_extraction_progress,
-         name='stream_tag_extraction_progress'),
-    path('ajax/transkribus/extract/tags/monitor/<int:project_id>/details/', stream_tag_extraction_progress_detail,
-         name='stream_tag_extraction_progress_detail'),
-    path('ajax/transkribus/extract/metadata/monitor/<int:project_id>/', stream_metadata_extraction_progress,
+    path('ajax/transkribus/extract/metadata/monitor/', stream_metadata_extraction_progress,
          name='stream_metadata_extraction_progress'),
 
     #############################
-    # FRAMEWORK
-    path('', TemplateView.as_view(template_name='twf/home.html'), name='home'),
-    path('login/', auth_views.LoginView.as_view(template_name='twf/login.html',
-                                                authentication_form=LoginForm), name='login'),
-    path('logout/', auth_views.LogoutView.as_view(next_page='twf:home'), name='logout'),
+    # METADATA
+    path('metadata/overview/', TWFMetadataOverviewView.as_view(), name='metadata_overview'),
+
+    path('metadata/load/metadata/', TWFMetadataLoadDataView.as_view(), name='metadata_load_metadata'),
+    path('metadata/extract/tags/', TWFMetadataExtractTagsView.as_view(), name='metadata_extract'),
+
+    path('metadata/review/documents/', TWFMetadataReviewDocumentsView.as_view(), name='metadata_review_documents'),
+    path('metadata/review/pages/', TWFMetadataReviewPagesView.as_view(), name='metadata_review_pages'),
+
+    path('validate_page_field/', validate_page_field, name='validate_page_field'),
+    path('validate_page_field/', validate_document_field, name='validate_document_field'),
 ]

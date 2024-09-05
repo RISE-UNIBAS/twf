@@ -3,9 +3,8 @@ from django.shortcuts import render
 from django.views import View
 from lxml import etree
 
-from twf.forms import GeonamesSearchForm, WikidataSearchForm, GNDSearchForm
+from twf.forms.forms import WikidataSearchForm, GeonamesSearchForm, GNDSearchForm
 from twf.models import Dictionary
-from twf.views.views_base import BaseView
 
 
 class DictionaryAuthView(BaseView, View):
@@ -13,6 +12,7 @@ class DictionaryAuthView(BaseView, View):
     template_name = 'twf/dictionaries.html'
 
     def get_context_data(self, **kwargs):
+        """Get the context data for the view."""
         context = {'dictionaries': self.get_dictionaries()}
 
         dict_types = Dictionary.objects.values_list('type', flat=True).order_by('type').distinct()
@@ -37,11 +37,13 @@ class DictionaryAuthViewManual(DictionaryAuthView):
     template_name = 'twf/dict_auth_manual.html'
 
     def get(self, request, *args, **kwargs):
+        """Get the view."""
         context = self.get_context_data()
 
         return render(request, self.template_name, context)
 
     def post(self, request, *args, **kwargs):
+        """Executed when POSTing the view."""
         context = self.get_context_data()
 
         return render(request, self.template_name, context)
@@ -52,11 +54,13 @@ class DictionaryAuthViewWikidata(DictionaryAuthView):
     template_name = 'twf/dict_auth_wikidata.html'
 
     def get_context_data(self, **kwargs):
+        """Get the context data for the view."""
         context = super().get_context_data(**kwargs)
         context['form'] = WikidataSearchForm()
         return context
 
     def request_data(self):
+        """Request data from Wikidata."""
         entry = self.get_context_data()['next_unauthorized_entry']
         if entry:
             entry_label = entry.label
@@ -79,6 +83,7 @@ class DictionaryAuthViewWikidata(DictionaryAuthView):
                 return data['results']['bindings']
 
     def get(self, request, *args, **kwargs):
+        """Get the view."""
         context = self.get_context_data()
         context['results'] = self.request_data()
         return render(request, self.template_name, context)
@@ -89,11 +94,13 @@ class DictionaryAuthViewGeonames(DictionaryAuthView):
     template_name = 'twf/dict_auth_geonames.html'
 
     def get_context_data(self, **kwargs):
+        """Get the context data for the view."""
         context = super().get_context_data(**kwargs)
         context['form'] = GeonamesSearchForm()
         return context
 
     def request_data(self):
+        """Request data from Geonames."""
         entry = self.get_context_data()['next_unauthorized_entry']
         if entry:
             entry_label = entry.label
@@ -109,11 +116,13 @@ class DictionaryAuthViewGeonames(DictionaryAuthView):
             return data['geonames']
 
     def get(self, request, *args, **kwargs):
+        """Get the view."""
         context = self.get_context_data()
         context['results'] = self.request_data()
         return render(request, self.template_name, context)
 
     def post(self, request, *args, **kwargs):
+        """Executed when POSTing the view."""
         context = self.get_context_data()
         # print("POST", request.POST)
         # print("CONTEXT", context)
@@ -131,11 +140,13 @@ class DictionaryAuthViewGND(DictionaryAuthView):
     template_name = 'twf/dict_auth_gnd.html'
 
     def get_context_data(self, **kwargs):
+        """Get the context data for the view."""
         context = super().get_context_data(**kwargs)
         context['form'] = GNDSearchForm()
         return context
 
     def request_data(self):
+        """Request data from GND."""
         entry = self.get_context_data()['next_unauthorized_entry']
         if entry:
             endpoint = 'https://services.dnb.de/sru/authorities'
@@ -179,6 +190,7 @@ class DictionaryAuthViewGND(DictionaryAuthView):
             return results
 
     def get(self, request, *args, **kwargs):
+        """Get the view."""
         context = self.get_context_data()
         context['results'] = self.request_data()
         return render(request, self.template_name, context)

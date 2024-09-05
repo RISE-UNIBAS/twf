@@ -1,0 +1,36 @@
+{% extends 'twf/base/base.html' %}
+{% load crispy_forms_tags %}
+
+
+{% block content %}
+    <div class="border rounded bg-light mt-0 p-3">
+        <h1 class="display-6">
+            Edit {{ entry.label }}
+            <a href="{% url 'twf:dictionaries_entry_view' entry.id %}" class="mt-2 btn btn-outline-dark float-end">Go Back</a>
+        </h1>
+        
+        <div class="container">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th scope="col">Variation</th>
+                        <th scope="col">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for variation in entry.variations.all %}
+                        <tr>
+                            <td>{{ variation }}</td>
+                            <td>
+                                <a href="" class="btn btn-outline-danger">Delete</a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    
+        {% crispy form %}
+    </div>
+    
+{% endblock %}

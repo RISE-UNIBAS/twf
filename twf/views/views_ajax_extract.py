@@ -10,7 +10,7 @@ from django.http import JsonResponse, StreamingHttpResponse
 from django.utils import timezone
 from simple_alto_parser import PageFileParser
 
-from twf.models import Project, Document, Page
+from twf.models import Project, Document, Page, PageTag
 from twf.page_file_meta_data_reader import extract_transkribus_file_metadata
 from twf.utils.file_utils import delete_all_in_folder
 from twf.views.views_ajax_base import set_progress, set_details, calculate_and_set_progress, add_details, \
@@ -20,12 +20,22 @@ PROGRESS_JOB_NAME = "extract-progress"
 DETAIL_JOB_NAME = "extract-progress-detail"
 
 
-async def start_extraction(request, project_id):
+async def start_extraction(request):
     """This function starts the extraction process."""
+    get_project_id_async = sync_to_async(get_project_id, thread_sensitive=True)
+    project_id = await get_project_id_async(request)
+
     set_progress(0, project_id, PROGRESS_JOB_NAME)
     extract_zip_export_async = sync_to_async(extract_zip_export, thread_sensitive=True)
     await extract_zip_export_async(project_id, request.user)
+    create_page_tags_async = sync_to_async(create_page_tags, thread_sensitive=True)
+    await create_page_tags_async(project_id, request.user)
     return JsonResponse({'status': 'success'}, status=200)
+
+
+def get_project_id(request):
+    project_id = request.session.get('project_id')
+    return project_id
 
 
 def extract_zip_export(project_id, extracting_user):
@@ -79,6 +89,8 @@ def extract_zip_export(project_id, extracting_user):
 
         #############################
         # Process the extracted files
+        # Document and Page instances are only created if they do not exist yet
+        all_existing_documents = list(Document.objects.filter(project=project).values_list('document_id', flat=True))
         created_documents = 0
         add_details(f"Processing {len(copied_files)} files.", project_id, DETAIL_JOB_NAME)
         for file in copied_files:
@@ -98,6 +110,10 @@ def extract_zip_export(project_id, extracting_user):
                 if created:
                     created_documents += 1
 
+                # remove document from existing documents list
+                if doc_instance.document_id in all_existing_documents:
+                    all_existing_documents.remove(doc_instance.document_id)
+
                 # # 2.) Create a page instance
                 page_instance, created = Page.objects.get_or_create(document=doc_instance,
                                                                     tk_page_id=data['pageId'],
@@ -115,7 +131,19 @@ def extract_zip_export(project_id, extracting_user):
             else:
                 print("ERROR")  # TODO: Handle error
 
-        parser_config = {'line_type': 'TextRegion', 'logging': {'level': logging.WARN}}
+        # Delete all documents that were not in the export
+        for doc_id in all_existing_documents:
+            Document.objects.filter(project=project, document_id=doc_id).delete()
+
+        #############################
+        # PARSE THE PAGES
+        parser_config = {'line_type': 'TextRegion',
+                         'logging': {'level': logging.WARN},
+                         'export': {'json': {
+                             'print_files': True,
+                             'print_filename': True,
+                             'print_file_meta_data': True,
+                         }}}
 
         all_pages = Page.objects.filter(document__project=project).order_by('document__document_id', 'tk_page_number')
         add_details(f"Parsing {all_pages.count()} pages.", project_id, DETAIL_JOB_NAME)
@@ -129,6 +157,7 @@ def extract_zip_export(project_id, extracting_user):
             page.last_parsed_at = parse_time
             page.save(current_user=extracting_user)
 
+            # Update Processing state
             processed_steps += 1
             set_progress(processed_steps, total_steps, project_id)
             add_details(f"Parsed page {page.tk_page_id} (p. {page.tk_page_number})", project_id, DETAIL_JOB_NAME)
@@ -140,16 +169,73 @@ def extract_zip_export(project_id, extracting_user):
         set_details("Project not found", project_id, DETAIL_JOB_NAME)
 
 
-def stream_extraction_progress(request, project_id):
+def create_page_tags(project_id, extracting_user):
+    """This function extracts tags from the parsed data of the pages."""
+
+    try:
+        # Get the projects to save the documents to
+        project = Project.objects.get(pk=project_id)
+        pages = Page.objects.filter(document__project=project).order_by('document__document_id', 'tk_page_number')
+
+        total_pages = len(pages)
+        processed_pages = 0
+        assigned_tags = 0
+        total_tags = 0
+
+        for page in pages:
+            PageTag.objects.filter(page=page).delete()
+            parsed_data = page.parsed_data
+
+            # Extract tags from parsed data and save them
+            num_tags = 0
+            for element in parsed_data["elements"]:
+                num_tags += len(element["element_data"]["custom_list_structure"])
+                for tag in element["element_data"]["custom_list_structure"]:
+                    if not "text" in tag:
+                        print("NO TEXT?", tag)  # TODO
+                    else:
+                        text = tag["text"].strip()
+                        del tag["text"]
+                        tag = PageTag(page=page, variation=text, variation_type=tag["type"],
+                                      additional_information=tag)
+                        is_assigned = tag.assign_tag(extracting_user)
+                        if is_assigned:
+                            assigned_tags += 1
+                        total_tags += 1
+                        tag.save(current_user=extracting_user)
+
+            page.num_tags = num_tags
+
+            page.parsed_data = parsed_data
+            page.last_parsed_at = timezone.now()
+            if "page_relevance" in parsed_data["file"] and parsed_data["file"]["page_relevance"] == "no":
+                page.is_ignored = True
+            page.save()
+
+            processed_pages += 1
+            calculate_and_set_progress(processed_pages, total_pages, project_id, PROGRESS_JOB_NAME)
+            add_details(f"Extracted Tags for page {page.tk_page_id}.", project_id, DETAIL_JOB_NAME)
+
+        set_progress(100, project_id, PROGRESS_JOB_NAME)
+        set_details("FINISHED", project_id, DETAIL_JOB_NAME)
+
+    except Project.DoesNotExist:
+        set_progress(100, project_id, PROGRESS_JOB_NAME)
+        set_details("Project not found", project_id, DETAIL_JOB_NAME)
+
+
+def stream_extraction_progress(request):
     """This function streams the progress of the extraction process to the client."""
+    project_id = request.session.get('project_id')
     set_progress(0, project_id, PROGRESS_JOB_NAME)
 
     return StreamingHttpResponse(base_event_stream(project_id, PROGRESS_JOB_NAME),
                                  content_type='text/event-stream')
 
 
-def stream_extraction_progress_detail(request, project_id):
+def stream_extraction_progress_detail(request):
     """This function streams the details of the extraction process to the client."""
+    project_id = request.session.get('project_id')
     add_details("Processing files", project_id, DETAIL_JOB_NAME)
 
     return StreamingHttpResponse(base_detail_event_stream(project_id, DETAIL_JOB_NAME),

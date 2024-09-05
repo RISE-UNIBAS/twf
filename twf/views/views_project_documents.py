@@ -4,31 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect
 from django.views.generic import TemplateView
-from django_filters.views import FilterView
-from django_tables2 import SingleTableMixin
-
-from twf.filters import DocumentFilter
 from twf.models import Document
-from twf.tables import DocumentTable
-from twf.views.views_base import BaseProjectListView, BaseProjectView
-
-
-class ProjectDocumentView(SingleTableMixin, FilterView, BaseProjectListView):
-    """View for the project documents."""
-    template_name = 'twf/documents.html'
-    table_class = DocumentTable
-    model = Document
-    filterset_class = DocumentFilter
-    paginate_by = 10
-
-    def get_queryset(self):
-        # TODO: Filter by project
-        return Document.objects.all()
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        print(context.keys())
-        return context
 
 
 class DocumentView(BaseProjectView, TemplateView):

@@ -1,3 +1,4 @@
+""""""
 from asgiref.sync import sync_to_async
 from django.http import JsonResponse, StreamingHttpResponse
 
@@ -9,8 +10,9 @@ PROGRESS_JOB_NAME = "extract-meta-progress"
 DETAIL_JOB_NAME = "extract-meta-progress-detail"
 
 
-async def start_metadata_extraction(request, project_id):
+async def start_metadata_extraction(request):
     """This function starts the metadata extraction process."""
+    project_id = request.session.get('project_id')
     set_progress(0, project_id, PROGRESS_JOB_NAME)
     create_doc_metadata_async = sync_to_async(create_doc_metadata, thread_sensitive=True)
     await create_doc_metadata_async(project_id, request.user)
@@ -55,7 +57,8 @@ def create_doc_metadata(project_id, extracting_user):
         return JsonResponse({'status': 'error', 'message': 'Project not found.'}, status=404)
 
 
-def stream_metadata_extraction_progress(request, project_id):
+def stream_metadata_extraction_progress(request):
+    project_id = request.session.get('project_id')
     set_progress(0, project_id, PROGRESS_JOB_NAME)
 
     return StreamingHttpResponse(base_event_stream(project_id, PROGRESS_JOB_NAME),

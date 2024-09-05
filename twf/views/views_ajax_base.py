@@ -5,7 +5,8 @@ from django.core.cache import cache
 
 def add_details(text, project_id, job_name, separator='---'):
     """This function saves the details of a process to the cache."""
-    current_details = cache.get(f'{project_id}_extract-tags-progress-detail', '')
+    current_details = cache.get(f'{project_id}_{job_name}', '')
+    print(text)
     cache.set(f'{project_id}_{job_name}', current_details + text + separator)
 
 
@@ -46,5 +47,5 @@ def base_detail_event_stream(project_id, job_name, sleep_time=1):
         if details == "FINISHED":
             yield 'event: complete\ndata: Process completed.\n\n'
             break
-        set_details('', project_id, job_name)    # Clear after sending
+        # set_details('', project_id, job_name)    # Clear after sending
         time.sleep(sleep_time)

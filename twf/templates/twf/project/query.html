@@ -1,0 +1,116 @@
+{% extends 'twf/base/base.html' %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+     <div class="border rounded bg-light mt-0 p-3">
+        <h1 class="display-6">Query the Data</h1>
+        <p class="lead">Query the database using SQL queries.</p>
+        {% crispy form %}
+        
+        <div class="row">
+            {% if results %}
+                <div class="col-12">
+                    <h5>Results</h5>
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    {% for column in results.0.keys %}
+                                        <th>{{ column }}</th>
+                                    {% endfor %}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for row in results %}
+                                    <tr>
+                                        {% for col, val in row.items %}
+                                            <td>{{ val }}</td>
+                                        {% endfor %}
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            {% endif %}
+            <div class="col-6">
+                <div class="border rounded bg-white my-3 p-3">
+                    <h5>Database Structure</h5>
+                    <p>This is the database's structure.</p>
+                    <table class="table table-striped">
+                        <tr>
+                            <th>Table</th>
+                            <th>Fields</th>
+                        </tr>
+                        <tr>
+                            <td>twf_project</td>
+                            <td>id (int), title (str)</td>
+                        </tr>
+                        <tr>
+                            <td>twf_document</td>
+                            <td>id (int), project_id (int), metadata (json)</td>
+                        </tr>
+                        <tr>
+                            <td>twf_page</td>
+                            <td>id (int), document_id (int), metadata (json), is_ignored (bool)</td>
+                        </tr>
+                        <tr>
+                            <td>twf_dictionary</td>
+                            <td>id (int), label (str), type (str)</td>
+                        </tr>
+                        <tr>
+                            <td>twf_dictionaryentry</td>
+                            <td>id (int), dictionary_id (int), label (str), authorization_data (json)</td>
+                        </tr>
+                        <tr>
+                            <td>twf_variation</td>
+                            <td>id (int), entry_id (int), variation (str)</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+            <div class="col-6">
+                <div class="border rounded bg-white my-3 p-3">
+                    <h5>Use AI systems</h5>
+                    <p>Enter your question to the data and paste the database explanation below to your AI chat system.</p>
+                    <p class="small bg-light">
+                        This question is to be answered by querying a database.
+                        This is the database's setup: It is a PostgreSQL database. It is setup by the django model migration system.
+                        The following tables are available: twf_project, twf_document, twf_page, twf_pagetag, twf_dictionary, twf_dictionaryentry, twf_variation,
+                        twf_collection, twf_collectionitem, twf_datevariation, twf_project_members, twf_project_selected_dictionaries. 
+                        
+                        All the tables a field id (int) as primary key. 
+                        The tables marked below as "timeStamped" have the fields created_at (datetime) and modified_at (datetime).
+                        
+                        The database structure describes projects containing documents containing pages. 
+                        Pages have Pagetags. Pagetags are assigned to dictionary entries which are part of a dictionary with a type.
+                        
+                        The table's setup is as follows:
+                        twf_project: id (int), title (str)
+                        twf_document: id (int), project_id (int), document_id (int), metadata (json)
+                        twf_page: id (int), document_id (int), metadata (json), is_ignored (bool), parsed_data (json),  + timeStamped
+                        twf_dictionary: id (int), label (str), type (str) + timeStamped
+                        twf_dictionaryentry: id (int), dictionary_id (int), label (str), authorization_data (json) + timeStamped
+                        twf_variation: id (int), entry_id (int), variation (str)
+                        twf_collection: id (int), project_id (int), title (str), description (str) + timeStamped
+                        twf_collectionitem: id (int), collection_id (int), document_id (int), document_configuration (json) + timeStamped
+                        twf_datevariation: id (int), variation (str), normalized_variation (json), edtf_of_normalized_variation (str) + timeStamped
+                        
+                        The 'parsed_data' field in the twf_page table contains the extracted text from the page. It contains the following fields:
+                        - 'file': A json object with metadata about the original PAGE.xml file
+                        - 'elements': A list of elements extracted from the PAGE.xml file. Each element is a json object with the following fields:
+                            - 'text': The element's text
+                            - 'element_data': A json object with metadata about the element:
+                                - 'id': The element's id
+                                - 'coords': The element's coordinates on the page
+                                - 'iiif_url': The URL to the IIIF image of the page
+                                - 'custom_list_structure': A list of tags that were marked in the element 
+                        
+                        Create a valid SQL SELECT query to answer the question above. Always create a query which limits the results to the project
+                        with the id {{ project.id }}.
+                    </p>
+                </div>
+            </div>
+        </div>
+     </div>
+{% endblock %}

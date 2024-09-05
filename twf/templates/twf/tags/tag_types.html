@@ -1,0 +1,7 @@
+{% for tag_type in tag_types %}
+    {% if selected_type == tag_type %}
+        <span class="badge bg-light"><a href="?tag_type={{ tag_type }}" class="text-dark">{{ tag_type }}</a></span>
+    {% else %}
+        <span class="badge bg-dark"><a href="?tag_type={{ tag_type }}" class="text-light">{{ tag_type }}</a></span>
+    {% endif %}
+{% endfor %}
