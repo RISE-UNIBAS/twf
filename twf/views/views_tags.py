@@ -310,8 +310,10 @@ class TWFProjectTagsView(SingleTableMixin, FilterView, TWFTagsView):
     table_class = TagTable
     paginate_by = 20
     model = PageTag
+    filterset = None
 
     def post(self, request, *args, **kwargs):
+        """Handle the post request."""
         if "export_tags" in request.POST:
 
             result = []
@@ -348,12 +350,14 @@ class TWFProjectTagsView(SingleTableMixin, FilterView, TWFTagsView):
         return redirect('twf:tags_all')
 
     def get_filterset(self, filterset_class):
+        """Get the filterset."""
         project = self.get_project()
         excluded = self.get_excluded_types()
         return filterset_class(self.request.GET, queryset=self.get_queryset(),
                                project=project, excluded=excluded)
 
     def get_queryset(self):
+        """Get the queryset."""
         project = self.get_project()
         excluded_types = self.get_excluded_types()
 
@@ -368,11 +372,13 @@ class TWFProjectTagsView(SingleTableMixin, FilterView, TWFTagsView):
         return self.filterset.qs
 
     def get(self, request, *args, **kwargs):
+        """Handle the get request."""
         self.object_list = self.get_queryset()
         context = self.get_context_data()
         return self.render_to_response(context)
 
     def get_context_data(self, **kwargs):
+        """Get the context data."""
         context = super().get_context_data(**kwargs)
         context['page_title'] = self.page_title
         context['filter'] = self.get_filterset(self.filterset_class)
@@ -380,8 +386,10 @@ class TWFProjectTagsView(SingleTableMixin, FilterView, TWFTagsView):
 
 
 class TWFProjectTagsOpenView(TWFProjectTagsView):
+    """View for the open tags."""
     template_name = 'twf/tags/open.html'
     page_title = 'Open Tags'
+    filterset = None
 
     def get_queryset(self):
         project = self.get_project()
@@ -396,8 +404,10 @@ class TWFProjectTagsOpenView(TWFProjectTagsView):
 
 
 class TWFProjectTagsParkedView(TWFProjectTagsView):
+    """View for the parked tags."""
     template_name = 'twf/tags/parked.html'
     page_title = 'Parked Tags'
+    filterset = None
 
     def get_queryset(self):
         project = self.get_project()
@@ -412,8 +422,10 @@ class TWFProjectTagsParkedView(TWFProjectTagsView):
 
 
 class TWFProjectTagsResolvedView(TWFProjectTagsView):
+    """View for the resolved tags."""
     template_name = 'twf/tags/resolved.html'
     page_title = 'Resolved Tags'
+    filterset = None
 
     def get_queryset(self):
         project = self.get_project()
@@ -433,10 +445,13 @@ class TWFProjectTagsResolvedView(TWFProjectTagsView):
 
 
 class TWFProjectTagsIgnoredView(TWFProjectTagsView):
+    """View for the ignored tags."""
     template_name = 'twf/tags/ignored.html'
     page_title = 'Ignored Tags'
+    filterset = None
 
     def get_queryset(self):
+        """Get the queryset."""
         project = self.get_project()
         excluded = self.get_excluded_types()
         queryset = self.model.objects.filter(page__document__project=project,
@@ -448,9 +463,11 @@ class TWFProjectTagsIgnoredView(TWFProjectTagsView):
 
 
 class TWFTagsDatesView(TWFProjectTagsView):
+    """View for the date tags."""
     template_name = 'twf/tags/dates.html'
     page_title = 'Date Tags'
     table_class = TagDateTable
+    filterset = None
 
     def get_queryset(self):
         project = self.get_project()

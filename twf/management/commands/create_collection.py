@@ -1,3 +1,4 @@
+"""Management command to create a collection of songs from a project."""
 from django.contrib.auth.models import User
 from django.core.management import BaseCommand
 

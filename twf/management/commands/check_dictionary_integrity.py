@@ -1,7 +1,6 @@
+"""Management command to check the integrity of a dictionary."""
 from collections import Counter
-
 from django.core.management import BaseCommand
-
 from twf.models import Project, Variation
 
 

@@ -1,3 +1,4 @@
+"""Management command to import PAGE metadata from a JSON file."""
 import json
 
 from django.contrib.auth.models import User

@@ -1,3 +1,4 @@
+"""Simple AI API client for OpenAI, GenAI, and Anthropic."""
 import base64
 import json
 import time

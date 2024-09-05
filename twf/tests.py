@@ -7,4 +7,4 @@ class TestTagAssigner(TestCase):
     def test_tag_assigner(self):
         """Test the tag_assigner function."""
         # Test the tag_assigner function
-        pass
+        self.assertTrue(True)

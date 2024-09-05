@@ -1,3 +1,4 @@
+"""Dynamic form generation based on JSON configuration."""
 from datetime import datetime
 
 from crispy_forms.helper import FormHelper
