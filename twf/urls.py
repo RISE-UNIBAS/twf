@@ -10,7 +10,7 @@ from twf.views.views_ajax_metadata import start_metadata_extraction, stream_meta
 from twf.views.views_ajax_validation import validate_page_field, validate_document_field
 from twf.views.views_base import TWFHomeView, TWFHomeLoginView, TWFHomePasswordChangeView, TWFHomeUserOverView, \
     TWFHomeUserManagementView
-from twf.views.views_command import park_tag, unpark_tag, ungroup_tag, export_tags
+from twf.views.views_command import park_tag, unpark_tag, ungroup_tag
 from twf.views.views_dictionaries import TWFDictionaryView, TWFDictionaryOverviewView, TWFDictionaryDictionaryView, \
     delete_variation, TWFDictionaryDictionaryEditView, TWFDictionaryDictionaryEntryEditView, \
     TWFDictionaryDictionaryEntryView, TWFDictionaryImportView, TWFDictionaryDictionaryExportView, \
@@ -20,7 +20,8 @@ from twf.views.views_metadata import TWFMetadataReviewDocumentsView, \
 from twf.views.views_project import TWFSelectProjectView, select_project, TWFProjectView, TWFProjectDocumentsView, \
     TWFProjectSettingsView, TWFProjectSetupView, TWFProjectDocumentView, TWFProjectQueryView, TWFProjectOverviewView, \
     TWFProjectCollectionsView, TWFProjectCollectionsCreateView, TWFProjectCollectionsAddDocumentView, \
-    TWFProjectCollectionsDetailView, TWFProjectAIQueryView, cut_collection_item
+    TWFProjectCollectionsDetailView, cut_collection_item, TWFProjectDocumentCreateView, TWFProjectDocumentNameView
+from twf.views.views_project_ai import TWFProjectAIBatchView, TWFProjectAIQueryView
 from twf.views.views_tags import TWFTagsView, TWFProjectTagsView, TWFProjectTagsOpenView, TWFProjectTagsParkedView, \
     TWFProjectTagsResolvedView, TWFProjectTagsIgnoredView, TWFTagsDatesView, TWFTagsGroupView, TWFTagsOverviewView
 
@@ -61,10 +62,6 @@ urlpatterns = [
     path('project/setup/sheets/metadata/', TWFProjectSetupView.as_view(template_name='twf/project/setup_metadata.html',
                                                                        page_title='Project Sheets Metadata'),
          name='project_sheets_metadata'),
-    path('project/documents/', TWFProjectDocumentsView.as_view(),
-         name='project_documents'),
-    path('project/document/<int:pk>/', TWFProjectDocumentView.as_view(),
-         name='view_document'),
     path('project/settings/', TWFProjectSettingsView.as_view(),
          name='project_settings'),
     path('project/export/', TWFProjectView.as_view(template_name='twf/project/export.html',
@@ -75,9 +72,19 @@ urlpatterns = [
     path('project/ai/query/', TWFProjectAIQueryView.as_view(),
          name='project_ai_query'),
 
-    path('project/batch/openai/', TWFProjectView.as_view(template_name='twf/project/batches/openai.html',
-                                                         page_title='Project Batch OpenAI'),
+    path('project/batch/openai/', TWFProjectAIBatchView.as_view(template_name='twf/project/batches/openai.html'),
          name='project_batch_openai'),
+
+    #############################
+    # DOCUMENTS
+    path('project/documents/', TWFProjectDocumentsView.as_view(),
+         name='project_documents'),
+    path('project/documents/create/', TWFProjectDocumentCreateView.as_view(),
+         name='create_document'),
+    path('project/documents/name/', TWFProjectDocumentNameView.as_view(),
+         name='name_documents'),
+    path('project/document/<int:pk>/', TWFProjectDocumentView.as_view(),
+         name='view_document'),
 
     #############################
     # COLLECTIONS
@@ -119,8 +126,6 @@ urlpatterns = [
          name='tags_unpark'),
     path('tags/ungroup/<int:pk>/', ungroup_tag,
          name='tags_ungroup'),
-    path('tags/export/', export_tags,
-         name='tags_export'),
 
     #############################
     # DICTIONARIES

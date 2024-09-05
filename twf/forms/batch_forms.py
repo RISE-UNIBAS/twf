@@ -7,6 +7,8 @@ from twf.models import Dictionary
 
 
 class GeonamesBatchForm(forms.Form):
+    """Form for batch processing Geonames data."""
+
     dictionary = forms.ChoiceField(label='Dictionary', required=True)
 
     def __init__(self, *args, **kwargs):
@@ -27,4 +29,5 @@ class GeonamesBatchForm(forms.Form):
         )
 
     def get_dictionaries(self):
+        """Return all dictionaries."""
         return Dictionary.objects.all()

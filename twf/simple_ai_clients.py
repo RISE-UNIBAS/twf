@@ -8,6 +8,7 @@ from openai import OpenAI
 
 
 class AiApiClient:
+    """Simple AI API client for OpenAI, GenAI, and Anthropic."""
 
     SUPPORTED_APIS = ['openai',
                       'genai',
@@ -48,21 +49,26 @@ class AiApiClient:
 
     @property
     def elapsed_time(self):
+        """Return the elapsed time since the client was initialized."""
         if self.end_time is None:
             return time.time() - self.init_time
         return self.end_time - self.init_time
 
     def end_client(self):
+        """End the client session."""
         self.api_client = None
         self.end_time = time.time()
 
     def add_image_resource(self, path):
+        """Add an image resource to the client"""
         self.image_resources.append(path)
 
     def clear_image_resources(self):
+        """Clear the image resources"""
         self.image_resources = []
 
     def prompt(self, model, prompt):
+        """Prompt the AI model with a given prompt."""
         prompt_start = time.time()
         answer = None
 

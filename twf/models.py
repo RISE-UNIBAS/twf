@@ -434,14 +434,16 @@ class PageTag(TimeStampedModel):
             if self.page.document.project.tag_type_translator.get(dictionary_type):
                 dictionary_type = self.page.document.project.tag_type_translator[dictionary_type]
             try:
-                entry = Variation.objects.get(variation=self.variation,
-                                              entry__dictionary__in=self.page.document.project.selected_dictionaries.all(),
-                                              entry__dictionary__type=dictionary_type)
+                entry = Variation.objects.get(
+                    variation=self.variation,
+                    entry__dictionary__in=self.page.document.project.selected_dictionaries.all(),
+                    entry__dictionary__type=dictionary_type)
             except Variation.MultipleObjectsReturned:
                 # TODO: Handle multiple objects returned
-                entry = Variation.objects.filter(variation=self.variation,
-                                                 entry__dictionary__in=self.page.document.project.selected_dictionaries.all(),
-                                                 entry__dictionary__type=dictionary_type).first()
+                entry = Variation.objects.filter(
+                    variation=self.variation,
+                    entry__dictionary__in=self.page.document.project.selected_dictionaries.all(),
+                    entry__dictionary__type=dictionary_type).first()
 
             self.dictionary_entry = entry.entry
             self.save(current_user=user)

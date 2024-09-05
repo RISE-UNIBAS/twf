@@ -14,6 +14,7 @@ class Command(BaseCommand):
         parser.add_argument('project_id', type=int, help='The project id to create the collection from')
 
     def handle(self, *args, **options):
+        """Handle the command"""
         print("Trying to create a song collection...")
         project = Project.objects.get(pk=options['project_id'])
 

@@ -6,7 +6,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import Group
 from django.db import connection
 from django.db.models import Count, Avg, Q
-from django.shortcuts import redirect, render
+from django.shortcuts import redirect
 from django.urls import reverse, reverse_lazy
 from django.utils.safestring import mark_safe
 from django.views.generic import FormView
@@ -15,10 +15,8 @@ from django_tables2 import SingleTableView
 
 from twf.filters import DocumentFilter
 from twf.forms.dynamic_forms import DynamicForm
-from twf.forms.project_forms import ProjectForm, QueryDatabaseForm, CollectionForm, CollectionAddDocumentForm, \
-    AIQueryDatabaseForm
+from twf.forms.project_forms import ProjectForm, QueryDatabaseForm, CollectionForm, CollectionAddDocumentForm
 from twf.models import Project, Document, TWF_GROUPS, Page, PageTag, Collection, CollectionItem
-from twf.simple_ai_clients import AiApiClient
 from twf.tables.tables import DocumentTable
 from twf.views.views_base import TWFHomeView, TWFView
 
@@ -106,7 +104,18 @@ class TWFProjectDocumentsView(SingleTableView, FilterView, TWFProjectView):
         context = super().get_context_data(**kwargs)
         context['page_title'] = self.page_title
         context['filter'] = self.get_filterset(self.filterset_class)
+        context['context_sub_nav'] = self.get_sub_pages()
         return context
+
+    @staticmethod
+    def get_sub_pages():
+        return {"options": [
+            {"url": reverse('twf:project_documents'), "value": "Overview"},
+            {"url": reverse('twf:create_document'), "value": "Manually Create Document"},
+            {"url": reverse('twf:name_documents'), "value": "Name Documents"},
+            {"url": reverse('twf:metadata_load_metadata'),
+             "value": mark_safe('<i class="fa-solid fa-arrow-right-from-bracket"></i> Load Metadata')},
+        ]}
 
 
 class TWFProjectDocumentView(TWFProjectView):
@@ -118,6 +127,28 @@ class TWFProjectDocumentView(TWFProjectView):
         project_id = self.request.session.get('project_id')
         if project_id:
             context['document'] = Document.objects.get(pk=self.kwargs.get('pk'))
+        return context
+
+
+class TWFProjectDocumentCreateView(TWFProjectView):
+    template_name = 'twf/project/create_document.html'
+    page_title = 'Create Document'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        project_id = self.request.session.get('project_id')
+        context['context_sub_nav'] = TWFProjectDocumentsView.get_sub_pages()
+        return context
+
+
+class TWFProjectDocumentNameView(TWFProjectView):
+    template_name = 'twf/project/name_documents.html'
+    page_title = 'Name Documents'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        project_id = self.request.session.get('project_id')
+        context['context_sub_nav'] = TWFProjectDocumentsView.get_sub_pages()
         return context
 
 
@@ -267,53 +298,6 @@ class TWFSelectProjectView(LoginRequiredMixin, TWFHomeView):
             }
         )
 
-        return context
-
-
-class TWFProjectAIQueryView(FormView, TWFProjectView):
-    template_name = 'twf/project/ai_query.html'
-    page_title = 'AI Query'
-    form_class = AIQueryDatabaseForm
-    results = None
-
-    def form_valid(self, form):
-        # Save the form
-        project = self.get_project()
-        question = form.cleaned_data['question']
-        gpt_role_description = "A Swiss History professor"
-        model = "gpt-4-turbo"
-        documents = form.cleaned_data['documents']
-        context = ""
-        for doc in documents:
-            for page in doc.pages.all():
-                for element in page.parsed_data['elements']:
-                    if "text" in element:
-                        context += element['text'] + "\n"
-
-        client = AiApiClient(api='openai',
-                             api_key=project.openai_api_key,
-                             gpt_role_description=gpt_role_description)
-        prompt = question + "\n\n" + "Context:\n" + context
-        response, elapsed_time = client.prompt(model=model,
-                                               prompt=prompt)
-
-        # Add a success message
-        messages.success(self.request, f'Answer received. Retrieving the answer took {elapsed_time:.2f} seconds.')
-
-        # Redirect to the same URL
-        context = self.get_context_data()
-        context['result'] = response.choices[0].message.content
-        context['form'] = form
-        return render(self.request, self.template_name, context)
-
-    def get_form_kwargs(self):
-        kwargs = super().get_form_kwargs()
-        # Add your custom argument here
-        kwargs['project'] = self.get_project()
-        return kwargs
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
         return context
 
 

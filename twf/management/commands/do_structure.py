@@ -1,7 +1,5 @@
 from django.contrib.auth.models import User
 from django.core.management import BaseCommand
-
-from twf.models import Collection, Project, CollectionItem
 from twf.views.views_ajax_extract import extract_zip_export
 
 
@@ -15,6 +13,7 @@ class Command(BaseCommand):
         parser.add_argument('user_id', type=int, help='The user id to create the collection for')
 
     def handle(self, *args, **options):
+        """Handle the command"""
         print("Start structuring...")
         project_id = options['project_id']
         user_id = options['user_id']

@@ -11,15 +11,17 @@ from django.urls import reverse
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import never_cache
 from django_filters.views import FilterView
-from django_tables2 import SingleTableView, SingleTableMixin
+from django_tables2 import SingleTableMixin
 
 from twf.filters import TagFilter
-from twf.models import Project, PageTag, DateVariation, Dictionary, DictionaryEntry, Variation
+from twf.models import PageTag, DateVariation, Dictionary, DictionaryEntry, Variation
 from twf.tables.tables_tags import TagTable, TagDateTable
 from twf.views.views_base import TWFView
 
 
 class TWFTagsView(LoginRequiredMixin, TWFView):
+    """Base class for all tag views."""
+
     template_name = 'twf/project/setup.html'
 
     def get_sub_navigation(self):
@@ -52,14 +54,8 @@ class TWFTagsView(LoginRequiredMixin, TWFView):
         ]
         return sub_nav
 
-    def get_project(self):
-        try:
-            project_id = self.request.session.get('project_id', None)
-            return Project.objects.get(id=project_id)
-        except Project.DoesNotExist:
-            return None
-
     def get_tag_types(self):
+        """Get the distinct tag types."""
         project = self.get_project()
         distinct_variation_types = (
             PageTag.objects.filter(page__document__project=project)
@@ -75,6 +71,7 @@ class TWFTagsView(LoginRequiredMixin, TWFView):
         return distinct_variation_types_list
 
     def get_excluded_types(self):
+        """Get the excluded tag types."""
         project = self.get_project()
         try:
             excluded = project.ignored_tag_types["ignored"]
@@ -83,6 +80,7 @@ class TWFTagsView(LoginRequiredMixin, TWFView):
         return excluded
 
     def get_date_types(self):
+        """Get the date tag types."""
         project = self.get_project()
         try:
             date_types = project.ignored_tag_types["dates"]
@@ -91,12 +89,14 @@ class TWFTagsView(LoginRequiredMixin, TWFView):
         return date_types
 
     def get_context_data(self, **kwargs):
+        """Get the context data."""
         context = super().get_context_data(**kwargs)
         context['navigation']['items'][2]['active'] = True
         return context
 
     @method_decorator(never_cache)
     def dispatch(self, *args, **kwargs):
+        """Check if a project is selected."""
         project = self.get_project()
         if not project:
             messages.warning(self.request, 'Please select a project first.')
@@ -111,10 +111,12 @@ class TWFTagsView(LoginRequiredMixin, TWFView):
 
 
 class TWFTagsOverviewView(TWFTagsView):
+    """View for the tags overview."""
     template_name = 'twf/tags/overview.html'
     page_title = 'Tags Overview'
 
     def get_context_data(self, **kwargs):
+        """Get the context data."""
         context = super().get_context_data(**kwargs)
 
         project = self.get_project()
@@ -195,6 +197,7 @@ class TWFTagsOverviewView(TWFTagsView):
 
 
 class TWFTagsGroupView(TWFTagsView):
+    """View for the tag grouping wizard."""
     template_name = 'twf/tags/grouping.html'
     page_title = 'Tag Grouping Wizard'
 
@@ -276,6 +279,7 @@ class TWFTagsGroupView(TWFTagsView):
         return unassigned_tag
 
     def get_context_data(self, **kwargs):
+        """Get the context data."""
         context = super().get_context_data(**kwargs)
         tag_types = self.get_tag_types()
         selected_type = self.request.GET.get('tag_type', tag_types[0])
@@ -299,6 +303,7 @@ class TWFTagsGroupView(TWFTagsView):
 
 
 class TWFProjectTagsView(SingleTableMixin, FilterView, TWFTagsView):
+    """Base class for all tag views."""
     template_name = 'twf/tags/all_tags.html'
     page_title = 'Project Documents'
     filterset_class = TagFilter
@@ -326,7 +331,8 @@ class TWFProjectTagsView(SingleTableMixin, FilterView, TWFTagsView):
                     'Tag Variation': item.variation,
                     'Tag Additional Information': item.additional_information,
                     'Tag Dictionary Entry': item.dictionary_entry.label if item.dictionary_entry else '',
-                    'Tag Date Variation': item.date_variation_entry.edtf_of_normalized_variation if item.date_variation_entry else '',
+                    'Tag Date Variation': item.date_variation_entry.edtf_of_normalized_variation
+                        if item.date_variation_entry else '',
                     'Tag Is Parked': item.is_parked,
                     'Tag Is Resolved': item.dictionary_entry is not None or item.date_variation_entry is not None
                 })

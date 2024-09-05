@@ -6,6 +6,7 @@ from twf.models import Dictionary
 
 
 class LoadMetadataForm(forms.Form):
+    """Form for loading metadata from a CSV file."""
 
     data_target_type = forms.ChoiceField(
         label='Data Target Type',
@@ -63,6 +64,9 @@ class LoadMetadataForm(forms.Form):
 
 
 class ExtractMetadataValuesForm(forms.Form):
+    """Form for extracting metadata values from a JSON file
+    and associating them with dictionary entries."""
+
     json_data_key = forms.CharField(
         label='JSON Data Key',
         required=False,

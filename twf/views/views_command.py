@@ -50,14 +50,3 @@ def ungroup_tag(request, pk):
         return HttpResponseRedirect(referer)
 
     return redirect('twf:project_group_tags', pk=tag.page.document.project.pk)
-
-
-def export_tags(request):
-    """Exports tags."""
-    from twf.utils import export_tags_to_csv
-
-    export_tags_to_csv()
-
-    messages.success(request, 'Tags have been exported.')
-
-    return redirect('twf:tags_overview')

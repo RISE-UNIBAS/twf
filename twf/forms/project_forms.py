@@ -9,6 +9,7 @@ from twf.models import Project, Collection, Document, CollectionItem
 
 
 class PasswordInputRetain(forms.PasswordInput):
+    """A PasswordInput widget that retains the value when the form is re-rendered."""
     def render(self, name, value, attrs=None, renderer=None):
         if value is None:
             value = ''
@@ -20,6 +21,7 @@ class PasswordInputRetain(forms.PasswordInput):
 
 
 class ProjectForm(forms.ModelForm):
+    """Form for creating and updating projects."""
     class Meta:
         model = Project
         fields = ['title', 'description', 'collection_id', 'transkribus_job_id', 'job_download_url',
@@ -171,6 +173,7 @@ class ProjectForm(forms.ModelForm):
 
 
 class AIQueryDatabaseForm(forms.Form):
+    """Form for querying the AI model with a question and documents."""
 
     documents = forms.ModelMultipleChoiceField(label='Documents', required=True,
                                                help_text='Please select the documents to query.',
@@ -211,7 +214,17 @@ class AIQueryDatabaseForm(forms.Form):
         self.helper = helper
 
 
+class ProjectOpenAIForm(forms.Form):
+    """Form for querying the OpenAI API with a question and documents."""
+
+    def __init__(self, *args, **kwargs):
+        project = kwargs.pop('project')
+        super().__init__(*args, **kwargs)
+
+
 class QueryDatabaseForm(forms.Form):
+    """Form for querying the database with a SQL query."""
+
     query = forms.CharField(widget=forms.Textarea(attrs={'rows': 5}), label='Query',
                             help_text='Please provide a SQL query to execute on the database.'
                                       'Only SELECT queries are allowed.',
@@ -240,6 +253,7 @@ class QueryDatabaseForm(forms.Form):
 
 
 class CollectionForm(forms.ModelForm):
+    """Form for creating and updating collections."""
 
     class Meta:
         model = Collection
@@ -268,6 +282,8 @@ class CollectionForm(forms.ModelForm):
 
 
 class CollectionAddDocumentForm(forms.Form):
+    """Form for adding a document to a collection."""
+
     document = forms.ModelChoiceField(label='Document', required=True,
                                       help_text='Please select the document to add to the collection.',
                                       widget=Select2Widget(attrs={'style': 'width: 100%;'}),

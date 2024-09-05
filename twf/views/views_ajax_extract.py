@@ -34,6 +34,7 @@ async def start_extraction(request):
 
 
 def get_project_id(request):
+    """This function gets the project ID from the session."""
     project_id = request.session.get('project_id')
     return project_id
 

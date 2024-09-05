@@ -10,6 +10,7 @@ from twf.models import Dictionary
 
 
 def parse_config(json_config, json_data):
+    """Parse JSON configuration and return form fields."""
     form_fields = []
     for field_name, field_config in json_config.items():
         field_value = json_data.get(field_name, '')
@@ -20,6 +21,7 @@ def parse_config(json_config, json_data):
 
 
 class DynamicForm(forms.Form):
+    """Dynamic form based on JSON configuration."""
     def __init__(self, *args, **kwargs):
         json_config = kwargs.pop('json_config', None)
         json_data = kwargs.pop('json_data', None)
@@ -104,6 +106,8 @@ class DynamicForm(forms.Form):
         self.is_valid()
 
     def get_validator(self, validation_conf):
+        """Return a validator function based on the validation configuration."""
+
         def validate(value):
             # Implement your validation logic based on the validation_conf
             if not self.validation_logic(value, validation_conf):
@@ -112,6 +116,7 @@ class DynamicForm(forms.Form):
 
     @staticmethod
     def validation_logic(value, field_conf):
+        """Implement custom validation logic based on the field configuration"""
         validation_conf = field_conf.get("validation", {})
         field_type = field_conf["type"]
 

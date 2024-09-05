@@ -32,6 +32,7 @@ class DictionaryForm(forms.ModelForm):
 
 
 class DictionaryEntryForm(forms.ModelForm):
+    """Form for creating and updating a dictionary entry."""
 
     class Meta:
         model = DictionaryEntry

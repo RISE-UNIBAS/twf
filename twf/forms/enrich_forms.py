@@ -7,6 +7,7 @@ from twf.models import DictionaryEntry
 
 
 class EnrichEntryManualForm(forms.ModelForm):
+    """Form for manually enriching a dictionary"""
 
     authorization_data = forms.CharField(widget=JSONEditor(attrs={
         'style': 'min-height: 400px;'
@@ -32,6 +33,7 @@ class EnrichEntryManualForm(forms.ModelForm):
 
 
 class EnrichEntryForm(forms.Form):
+    """Form for enriching a dictionary entry"""
 
     search_term = forms.CharField(label="Search Term",
                                   help_text="Enter a search term to find a matching entry.")

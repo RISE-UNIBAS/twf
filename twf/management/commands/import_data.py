@@ -3,7 +3,7 @@ import json
 from django.contrib.auth.models import User
 from django.core.management import BaseCommand
 
-from twf.models import Collection, Project, CollectionItem, Page, Document
+from twf.models import Project, Page, Document
 
 
 class Command(BaseCommand):
@@ -18,6 +18,7 @@ class Command(BaseCommand):
         parser.add_argument('identifier', type=str, help='The identifier of the data')
 
     def handle(self, *args, **options):
+        """Handle the command"""
         print("Trying to import data...")
 
         project = Project.objects.get(pk=options['project_id'])
@@ -52,19 +53,4 @@ class Command(BaseCommand):
                 except Document.DoesNotExist:
                     print(f"Document {key} not found.")
                     pass
-
-        """
-        for item in keyed_data.keys():
-            try:
-                tk_id, tk_page = item.split('/')
-                page = Page.objects.get(document__document_id=tk_id, tk_page_number=tk_page)
-                page.metadata = keyed_data[item]
-                page.save(current_user=user)
-                print(f"Page {tk_id} updated.")
-            except Page.DoesNotExist:
-                print(f"Page {tk_id} not found.")
-        """
-        # pages = Page.objects.filter(document__project=project)
-        # for p in pages:
-            # p.metadata = {}
-            # p.save()
+        print("Data imported.")

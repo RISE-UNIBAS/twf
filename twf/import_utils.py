@@ -8,8 +8,8 @@ def import_dictionary_from_csv(csv_file_path, user, type_name, label,
                                label_column='preferred_name', variations_column='variations'):
     """
     Import a dictionary from a CSV file.
-    :param user:
     :param csv_file_path:       The path to the CSV file.
+    :param user:
     :param type_name:           The type of the dictionary.
     :param label:               The label of the dictionary.
     :param label_column:        The name of the column containing the labels.

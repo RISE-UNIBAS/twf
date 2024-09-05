@@ -127,6 +127,7 @@ class TWFHomeView(TWFView):
         return sub_nav
 
     def get_context_data(self, **kwargs):
+        """Add the active item to the navigation."""
         context = super().get_context_data(**kwargs)
         context['navigation']['items'][0]['active'] = True
         return context
@@ -158,11 +159,13 @@ class TWFHomeUserOverView(TWFHomeView):
     page_title = 'User Overview'
 
     def get_context_data(self, **kwargs):
+        """Add the user summary to the context."""
         context = super().get_context_data(**kwargs)
         context['summary'] = self.get_user_summary()
         return context
 
     def get_user_summary(self):
+        """Get the summary of the user."""
         # Get the current date and time
         current_time = now()
 
@@ -207,10 +210,12 @@ class TWFHomeUserOverView(TWFHomeView):
 
 
 class TWFHomeUserManagementView(TWFHomeView):
+    """View to manage the users."""
     template_name = 'twf/users/management.html'
     page_title = 'User Management'
 
     def get_context_data(self, **kwargs):
+        """Add the user profiles to the context."""
         context = super().get_context_data(**kwargs)
         project_id = self.request.session.get('project_id', None)
         member_profiles = Project.objects.get(pk=project_id).members.all()

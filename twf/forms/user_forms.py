@@ -2,10 +2,7 @@
 from django import forms
 from django.contrib.auth.forms import AuthenticationForm, PasswordChangeForm
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, Submit, Field, Column, Row, Div
-from django_select2 import forms as s2forms
-
-from twf.models import Project, DictionaryEntry
+from crispy_forms.layout import Layout, Submit, Column, Row, Div
 
 
 class LoginForm(AuthenticationForm):
@@ -25,6 +22,7 @@ class LoginForm(AuthenticationForm):
             )
         )
 
+
 class ChangePasswordForm(PasswordChangeForm):
     """Form for changing the password of a user."""
 
@@ -42,6 +40,7 @@ class ChangePasswordForm(PasswordChangeForm):
                 css_class='text-end pt-3'
             )
         )
+
 
 class UserManagementForm(forms.Form):
     """Form for managing users."""

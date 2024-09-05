@@ -1,9 +1,7 @@
 """Forms for the twf app."""
 from django import forms
-from django.contrib.auth.forms import AuthenticationForm
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, Submit, Field, Column, Row
-from django_select2 import forms as s2forms
+from crispy_forms.layout import Layout, Submit, Field, Row
 
 from twf.models import Project, DictionaryEntry
 
