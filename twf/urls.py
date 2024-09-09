@@ -2,6 +2,7 @@
 from django.urls import path
 from django.contrib.auth import views as auth_views
 
+from twf.tasks.task_status import task_status_view
 from twf.views.views_ajax_download import ajax_transkribus_download_export, download_progress_view
 from twf.views.views_ajax_export import ajax_transkribus_request_export, ajax_transkribus_request_export_status, \
     ajax_transkribus_reset_export
@@ -10,17 +11,20 @@ from twf.views.views_ajax_metadata import start_metadata_extraction, stream_meta
 from twf.views.views_ajax_validation import validate_page_field, validate_document_field
 from twf.views.views_base import TWFHomeView, TWFHomeLoginView, TWFHomePasswordChangeView, TWFHomeUserOverView, \
     TWFHomeUserManagementView
+from twf.views.views_collection import RemovePartView, SplitCollectionItemView, \
+    UpdateCollectionItemView, TWFProjectCollectionsView, TWFProjectCollectionsCreateView, \
+    TWFProjectCollectionsDetailView, TWFProjectCollectionsReviewView, TWFProjectCollectionsAddDocumentView
 from twf.views.views_command import park_tag, unpark_tag, ungroup_tag
 from twf.views.views_dictionaries import TWFDictionaryView, TWFDictionaryOverviewView, TWFDictionaryDictionaryView, \
     delete_variation, TWFDictionaryDictionaryEditView, TWFDictionaryDictionaryEntryEditView, \
     TWFDictionaryDictionaryEntryView, TWFDictionaryImportView, TWFDictionaryDictionaryExportView, \
     TWFDictionaryBatchGeonamesView, TWFDictionaryNormDataView, TWFDictionaryCreateView, skip_entry
+from twf.views.views_export import TWFExportDataView
 from twf.views.views_metadata import TWFMetadataReviewDocumentsView, \
     TWFMetadataLoadDataView, TWFMetadataExtractTagsView, TWFMetadataReviewPagesView, TWFMetadataOverviewView
 from twf.views.views_project import TWFSelectProjectView, select_project, TWFProjectView, TWFProjectDocumentsView, \
     TWFProjectSettingsView, TWFProjectSetupView, TWFProjectDocumentView, TWFProjectQueryView, TWFProjectOverviewView, \
-    TWFProjectCollectionsView, TWFProjectCollectionsCreateView, TWFProjectCollectionsAddDocumentView, \
-    TWFProjectCollectionsDetailView, cut_collection_item, TWFProjectDocumentCreateView, TWFProjectDocumentNameView
+    TWFProjectDocumentCreateView, TWFProjectDocumentNameView
 from twf.views.views_project_ai import TWFProjectAIBatchView, TWFProjectAIQueryView
 from twf.views.views_tags import TWFTagsView, TWFProjectTagsView, TWFProjectTagsOpenView, TWFProjectTagsParkedView, \
     TWFProjectTagsResolvedView, TWFProjectTagsIgnoredView, TWFTagsDatesView, TWFTagsGroupView, TWFTagsOverviewView
@@ -64,16 +68,16 @@ urlpatterns = [
          name='project_sheets_metadata'),
     path('project/settings/', TWFProjectSettingsView.as_view(),
          name='project_settings'),
-    path('project/export/', TWFProjectView.as_view(template_name='twf/project/export.html',
-                                                   page_title='Project Export'),
+    path('project/export/', TWFExportDataView.as_view(),
          name='project_export'),
     path('project/query/', TWFProjectQueryView.as_view(),
          name='project_query'),
     path('project/ai/query/', TWFProjectAIQueryView.as_view(),
          name='project_ai_query'),
 
-    path('project/batch/openai/', TWFProjectAIBatchView.as_view(template_name='twf/project/batches/openai.html'),
+    path('project/batch/openai/', TWFProjectAIBatchView.as_view(),
          name='project_batch_openai'),
+    path('project/batch/openai/ask-chatgpt/', TWFProjectAIBatchView.as_view(), name='project_batch_openai_ask-chatgpt'),
 
     #############################
     # DOCUMENTS
@@ -94,10 +98,19 @@ urlpatterns = [
          name='project_collections_create'),
     path('project/collections/<int:pk>/', TWFProjectCollectionsDetailView.as_view(),
          name='project_collections_view'),
-    path('project/collections/<int:pk>/add/document/', TWFProjectCollectionsAddDocumentView.as_view(),
-         name='project_collections_add_document'),
-    path('project/collections/item/<int:pk>/<int:anno_idx>/', cut_collection_item,
+
+    path('project/collections/review/<int:pk>/', TWFProjectCollectionsReviewView.as_view(),
+         name='project_collection_review'),
+    path('project/collections/item/<int:item_id>/remove_part/<int:part_id>/', RemovePartView.as_view(),
+         name='project_collections_item_remove_part'),
+    path('project/collections/item/<int:pk>/split/<int:part_id>/', SplitCollectionItemView.as_view(),
          name='project_collections_item_split'),
+
+    path('collections/item/update/<int:pk>/', UpdateCollectionItemView.as_view(),
+         name='project_collections_item_update'),
+
+    path('project/collections/<int:pk>/add/document', TWFProjectCollectionsAddDocumentView.as_view(),
+         name='project_collections_add_document'),
 
     #############################
     # TAGS
@@ -184,6 +197,7 @@ urlpatterns = [
          name='stream_extraction_progress_detail'),
     path('ajax/transkribus/extract/metadata/monitor/', stream_metadata_extraction_progress,
          name='stream_metadata_extraction_progress'),
+    path('celery/status/<str:task_id>/', task_status_view, name='celery_task_status'),
 
     #############################
     # METADATA

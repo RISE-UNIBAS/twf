@@ -35,10 +35,6 @@ h1 {
   flex: 1;  /* This makes the content expand to fill available space, pushing the footer down */
 }
 
-.footer {
-  flex-shrink: 0; /* Prevents the footer from shrinking */
-}
-
 .l-inactive {
     transition: background-color .3s ease;
     color: #3a3a3a !important;
@@ -107,4 +103,14 @@ nav > ul.pagination {
 }
 .form-control {
     font-size: small;
+}
+
+.footer {
+    flex-shrink: 0;
+    background-color: #f8f9fa;
+    padding: 10px 0;
+}
+
+.text-right {
+    text-align: right;
 }

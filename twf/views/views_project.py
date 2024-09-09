@@ -6,7 +6,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import Group
 from django.db import connection
 from django.db.models import Count, Avg, Q
-from django.shortcuts import redirect
+from django.shortcuts import redirect, render
 from django.urls import reverse, reverse_lazy
 from django.utils.safestring import mark_safe
 from django.views.generic import FormView
@@ -60,13 +60,10 @@ class TWFProjectView(LoginRequiredMixin, TWFView):
         ]
         return sub_nav
 
-    def get_project(self):
-        project_id = self.request.session.get('project_id')
-        return Project.objects.get(pk=project_id)
-
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['navigation']['items'][1]['active'] = True
+        if len(context['navigation']['items']) > 1:
+            context['navigation']['items'][1]['active'] = True
         return context
 
     @staticmethod
@@ -169,84 +166,6 @@ class TWFProjectDocumentNameView(TWFProjectView):
         return context
 
 
-class TWFProjectCollectionsView(TWFProjectView):
-    template_name = 'twf/project/collections.html'
-    page_title = 'Project Collections'
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['collections'] = Collection.objects.filter(project_id=self.request.session.get('project_id'))
-        context['context_sub_nav'] = self.get_collections_sub_pages()
-        return context
-
-
-class TWFProjectCollectionsCreateView(FormView, TWFProjectView):
-    template_name = 'twf/project/collections_create.html'
-    page_title = 'Create New Collection'
-    form_class = CollectionForm
-    success_url = reverse_lazy('twf:project_collections')
-
-    def form_valid(self, form):
-        # Save the form
-        self.object = form.save(commit=False)
-        self.object.project_id = self.request.session.get('project_id')
-        self.object.save(current_user=self.request.user)
-
-        # Add a success message
-        messages.success(self.request, 'Collection has been created successfully.')
-        # Redirect to the success URL
-        return super().form_valid(form)
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['context_sub_nav'] = self.get_collections_sub_pages()
-        return context
-
-
-class TWFProjectCollectionsDetailView(TWFProjectView):
-    template_name = 'twf/project/collection_view.html'
-    page_title = 'Collection'
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        collection = Collection.objects.get(pk=self.kwargs.get('pk'))
-        context['collection'] = collection
-        context['items'] = collection.items.all()
-        context['context_sub_nav'] = self.get_collections_sub_pages()
-        return context
-
-
-class TWFProjectCollectionsAddDocumentView(FormView, TWFProjectView):
-    template_name = 'twf/project/collections_add_doc.html'
-    page_title = 'Add Document To Collection'
-    form_class = CollectionAddDocumentForm
-    success_url = reverse_lazy('twf:project_collections')
-
-    def form_valid(self, form):
-        # Save the form
-        doc = form.cleaned_data['document']
-        collection = Collection.objects.get(pk=self.kwargs.get('pk'))
-        collection_item = CollectionItem(document=doc, collection=collection)
-        collection_item.save(current_user=self.request.user)
-
-        # Add a success message
-        messages.success(self.request, 'Document has been added to the collection successfully.')
-
-        # Redirect to the success URL
-        return super().form_valid(form)
-
-    def get_form_kwargs(self):
-        kwargs = super().get_form_kwargs()
-        # Add your custom argument here
-        kwargs['collection'] = Collection.objects.get(pk=self.kwargs.get('pk'))
-        return kwargs
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['context_sub_nav'] = self.get_collections_sub_pages()
-        return context
-
-
 class TWFProjectSettingsView(FormView, TWFProjectView):
     template_name = 'twf/project/settings.html'
     page_title = 'Project Settings'
@@ -279,8 +198,9 @@ class TWFProjectSetupView(TWFProjectView):
         context = super().get_context_data(**kwargs)
         context['context_sub_nav'] = {"options": [
             {"url": reverse('twf:project_setup'), "value": "Setup Overview"},
-            {"url": reverse('twf:project_tk_export'), "value": "Transkribus Export"},
+            {"url": reverse('twf:project_tk_export'), "value": "Request Transkribus Export"},
             {"url": reverse('twf:project_tk_structure'), "value": "Extract Transkribus Data"},
+            {"url": reverse('twf:project_tk_structure'), "value": "Import Data From JSON File"},
             {"url": reverse('twf:project_sheets_metadata'), "value": "Sheets Metadata"},
         ]}
         return context
@@ -406,7 +326,7 @@ def select_project(request, pk):
     return redirect('twf:project_overview')
 
 
-def cut_collection_item(request, pk, anno_idx):
+"""def cut_collection_item(request, pk, anno_idx):
     collection_item = CollectionItem.objects.get(pk=pk)
     annotations = collection_item.document_configuration['annotations']
 
@@ -453,7 +373,7 @@ def mark_collection_item_as_faulty(request, pk):
         return redirect('twf:project_collections')
 
 
-from django.shortcuts import render
+from django.shortcuts import render"""
 
 
 def dynamic_form_view(request, pk):

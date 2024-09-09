@@ -351,3 +351,46 @@ class DocumentForm(forms.ModelForm):
 
         self.helper = helper
 
+
+class BatchOpenAIForm(forms.Form):
+    CHOICES = [
+        ('documents', 'Documents'),
+        ('collection', 'Collection')
+    ]
+
+    selection = forms.ChoiceField(choices=CHOICES, widget=forms.RadioSelect, label="Choose Type")
+    role_description = forms.CharField(max_length=200, widget=forms.TextInput(attrs={
+        'placeholder': 'Describe the role here...'
+    }), label="Role Description")
+    prompt = forms.CharField(widget=forms.Textarea(attrs={
+        'placeholder': 'Enter your prompt here...'
+    }), label="Prompt")
+
+    def __init__(self, *args, **kwargs):
+        project = kwargs.pop('project')
+        super().__init__(*args, **kwargs)
+        helper = FormHelper()
+        helper.form_method = 'post'
+        helper.form_class = 'form form-control'
+        helper.form_id = 'batch-openai-form'
+
+        helper.layout = Layout(
+            Row(
+                Column('selection', css_class='form-group col-12 mb-3'),
+                css_class='row form-row'
+            ),
+            Row(
+                Column('role_description', css_class='form-group col-12 mb-3'),
+                css_class='row form-row'
+            ),
+            Row(
+                Column('prompt', css_class='form-group col-12 mb-3'),
+                css_class='row form-row'
+            ),
+            Div(
+                Submit('submit', 'Start Project Batch', css_class='btn btn-dark'),
+                css_class='text-end pt-3'
+            ),
+        )
+
+        self.helper = helper

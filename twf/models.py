@@ -1,11 +1,12 @@
 """This module contains the models for the twf app."""
 from django.conf import settings
 from django.db import models
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from fuzzywuzzy import process
 
 from twf.templatetags.tk_tags import tk_iiif_url, tk_bounding_box
 
+User = get_user_model()
 TWF_GROUPS = ['Setup Project', 'Group Tags', 'Run Batches', 'Import Dictionaries', 'Manipulate Dictionaries']
 
 
@@ -538,6 +539,12 @@ class Collection(TimeStampedModel):
 class CollectionItem(TimeStampedModel):
     """An item in a collection."""
 
+    STATUS_CHOICES = (
+        ('open', 'Open'),
+        ('reviewed', 'Reviewed'),
+        ('faulty', 'Faulty'),
+    )
+
     collection = models.ForeignKey(Collection, related_name='items', on_delete=models.CASCADE)
     """The collection this item belongs to."""
 
@@ -550,11 +557,9 @@ class CollectionItem(TimeStampedModel):
     title = models.CharField(max_length=100)
     """The title of the item."""
 
-    marked_as_done = models.BooleanField(default=False)
-    """Whether the item is marked as done."""
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='open')
 
-    marked_as_faulty = models.BooleanField(default=False)
-    """Whether the item is marked as faulty."""
+    review_notes = models.TextField(blank=True, default='')
 
     def __str__(self):
         """Return the string representation of the CollectionItem."""

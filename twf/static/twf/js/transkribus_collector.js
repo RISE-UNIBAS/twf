@@ -119,35 +119,3 @@ function updateProgress(downloadProgress, downloadProgressBar, startDownloadButt
         downloadProgressBar.css('width', progress + '%').attr('aria-valuenow', progress).text(progress + '%');
     };
 }
-
-function monitorProgress(project_id) {
-    // Initialize an EventSource
-    const evtSource = new EventSource('/ajax/transkribus/extract/monitor/');
-    evtSource.onmessage = function(event) {
-        //console.log('Current progress:', event.data);
-        let progress = parseInt(event.data); // Assuming progress data is a simple integer
-        if (progress >= 100) {
-            evtSource.close();  // Close the event source if the progress is 100
-            console.log('Extraction completed');
-        }
-        $('#extractProgressBar').css('width', progress + '%').attr('aria-valuenow', progress).text(progress + '%');
-    };
-
-    evtSource.onerror = function() {
-        console.log('EventSource failed.');
-        evtSource.close();  // Close the event source on error
-    };
-
-    const evtDetailSource = new EventSource('/ajax/transkribus/extract/monitor/details/');
-    evtDetailSource.onmessage = function(event) {
-        let detailArea = $('#extractionLog');
-        let new_text = event.data.replace(/---/g, '\n');
-        detailArea.append(new_text);
-        detailArea.scrollTop(detailArea.prop('scrollHeight'));
-    };
-
-    evtDetailSource.onerror = function() {
-        console.log('Details failed.');
-        evtDetailSource.close();  // Close the event source on error
-    };
-}

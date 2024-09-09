@@ -19,4 +19,3 @@ class Command(BaseCommand):
         user_id = options['user_id']
         user = User.objects.get(pk=user_id)
         extract_zip_export(project_id, user)
-

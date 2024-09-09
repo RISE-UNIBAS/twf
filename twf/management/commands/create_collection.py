@@ -46,4 +46,5 @@ class Command(BaseCommand):
 
             collection_item.title = f'Song in {document.document_id}'
             collection_item.save(current_user=user)
-            print(f"Added Song for document {document.document_id} with {len(collection_item.document_configuration['annotations'])} annotations.")
+            print(f"Added Song for document {document.document_id} with "
+                  f"{len(collection_item.document_configuration['annotations'])} annotations.")

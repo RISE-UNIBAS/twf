@@ -47,34 +47,60 @@
 
 {% block script %}
     <script>
+        function scrollToBottom() {
+            var textarea = $('#extractionLog');
+            textarea.scrollTop(textarea[0].scrollHeight);
+        }
+
         $(document).ready(function() {
-            let download_file = '{{ project.job_download_url }}';
-            let has_downloaded_file = download_file !== 'None';
-            let project_id = '{{ project.pk }}';
-            
-            if (!has_downloaded_file) {
-                $('#extractZip').prop('disabled', true);
-            } 
-            else {
-                $('#extractZip').prop('disabled', false);
-                $("#extractZip").click(function() {
-                    $('#extractionLog').text(''); // clear log
-                    monitorProgress(project_id);  // Monitor progress using SSE
-                    
-                    // Start the extraction process
-                    $.ajax({
-                        url: '/ajax/transkribus/extract/',
-                        success: function(data) {
-                            console.log("SUCCESS", data);
-                           
-                        },
-                        error: function(data) {
-                            console.log("ERROR", data);
-                        }
-                    });
+            $('#extractZip').click(function() {
+                $('#extractionLog').text(''); // clear log
+                
+                // Start the extraction process
+                $.ajax({
+                    url: '/ajax/transkribus/extract/',
+                    success: function(data) {
+                        console.log("Extraction started", data);
+                        let taskId = data.task_id;
+                        pollTaskProgress(taskId);  // Start polling for task progress
+                    },
+                    error: function(data) {
+                        console.log("ERROR", data);
+                    }
                 });
-            }
+            });
         });
+    
+        function pollTaskProgress(taskId) {
+            let url = '/celery/status/' + taskId + '/';  // Adjust the URL if needed
+            
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    const progressBar = $('#extractProgressBar');
+                    
+                    if (data.status === 'PROGRESS' || data.status === 'PENDING') {
+                        // console.log(data)
+                        let progress = (data.current / data.total) * 100;
+                        progressBar.css('width', progress + '%');
+                        progressBar.text(progress.toFixed(2) + '%');
+                        $('#extractionLog').append(data.text + '\n');
+                        scrollToBottom();
+                        
+                        setTimeout(function() {
+                            pollTaskProgress(taskId);  // Poll again
+                        }, 800);  // Adjust the polling interval if needed
+                    } else if (data.status === 'SUCCESS') {
+                        progressBar.css('width', '100%');
+                        progressBar.text('Completed');
+                        $('#extractionLog').append('Task completed');
+                        scrollToBottom();
+                    } else if (data.status === 'FAILURE') {
+                        $('#extractionLog').append('Error: ' + data.error + '\n');
+                        scrollToBottom();
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+        }
     </script>
-    <script src="{% static 'twf/js/transkribus_collector.js' %}" type="text/javascript"></script>
 {% endblock %}

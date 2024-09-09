@@ -3,25 +3,38 @@ files are then processed and saved to the database."""
 import logging
 import os
 import zipfile
+from celery import shared_task
 
-from asgiref.sync import sync_to_async
 from django.core.files.storage import FileSystemStorage
 from django.http import JsonResponse, StreamingHttpResponse
 from django.utils import timezone
 from simple_alto_parser import PageFileParser
 
-from twf.models import Project, Document, Page, PageTag
+from twf.models import Project, Document, Page, PageTag, User
 from twf.page_file_meta_data_reader import extract_transkribus_file_metadata
 from twf.utils.file_utils import delete_all_in_folder
 from twf.views.views_ajax_base import set_progress, set_details, calculate_and_set_progress, add_details, \
     base_event_stream, base_detail_event_stream
+from twf.tasks.structure_tasks import extract_zip_export_task
 
 PROGRESS_JOB_NAME = "extract-progress"
 DETAIL_JOB_NAME = "extract-progress-detail"
 
 
-async def start_extraction(request):
-    """This function starts the extraction process."""
+def start_extraction(request):
+    """Start the extraction process as a Celery task."""
+    project_id = request.session.get('project_id')
+    user_id = request.user.id
+
+    # Trigger the task
+    task = extract_zip_export_task.delay(project_id, user_id)
+
+    # Return the task ID so that the frontend can monitor the task
+    return JsonResponse({'status': 'success', 'task_id': task.id})
+
+
+"""async def start_extraction(request):
+    
     get_project_id_async = sync_to_async(get_project_id, thread_sensitive=True)
     project_id = await get_project_id_async(request)
 
@@ -30,13 +43,7 @@ async def start_extraction(request):
     await extract_zip_export_async(project_id, request.user)
     create_page_tags_async = sync_to_async(create_page_tags, thread_sensitive=True)
     await create_page_tags_async(project_id, request.user)
-    return JsonResponse({'status': 'success'}, status=200)
-
-
-def get_project_id(request):
-    """This function gets the project ID from the session."""
-    project_id = request.session.get('project_id')
-    return project_id
+    return JsonResponse({'status': 'success'}, status=200)"""
 
 
 def extract_zip_export(project_id, extracting_user):

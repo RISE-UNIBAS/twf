@@ -1,0 +1,66 @@
+{% extends 'twf/base/base.html' %}
+{% load crispy_forms_tags %}
+{% load nav_tags %}
+
+{% block content %}
+     <div class="border rounded bg-light mt-0 p-3">
+        <h1 class="display-6">Ask ChatGPT</h1>
+        <p class="lead">Select the context of your question and ask an AI questions about it.</p>
+        {% crispy form %}
+        
+        <div class="row ms-1 me-1 mt-3 p-2 border rounded bg-white">
+        </div>
+     </div>
+{% endblock %}
+
+{% block script %}
+    <script>
+        document.getElementById('batch-openai-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+        
+            fetch('{% url "twf:project_batch_openai_ask-chatgpt" %}', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    const taskId = data.task_id;
+                    alert('Task submitted successfully. Task ID: ' + taskId);
+        
+                    // Start polling for task status
+                    pollTaskStatus(taskId);
+                } else {
+                    alert('There was an error.');
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        });
+        
+        function pollTaskStatus(taskId) {
+            const baseUrl = '{% url "twf:celery_task_status" "TASK_ID_PLACEHOLDER" %}';
+            const url = baseUrl.replace('TASK_ID_PLACEHOLDER', taskId);
+            
+            fetch(url)
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'SUCCESS') {
+                    alert('Task completed! Result: ' + data.result);
+                } else if (data.status === 'FAILURE') {
+                    alert('Task failed.'+ data.error);
+                } else {
+                    // Poll again in 2 seconds if the task is still running
+                    setTimeout(function() {
+                        pollTaskStatus(taskId);
+                    }, 2000);
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
+    </script>
+{% endblock %}

@@ -9,13 +9,16 @@
          {{ col }}
          {{ col.items.all }}
          <div class="row">
-             <div class="col-4">
+             <div class="col-3">
                  <a href="{% url 'twf:project_collections_view' col.id %}" class="btn btn-dark">View</a>
              </div>
-             <div class="col-4">
+             <div class="col-3">
                  <a href="{% url 'twf:project_collections_add_document' col.id %}" class="btn btn-dark">Add Document</a>
              </div>
-             <div class="col-4">
+             <div class="col-3">
+                 <a href="{% url 'twf:project_collection_review' col.id %}" class="btn btn-dark">Review Collection</a>
+             </div>
+             <div class="col-3">
                  <a href="{% url 'twf:project_collections_view' col.id %}" class="btn btn-danger float-end">Delete</a>
              </div>
          </div>

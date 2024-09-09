@@ -1,7 +1,9 @@
 """Base views for all views."""
 from abc import ABC, abstractmethod
 
+from django.contrib import messages
 from django.contrib.auth.views import LoginView, PasswordChangeView
+from django.shortcuts import redirect
 from django.urls import reverse, reverse_lazy
 from django.utils.timezone import now, timedelta
 from django.views.generic import TemplateView
@@ -13,6 +15,7 @@ from twf.models import Project, Document, Page, Dictionary, DictionaryEntry, Pag
 
 class TWFView(TemplateView, ABC):
     """Base view for all views."""
+    project_required = True
     page_title = None
 
     def __init__(self, *args, **kwargs):
@@ -20,19 +23,30 @@ class TWFView(TemplateView, ABC):
         if self.page_title is None:
             self.page_title = kwargs.get('page_title', None)
 
+    def dispatch(self, request, *args, **kwargs):
+        if self.project_required:
+            project = self.get_project()
+            if project is None:
+                messages.error(request, 'No project is set. Select a project first')
+                return redirect('twf:home')  # Redirect if no project is set
+        return super().dispatch(request, *args, **kwargs)
+
     def is_project_set(self):
         """Check if a project is set."""
         return self.s_is_project_set(self.request)
 
     @staticmethod
     def s_is_project_set(request):
+        """Check if a project is set."""
         return request.session.get('project_id', None) is not None
 
     def get_project(self):
+        """Get the project."""
         return self.s_get_project(self.request)
 
     @staticmethod
     def s_get_project(request):
+        """Get the project."""
         project = None
         if TWFView.s_is_project_set(request):
             project_id = request.session.get('project_id')
@@ -80,17 +94,11 @@ class TWFView(TemplateView, ABC):
         """Add the project and tag types to the context."""
         context = super().get_context_data(**kwargs)
 
-        project = None
-        if self.is_project_set():
-            project_id = self.request.session.get('project_id', None)
-            project = Project.objects.get(pk=project_id)
-            context['project'] = project
-
         context.update(
             {
                 'page_title': self.page_title,
                 'project_set': self.is_project_set(),
-                'project': project,
+                'project': self.get_project(),
                 'navigation': {
                     'items': self.get_navigation_items(),
                 },
@@ -103,6 +111,8 @@ class TWFView(TemplateView, ABC):
 
 
 class TWFHomeView(TWFView):
+    project_required = False
+
     """Base view for the home view."""
     template_name = 'twf/base/home.html'
 
@@ -217,8 +227,11 @@ class TWFHomeUserManagementView(TWFHomeView):
     def get_context_data(self, **kwargs):
         """Add the user profiles to the context."""
         context = super().get_context_data(**kwargs)
-        project_id = self.request.session.get('project_id', None)
-        member_profiles = Project.objects.get(pk=project_id).members.all()
+        project = self.get_project()
+        if project is not None:
+            member_profiles = project.members.all()
+        else:
+            member_profiles = []
 
         permission_matrix = {}
         for profile in member_profiles:
@@ -230,5 +243,3 @@ class TWFHomeUserManagementView(TWFHomeView):
         context['member_profiles'] = permission_matrix
         context['twf_groups'] = TWF_GROUPS
         return context
-
-

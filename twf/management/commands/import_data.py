@@ -1,11 +1,11 @@
 """Management command to import PAGE metadata from a JSON file."""
 import json
-
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from django.core.management import BaseCommand
 
 from twf.models import Project, Page, Document
 
+User = get_user_model()
 
 class Command(BaseCommand):
     """Management command to import dictionaries from a CSV file."""
@@ -46,12 +46,12 @@ class Command(BaseCommand):
                                 document.metadata['pages'].append(page_data)
                             except Page.DoesNotExist:
                                 print(f"Page {tk_page_number} not found.")
-                                pass
+                                # pass
 
                     document.save(current_user=user)
                     print(f"Document {key} updated.")
 
                 except Document.DoesNotExist:
                     print(f"Document {key} not found.")
-                    pass
+                    # pass
         print("Data imported.")

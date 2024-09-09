@@ -1,0 +1,50 @@
+import logging
+
+from celery.result import AsyncResult
+from django.http import JsonResponse
+
+logger = logging.getLogger(__name__)
+
+
+def task_status_view(request, task_id):
+    try:
+        # Get the task result by its task_id
+        task_result = AsyncResult(task_id)
+
+        # If the task is in progress, return the progress meta information
+        if task_result.state == 'PROGRESS':
+            response_data = {
+                'status': 'PROGRESS',
+                'current': task_result.info.get('current', 0),  # Current progress step
+                'total': task_result.info.get('total', 1),  # Total steps
+                'progress': (task_result.info.get('current', 0) / task_result.info.get('total', 1)) * 100,
+                'text': task_result.info.get('text', '')
+                # Progress percentage
+            }
+
+        # If the task is completed, return the result
+        elif task_result.state == 'SUCCESS':
+            response_data = {
+                'status': 'SUCCESS',
+                'result': task_result.result
+            }
+
+        # If the task has failed, return the error message
+        elif task_result.state == 'FAILURE':
+            response_data = {
+                'status': 'FAILURE',
+                'error': str(task_result.info) if isinstance(task_result.info, Exception) else task_result.info
+            }
+
+        # Handle other states (PENDING, REVOKED, etc.)
+        else:
+            response_data = {
+                'status': task_result.state
+            }
+
+        # Return the response as JSON
+        return JsonResponse(response_data)
+
+    except Exception as e:
+        # Catch any other unexpected exceptions and return as error
+        return JsonResponse({'status': 'error', 'message': str(e)}, status=500)

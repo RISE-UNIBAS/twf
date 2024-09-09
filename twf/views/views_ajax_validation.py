@@ -1,3 +1,4 @@
+"""Ajax views for validating metadata fields."""
 from django.http import JsonResponse
 
 from twf.forms.dynamic_forms import DynamicForm

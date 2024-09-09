@@ -237,7 +237,7 @@ class TWFDictionaryDictionaryExportView(TWFDictionaryView):
     page_title = 'Export Dictionary'
 
     def post(self, request, *args, **kwargs):
-
+        """Handle the POST request."""
         if "export_json" in request.POST:
             json_data = self.get_json_data()
             json_str = json.dumps(json_data, indent=4)
@@ -253,6 +253,7 @@ class TWFDictionaryDictionaryExportView(TWFDictionaryView):
         return response
 
     def get_json_data(self):
+        """Get the JSON data for the dictionary."""
         dictionary = Dictionary.objects.get(pk=self.kwargs.get('pk'))
 
         json_data = {
