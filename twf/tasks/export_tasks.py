@@ -2,7 +2,7 @@ import json
 import csv
 import pandas as pd
 from celery import shared_task
-from twf.models import Project, Document, Collection
+from twf.models import Project
 
 
 @shared_task(bind=True)

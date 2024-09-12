@@ -15,9 +15,8 @@ from django_tables2 import SingleTableView
 
 from twf.filters import DocumentFilter
 from twf.forms.dynamic_forms import DynamicForm
-from twf.forms.project_forms import ProjectForm, QueryDatabaseForm, CollectionForm, CollectionAddDocumentForm, \
-    DocumentForm
-from twf.models import Project, Document, TWF_GROUPS, Page, PageTag, Collection, CollectionItem
+from twf.forms.project_forms import ProjectForm, QueryDatabaseForm, DocumentForm
+from twf.models import Project, Document, TWF_GROUPS, Page, PageTag
 from twf.tables.tables import DocumentTable
 from twf.views.views_base import TWFHomeView, TWFView
 
@@ -47,8 +46,14 @@ class TWFProjectView(LoginRequiredMixin, TWFView):
                 'options': [
                     {'url': reverse('twf:project_query'), 'value': 'Query'},
                     {'url': reverse('twf:project_ai_query'), 'value': 'Ask ChatGPT'},
-                    {'url': reverse('twf:project_collections'), 'value': 'Collections'},
-                    {'url': reverse('twf:project_export'), 'value': 'Export'},
+                ]
+            },
+            {
+                'name': 'Export Data',
+                'options': [
+                    {'url': reverse('twf:project_export_documents'), 'value': 'Export Documents'},
+                    {'url': reverse('twf:project_export_collections'), 'value': 'Export Collections'},
+                    {'url': reverse('twf:project_export_project'), 'value': 'Export project'},
                 ]
             },
             {
@@ -65,13 +70,6 @@ class TWFProjectView(LoginRequiredMixin, TWFView):
         if len(context['navigation']['items']) > 1:
             context['navigation']['items'][1]['active'] = True
         return context
-
-    @staticmethod
-    def get_collections_sub_pages():
-        return {"options": [
-            {"url": reverse('twf:project_collections'), "value": "Overview"},
-            {"url": reverse('twf:project_collections_create'), "value": "Create New Collection"},
-        ]}
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

@@ -12,7 +12,7 @@ from twf.views.views_ajax_validation import validate_page_field, validate_docume
 from twf.views.views_base import TWFHomeView, TWFHomeLoginView, TWFHomePasswordChangeView, TWFHomeUserOverView, \
     TWFHomeUserManagementView
 from twf.views.views_collection import RemovePartView, SplitCollectionItemView, \
-    UpdateCollectionItemView, TWFProjectCollectionsView, TWFProjectCollectionsCreateView, \
+    UpdateCollectionItemView, TWFCollectionsView, TWFProjectCollectionsCreateView, \
     TWFProjectCollectionsDetailView, TWFProjectCollectionsReviewView, TWFProjectCollectionsAddDocumentView
 from twf.views.views_command import park_tag, unpark_tag, ungroup_tag
 from twf.views.views_dictionaries import TWFDictionaryView, TWFDictionaryOverviewView, TWFDictionaryDictionaryView, \
@@ -31,34 +31,28 @@ from twf.views.views_tags import TWFTagsView, TWFProjectTagsView, TWFProjectTags
 
 urlpatterns = [
     #############################
-    # FRAMEWORK
-    path('', TWFHomeView.as_view(),
-         name='home'),
-    path('login/', TWFHomeLoginView.as_view(),
-         name='login'),
-    path('logout/confirm/', TWFHomeView.as_view(page_title='Logout', template_name='twf/users/logout.html'),
-         name='user_logout'),
-    path('user/change/password/', TWFHomePasswordChangeView.as_view(),
-         name='user_change_password'),
-    path('user/overview/', TWFHomeUserOverView.as_view(),
-         name='user_overview'),
-    path('user/management/', TWFHomeUserManagementView.as_view(),
-         name='user_management'),
-    path('logout/', auth_views.LogoutView.as_view(next_page='twf:home'),
-         name='logout'),
+    # FRAMEWORK (HOME)
+    path('', TWFHomeView.as_view(), name='home'),
+    path('login/', TWFHomeLoginView.as_view(), name='login'),
+    path('logout/confirm/',
+         TWFHomeView.as_view(page_title='Logout', template_name='twf/users/logout.html'), name='user_logout'),
+    path('user/change/password/', TWFHomePasswordChangeView.as_view(), name='user_change_password'),
+    path('user/overview/', TWFHomeUserOverView.as_view(), name='user_overview'),
+    path('user/management/', TWFHomeUserManagementView.as_view(), name='user_management'),
+    path('logout/', auth_views.LogoutView.as_view(next_page='twf:home'), name='logout'),
+
+    # Select Project
+    path('project/select/<int:pk>/confirm/', TWFSelectProjectView.as_view(), name='project_select'),
+    path('project/select/<int:pk>', select_project, name='project_do_select'),
 
     #############################
     # PROJECT
-    path('project/select/<int:pk>/confirm/', TWFSelectProjectView.as_view(),
-         name='project_select'),
-    path('project/select/<int:pk>', select_project,
-         name='project_do_select'),
-    path('project/overview/', TWFProjectOverviewView.as_view(),
-         name='project_overview'),
-    path('project/setup/', TWFProjectSetupView.as_view(page_title='Project Setup'),
-         name='project_setup'),
-    path('project/setup/tk/export/', TWFProjectSetupView.as_view(template_name='twf/project/setup_export.html',
-                                                                 page_title='Project TK Export'),
+
+    # Project Data
+    path('project/overview/', TWFProjectOverviewView.as_view(), name='project_overview'),
+    path('project/setup/', TWFProjectSetupView.as_view(page_title='Project Setup'), name='project_setup'),
+    path('project/setup/tk/export/',
+         TWFProjectSetupView.as_view(template_name='twf/project/setup_export.html', page_title='Project TK Export'),
          name='project_tk_export'),
     path('project/setup/tk/structure/', TWFProjectSetupView.as_view(template_name='twf/project/setup_structure.html',
                                                                     page_title='Project TK Structure'),
@@ -66,17 +60,18 @@ urlpatterns = [
     path('project/setup/sheets/metadata/', TWFProjectSetupView.as_view(template_name='twf/project/setup_metadata.html',
                                                                        page_title='Project Sheets Metadata'),
          name='project_sheets_metadata'),
-    path('project/settings/', TWFProjectSettingsView.as_view(),
-         name='project_settings'),
-    path('project/export/', TWFExportDataView.as_view(),
-         name='project_export'),
-    path('project/query/', TWFProjectQueryView.as_view(),
-         name='project_query'),
-    path('project/ai/query/', TWFProjectAIQueryView.as_view(),
-         name='project_ai_query'),
+    path('project/settings/', TWFProjectSettingsView.as_view(), name='project_settings'),
 
-    path('project/batch/openai/', TWFProjectAIBatchView.as_view(),
-         name='project_batch_openai'),
+    # Project options
+    path('project/query/', TWFProjectQueryView.as_view(), name='project_query'),
+    path('project/ai/query/', TWFProjectAIQueryView.as_view(), name='project_ai_query'),
+
+    # Project: Export Data
+    path('project/export/documents/', TWFExportDataView.as_view(), name='project_export_documents'),
+    path('project/export/collections/', TWFExportDataView.as_view(), name='project_export_collections'),
+    path('project/export/projects/', TWFExportDataView.as_view(), name='project_export_project'),
+
+    path('project/batch/openai/', TWFProjectAIBatchView.as_view(), name='project_batch_openai'),
     path('project/batch/openai/ask-chatgpt/', TWFProjectAIBatchView.as_view(), name='project_batch_openai_ask-chatgpt'),
 
     #############################
@@ -89,28 +84,6 @@ urlpatterns = [
          name='name_documents'),
     path('project/document/<int:pk>/', TWFProjectDocumentView.as_view(),
          name='view_document'),
-
-    #############################
-    # COLLECTIONS
-    path('project/collections/', TWFProjectCollectionsView.as_view(),
-         name='project_collections'),
-    path('project/collections/create/', TWFProjectCollectionsCreateView.as_view(),
-         name='project_collections_create'),
-    path('project/collections/<int:pk>/', TWFProjectCollectionsDetailView.as_view(),
-         name='project_collections_view'),
-
-    path('project/collections/review/<int:pk>/', TWFProjectCollectionsReviewView.as_view(),
-         name='project_collection_review'),
-    path('project/collections/item/<int:item_id>/remove_part/<int:part_id>/', RemovePartView.as_view(),
-         name='project_collections_item_remove_part'),
-    path('project/collections/item/<int:pk>/split/<int:part_id>/', SplitCollectionItemView.as_view(),
-         name='project_collections_item_split'),
-
-    path('collections/item/update/<int:pk>/', UpdateCollectionItemView.as_view(),
-         name='project_collections_item_update'),
-
-    path('project/collections/<int:pk>/add/document', TWFProjectCollectionsAddDocumentView.as_view(),
-         name='project_collections_add_document'),
 
     #############################
     # TAGS
@@ -178,6 +151,26 @@ urlpatterns = [
                                                                  page_title='Batch Manual'),
          name='dictionaries_batch_openai'),
 
+    #############################
+    # COLLECTIONS
+    path('collections/', TWFCollectionsView.as_view(), name='collections'),
+    path('project/collections/create/', TWFProjectCollectionsCreateView.as_view(),
+         name='project_collections_create'),
+    path('project/collections/<int:pk>/', TWFProjectCollectionsDetailView.as_view(),
+         name='project_collections_view'),
+
+    path('project/collections/review/<int:pk>/', TWFProjectCollectionsReviewView.as_view(),
+         name='project_collection_review'),
+    path('project/collections/item/<int:item_id>/remove_part/<int:part_id>/', RemovePartView.as_view(),
+         name='project_collections_item_remove_part'),
+    path('project/collections/item/<int:pk>/split/<int:part_id>/', SplitCollectionItemView.as_view(),
+         name='project_collections_item_split'),
+
+    path('collections/item/update/<int:pk>/', UpdateCollectionItemView.as_view(),
+         name='project_collections_item_update'),
+
+    path('project/collections/<int:pk>/add/document', TWFProjectCollectionsAddDocumentView.as_view(),
+         name='project_collections_add_document'),
 
     #############################
     # AJAX CALLS

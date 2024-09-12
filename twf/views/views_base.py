@@ -66,6 +66,7 @@ class TWFView(TemplateView, ABC):
             {'url': reverse('twf:tags_overview'), 'value': 'Tags'},
             {'url': reverse('twf:metadata_overview'), 'value': 'Metadata'},
             {'url': reverse('twf:dictionaries'), 'value': 'Dictionaries'},
+            {'url': reverse('twf:collections'), 'value': 'Collections'},
         ]
         return nav
 

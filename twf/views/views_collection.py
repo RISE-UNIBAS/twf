@@ -1,33 +1,43 @@
 """ This module contains the views for the Collection model. """
 from django.contrib import messages
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import redirect
-from django.urls import reverse_lazy
+from django.urls import reverse_lazy, reverse
 from django.views import View
 from django.views.generic import FormView
 
 from twf.forms.project_forms import CollectionForm, CollectionAddDocumentForm
 from twf.models import CollectionItem, Collection
+from twf.views.views_base import TWFView
 from twf.views.views_project import TWFProjectView
 
 
-class TWFProjectCollectionsView(TWFProjectView):
+class TWFCollectionsView(LoginRequiredMixin, TWFView):
     """ View for the project collections page. """
-    template_name = 'twf/project/collections.html'
+    template_name = 'twf/collections/collections.html'
     page_title = 'Project Collections'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        if len(context['navigation']['items']) > 1:
+            context['navigation']['items'][5]['active'] = True
         context['collections'] = Collection.objects.filter(project_id=self.request.session.get('project_id'))
-        context['context_sub_nav'] = self.get_collections_sub_pages()
+        context['context_sub_nav'] = self.get_sub_navigation()
         return context
 
+    def get_sub_navigation(self):
+        return {"options": [
+            {"url": reverse('twf:collections'), "value": "Overview"},
+            {"url": reverse('twf:project_collections_create'), "value": "Create New Collection"},
+        ]}
 
-class TWFProjectCollectionsCreateView(FormView, TWFProjectView):
+
+class TWFProjectCollectionsCreateView(FormView, TWFCollectionsView):
     """ View for creating a new collection. """
-    template_name = 'twf/project/collections_create.html'
+    template_name = 'twf/collections/collections_create.html'
     page_title = 'Create New Collection'
     form_class = CollectionForm
-    success_url = reverse_lazy('twf:project_collections')
+    success_url = reverse_lazy('twf:collections')
 
     def form_valid(self, form):
         # Save the form
@@ -42,13 +52,13 @@ class TWFProjectCollectionsCreateView(FormView, TWFProjectView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['context_sub_nav'] = self.get_collections_sub_pages()
+        context['context_sub_nav'] = self.get_sub_navigation()
         return context
 
 
-class TWFProjectCollectionsDetailView(TWFProjectView):
+class TWFProjectCollectionsDetailView(TWFCollectionsView):
     """ View for the collection detail page. """
-    template_name = 'twf/project/collection_view.html'
+    template_name = 'twf/collections/collection_view.html'
     page_title = 'Collection'
 
     def get_context_data(self, **kwargs):
@@ -56,16 +66,16 @@ class TWFProjectCollectionsDetailView(TWFProjectView):
         collection = Collection.objects.get(pk=self.kwargs.get('pk'))
         context['collection'] = collection
         context['items'] = collection.items.all()
-        context['context_sub_nav'] = self.get_collections_sub_pages()
+        context['context_sub_nav'] = self.get_sub_navigation()
         return context
 
 
-class TWFProjectCollectionsAddDocumentView(FormView, TWFProjectView):
+class TWFProjectCollectionsAddDocumentView(FormView, TWFCollectionsView):
     """ View for adding a document to a collection. """
-    template_name = 'twf/project/collections_add_doc.html'
+    template_name = 'twf/collections/collections_add_doc.html'
     page_title = 'Add Document To Collection'
     form_class = CollectionAddDocumentForm
-    success_url = reverse_lazy('twf:project_collections')
+    success_url = reverse_lazy('twf:collections')
 
     def form_valid(self, form):
         # Save the form
@@ -88,13 +98,13 @@ class TWFProjectCollectionsAddDocumentView(FormView, TWFProjectView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['context_sub_nav'] = self.get_collections_sub_pages()
+        context['context_sub_nav'] = self.get_sub_navigation()
         return context
 
 
-class TWFProjectCollectionsReviewView(TWFProjectView):
+class TWFProjectCollectionsReviewView(TWFCollectionsView):
     """ View for reviewing collection items. """
-    template_name = 'twf/project/collection_review.html'
+    template_name = 'twf/collections/collection_review.html'
     page_title = 'Review Collection Item'
 
     def get_context_data(self, **kwargs):
@@ -105,7 +115,7 @@ class TWFProjectCollectionsReviewView(TWFProjectView):
         item = collection.items.filter(status__in=['open', '', None]).first()
         context['item'] = item
         context['collection'] = collection
-        context['context_sub_nav'] = self.get_collections_sub_pages()
+        context['context_sub_nav'] = self.get_sub_navigation()
 
         return context
 
