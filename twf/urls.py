@@ -3,6 +3,7 @@ from django.urls import path
 from django.contrib.auth import views as auth_views
 
 from twf.tasks.task_status import task_status_view
+from twf.views.project.views_project_setup import TWFProjectSetupView
 from twf.views.views_ajax_download import ajax_transkribus_download_export, download_progress_view
 from twf.views.views_ajax_export import ajax_transkribus_request_export, ajax_transkribus_request_export_status, \
     ajax_transkribus_reset_export
@@ -20,12 +21,13 @@ from twf.views.views_dictionaries import TWFDictionaryView, TWFDictionaryOvervie
     TWFDictionaryDictionaryEntryView, TWFDictionaryImportView, TWFDictionaryDictionaryExportView, \
     TWFDictionaryBatchGeonamesView, TWFDictionaryNormDataView, TWFDictionaryCreateView, skip_entry
 from twf.views.views_export import TWFExportDataView
-from twf.views.views_metadata import TWFMetadataReviewDocumentsView, \
+from twf.views.metadata.views_metadata import TWFMetadataReviewDocumentsView, \
     TWFMetadataLoadDataView, TWFMetadataExtractTagsView, TWFMetadataReviewPagesView, TWFMetadataOverviewView
-from twf.views.views_project import TWFSelectProjectView, select_project, TWFProjectView, TWFProjectDocumentsView, \
-    TWFProjectSettingsView, TWFProjectSetupView, TWFProjectDocumentView, TWFProjectQueryView, TWFProjectOverviewView, \
-    TWFProjectDocumentCreateView, TWFProjectDocumentNameView
-from twf.views.views_project_ai import TWFProjectAIBatchView, TWFProjectAIQueryView
+from twf.views.project.views_project import TWFSelectProjectView, select_project, TWFProjectDocumentsView, \
+    TWFProjectSettingsView, TWFProjectQueryView, TWFProjectOverviewView
+from twf.views.project.views_project_ai import TWFProjectAIBatchView, TWFProjectAIQueryView
+from twf.views.project.views_project_documents import TWFProjectDocumentCreateView, TWFProjectDocumentNameView, \
+    TWFProjectDocumentView
 from twf.views.views_tags import TWFTagsView, TWFProjectTagsView, TWFProjectTagsOpenView, TWFProjectTagsParkedView, \
     TWFProjectTagsResolvedView, TWFProjectTagsIgnoredView, TWFTagsDatesView, TWFTagsGroupView, TWFTagsOverviewView
 
@@ -67,9 +69,15 @@ urlpatterns = [
     path('project/ai/query/', TWFProjectAIQueryView.as_view(), name='project_ai_query'),
 
     # Project: Export Data
-    path('project/export/documents/', TWFExportDataView.as_view(), name='project_export_documents'),
-    path('project/export/collections/', TWFExportDataView.as_view(), name='project_export_collections'),
-    path('project/export/projects/', TWFExportDataView.as_view(), name='project_export_project'),
+    path('project/export/documents/',
+         TWFExportDataView.as_view(template_name='twf/project/export/export_documents.html'),
+         name='project_export_documents'),
+    path('project/export/collections/',
+         TWFExportDataView.as_view(template_name='twf/project/export/export_collections.html'),
+         name='project_export_collections'),
+    path('project/export/projects/',
+         TWFExportDataView.as_view(template_name='twf/project/export/export_project.html'),
+         name='project_export_project'),
 
     path('project/batch/openai/', TWFProjectAIBatchView.as_view(), name='project_batch_openai'),
     path('project/batch/openai/ask-chatgpt/', TWFProjectAIBatchView.as_view(), name='project_batch_openai_ask-chatgpt'),

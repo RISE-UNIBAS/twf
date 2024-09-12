@@ -9,7 +9,6 @@ from django.views.generic import FormView
 from twf.forms.project_forms import CollectionForm, CollectionAddDocumentForm
 from twf.models import CollectionItem, Collection
 from twf.views.views_base import TWFView
-from twf.views.views_project import TWFProjectView
 
 
 class TWFCollectionsView(LoginRequiredMixin, TWFView):

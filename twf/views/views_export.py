@@ -3,12 +3,12 @@ from django.http import JsonResponse
 from django.views.generic import FormView
 
 from twf.forms.export_forms import ExportDataForm
-from twf.views.views_project import TWFProjectView
+from twf.views.project.views_project import TWFProjectView
 from twf.tasks.export_tasks import export_data_task
 
 
 class TWFExportDataView(FormView, TWFProjectView):
-    template_name = 'twf/project/export.html'  # Path to your export template
+    template_name = None
     page_title = 'Export Data'
     form_class = ExportDataForm
     success_url = reverse_lazy('export_data')  # You can change this to the desired success URL

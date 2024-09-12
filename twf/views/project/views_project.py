@@ -34,7 +34,6 @@ class TWFProjectView(LoginRequiredMixin, TWFView):
                     {'url': reverse('twf:project_setup'), 'value': 'Setup', 'active_on': [
                         reverse('twf:project_tk_export'),
                         reverse('twf:project_tk_structure'),
-                        reverse('twf:project_sheets_metadata')
                     ]},
                     {'url': reverse('twf:project_documents'), 'value': 'Documents'},
                     {'url': reverse('twf:project_documents'), 'value': 'Pages'},
@@ -118,53 +117,6 @@ class TWFProjectDocumentsView(SingleTableView, FilterView, TWFProjectView):
         ]}
 
 
-class TWFProjectDocumentView(TWFProjectView):
-    template_name = 'twf/project/document.html'
-    page_title = 'Document'
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        project_id = self.request.session.get('project_id')
-        if project_id:
-            context['document'] = Document.objects.get(pk=self.kwargs.get('pk'))
-        return context
-
-
-class TWFProjectDocumentCreateView(FormView, TWFProjectView):
-    template_name = 'twf/project/create_document.html'
-    page_title = 'Create Document'
-    form_class = DocumentForm
-    success_url = reverse_lazy('twf:project_documents')
-    object = None
-
-    def form_valid(self, form):
-        # Save the form
-        self.object = form.save(commit=False)
-        self.object.project_id = self.request.session.get('project_id')
-        self.object.save(current_user=self.request.user)
-
-        # Add a success message
-        messages.success(self.request, 'Document has been created successfully.')
-        # Redirect to the success URL
-        return super().form_valid(form)
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        project_id = self.request.session.get('project_id')
-        context['context_sub_nav'] = TWFProjectDocumentsView.get_sub_pages()
-        return context
-
-
-class TWFProjectDocumentNameView(TWFProjectView):
-    template_name = 'twf/project/name_documents.html'
-    page_title = 'Name Documents'
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        project_id = self.request.session.get('project_id')
-        context['context_sub_nav'] = TWFProjectDocumentsView.get_sub_pages()
-        return context
-
 
 class TWFProjectSettingsView(FormView, TWFProjectView):
     template_name = 'twf/project/settings.html'
@@ -191,19 +143,7 @@ class TWFProjectSettingsView(FormView, TWFProjectView):
         return super().form_valid(form)
 
 
-class TWFProjectSetupView(TWFProjectView):
-    template_name = 'twf/project/setup.html'
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['context_sub_nav'] = {"options": [
-            {"url": reverse('twf:project_setup'), "value": "Setup Overview"},
-            {"url": reverse('twf:project_tk_export'), "value": "Request Transkribus Export"},
-            {"url": reverse('twf:project_tk_structure'), "value": "Extract Transkribus Data"},
-            {"url": reverse('twf:project_tk_structure'), "value": "Import Data From JSON File"},
-            {"url": reverse('twf:project_sheets_metadata'), "value": "Sheets Metadata"},
-        ]}
-        return context
 
 
 class TWFSelectProjectView(LoginRequiredMixin, TWFHomeView):

@@ -13,3 +13,5 @@ class TestTagAssigner(TestCase):
         response, elapsed_time = client.prompt(model="gpt-4-turbo", prompt="What is the capital of France?")
         print(response.choices[0].message.content)
         self.assertTrue(True)
+
+

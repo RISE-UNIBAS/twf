@@ -1,6 +1,6 @@
-from django.contrib.auth.models import User
+"""Django management command to structure a project."""
 from django.core.management import BaseCommand
-from twf.views.views_ajax_extract import extract_zip_export
+from twf.tasks.structure_tasks import extract_zip_export_task
 
 
 class Command(BaseCommand):
@@ -17,5 +17,6 @@ class Command(BaseCommand):
         print("Start structuring...")
         project_id = options['project_id']
         user_id = options['user_id']
-        user = User.objects.get(pk=user_id)
-        extract_zip_export(project_id, user)
+        task_result = extract_zip_export_task.delay(project_id, user_id)
+
+        self.stdout.write(self.style.SUCCESS(f'Task triggered with ID: {task_result.id}'))

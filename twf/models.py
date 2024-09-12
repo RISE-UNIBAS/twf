@@ -202,6 +202,16 @@ class Project(TimeStampedModel):
                                             help_text='A dictionary of metadata fields for pages.')
     """A dictionary of metadata fields for pages."""
 
+    document_export_configuration = models.JSONField(default=dict, blank=True,
+                                                     verbose_name='Document Export Configuration',
+                                                     help_text='A dictionary of export configurations for documents.')
+    """A dictionary of export configurations for documents."""
+
+    page_export_configuration = models.JSONField(default=dict, blank=True,
+                                                    verbose_name='Page Export Configuration',
+                                                    help_text='A dictionary of export configurations for pages.')
+    """A dictionary of export configurations for pages."""
+
     def get_valid_cols(self):
         """Return the valid columns for metadata."""
         if self.metadata_google_valid_columns:
