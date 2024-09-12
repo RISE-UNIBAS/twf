@@ -26,10 +26,15 @@ class TWFCollectionsView(LoginRequiredMixin, TWFView):
         return context
 
     def get_sub_navigation(self):
-        return {"options": [
-            {"url": reverse('twf:collections'), "value": "Overview"},
-            {"url": reverse('twf:project_collections_create'), "value": "Create New Collection"},
-        ]}
+        return [
+            {
+                'name': 'Collections',
+                'options': [
+                    {"url": reverse('twf:collections'), "value": "Overview"},
+                    {"url": reverse('twf:project_collections_create'), "value": "Create New Collection"},
+                ]
+            }
+        ]
 
 
 class TWFProjectCollectionsCreateView(FormView, TWFCollectionsView):

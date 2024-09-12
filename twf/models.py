@@ -149,6 +149,7 @@ class Project(TimeStampedModel):
     """The owner of the project."""
 
     members = models.ManyToManyField(UserProfile, related_name='projects',
+                                     blank=True,
                                      verbose_name='Project Members',
                                      help_text='The members of the project. Their roles can be adjusted'
                                                'in the user management section.')

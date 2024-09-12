@@ -1,4 +1,3 @@
-import copy
 from statistics import median
 
 from django.contrib import messages
@@ -38,6 +37,7 @@ class TWFProjectView(LoginRequiredMixin, TWFView):
                         reverse('twf:project_sheets_metadata')
                     ]},
                     {'url': reverse('twf:project_documents'), 'value': 'Documents'},
+                    {'url': reverse('twf:project_documents'), 'value': 'Pages'},
                     {'url': reverse('twf:project_settings'), 'value': 'Settings'},
                 ]
             },
@@ -59,7 +59,9 @@ class TWFProjectView(LoginRequiredMixin, TWFView):
             {
                 'name': 'Project Batch',
                 'options': [
-                    {'url': reverse('twf:project_batch_openai'), 'value': 'Open AI'},
+                    {'url': reverse('twf:project_batch_openai'), 'value': 'ChatGPT'},
+                    {'url': reverse('twf:project_batch_openai'), 'value': 'Gemini'},
+                    {'url': reverse('twf:project_batch_openai'), 'value': 'Claude'},
                 ]
             },
         ]
