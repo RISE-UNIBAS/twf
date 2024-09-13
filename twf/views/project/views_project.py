@@ -2,22 +2,16 @@ from statistics import median
 
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.contrib.auth.models import Group
 from django.db import connection
 from django.db.models import Count, Avg, Q
 from django.shortcuts import redirect, render
 from django.urls import reverse, reverse_lazy
-from django.utils.safestring import mark_safe
 from django.views.generic import FormView
-from django_filters.views import FilterView
-from django_tables2 import SingleTableView
 
-from twf.filters import DocumentFilter
 from twf.forms.dynamic_forms import DynamicForm
-from twf.forms.project_forms import ProjectForm, QueryDatabaseForm, DocumentForm
-from twf.models import Project, Document, TWF_GROUPS, Page, PageTag
-from twf.tables.tables import DocumentTable
-from twf.views.views_base import TWFHomeView, TWFView
+from twf.forms.project_forms import ProjectForm, QueryDatabaseForm
+from twf.models import Project, Document, Page, PageTag
+from twf.views.views_base import TWFView
 
 
 class TWFProjectView(LoginRequiredMixin, TWFView):
@@ -35,9 +29,7 @@ class TWFProjectView(LoginRequiredMixin, TWFView):
                         reverse('twf:project_tk_export'),
                         reverse('twf:project_tk_structure'),
                     ]},
-                    {'url': reverse('twf:project_documents'), 'value': 'Documents'},
-                    {'url': reverse('twf:project_documents'), 'value': 'Pages'},
-                    {'url': reverse('twf:project_settings'), 'value': 'Settings'},
+                    {'url': reverse('twf:project_settings'), 'value': 'Project Settings'},
                 ]
             },
             {
@@ -45,14 +37,6 @@ class TWFProjectView(LoginRequiredMixin, TWFView):
                 'options': [
                     {'url': reverse('twf:project_query'), 'value': 'Query'},
                     {'url': reverse('twf:project_ai_query'), 'value': 'Ask ChatGPT'},
-                ]
-            },
-            {
-                'name': 'Export Data',
-                'options': [
-                    {'url': reverse('twf:project_export_documents'), 'value': 'Export Documents'},
-                    {'url': reverse('twf:project_export_collections'), 'value': 'Export Collections'},
-                    {'url': reverse('twf:project_export_project'), 'value': 'Export project'},
                 ]
             },
             {
@@ -66,6 +50,9 @@ class TWFProjectView(LoginRequiredMixin, TWFView):
         ]
         return sub_nav
 
+    def get_navigation_index(self):
+        return 1
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         if len(context['navigation']['items']) > 1:
@@ -76,46 +63,6 @@ class TWFProjectView(LoginRequiredMixin, TWFView):
         super().__init__(*args, **kwargs)
         if self.page_title is None:
             self.page_title = kwargs.get('page_title', 'Project View')
-
-
-class TWFProjectDocumentsView(SingleTableView, FilterView, TWFProjectView):
-    """View for displaying project documents."""
-    template_name = 'twf/project/documents.html'
-    page_title = 'Project Documents'
-    table_class = DocumentTable
-    filterset_class = DocumentFilter
-    paginate_by = 10
-    model = Document
-
-    def get_queryset(self):
-        queryset = Document.objects.filter(project_id=self.request.session.get('project_id'))
-        self.filterset = self.filterset_class(self.request.GET, queryset=queryset)
-        return self.filterset.qs
-
-    def get(self, request, *args, **kwargs):
-        self.object_list = self.get_queryset()
-        context = self.get_context_data()
-        return self.render_to_response(context)
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['page_title'] = self.page_title
-        context['filter'] = self.get_filterset(self.filterset_class)
-        context['context_sub_nav'] = self.get_sub_pages()
-        return context
-
-    @staticmethod
-    def get_sub_pages():
-        return {"options": [
-            {"url": reverse('twf:project_documents'), "value": "Overview"},
-            {"url": reverse('twf:create_document'), "value": "Manually Create Document"},
-            {"url": reverse('twf:name_documents'), "value": "Name Documents"},
-            {"url": reverse('twf:project_setup'),
-             "value": mark_safe('<i class="fa-solid fa-arrow-right-from-bracket"></i> Import Documents')},
-            {"url": reverse('twf:metadata_load_metadata'),
-             "value": mark_safe('<i class="fa-solid fa-arrow-right-from-bracket"></i> Load Metadata')},
-        ]}
-
 
 
 class TWFProjectSettingsView(FormView, TWFProjectView):
@@ -142,41 +89,6 @@ class TWFProjectSettingsView(FormView, TWFProjectView):
         # Redirect to the success URL
         return super().form_valid(form)
 
-
-
-
-
-class TWFSelectProjectView(LoginRequiredMixin, TWFHomeView):
-    template_name = 'twf/project/select.html'
-    page_title = 'Select Project'
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        user = self.request.user
-
-        project = Project.objects.get(pk=self.kwargs.get('pk'))
-        user_role = 'member'
-        if user.is_superuser:
-            user_role = 'admin'
-        if project.owner == user:
-            user_role = 'owner'
-        if project.members.filter(pk=user.pk).exists():
-            user_role = 'member'
-
-        groups = []
-        for group in TWF_GROUPS:
-            db_group, created = Group.objects.get_or_create(name=group)
-            groups.append((db_group, user.groups.filter(name=group).exists()))
-
-        context.update(
-            {
-                'project': project,
-                'user_role': user_role,
-                'groups': groups
-            }
-        )
-
-        return context
 
 
 class TWFProjectQueryView(FormView, TWFProjectView):
@@ -329,4 +241,4 @@ def dynamic_form_view(request, pk):
     else:
         form = DynamicForm(json_data=json_data)
 
-    return render(request, 'twf/project/document_metadata.html', {'form': form})
+    return render(request, 'twf/documents/document_metadata.html', {'form': form})

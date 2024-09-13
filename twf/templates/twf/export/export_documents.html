@@ -1,0 +1,31 @@
+cmd{% extends 'twf/base/base.html' %}
+{% load crispy_forms_tags %}
+{% load nav_tags %}
+
+{% block content %}
+     <div class="border rounded bg-light mt-0 p-3">
+        <h1 class="display-6">Export Documents</h1>
+        <p class="lead">Export documents from the project to JSON data.</p>
+         
+        <div class="row">
+            <div class="col-md-6">
+                {% crispy form %}
+                
+                <p>Document data keys:</p>
+                <p class="small">    
+                    {{ available_doc_data|pretty_json }}
+                </p>
+                
+                <p>Page data keys:</p>
+                <p class="small">
+                    {{ available_page_data|pretty_json }}
+                </p>
+            </div>
+            
+            <div class="col-md-6">
+                <code id="json">{{ json_data|pretty_json }}</code>
+                {{ warnings }}
+            </div>
+        </div>      
+     </div>
+{% endblock %}

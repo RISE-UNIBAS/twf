@@ -54,6 +54,9 @@ class TWFTagsView(LoginRequiredMixin, TWFView):
         ]
         return sub_nav
 
+    def get_navigation_index(self):
+        return 3
+
     def get_tag_types(self):
         """Get the distinct tag types."""
         project = self.get_project()
@@ -91,7 +94,6 @@ class TWFTagsView(LoginRequiredMixin, TWFView):
     def get_context_data(self, **kwargs):
         """Get the context data."""
         context = super().get_context_data(**kwargs)
-        context['navigation']['items'][2]['active'] = True
         return context
 
     @method_decorator(never_cache)

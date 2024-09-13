@@ -61,6 +61,9 @@ class TWFDictionaryView(LoginRequiredMixin, TWFView):
         ]
         return sub_nav
 
+    def get_navigation_index(self):
+        return 5
+
     def get_dictionaries(self):
         """Get the dictionaries."""
         project = self.get_project()
@@ -69,7 +72,6 @@ class TWFDictionaryView(LoginRequiredMixin, TWFView):
     def get_context_data(self, **kwargs):
         """Get the context data."""
         context = super().get_context_data(**kwargs)
-        context['navigation']['items'][4]['active'] = True
         return context
 
     def __init__(self, *args, **kwargs):

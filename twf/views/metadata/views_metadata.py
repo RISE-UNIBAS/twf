@@ -11,11 +11,10 @@ from twf.views.views_base import TWFView
 class TWFMetadataView(LoginRequiredMixin, TWFView):
     """Base view for all project views."""
     template_name = 'twf/metadata/overview.html'
-    page_title = 'Tags Overview'
+    page_title = 'Metadata Overview'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['navigation']['items'][3]['active'] = True
         return context
 
     def get_sub_navigation(self):
@@ -44,6 +43,9 @@ class TWFMetadataView(LoginRequiredMixin, TWFView):
             }
         ]
         return sub_nav
+
+    def get_navigation_index(self):
+        return 4
 
 
 class TWFMetadataOverviewView(TWFMetadataView):

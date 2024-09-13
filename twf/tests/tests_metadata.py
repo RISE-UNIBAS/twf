@@ -1,6 +1,7 @@
 from django.test import TestCase
 
-from twf.views.export.export_utils import transform_page_metadata
+from twf.models import Document, Page, User, Project
+from twf.views.export.export_utils import create_data_from_config
 
 
 class MetadataTransformationTest(TestCase):
@@ -8,31 +9,43 @@ class MetadataTransformationTest(TestCase):
     def setUp(self):
         # Example configuration used for transformation
         self.config = {
-            "pages": {
-                "page_number": {
-                    "value": "p. {page}"
-                },
-                "tags.animals": {
-                    "value": "tags1"
-                },
-                "tags.cities": {
-                    "value": "tags2"
-                }
+            "schema": {
+                "value": "http://some.url.to/schema.json"
+            },
+            "project.name.short": {
+                "value": "Static title"
+            },
+            "project.name.long": {
+                "value": "Some longer static title"
+            },
+            "page_number": {
+                "value": "p. {page}"
+            },
+            "tags.animals": {
+                "value": "{tags1}",
+                "empty_value": []
+            },
+            "tags.cities": {
+                "value": "{tags2}",
+                "empty_value": []
             }
         }
 
         # Example metadata input for the test
-        self.page_metadata = {
+        self.metadata = {
             "page": 23,
             "tags1": ["lion", "zebra"],
             "tags2": ["new york", "london"]
         }
 
-    def test_transform_metadata_correctly(self):
-        """
-        Test that metadata is correctly transformed based on the provided configuration.
-        """
-        expected_output = {
+        self.expected_output = {
+            "schema": "http://some.url.to/schema.json",
+            "project": {
+                "name": {
+                    "short": "Static title",
+                    "long": "Some longer static title"
+                }
+            },
             "page_number": "p. 23",
             "tags": {
                 "animals": ["lion", "zebra"],
@@ -40,11 +53,15 @@ class MetadataTransformationTest(TestCase):
             }
         }
 
+    def test_transform_metadata_correctly(self):
+        """
+        Test that metadata is correctly transformed based on the provided configuration.
+        """
         # Call the function to transform metadata
-        result = transform_page_metadata(self.page_metadata, self.config)
+        result = create_data_from_config(self.metadata, self.config)
 
         # Assert the transformed result matches the expected output
-        self.assertEqual(result, expected_output)
+        self.assertEqual(result, self.expected_output)
 
     def test_missing_keys_handled_gracefully(self):
         """
@@ -52,20 +69,15 @@ class MetadataTransformationTest(TestCase):
         """
         incomplete_metadata = {
             "page": 23,
-            "tags1": ["lion"]
+            "tags1": ["lion", "zebra"],
             # "tags2" is missing
         }
 
         # Expected output when tags2 is missing
-        expected_output = {
-            "page_number": "p. 23",
-            "tags": {
-                "animals": ["lion"],
-                "cities": []  # Should handle missing tags2 gracefully
-            }
-        }
+        expected_output = self.expected_output
+        expected_output["tags"]["cities"] = []
 
-        result = transform_page_metadata(incomplete_metadata, self.config)
+        result = create_data_from_config(incomplete_metadata, self.config)
 
         # Assert that missing keys are handled without errors
         self.assertEqual(result, expected_output)
@@ -77,15 +89,12 @@ class MetadataTransformationTest(TestCase):
         empty_metadata = {}
 
         # Expected output for empty metadata
-        expected_output = {
-            "page_number": "p. ",
-            "tags": {
-                "animals": [],
-                "cities": []
-            }
-        }
+        expected_output = self.expected_output
+        expected_output["tags"]["animals"] = []
+        expected_output["tags"]["cities"] = []
+        expected_output["page_number"] = ""
 
-        result = transform_page_metadata(empty_metadata, self.config)
+        result = create_data_from_config(empty_metadata, self.config)
 
         # Assert the transformed result is empty or minimally structured
         self.assertEqual(result, expected_output)

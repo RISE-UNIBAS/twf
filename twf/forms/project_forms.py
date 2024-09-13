@@ -31,7 +31,8 @@ class ProjectForm(forms.ModelForm):
                   'tag_type_translator', 'ignored_tag_types',
                   'transkribus_username', 'transkribus_password',
                   'geonames_username', 'openai_api_key',
-                  'document_metadata_fields', 'page_metadata_fields']
+                  'document_metadata_fields', 'page_metadata_fields',
+                  'document_export_configuration', 'page_export_configuration']
         widgets = {
             'description': forms.Textarea(attrs={'rows': 5}),
             'owner': Select2Widget(attrs={'style': 'width: 100%;'}),
@@ -42,7 +43,9 @@ class ProjectForm(forms.ModelForm):
             'transkribus_password': PasswordInputRetain(),
             'selected_dictionaries': Select2MultipleWidget(attrs={'style': 'width: 100%;'}),
             'document_metadata_fields': forms.Textarea(attrs={'rows': 3}),
-            'field_metadata_fields': forms.Textarea(attrs={'rows': 3})
+            'field_metadata_fields': forms.Textarea(attrs={'rows': 3}),
+            'document_export_configuration': forms.Textarea(attrs={'rows': 3}),
+            'page_export_configuration': forms.Textarea(attrs={'rows': 3}),
         }
 
     def __init__(self, *args, **kwargs):
@@ -163,6 +166,20 @@ class ProjectForm(forms.ModelForm):
                 Column('page_metadata_fields', css_class='form-group col-6 mb-3'),
                 css_class='row form-row'
             ),
+            Row(
+                Div(
+                    HTML(
+                        '<strong>7.) Export Configuration</strong>'
+                    ),
+                    css_class='col-12 mb-3'
+                ),
+                css_class='row form-row'
+            ),
+            Row(
+                Column('document_export_configuration', css_class='form-group col-6 mb-3'),
+                Column('page_export_configuration', css_class='form-group col-6 mb-3'),
+                css_class='row form-row'
+            ),
             Div(
                 Submit('submit', 'Save Settings', css_class='btn btn-dark'),
                 css_class='text-end pt-3'
@@ -170,7 +187,6 @@ class ProjectForm(forms.ModelForm):
         )
 
         self.helper = helper
-
 
 class AIQueryDatabaseForm(forms.Form):
     """Form for querying the AI model with a question and documents."""

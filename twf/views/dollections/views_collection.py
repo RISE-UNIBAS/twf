@@ -18,8 +18,6 @@ class TWFCollectionsView(LoginRequiredMixin, TWFView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        if len(context['navigation']['items']) > 1:
-            context['navigation']['items'][5]['active'] = True
         context['collections'] = Collection.objects.filter(project_id=self.request.session.get('project_id'))
         context['context_sub_nav'] = self.get_sub_navigation()
         return context
@@ -34,6 +32,9 @@ class TWFCollectionsView(LoginRequiredMixin, TWFView):
                 ]
             }
         ]
+
+    def get_navigation_index(self):
+        return 6
 
 
 class TWFProjectCollectionsCreateView(FormView, TWFCollectionsView):
