@@ -33,7 +33,6 @@ class TWFDictionaryView(LoginRequiredMixin, TWFView):
                             'value': twf_dict.label,
                             'active_on': [
                                 reverse('twf:dictionaries_edit', kwargs={'pk': twf_dict.pk}),
-                                reverse('twf:dictionaries_export', kwargs={'pk': twf_dict.pk}),
                             ]})
 
         sub_nav = [
@@ -231,67 +230,6 @@ class TWFDictionaryDictionaryEditView(FormView, TWFDictionaryView):
         messages.success(self.request, 'Dictionary settings have been updated successfully.')
         # Redirect to the success URL
         return super().form_valid(form)
-
-
-class TWFDictionaryDictionaryExportView(TWFDictionaryView):
-    """Export a dictionary."""
-    template_name = 'twf/dictionaries/dictionary_export.html'
-    page_title = 'Export Dictionary'
-
-    def post(self, request, *args, **kwargs):
-        """Handle the POST request."""
-        if "export_json" in request.POST:
-            json_data = self.get_json_data()
-            json_str = json.dumps(json_data, indent=4)
-            response = HttpResponse(json_str, content_type='application/json')
-            response['Content-Disposition'] = 'attachment; filename="data.json"'
-        elif "export_csv" in request.POST:
-            csv_data = self.get_csv_data()
-            response = HttpResponse(csv_data, content_type='text/csv')
-            response['Content-Disposition'] = 'attachment; filename="data.csv"'
-        else:
-            response = redirect('twf:dictionary', pk=self.kwargs.get('pk'))
-
-        return response
-
-    def get_json_data(self):
-        """Get the JSON data for the dictionary."""
-        dictionary = Dictionary.objects.get(pk=self.kwargs.get('pk'))
-
-        json_data = {
-            "name": dictionary.label,
-            "type": dictionary.type,
-            "metadata": {},
-            "entries": []
-        }
-
-        entries = dictionary.entries.all()
-        for entry in entries:
-            json_data["entries"].append(
-                {
-                    "label": entry.label,
-                    "variations": list(entry.variations.all().values_list('variation', flat=True))
-                }
-            )
-        return json_data
-
-    def get_csv_data(self):
-        csv_data = 'entry;variations\n'
-        dictionary = Dictionary.objects.get(pk=self.kwargs.get('pk'))
-        entries = dictionary.entries.all()
-        for entry in entries:
-            csv_data += f'{entry.label};'
-            variations = entry.variations.all()
-            for variation in variations:
-                csv_data += f'{variation.variation},'
-            csv_data += '\n'
-        return csv_data
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['page_title'] = self.page_title
-        context['dictionary'] = Dictionary.objects.get(pk=self.kwargs.get('pk')) if self.kwargs.get('pk') else None
-        return context
 
 
 class TWFDictionaryNormDataView(TWFDictionaryView):

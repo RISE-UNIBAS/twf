@@ -80,7 +80,7 @@ class TWFDocumentsBrowseView(SingleTableView, FilterView, TWFDocumentView):
         return context
 
 
-class TWFProjectDocumentCreateView(FormView, TWFDocumentView):
+class TWFDocumentCreateView(FormView, TWFDocumentView):
     template_name = 'twf/documents/create_document.html'
     page_title = 'Create Document'
     form_class = DocumentForm
@@ -103,7 +103,7 @@ class TWFProjectDocumentCreateView(FormView, TWFDocumentView):
         return context
 
 
-class TWFProjectDocumentNameView(TWFDocumentView):
+class TWFDocumentNameView(TWFDocumentView):
     template_name = 'twf/documents/name_documents.html'
     page_title = 'Name Documents'
 

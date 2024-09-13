@@ -23,15 +23,28 @@ class TWFCollectionsView(LoginRequiredMixin, TWFView):
         return context
 
     def get_sub_navigation(self):
-        return [
+        sub_nav = [
             {
-                'name': 'Collections',
+                'name': 'Overview',
                 'options': [
                     {"url": reverse('twf:collections'), "value": "Overview"},
                     {"url": reverse('twf:project_collections_create'), "value": "Create New Collection"},
                 ]
+            },
+            {
+                'name': 'Your collections',
+                'options': []
             }
         ]
+
+        collections = Collection.objects.filter(project=self.get_project())
+        for collection in collections:
+            sub_nav[1]['options'].append({
+                'url': reverse('twf:collections_view', kwargs={'pk': collection.pk}),
+                'value': collection.title
+            })
+
+        return sub_nav
 
     def get_navigation_index(self):
         return 6

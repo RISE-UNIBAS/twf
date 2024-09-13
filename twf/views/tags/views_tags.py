@@ -28,11 +28,17 @@ class TWFTagsView(LoginRequiredMixin, TWFView):
         """Get the sub navigation."""
         sub_nav = [
             {
-                'name': 'Tag Data',
+                'name': 'Data',
                 'options': [
                     {'url': reverse('twf:tags_overview'), 'value': 'Overview'},
                     {'url': reverse('twf:tags_all'), 'value': 'All Tags'},
                     {'url': reverse('twf:tags_settings'), 'value': 'Settings'},
+                ]
+            },
+            {
+                'name': 'Tag Extraction',
+                'options': [
+                    {'url': reverse('twf:tags_extract'), 'value': 'Extract Tags'},
                 ]
             },
             {
@@ -110,6 +116,12 @@ class TWFTagsView(LoginRequiredMixin, TWFView):
 
         if self.page_title is None:
             self.page_title = kwargs.get('page_title', 'Tags View')
+
+
+class TWFTagsExtractView(TWFTagsView):
+    """View for the tags overview."""
+    template_name = 'twf/tags/extract.html'
+    page_title = 'Extract Tags'
 
 
 class TWFTagsOverviewView(TWFTagsView):

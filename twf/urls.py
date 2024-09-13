@@ -3,7 +3,8 @@ from django.urls import path
 from django.contrib.auth import views as auth_views
 
 from twf.tasks.task_status import task_status_view
-from twf.views.documents.views_documents import TWFDocumentsOverviewView, TWFDocumentsBrowseView
+from twf.views.documents.views_documents import TWFDocumentsOverviewView, TWFDocumentsBrowseView, TWFDocumentCreateView, \
+    TWFDocumentNameView
 from twf.views.home.views_home import TWFHomeView, TWFHomeLoginView, TWFHomePasswordChangeView, TWFHomeUserOverView, \
     TWFHomeUserManagementView, TWFSelectProjectView
 from twf.views.project.views_project_setup import TWFProjectSetupView
@@ -19,18 +20,18 @@ from twf.views.dollections.views_collection import RemovePartView, SplitCollecti
 from twf.views.views_command import park_tag, unpark_tag, ungroup_tag
 from twf.views.dictionaries.views_dictionaries import TWFDictionaryView, TWFDictionaryOverviewView, TWFDictionaryDictionaryView, \
     delete_variation, TWFDictionaryDictionaryEditView, TWFDictionaryDictionaryEntryEditView, \
-    TWFDictionaryDictionaryEntryView, TWFDictionaryImportView, TWFDictionaryDictionaryExportView, \
+    TWFDictionaryDictionaryEntryView, TWFDictionaryImportView, \
     TWFDictionaryBatchGeonamesView, TWFDictionaryNormDataView, TWFDictionaryCreateView, skip_entry
 from twf.views.export.views_export import TWFExportDocumentsView, TWFExportCollectionsView, TWFExportProjectView, \
-    TWFExportView
+    TWFExportOverviewView, TWFExportTagsView, TWFExportDictionariesView, TWFExportDictionaryView
 from twf.views.metadata.views_metadata import TWFMetadataReviewDocumentsView, \
     TWFMetadataLoadDataView, TWFMetadataExtractTagsView, TWFMetadataReviewPagesView, TWFMetadataOverviewView
 from twf.views.project.views_project import select_project, \
     TWFProjectSettingsView, TWFProjectQueryView, TWFProjectOverviewView
 from twf.views.project.views_project_ai import TWFProjectAIBatchView, TWFProjectAIQueryView
-from twf.views.documents.views_project_documents import TWFProjectDocumentCreateView, TWFProjectDocumentNameView
 from twf.views.tags.views_tags import TWFTagsView, TWFProjectTagsView, TWFProjectTagsOpenView, TWFProjectTagsParkedView, \
-    TWFProjectTagsResolvedView, TWFProjectTagsIgnoredView, TWFTagsDatesView, TWFTagsGroupView, TWFTagsOverviewView
+    TWFProjectTagsResolvedView, TWFProjectTagsIgnoredView, TWFTagsDatesView, TWFTagsGroupView, TWFTagsOverviewView, \
+    TWFTagsExtractView
 
 urlpatterns = [
     #############################
@@ -70,26 +71,21 @@ urlpatterns = [
     path('project/query/', TWFProjectQueryView.as_view(), name='project_query'),
     path('project/ai/query/', TWFProjectAIQueryView.as_view(), name='project_ai_query'),
 
-    # Project: Export Data
-    path('project/export/', TWFExportView.as_view(), name='export_overview'),
-    path('project/export/documents/', TWFExportDocumentsView.as_view(), name='project_export_documents'),
-    path('project/export/collections/', TWFExportCollectionsView.as_view(), name='project_export_collections'),
-    path('project/export/projects/', TWFExportProjectView.as_view(), name='project_export_project'),
-
     path('project/batch/openai/', TWFProjectAIBatchView.as_view(), name='project_batch_openai'),
     path('project/batch/openai/ask-chatgpt/', TWFProjectAIBatchView.as_view(), name='project_batch_openai_ask-chatgpt'),
 
     #############################
-    # Documents
+    # DOCUMENTS
     path('documents/', TWFDocumentsOverviewView.as_view(), name='documents_overview'),
     path('documents/browse/', TWFDocumentsBrowseView.as_view(), name='documents_browse'),
-    path('documents/create/', TWFProjectDocumentCreateView.as_view(), name='documents_create'),
-    path('documents/name/', TWFProjectDocumentNameView.as_view(), name='name_documents'),
+    path('documents/create/', TWFDocumentCreateView.as_view(), name='documents_create'),
+    path('documents/name/', TWFDocumentNameView.as_view(), name='name_documents'),
     path('document/<int:pk>/', TWFDocumentsBrowseView.as_view(), name='view_document'),
 
     #############################
     # TAGS
     path('tags/overview/', TWFTagsOverviewView.as_view(), name='tags_overview'),
+    path('tags/extract/', TWFTagsExtractView.as_view(), name='tags_extract'),
     path('tags/all/', TWFProjectTagsView.as_view(template_name='twf/tags/all_tags.html',
                                                  page_title='All Tags'),
          name='tags_all'),
@@ -110,7 +106,7 @@ urlpatterns = [
     path('dictionaries/create/', TWFDictionaryCreateView.as_view(), name='dictionary_create'),
     path('dictionaries/<int:pk>/', TWFDictionaryDictionaryView.as_view(), name='dictionaries_view'),
     path('dictionaries/<int:pk>/edit/', TWFDictionaryDictionaryEditView.as_view(), name='dictionaries_edit'),
-    path('dictionaries/<int:pk>/export/', TWFDictionaryDictionaryExportView.as_view(), name='dictionaries_export'),
+
     path('dictionaries/entry/<int:pk>/', TWFDictionaryDictionaryEntryView.as_view(), name='dictionaries_entry_view'),
     path('dictionaries/entry/<int:pk>/skip/', skip_entry, name='dictionaries_entry_skip'),
     path('dictionaries/entry/<int:pk>/edit/',
@@ -134,8 +130,7 @@ urlpatterns = [
     # COLLECTIONS
     path('collections/', TWFCollectionsView.as_view(), name='collections'),
     path('project/collections/create/', TWFProjectCollectionsCreateView.as_view(), name='project_collections_create'),
-    path('project/collections/<int:pk>/', TWFProjectCollectionsDetailView.as_view(), name='project_collections_view'),
-
+    path('project/collections/<int:pk>/', TWFProjectCollectionsDetailView.as_view(), name='collections_view'),
     path('project/collections/review/<int:pk>/', TWFProjectCollectionsReviewView.as_view(),
          name='project_collection_review'),
     path('project/collections/item/<int:item_id>/remove_part/<int:part_id>/', RemovePartView.as_view(),
@@ -148,6 +143,19 @@ urlpatterns = [
 
     path('project/collections/<int:pk>/add/document', TWFProjectCollectionsAddDocumentView.as_view(),
          name='project_collections_add_document'),
+
+
+    #############################
+    # EXPORT
+    path('export/', TWFExportOverviewView.as_view(), name='export_overview'),
+    path('export/documents/', TWFExportDocumentsView.as_view(), name='export_documents'),
+    path('export/collections/', TWFExportCollectionsView.as_view(), name='export_collections'),
+    path('export/project/', TWFExportProjectView.as_view(), name='export_project'),
+    path('export/tags/', TWFExportTagsView.as_view(), name='export_tags'),
+
+    path('export/dictionaries/', TWFExportDictionariesView.as_view(), name='export_dictionaries'),
+    path('export/dictionaries/<int:pk>/', TWFExportDictionaryView.as_view(), name='export_dictionary'),
+
 
     #############################
     # AJAX CALLS
