@@ -92,7 +92,7 @@ DATABASES = {
         'NAME': config('DB_NAME'),
         'USER': config('DB_USER'),
         'PASSWORD': config('DB_PASSWORD'),
-        'HOST': config('DB_HOST', default='localhost'),
+        'HOST': config('DB_HOST', default='None'),
         'PORT': config('DB_PORT', default=''),
     }
 }
@@ -164,9 +164,10 @@ CACHES = {
 }
 
 # Celery Configuration
-CELERY_BROKER_URL = 'redis://localhost:6379/0'  # Or your broker URL
-CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
-CELERY_ACCEPT_CONTENT = ['json' , 'pickle']
+CELERY_BROKER_URL = 'redis://172.24.94.219:6379/0'  # Or your broker URL
+CELERY_RESULT_BACKEND = 'redis://172.24.94.219:6379/0'
+CELERY_ACCEPT_CONTENT = ['json', 'pickle']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = 'UTC'
+CELERY_BROKER_TRANSPORT_OPTIONS = {'visibility_timeout': 3600}

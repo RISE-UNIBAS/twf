@@ -11,7 +11,8 @@ from twf.views.project.views_project_setup import TWFProjectSetupView
 from twf.views.views_ajax_download import ajax_transkribus_download_export, download_progress_view
 from twf.views.views_ajax_export import ajax_transkribus_request_export, ajax_transkribus_request_export_status, \
     ajax_transkribus_reset_export
-from twf.views.views_ajax_extract import start_extraction, stream_extraction_progress, stream_extraction_progress_detail
+from twf.views.views_ajax_extract import start_extraction, stream_extraction_progress, \
+    stream_extraction_progress_detail, start_task_creation
 from twf.views.views_ajax_metadata import start_metadata_extraction, stream_metadata_extraction_progress
 from twf.views.views_ajax_validation import validate_page_field, validate_document_field
 from twf.views.dollections.views_collection import RemovePartView, SplitCollectionItemView, \
@@ -37,7 +38,7 @@ urlpatterns = [
     #############################
     # FRAMEWORK (HOME)
     path('', TWFHomeView.as_view(), name='home'),
-    path('about/', TWFHomeView.as_view(), name='about'),
+    path('about/', TWFHomeView.as_view(template_name='twf/base/about.html'), name='about'),
     path('login/', TWFHomeLoginView.as_view(), name='login'),
     path('logout/confirm/',
          TWFHomeView.as_view(page_title='Logout', template_name='twf/users/logout.html'), name='user_logout'),
@@ -167,6 +168,7 @@ urlpatterns = [
          name='ajax_transkribus_download_export'),
     path('ajax/transkribus/export/monitor/download/', download_progress_view, name='download_progress'),
     path('ajax/transkribus/extract/', start_extraction, name='extract_and_process_zip'),
+    path('ajax/transkribus/tags/extract/', start_task_creation, name='extract_and_process_tags'),
     path('ajax/transkribus/extract/metadata/', start_metadata_extraction,
          name='start_metadata_extraction'),
     path('ajax/transkribus/extract/monitor/', stream_extraction_progress,

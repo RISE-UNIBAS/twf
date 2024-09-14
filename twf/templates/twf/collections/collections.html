@@ -2,8 +2,7 @@
 
 {% block sub_content %}
      <div class="border rounded bg-light mt-0 p-3">
-        <h1 class="display-6">Collections</h1>
-        <p class="lead">Create a new collection</p>
+        {% include 'twf/collections/info_card_collections.html' %}
         
      {% for col in collections %}
          {{ col }}

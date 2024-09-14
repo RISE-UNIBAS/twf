@@ -1,0 +1,35 @@
+{% extends 'twf/base/info_card.html' %}
+
+{% block title %}
+    Dictionaries Overview
+{% endblock %}
+
+{% block info_text %}
+    Dictionaries consist of structured entries and are categorized by type. Each entry can have multiple variations, 
+    often derived from tags through a grouping wizard. Additionally, entries can be enriched with authorization data, 
+    such as GND and Geonames, allowing for more accurate and standardized references within the project.
+{% endblock %}
+
+{% block number_1 %}
+    {{ project.documents.count }}
+{% endblock %}
+
+{% block number_1_label %}
+    Documents
+{% endblock %}
+
+{% block number_2 %}
+    {{ project.batches.count }}
+{% endblock %}
+
+{% block number_2_label %}
+    Batches
+{% endblock %}
+
+{% block number_3 %}
+    {{ project.users.count }}
+{% endblock %}
+
+{% block number_3_label %}
+    Users
+{% endblock %}

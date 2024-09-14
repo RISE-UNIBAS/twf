@@ -3,8 +3,7 @@
 
 {% block content %}
      <div class="border rounded bg-light mt-0 p-3">
-        <h1 class="display-6">Where you're at</h1>
-        <p class="lead">This is the overview of the grouped tags in your project</p>
+         {% include 'twf/tags/info_card_tags.html' %}
      
         {% for dtype, entries in stats.most_used_entries_per_type.items %}
             <div class="row">

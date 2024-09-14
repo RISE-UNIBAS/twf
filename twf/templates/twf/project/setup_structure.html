@@ -1,8 +1,8 @@
 {% extends 'twf/base/base.html' %}
 {% load static %}
 
-{% block sub_content %}
-    <div>
+{% block content %}
+    <div class="border rounded bg-light mt-0 p-3">
         <h1 class="display-6">Structure downloaded data</h1>
         <p class="lead">This page allows you to extract the downloaded data 
             from Transkribus and create database objects from it.</p>
@@ -48,7 +48,7 @@
 {% block script %}
     <script>
         function scrollToBottom() {
-            var textarea = $('#extractionLog');
+            const textarea = $('#extractionLog');
             textarea.scrollTop(textarea[0].scrollHeight);
         }
 
@@ -78,8 +78,11 @@
                 .then(response => response.json())
                 .then(data => {
                     const progressBar = $('#extractProgressBar');
+                    const status = data.status.toUpperCase();
                     
-                    if (data.status === 'PROGRESS' || data.status === 'PENDING') {
+                    console.log('Status:', status, data.status);
+                    
+                    if (status === 'PROGRESS' || status === 'PENDING') {
                         // console.log(data)
                         let progress = (data.current / data.total) * 100;
                         progressBar.css('width', progress + '%');
@@ -90,12 +93,12 @@
                         setTimeout(function() {
                             pollTaskProgress(taskId);  // Poll again
                         }, 800);  // Adjust the polling interval if needed
-                    } else if (data.status === 'SUCCESS') {
+                    } else if (status === 'SUCCESS') {
                         progressBar.css('width', '100%');
                         progressBar.text('Completed');
                         $('#extractionLog').append('Task completed');
                         scrollToBottom();
-                    } else if (data.status === 'FAILURE') {
+                    } else if (status === 'FAILURE') {
                         $('#extractionLog').append('Error: ' + data.error + '\n');
                         scrollToBottom();
                     }

@@ -1,0 +1,35 @@
+{% extends 'twf/base/info_card.html' %}
+
+{% block title %}
+    Collections Overview
+{% endblock %}
+
+{% block info_text %}
+    Collections allow users to group and organize entire documents or specific parts of documents. 
+    These custom collections can be saved and used for easy reference, enabling more focused analysis 
+    and export of selected content.
+{% endblock %}
+
+{% block number_1 %}
+    {{ project.collections.count }}
+{% endblock %}
+
+{% block number_1_label %}
+    Collection(s)
+{% endblock %}
+
+{% block number_2 %}
+    {{ project.batches.count }}
+{% endblock %}
+
+{% block number_2_label %}
+    Batches
+{% endblock %}
+
+{% block number_3 %}
+    {{ project.users.count }}
+{% endblock %}
+
+{% block number_3_label %}
+    Users
+{% endblock %}

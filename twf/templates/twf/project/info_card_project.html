@@ -1,0 +1,35 @@
+{% extends 'twf/base/info_card.html' %}
+
+{% block title %}
+    Project Overview
+{% endblock %}
+
+{% block info_text %}
+     This section allows you to manage your project's core settings, configure setup options, 
+     and handle project-specific batches. Here, you can fine-tune project parameters, adjust 
+     configurations, and run batch operations to streamline your workflow.
+{% endblock %}
+
+{% block number_1 %}
+    {{ project.documents.count }}
+{% endblock %}
+
+{% block number_1_label %}
+    Documents
+{% endblock %}
+
+{% block number_2 %}
+    {{ stats.page_count }}
+{% endblock %}
+
+{% block number_2_label %}
+    Pages
+{% endblock %}
+
+{% block number_3 %}
+    {{ project.members.count|add:1 }}
+{% endblock %}
+
+{% block number_3_label %}
+    Users
+{% endblock %}

@@ -11,7 +11,7 @@ def create_data(db_object, return_warnings=False):
     elif isinstance(db_object, Page):
         return create_page_data(db_object, return_warnings)
     else:
-        raise ValueError("Invalid object type")
+        raise ValueError(f"Invalid object type: {db_object}")
 
 
 def create_project_data(project, return_warnings=False):

@@ -22,18 +22,21 @@ class TWFProjectView(LoginRequiredMixin, TWFView):
         """Get the sub navigation."""
         sub_nav = [
             {
-                'name': 'Project Data',
+                'name': 'Project',
                 'options': [
                     {'url': reverse('twf:project_overview'), 'value': 'Overview'},
-                    {'url': reverse('twf:project_setup'), 'value': 'Setup', 'active_on': [
-                        reverse('twf:project_tk_export'),
-                        reverse('twf:project_tk_structure'),
-                    ]},
                     {'url': reverse('twf:project_settings'), 'value': 'Project Settings'},
                 ]
             },
             {
-                'name': 'Project Options',
+                'name': 'Setup Project',
+                'options': [
+                    {'url': reverse('twf:project_tk_export'), 'value': 'Request Transkribus Export'},
+                    {'url': reverse('twf:project_tk_structure'), 'value': 'Extract Transkribus Export'},
+                ]
+            },
+            {
+                'name': 'Ask Questions',
                 'options': [
                     {'url': reverse('twf:project_query'), 'value': 'Query'},
                     {'url': reverse('twf:project_ai_query'), 'value': 'Ask ChatGPT'},

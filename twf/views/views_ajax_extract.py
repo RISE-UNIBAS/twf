@@ -3,19 +3,20 @@ files are then processed and saved to the database."""
 import logging
 import os
 import zipfile
-from celery import shared_task
 
 from django.core.files.storage import FileSystemStorage
 from django.http import JsonResponse, StreamingHttpResponse
 from django.utils import timezone
 from simple_alto_parser import PageFileParser
 
-from twf.models import Project, Document, Page, PageTag, User
+from twf.models import Project, Document, Page, PageTag
 from twf.page_file_meta_data_reader import extract_transkribus_file_metadata
 from twf.utils.file_utils import delete_all_in_folder
 from twf.views.views_ajax_base import set_progress, set_details, calculate_and_set_progress, add_details, \
     base_event_stream, base_detail_event_stream
 from twf.tasks.structure_tasks import extract_zip_export_task
+from twf.tasks.tags_tasks import create_page_tags
+from twf.views.views_base import TWFView
 
 PROGRESS_JOB_NAME = "extract-progress"
 DETAIL_JOB_NAME = "extract-progress-detail"
@@ -23,11 +24,23 @@ DETAIL_JOB_NAME = "extract-progress-detail"
 
 def start_extraction(request):
     """Start the extraction process as a Celery task."""
-    project_id = request.session.get('project_id')
+    project = TWFView.s_get_project(request)
     user_id = request.user.id
 
     # Trigger the task
-    task = extract_zip_export_task.delay(project_id, user_id)
+    task = extract_zip_export_task.delay(project.id, user_id)
+
+    # Return the task ID so that the frontend can monitor the task
+    return JsonResponse({'status': 'success', 'task_id': task.id})
+
+
+def start_task_creation(request):
+    """Start the extraction process as a Celery task."""
+    project = TWFView.s_get_project(request)
+    user_id = request.user.id
+
+    # Trigger the task
+    task = create_page_tags.delay(project.id, user_id)
 
     # Return the task ID so that the frontend can monitor the task
     return JsonResponse({'status': 'success', 'task_id': task.id})
@@ -46,7 +59,7 @@ def start_extraction(request):
     return JsonResponse({'status': 'success'}, status=200)"""
 
 
-def extract_zip_export(project_id, extracting_user):
+def extract_zip_export_old(project_id, extracting_user):
     """This function extracts page.xml files from a Transkribus export zip file. It then processes the extracted files
     and renames them according to the Transkribus document and page IDs. The extracted files are saved in a folder
     named after the collection ID of the project."""
@@ -177,7 +190,7 @@ def extract_zip_export(project_id, extracting_user):
         set_details("Project not found", project_id, DETAIL_JOB_NAME)
 
 
-def create_page_tags(project_id, extracting_user):
+def create_page_tags_old(project_id, extracting_user):
     """This function extracts tags from the parsed data of the pages."""
 
     try:

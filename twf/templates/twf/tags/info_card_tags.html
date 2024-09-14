@@ -1,0 +1,36 @@
+{% extends 'twf/base/info_card.html' %}
+
+{% block title %}
+    Tags Overview
+{% endblock %}
+
+{% block info_text %}
+     Tags are extracted from page data and used for grouping into dictionary entries. Each tag represents a 
+    mention of something, which may have multiple spellings or variations. Tags are categorized by types, so 
+    for instance, 'Lndn' and 'London' can be grouped into a dictionary entry for locations, both referring to 
+    the city of London. Each tag also retains a reference to the page where it was originally found.
+{% endblock %}
+
+{% block number_1 %}
+    {{ project.documents.count }}
+{% endblock %}
+
+{% block number_1_label %}
+    Documents
+{% endblock %}
+
+{% block number_2 %}
+    {{ project.batches.count }}
+{% endblock %}
+
+{% block number_2_label %}
+    Batches
+{% endblock %}
+
+{% block number_3 %}
+    {{ project.users.count }}
+{% endblock %}
+
+{% block number_3_label %}
+    Users
+{% endblock %}

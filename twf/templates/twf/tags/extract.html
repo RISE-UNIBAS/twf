@@ -2,7 +2,95 @@
 
 {% block content %}
      <div class="border rounded bg-light mt-0 p-3">
-        <h1 class="display-6">Extract</h1>
-        <p class="lead">This table shows all tags which are not ignored.</p>
+        <h1 class="display-6">Extract Tags from Transkribus Documents</h1>
+        <p class="lead"></p>
+     
+        <div class="row">
+            <div class="col-12">
+                <div class="mb-3">
+                    <label for="extractTags" class="form-label">Extract tags from transkribus parsed data</label>
+                    <input id="extractTags" type="button"  role="button" class="form-control btn btn-dark" value="Extract Tags from Documents">
+                    <div id="transkribusDownloadHelp" class="form-text text-danger">
+                        Depending on the number of your documents, this can take a long time.
+                    </div>
+                    
+                    <div class="col-12 border text-center">
+                        <span>Progress:</span>
+                        <div class="progress">
+                            <div class="progress-bar bg-dark" role="progressbar" 
+                                 style="width: 0;" id="extractProgressBar" aria-valuenow="0" 
+                                 aria-valuemin="0" aria-valuemax="100">0%</div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-12">
+                        <textarea id="extractionLog" style="width: 100%" rows="10"></textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
      </div>
+{% endblock %}
+
+{% block script %}
+    <script>
+        function scrollToBottom() {
+            const textarea = $('#extractionLog');
+            textarea.scrollTop(textarea[0].scrollHeight);
+        }
+
+        $(document).ready(function() {
+            $('#extractTags').click(function() {
+                $('#extractionLog').text(''); // clear log
+                
+                // Start the extraction process
+                $.ajax({
+                    url: '/ajax/transkribus/tags/extract/',
+                    success: function(data) {
+                        console.log("Extraction started", data);
+                        let taskId = data.task_id;
+                        pollTaskProgress(taskId);  // Start polling for task progress
+                    },
+                    error: function(data) {
+                        console.log("ERROR", data);
+                    }
+                });
+            });
+        });
+    
+        function pollTaskProgress(taskId) {
+            let url = '/celery/status/' + taskId + '/';  // Adjust the URL if needed
+            
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    const progressBar = $('#extractProgressBar');
+                    const status = data.status.toUpperCase();
+                    
+                    console.log('Status:', status, data.status);
+                    
+                    if (status === 'PROGRESS' || status === 'PENDING') {
+                        // console.log(data)
+                        let progress = (data.current / data.total) * 100;
+                        progressBar.css('width', progress + '%');
+                        progressBar.text(progress.toFixed(2) + '%');
+                        $('#extractionLog').append(data.text + '\n');
+                        scrollToBottom();
+                        
+                        setTimeout(function() {
+                            pollTaskProgress(taskId);  // Poll again
+                        }, 800);  // Adjust the polling interval if needed
+                    } else if (status === 'SUCCESS') {
+                        progressBar.css('width', '100%');
+                        progressBar.text('Completed');
+                        $('#extractionLog').append('Task completed');
+                        scrollToBottom();
+                    } else if (status === 'FAILURE') {
+                        $('#extractionLog').append('Error: ' + data.error + '\n');
+                        scrollToBottom();
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+        }
+    </script>
 {% endblock %}

@@ -70,6 +70,9 @@ class TWFExportDocumentsView(FormView, TWFExportView):
         project = self.get_project()
 
         sample_document = project.documents.order_by('?').first()
+        if not sample_document:
+            return context
+        
         transformed_metadata, warnings = create_data(sample_document, return_warnings=True)
         context['json_data'] = transformed_metadata
         context['available_doc_data'] = flatten_dict_keys(sample_document.metadata)
