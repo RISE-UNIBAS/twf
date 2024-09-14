@@ -13,25 +13,25 @@
 {% endblock %}
 
 {% block number_1 %}
-    {{ project.documents.count }}
+    {{ doc_count }}
 {% endblock %}
 
 {% block number_1_label %}
-    Documents
+    Documents with Metadata
 {% endblock %}
 
 {% block number_2 %}
-    {{ project.batches.count }}
+    {{ page_count }}
 {% endblock %}
 
 {% block number_2_label %}
-    Batches
+    Pages with Metadata
 {% endblock %}
 
 {% block number_3 %}
-    {{ project.users.count }}
+    
 {% endblock %}
 
 {% block number_3_label %}
-    Users
+    
 {% endblock %}

@@ -12,11 +12,11 @@
 {% endblock %}
 
 {% block number_1 %}
-    {{ project.documents.count }}
+    {{ stats.variation_type_counts|length }}
 {% endblock %}
 
 {% block number_1_label %}
-    Documents
+    Tag Types
 {% endblock %}
 
 {% block number_2 %}
