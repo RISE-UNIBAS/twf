@@ -46,64 +46,18 @@
 {% endblock %}
 
 {% block script %}
+    <script src="{% static 'twf/js/celery_task_monitor.js' %}"></script>
     <script>
-        function scrollToBottom() {
-            const textarea = $('#extractionLog');
-            textarea.scrollTop(textarea[0].scrollHeight);
-        }
-
         $(document).ready(function() {
             $('#extractZip').click(function() {
-                $('#extractionLog').text(''); // clear log
+                const startUrl = '/celery/transkribus/extract/'; // Task start URL
+                const progressUrlBase = '/celery/status/'; // Base URL for polling progress
+                const progressBarId = '#extractProgressBar'; // ID of the progress bar element
+                const logTextareaId = '#extractionLog'; // ID of the textarea to display logs
                 
-                // Start the extraction process
-                $.ajax({
-                    url: '/ajax/transkribus/extract/',
-                    success: function(data) {
-                        console.log("Extraction started", data);
-                        let taskId = data.task_id;
-                        pollTaskProgress(taskId);  // Start polling for task progress
-                    },
-                    error: function(data) {
-                        console.log("ERROR", data);
-                    }
-                });
+                // Start the task
+                startTask(startUrl, progressUrlBase, progressBarId, logTextareaId);
             });
         });
-    
-        function pollTaskProgress(taskId) {
-            let url = '/celery/status/' + taskId + '/';  // Adjust the URL if needed
-            
-            fetch(url)
-                .then(response => response.json())
-                .then(data => {
-                    const progressBar = $('#extractProgressBar');
-                    const status = data.status.toUpperCase();
-                    
-                    console.log('Status:', status, data.status);
-                    
-                    if (status === 'PROGRESS' || status === 'PENDING') {
-                        // console.log(data)
-                        let progress = (data.current / data.total) * 100;
-                        progressBar.css('width', progress + '%');
-                        progressBar.text(progress.toFixed(2) + '%');
-                        $('#extractionLog').append(data.text + '\n');
-                        scrollToBottom();
-                        
-                        setTimeout(function() {
-                            pollTaskProgress(taskId);  // Poll again
-                        }, 800);  // Adjust the polling interval if needed
-                    } else if (status === 'SUCCESS') {
-                        progressBar.css('width', '100%');
-                        progressBar.text('Completed');
-                        $('#extractionLog').append('Task completed');
-                        scrollToBottom();
-                    } else if (status === 'FAILURE') {
-                        $('#extractionLog').append('Error: ' + data.error + '\n');
-                        scrollToBottom();
-                    }
-                })
-                .catch(error => console.error('Error:', error));
-        }
     </script>
 {% endblock %}

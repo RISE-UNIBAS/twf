@@ -1,9 +1,8 @@
 """Views for the dictionary overview and the dictionary entries."""
-import json
 
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.http import HttpResponseRedirect, HttpResponse
+from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse, reverse_lazy
 from django.utils.safestring import mark_safe
@@ -12,10 +11,10 @@ from django_filters.views import FilterView
 from django_tables2 import SingleTableView
 
 from twf.filters import DictionaryEntryFilter
-from twf.forms.batch_forms import GeonamesBatchForm
-from twf.forms.dictionary_forms import DictionaryForm, DictionaryEntryForm, DictionaryImportForm
+from twf.forms.dictionaries.batch_forms import GeonamesBatchForm
+from twf.forms.dictionaries.dictionary_forms import DictionaryForm, DictionaryEntryForm, DictionaryImportForm
 from twf.forms.enrich_forms import EnrichEntryManualForm, EnrichEntryForm
-from twf.models import Dictionary, DictionaryEntry, Variation, PageTag, Project
+from twf.models import Dictionary, DictionaryEntry, Variation, PageTag
 from twf.tables.tables_dictionary import DictionaryTable, DictionaryEntryTable, DictionaryEntryVariationTable
 from twf.views.views_base import TWFView
 
@@ -49,12 +48,21 @@ class TWFDictionaryView(LoginRequiredMixin, TWFView):
                 'options': options
             },
             {
-                'name': 'Batch Workflows',
+                'name': 'Supervised Workflows',
                 'options': [
                     {'url': reverse('twf:dictionaries_batch_gnd'), 'value': 'GND'},
                     {'url': reverse('twf:dictionaries_batch_wikidata'), 'value': 'Wikidata'},
                     {'url': reverse('twf:dictionaries_batch_geonames'), 'value': 'Geonames'},
                     {'url': reverse('twf:dictionaries_batch_openai'), 'value': 'Open AI'},
+                ]
+            },
+            {
+                'name': 'Automated Workflows',
+                'options': [
+                    {'url': reverse('twf:dictionaries_request_gnd'), 'value': 'GND'},
+                    {'url': reverse('twf:dictionaries_request_wikidata'), 'value': 'Wikidata'},
+                    {'url': reverse('twf:dictionaries_request_geonames'), 'value': 'Geonames'},
+                    {'url': reverse('twf:dictionaries_request_openai'), 'value': 'Open AI'},
                 ]
             }
         ]

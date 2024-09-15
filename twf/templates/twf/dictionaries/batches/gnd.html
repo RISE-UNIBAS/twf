@@ -1,7 +1,50 @@
 {% extends 'twf/base/base.html' %}
+{% load static %}
 
 {% block content %}
      <div class="border rounded bg-light mt-0 p-3">
-        
+        <h1 class="display-6">Search GND for Persons</h1>
+     
+        <div class="row">
+            <div class="col-12">
+                <div class="mb-3">
+                    <label for="searchGND" class="form-label">Search the GND Database for names</label>
+                    <input id="searchGND" type="button"  role="button" class="form-control btn btn-dark" value="Search GND Database">
+                    <div id="transkribusDownloadHelp" class="form-text text-danger">
+                        Depending on the number of your dictionary entries, this can take a long time.
+                    </div>
+                    
+                    <div class="col-12 border text-center">
+                        <span>Progress:</span>
+                        <div class="progress">
+                            <div class="progress-bar bg-dark" role="progressbar" 
+                                 style="width: 0;" id="extractProgressBar" aria-valuenow="0" 
+                                 aria-valuemin="0" aria-valuemax="100">0%</div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-12">
+                        <textarea id="extractionLog" style="width: 100%" rows="10"></textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
      </div>
+{% endblock %}
+
+{% block script %}
+    <script src="{% static 'twf/js/celery_task_monitor.js' %}"></script>
+    <script>
+        $(document).ready(function() {
+            $('#searchGND').click(function() {
+                const startUrl = '/celery/dictionaries/batch/gnd/'; // Task start URL
+                const progressUrlBase = '/celery/status/'; // Base URL for polling progress
+                const progressBarId = '#extractProgressBar'; // ID of the progress bar element
+                const logTextareaId = '#extractionLog'; // ID of the textarea to display logs
+                
+                // Start the task
+                startTask(startUrl, progressUrlBase, progressBarId, logTextareaId);
+            });
+        });
+    </script>
 {% endblock %}

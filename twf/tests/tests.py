@@ -1,7 +1,7 @@
 """Tests for the twf app."""
 from django.test import TestCase
 
-from twf.simple_ai_clients import AiApiClient
+from twf.clients.simple_ai_clients import AiApiClient
 
 
 class TestTagAssigner(TestCase):

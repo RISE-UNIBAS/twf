@@ -3,7 +3,7 @@ import logging
 from celery import shared_task
 
 from twf.models import Project
-from twf.simple_ai_clients import AiApiClient
+from twf.clients.simple_ai_clients import AiApiClient
 
 logger = logging.getLogger(__name__)
 

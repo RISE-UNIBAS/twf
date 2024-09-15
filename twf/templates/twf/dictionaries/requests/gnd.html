@@ -3,16 +3,15 @@
 
 {% block content %}
      <div class="border rounded bg-light mt-0 p-3">
-        <h1 class="display-6">Extract Tags from Transkribus Documents</h1>
-        <p class="lead"></p>
+        <h1 class="display-6">Search GND for Persons</h1>
      
         <div class="row">
             <div class="col-12">
                 <div class="mb-3">
-                    <label for="extractTags" class="form-label">Extract tags from transkribus parsed data</label>
-                    <input id="extractTags" type="button"  role="button" class="form-control btn btn-dark" value="Extract Tags from Documents">
+                    <label for="searchGND" class="form-label">Search the GND Database for names</label>
+                    <input id="searchGND" type="button"  role="button" class="form-control btn btn-dark" value="Search GND Database">
                     <div id="transkribusDownloadHelp" class="form-text text-danger">
-                        Depending on the number of your documents, this can take a long time.
+                        Depending on the number of your dictionary entries, this can take a long time.
                     </div>
                     
                     <div class="col-12 border text-center">
@@ -37,8 +36,8 @@
     <script src="{% static 'twf/js/celery_task_monitor.js' %}"></script>
     <script>
         $(document).ready(function() {
-            $('#extractTags').click(function() {
-                const startUrl = '/celery/transkribus/tags/extract/'; // Task start URL
+            $('#searchGND').click(function() {
+                const startUrl = '/celery/dictionaries/request/gnd/'; // Task start URL
                 const progressUrlBase = '/celery/status/'; // Base URL for polling progress
                 const progressBarId = '#extractProgressBar'; // ID of the progress bar element
                 const logTextareaId = '#extractionLog'; // ID of the textarea to display logs

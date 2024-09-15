@@ -7,7 +7,7 @@ from django.shortcuts import render
 from django.views.generic import FormView
 
 from twf.forms.project_forms import AIQueryDatabaseForm, BatchOpenAIForm
-from twf.simple_ai_clients import AiApiClient
+from twf.clients.simple_ai_clients import AiApiClient
 from twf.views.project.views_project import TWFProjectView
 from twf.tasks.openai_tasks import ask_chatgpt_task
 
