@@ -63,31 +63,41 @@ def search_wikidata_entries(self, dictionary_id, user_id):
 
 
 @shared_task(bind=True)
-def search_geonames_entries(self, dictionary_id, user_id, geonames_username, geonames_search_type):
+def search_geonames_entries(self, dictionary_id, user_id, geonames_username, country_restriction, similarity_threshold):
     percentage_complete = 0
     self.update_state(state='PROGRESS', meta={'current': percentage_complete, 'total': 100,
                                               'text': 'Starting Geonames Search...'})
 
     dictionary, user, number_of_entries = get_dictionary_and_user(dictionary_id, user_id)
+    if country_restriction == '':
+        country_restriction = None
 
     completed_entries = 0
     found_entries = 0
     for entry in dictionary.entries.all():
         # Perform Geonames search for each entry
-        location_info_list = search_location(entry.label, geonames_username, geonames_search_type)
-        if location_info_list:
-            entry.authorization_data['geonames'] = location_info_list[0].raw
-            entry.save(current_user=user)
-            found_entries += 1
+        try:
+            completed_entries += 1
+            location_info_list = search_location(entry.label, geonames_username, False,
+                                                 country_restriction, similarity_threshold)
 
-        # Update the progress
-        percentage_complete = (completed_entries / number_of_entries) * 100
-        self.update_state(state='PROGRESS', meta={'current': percentage_complete, 'total': 100,
-                                                  'text': f'Geonames Search in progress for entry {entry.label}...'})
+            if location_info_list:
+                data, similarity = location_info_list[0]
+                entry.authorization_data['geonames'] = data
+                entry.save(current_user=user)
+                found_entries += 1
+
+            # Update the progress
+            percentage_complete = (completed_entries / number_of_entries) * 100
+            self.update_state(state='PROGRESS', meta={'current': percentage_complete, 'total': 100,
+                                                      'text': f'Geonames Search in progress for entry {entry.label}...'})
+        except Exception as e:
+            self.update_state(state='FAILURE', meta={'error': str(e)})
+            raise ValueError(str(e))
 
     percentage_complete = 100
     self.update_state(state='SUCCESS', meta={'current': percentage_complete, 'total': 100,
-                                             'text': 'Geonames Search Completed.'})
+                                             'text': 'Geonames Search Completed. Found entries: ' + str(found_entries)})
 
 
 @shared_task(bind=True)

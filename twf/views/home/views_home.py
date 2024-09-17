@@ -13,7 +13,7 @@ class TWFHomeView(TWFView):
     project_required = False
 
     """Base view for the home view."""
-    template_name = 'twf/base/home.html'
+    template_name = 'twf/home/home.html'
 
     def get_sub_navigation(self):
         """Get the sub navigation."""
@@ -58,15 +58,15 @@ class TWFHomeView(TWFView):
 
 
 class TWFHomeLoginView(TWFHomeView, LoginView):
-    """View to login the user."""
-    template_name = 'twf/users/login.html'
+    """View to log in the user."""
+    template_name = 'twf/home/users/login.html'
     page_title = 'Login'
     authentication_form = LoginForm
 
 
 class TWFHomePasswordChangeView(TWFHomeView, PasswordChangeView):
     """View to change the password of the user."""
-    template_name = 'twf/users/change_password.html'
+    template_name = 'twf/home/users/change_password.html'
     page_title = 'Change Password'
     form_class = ChangePasswordForm
     success_url = reverse_lazy('twf:home')
@@ -74,7 +74,7 @@ class TWFHomePasswordChangeView(TWFHomeView, PasswordChangeView):
 
 class TWFHomeUserOverView(LoginRequiredMixin, TWFHomeView):
     """View to display an overview of the user."""
-    template_name = 'twf/users/overview.html'
+    template_name = 'twf/home/users/overview.html'
     page_title = 'User Overview'
 
     def get_context_data(self, **kwargs):
@@ -130,7 +130,7 @@ class TWFHomeUserOverView(LoginRequiredMixin, TWFHomeView):
 
 class TWFHomeUserManagementView(LoginRequiredMixin, TWFHomeView):
     """View to manage the users."""
-    template_name = 'twf/users/management.html'
+    template_name = 'twf/home/users/management.html'
     page_title = 'User Management'
 
     def get_context_data(self, **kwargs):
@@ -155,7 +155,8 @@ class TWFHomeUserManagementView(LoginRequiredMixin, TWFHomeView):
 
 
 class TWFSelectProjectView(LoginRequiredMixin, TWFHomeView):
-    template_name = 'twf/project/select.html'
+    """View to select a project."""
+    template_name = 'twf/home/select_project.html'
     page_title = 'Select Project'
 
     def get_context_data(self, **kwargs):
@@ -178,7 +179,8 @@ class TWFSelectProjectView(LoginRequiredMixin, TWFHomeView):
 
         context.update(
             {
-                'project': project,
+                'project_to_select': project,
+                'project': self.get_project(),
                 'user_role': user_role,
                 'groups': groups
             }

@@ -7,8 +7,9 @@
      * @param {string} progressUrlBase - The base URL to poll the task progress, appended with task ID.
      * @param {string} progressBarId - The ID of the progress bar to update.
      * @param {string} logTextareaId - The ID of the textarea to display logs.
+     * @param {object} data - Additional data to send with the start request.
      */
-    function startTask(startUrl, progressUrlBase, progressBarId, logTextareaId) {
+    function startTask(startUrl, progressUrlBase, progressBarId, logTextareaId, data) {
         // Clear the log before starting
         $(logTextareaId).text('');
 
@@ -16,8 +17,8 @@
         $.ajax({
             url: startUrl,
             method: 'GET',
+            data: data,
             success: function(data) {
-                console.log("Task started", data);
                 let taskId = data.task_id;
                 pollTaskProgress(taskId, progressUrlBase, progressBarId, logTextareaId);
             },
@@ -58,7 +59,7 @@
                 } else if (status === 'SUCCESS') {
                     progressBar.css('width', '100%');
                     progressBar.text('Completed');
-                    $(logTextareaId).append('Task completed\n');
+                    $(logTextareaId).append('Task completed\n' + data.result.text + '\n');
                     scrollToBottom(logTextareaId);
                 } else if (status === 'FAILURE') {
                     $(logTextareaId).append('Error: ' + data.error + '\n');

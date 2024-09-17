@@ -2,13 +2,15 @@
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Row, Column, Div, Submit
 from django import forms
+from django_select2.forms import Select2Widget
 
 
 class DictionaryRequestForm(forms.Form):
     """ Base form for batches of dictionaries. """
 
     project = None
-    dictionary = forms.ChoiceField(label='Dictionary', required=True)
+    dictionary = forms.ChoiceField(label='Dictionary', required=True,
+                                   widget= Select2Widget(attrs={'style': 'width: 100%;'}))
 
     def __init__(self, *args, **kwargs):
         self.project = kwargs.pop('project', None)
@@ -17,7 +19,7 @@ class DictionaryRequestForm(forms.Form):
         if self.project is None:
             raise ValueError('Project must be provided.')
 
-        self.fields['dictionary'].choices = [(d.pk, d.label) for d in self.project.dictionaries.all()]
+        self.fields['dictionary'].choices = [(d.pk, d.label) for d in self.project.selected_dictionaries.all()]
         self.helper = FormHelper()
         self.helper.form_method = 'post'
         self.helper.layout = Layout(

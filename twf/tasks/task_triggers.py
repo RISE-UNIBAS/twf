@@ -43,10 +43,12 @@ def start_geonames_batch(request):
     project = TWFView.s_get_project(request)
 
     geonames_username = project.geonames_username
-    geonames_search_type = request.GET.get('geonames_search_type')
+    country_restriction = request.GET.get('only_search_in')
+    similarity_threshold = request.GET.get('similarity_threshold')
 
     # Trigger the task
-    task = search_geonames_entries.delay(dictionary_id, user_id, geonames_username, geonames_search_type)
+    task = search_geonames_entries.delay(dictionary_id, user_id, geonames_username,
+                                         country_restriction, similarity_threshold)
     return JsonResponse({'status': 'success', 'task_id': task.id})
 
 

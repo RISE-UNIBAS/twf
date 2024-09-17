@@ -18,40 +18,28 @@
     <script>
         $(document).ready(function() {
             $('#button-id-startbatch').click(function() {
+                
+                const dictionaryId = $('#id_dictionary').val();
+                const only_search_in = $('#id_only_search_in').val();
+                const similarity = $('#id_similarity_threshold').val();
+                
+                if(dictionaryId === '') {
+                    alert('Please select a dictionary.');
+                    return;
+                }
+                
                 const startUrl = '/celery/dictionaries/batch/geonames/'; // Task start URL
                 const progressUrlBase = '/celery/status/'; // Base URL for polling progress
                 const progressBarId = '#taskProgressBar'; // ID of the progress bar element
                 const logTextareaId = '#id_progress_details'; // ID of the textarea to display logs
+                const data = {
+                    dictionary_id: dictionaryId,
+                    only_search_in: only_search_in,
+                    similarity_threshold: similarity,
+                };
                 
                 // Start the task
-                startTask(startUrl, progressUrlBase, progressBarId, logTextareaId);
-            });
-        });
-    </script>
-    <script>
-        $(document).ready(function() {
-            $('#button-id-startbatch').click(function() {
-                const dictionaryId = $('#id_dictionary').val();
-                const geonamesSearchType = $('#geonames_search_type').val();
-                
-                $.ajax({
-                    url: '/start_geonames_batch/',  // The URL for your task trigger
-                    method: 'GET',  // Use 'POST' if your form submits via POST
-                    data: {
-                        dictionary_id: dictionaryId,
-                        geonames_search_type: geonamesSearchType,
-                    },
-                    success: function(response) {
-                        if (response.status === 'success') {
-                            alert('Task started successfully! Task ID: ' + response.task_id);
-                        } else {
-                            alert('Failed to start task.');
-                        }
-                    },
-                    error: function() {
-                        alert('Error starting task.');
-                    }
-                });
+                startTask(startUrl, progressUrlBase, progressBarId, logTextareaId, data);
             });
         });
     </script>

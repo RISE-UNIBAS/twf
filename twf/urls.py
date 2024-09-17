@@ -43,10 +43,10 @@ urlpatterns = [
     #############################
     # FRAMEWORK (HOME)
     path('', TWFHomeView.as_view(), name='home'),
-    path('about/', TWFHomeView.as_view(template_name='twf/base/about.html'), name='about'),
+    path('about/', TWFHomeView.as_view(template_name='twf/home/about.html'), name='about'),
     path('login/', TWFHomeLoginView.as_view(), name='login'),
     path('logout/confirm/',
-         TWFHomeView.as_view(page_title='Logout', template_name='twf/users/logout.html'), name='user_logout'),
+         TWFHomeView.as_view(page_title='Logout', template_name='twf/home/users/logout.html'), name='user_logout'),
     path('user/change/password/', TWFHomePasswordChangeView.as_view(), name='user_change_password'),
     path('user/overview/', TWFHomeUserOverView.as_view(), name='user_overview'),
     path('user/management/', TWFHomeUserManagementView.as_view(), name='user_management'),
