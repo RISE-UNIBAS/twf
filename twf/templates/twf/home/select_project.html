@@ -18,9 +18,13 @@
              {% endfor %}
          </table>
          
-         <form method="post" action="{% url 'twf:project_do_select' project.pk %}">
+         <form method="post" action="{% url 'twf:project_do_select' project_to_select.pk %}">
             {% csrf_token %}
-            <button type="submit" class="btn btn-dark">Select {{ project.title }}</button>
+            {% if project and project.id == project_to_select.id %}
+                <button type="submit" class="btn btn-dark" disabled>{{ project_to_select.title }} is already selected</button>
+             {% else %}
+                <button type="submit" class="btn btn-dark">Select {{ project_to_select.title }}</button>
+             {% endif %}
         </form>
      </div>
 {% endblock %}
