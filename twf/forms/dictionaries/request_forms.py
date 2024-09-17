@@ -1,14 +1,10 @@
 """Contains all forms concerning batch processes."""
-from abc import ABC, abstractmethod
-
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Row, Column, Div, Submit
 from django import forms
 
-from twf.models import Dictionary
 
-
-class DictionaryRequestForm(forms.Form, ABC):
+class DictionaryRequestForm(forms.Form):
     """ Base form for batches of dictionaries. """
 
     project = None
@@ -37,11 +33,9 @@ class DictionaryRequestForm(forms.Form, ABC):
             )
         )
 
-    @abstractmethod
     def get_button_label(self):
         return 'Start Batch'
 
-    @abstractmethod
     def get_dynamic_fields(self):
         return []
 

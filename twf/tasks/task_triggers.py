@@ -40,9 +40,13 @@ def start_geonames_batch(request):
     """Start the GND requests as a Celery task."""
     dictionary_id = request.GET.get('dictionary_id')
     user_id = request.user.id
+    project = TWFView.s_get_project(request)
+
+    geonames_username = project.geonames_username
+    geonames_search_type = request.GET.get('geonames_search_type')
 
     # Trigger the task
-    task = search_geonames_entries.delay(dictionary_id, user_id)
+    task = search_geonames_entries.delay(dictionary_id, user_id, geonames_username, geonames_search_type)
     return JsonResponse({'status': 'success', 'task_id': task.id})
 
 

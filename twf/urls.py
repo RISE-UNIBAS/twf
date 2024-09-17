@@ -24,10 +24,10 @@ from twf.views.dollections.views_collection import RemovePartView, SplitCollecti
     UpdateCollectionItemView, TWFCollectionsView, TWFProjectCollectionsCreateView, \
     TWFProjectCollectionsDetailView, TWFProjectCollectionsReviewView, TWFProjectCollectionsAddDocumentView
 from twf.views.views_command import park_tag, unpark_tag, ungroup_tag
-from twf.views.dictionaries.views_dictionaries import TWFDictionaryView, TWFDictionaryOverviewView, TWFDictionaryDictionaryView, \
+from twf.views.dictionaries.views_dictionaries import TWFDictionaryOverviewView, TWFDictionaryDictionaryView, \
     delete_variation, TWFDictionaryDictionaryEditView, TWFDictionaryDictionaryEntryEditView, \
     TWFDictionaryDictionaryEntryView, TWFDictionaryImportView, \
-    TWFDictionaryBatchGeonamesView, TWFDictionaryNormDataView, TWFDictionaryCreateView, skip_entry
+    TWFDictionaryNormDataView, TWFDictionaryCreateView, skip_entry
 from twf.views.export.views_export import TWFExportDocumentsView, TWFExportCollectionsView, TWFExportProjectView, \
     TWFExportOverviewView, TWFExportTagsView, TWFExportDictionariesView, TWFExportDictionaryView
 from twf.views.metadata.views_metadata import TWFMetadataReviewDocumentsView, \

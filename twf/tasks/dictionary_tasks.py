@@ -1,6 +1,21 @@
 from celery import shared_task
 
+from twf.clients.geonames_client import search_location
 from twf.models import Dictionary, User
+
+
+def get_dictionary_and_user(dictionary_id, user_id):
+    try:
+        dictionary = Dictionary.objects.get(id=dictionary_id)
+        user = User.objects.get(id=user_id)
+        number_of_entries = dictionary.entries.count()
+        return dictionary, user, number_of_entries
+    except Dictionary.DoesNotExist as e:
+        raise ValueError(str(e))
+    except User.DoesNotExist as e:
+        raise ValueError(str(e))
+    except Exception as e:
+        raise ValueError(str(e))
 
 
 @shared_task(bind=True)
@@ -9,32 +24,19 @@ def search_gnd_entries(self, dictionary_id, user_id):
     self.update_state(state='PROGRESS', meta={'current': percentage_complete, 'total': 100,
                                               'text': 'Starting GND Search...'})
 
-    try:
-        # Fetch the dictionary
-        dictionary = Dictionary.objects.get(id=dictionary_id)
-        user = User.objects.get(id=user_id)
+    dictionary, user, number_of_entries = get_dictionary_and_user(dictionary_id, user_id)
+    for entry in dictionary.entries.all():
+        # Perform GND search for each entry
 
-        number_of_entries = dictionary.entries.count()
-        for entry in dictionary.entries.all():
-            # Perform GND search for each entry
+        # Update the progress
+        percentage_complete = (entry.id / number_of_entries) * 100
+        self.update_state(state='PROGRESS', meta={'current': percentage_complete, 'total': 100,
+                                                  'text': f'GND Search in progress for entry {entry.id}...'})
 
-            # Update the progress
-            percentage_complete = (entry.id / number_of_entries) * 100
-            self.update_state(state='PROGRESS', meta={'current': percentage_complete, 'total': 100,
-                                                      'text': f'GND Search in progress for entry {entry.id}...'})
+    percentage_complete = 100
+    self.update_state(state='SUCCESS', meta={'current': percentage_complete, 'total': 100,
+                                            'text': 'GND Search Completed.'})
 
-        percentage_complete = 100
-        self.update_state(state='SUCCESS', meta={'current': percentage_complete, 'total': 100,
-                                                'text': 'GND Search Completed.'})
-    except Dictionary.DoesNotExist as e:
-        self.update_state(state='FAILURE', meta={'error': "Dictionary not found"})
-        raise ValueError(str(e))
-    except User.DoesNotExist as e:
-        self.update_state(state='FAILURE', meta={'error': "User not found"})
-        raise ValueError(str(e))
-    except Exception as e:
-        self.update_state(state='FAILURE', meta={'error': str(e)})
-        raise
 
 
 @shared_task(bind=True)
@@ -43,66 +45,49 @@ def search_wikidata_entries(self, dictionary_id, user_id):
     self.update_state(state='PROGRESS', meta={'current': percentage_complete, 'total': 100,
                                               'text': 'Starting Wikidata Search...'})
 
-    try:
-        # Fetch the dictionary
-        dictionary = Dictionary.objects.get(id=dictionary_id)
-        user = User.objects.get(id=user_id)
+    dictionary, user, number_of_entries = get_dictionary_and_user(dictionary_id, user_id)
 
-        number_of_entries = dictionary.entries.count()
-        for entry in dictionary.entries.all():
-            # Perform Wikidata search for each entry
+    number_of_entries = dictionary.entries.count()
+    for entry in dictionary.entries.all():
+        # Perform Wikidata search for each entry
 
-            # Update the progress
-            percentage_complete = (entry.id / number_of_entries) * 100
-            self.update_state(state='PROGRESS', meta={'current': percentage_complete, 'total': 100,
-                                                      'text': f'GND Search in progress for entry {entry.id}...'})
+        # Update the progress
+        percentage_complete = (entry.id / number_of_entries) * 100
+        self.update_state(state='PROGRESS', meta={'current': percentage_complete, 'total': 100,
+                                                  'text': f'GND Search in progress for entry {entry.id}...'})
 
-        percentage_complete = 100
-        self.update_state(state='SUCCESS', meta={'current': percentage_complete, 'total': 100,
-                                                 'text': 'Wikidata Search Completed.'})
-    except Dictionary.DoesNotExist as e:
-        self.update_state(state='FAILURE', meta={'error': "Dictionary not found"})
-        raise ValueError(str(e))
-    except User.DoesNotExist as e:
-        self.update_state(state='FAILURE', meta={'error': "User not found"})
-        raise ValueError(str(e))
-    except Exception as e:
-        self.update_state(state='FAILURE', meta={'error': str(e)})
-        raise
+    percentage_complete = 100
+    self.update_state(state='SUCCESS', meta={'current': percentage_complete, 'total': 100,
+                                             'text': 'Wikidata Search Completed.'})
+
 
 
 @shared_task(bind=True)
-def search_geonames_entries(self, dictionary_id, user_id):
+def search_geonames_entries(self, dictionary_id, user_id, geonames_username, geonames_search_type):
     percentage_complete = 0
     self.update_state(state='PROGRESS', meta={'current': percentage_complete, 'total': 100,
                                               'text': 'Starting Geonames Search...'})
 
-    try:
-        # Fetch the dictionary
-        dictionary = Dictionary.objects.get(id=dictionary_id)
-        user = User.objects.get(id=user_id)
+    dictionary, user, number_of_entries = get_dictionary_and_user(dictionary_id, user_id)
 
-        number_of_entries = dictionary.entries.count()
-        for entry in dictionary.entries.all():
-            # Perform GND search for each entry
+    completed_entries = 0
+    found_entries = 0
+    for entry in dictionary.entries.all():
+        # Perform Geonames search for each entry
+        location_info_list = search_location(entry.label, geonames_username, geonames_search_type)
+        if location_info_list:
+            entry.authorization_data['geonames'] = location_info_list[0].raw
+            entry.save(current_user=user)
+            found_entries += 1
 
-            # Update the progress
-            percentage_complete = (entry.id / number_of_entries) * 100
-            self.update_state(state='PROGRESS', meta={'current': percentage_complete, 'total': 100,
-                                                      'text': f'Geonames Search in progress for entry {entry.id}...'})
+        # Update the progress
+        percentage_complete = (completed_entries / number_of_entries) * 100
+        self.update_state(state='PROGRESS', meta={'current': percentage_complete, 'total': 100,
+                                                  'text': f'Geonames Search in progress for entry {entry.label}...'})
 
-        percentage_complete = 100
-        self.update_state(state='SUCCESS', meta={'current': percentage_complete, 'total': 100,
-                                                 'text': 'Geonames Search Completed.'})
-    except Dictionary.DoesNotExist as e:
-        self.update_state(state='FAILURE', meta={'error': "Dictionary not found"})
-        raise ValueError(str(e))
-    except User.DoesNotExist as e:
-        self.update_state(state='FAILURE', meta={'error': "User not found"})
-        raise ValueError(str(e))
-    except Exception as e:
-        self.update_state(state='FAILURE', meta={'error': str(e)})
-        raise
+    percentage_complete = 100
+    self.update_state(state='SUCCESS', meta={'current': percentage_complete, 'total': 100,
+                                             'text': 'Geonames Search Completed.'})
 
 
 @shared_task(bind=True)
@@ -111,32 +96,19 @@ def search_openai_entries(self, dictionary_id, user_id):
     self.update_state(state='PROGRESS', meta={'current': percentage_complete, 'total': 100,
                                               'text': 'Starting Openai Search...'})
 
-    try:
-        # Fetch the dictionary
-        dictionary = Dictionary.objects.get(id=dictionary_id)
-        user = User.objects.get(id=user_id)
+    dictionary, user, number_of_entries = get_dictionary_and_user(dictionary_id, user_id)
 
-        number_of_entries = dictionary.entries.count()
-        for entry in dictionary.entries.all():
-            # Perform Openai search for each entry
+    for entry in dictionary.entries.all():
+        # Perform Openai search for each entry
 
-            # Update the progress
-            percentage_complete = (entry.id / number_of_entries) * 100
-            self.update_state(state='PROGRESS', meta={'current': percentage_complete, 'total': 100,
-                                                      'text': f'GND Search in progress for entry {entry.id}...'})
+        # Update the progress
+        percentage_complete = (entry.id / number_of_entries) * 100
+        self.update_state(state='PROGRESS', meta={'current': percentage_complete, 'total': 100,
+                                                  'text': f'GND Search in progress for entry {entry.id}...'})
 
-        percentage_complete = 100
-        self.update_state(state='SUCCESS', meta={'current': percentage_complete, 'total': 100,
-                                                 'text': 'GND Search Completed.'})
-    except Dictionary.DoesNotExist as e:
-        self.update_state(state='FAILURE', meta={'error': "Dictionary not found"})
-        raise ValueError(str(e))
-    except User.DoesNotExist as e:
-        self.update_state(state='FAILURE', meta={'error': "User not found"})
-        raise ValueError(str(e))
-    except Exception as e:
-        self.update_state(state='FAILURE', meta={'error': str(e)})
-        raise
+    percentage_complete = 100
+    self.update_state(state='SUCCESS', meta={'current': percentage_complete, 'total': 100,
+                                             'text': 'GND Search Completed.'})
 
 
 @shared_task(bind=True)
