@@ -1,7 +1,7 @@
 from celery import shared_task
 
 from twf.clients.geonames_client import search_location
-from twf.clients.wikidata_client import query_wikidata
+# from twf.clients.wikidata_client import query_wikidata
 from twf.models import Dictionary, User
 
 
@@ -50,7 +50,7 @@ def search_wikidata_entries(self, dictionary_id, user_id, entity_type, language)
     number_of_entries = dictionary.entries.count()
     for entry in dictionary.entries.all():
         # Perform Wikidata search for each entry
-        results = query_wikidata(entity_type, entry.label, language)
+        results = {} # query_wikidata(entity_type, entry.label, language)
 
         # Update the progress
         percentage_complete = (entry.id / number_of_entries) * 100
