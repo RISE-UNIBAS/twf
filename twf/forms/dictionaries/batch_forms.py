@@ -105,6 +105,12 @@ class GNDBatchForm(DictionaryBatchForm):
 class WikidataBatchForm(DictionaryBatchForm):
     """Form for batch processing Geonames data."""
 
+    entity_type = forms.ChoiceField(label='Entity Type', required=True,
+                                    choices=[('city', 'City'), ('person', 'Person'), ('event', 'Event'),
+                                             ('ship', 'Ship'), ('building', 'Building')],
+                                    widget=Select2Widget(attrs={'style': 'width: 100%;'}))
+    language = forms.CharField(label='Language', required=True, initial='en')
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -112,7 +118,13 @@ class WikidataBatchForm(DictionaryBatchForm):
         return 'Start Wikidata Batch'
 
     def get_dynamic_fields(self):
-        return []
+        fields = []
+        fields.append(Row(
+            Column('entity_type', css_class='form-group col-6 mb-0'),
+            Column('language', css_class='form-group col-6 mb-0'),
+            css_class='row form-row'
+        ))
+        return fields
 
 
 class OpenaiBatchForm(DictionaryBatchForm):

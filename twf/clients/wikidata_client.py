@@ -1,25 +1,42 @@
-from SPARQLWrapper import SPARQLWrapper, JSON
+import requests
 
-# Set up the endpoint and query
-sparql = SPARQLWrapper("https://query.wikidata.org/sparql")
-query = """
-SELECT ?city ?cityLabel ?country ?countryLabel
-WHERE 
-{
-  ?city wdt:P31 wd:Q515;
-        rdfs:label "London"@en;
-        wdt:P17 ?country.
-  SERVICE wikibase:label { bd:serviceParam wikibase:language "[AUTO_LANGUAGE],en". }
-}
-"""
 
-# Set the query and return format
-sparql.setQuery(query)
-sparql.setReturnFormat(JSON)
+def get_wikidata_entity(entity_id):
+    url = "https://www.wikidata.org/w/api.php"
+    params = {
+        'action': 'wbgetentities',
+        'ids': entity_id,   # The Wikidata entity ID, e.g., 'Q64' for Berlin
+        'format': 'json',
+        'props': 'claims'   # We're only interested in the claims (properties) of the entity
+    }
 
-# Execute the query and get results
-results = sparql.query().convert()
+    response = requests.get(url, params=params)
+    print("Entity", response.json())
+    return response.json()
 
-# Print results
-for result in results["results"]["bindings"]:
-    print(f"City: {result['cityLabel']['value']}, Country: {result['countryLabel']['value']}")
+
+def has_coordinates(entity_data):
+    claims = entity_data['entities'].get('Q64', {}).get('claims', {})
+    return 'P625' in claims  # Check if the coordinates property (P625) exists
+
+
+def get_coordinates(entity_data):
+    claims = entity_data['entities'].get('Q64', {}).get('claims', {})
+    if 'P625' in claims:
+        # Extract the coordinates (latitude and longitude)
+        coordinates_data = claims['P625'][0]['mainsnak']['datavalue']['value']
+        latitude = coordinates_data['latitude']
+        longitude = coordinates_data['longitude']
+        return latitude, longitude
+    return None
+
+
+# Example usage:
+entity_id = 'Q64'  # Berlin
+entity_data = get_wikidata_entity(entity_id)
+coordinates = get_coordinates(entity_data)
+
+if coordinates:
+    print(f"Coordinates for {entity_id}: Latitude = {coordinates[0]}, Longitude = {coordinates[1]}")
+else:
+    print(f"Entity {entity_id} does not have coordinates.")

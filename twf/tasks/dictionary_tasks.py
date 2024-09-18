@@ -1,6 +1,7 @@
 from celery import shared_task
 
 from twf.clients.geonames_client import search_location
+from twf.clients.wikidata_client import query_wikidata
 from twf.models import Dictionary, User
 
 
@@ -38,9 +39,8 @@ def search_gnd_entries(self, dictionary_id, user_id):
                                             'text': 'GND Search Completed.'})
 
 
-
 @shared_task(bind=True)
-def search_wikidata_entries(self, dictionary_id, user_id):
+def search_wikidata_entries(self, dictionary_id, user_id, entity_type, language):
     percentage_complete = 0
     self.update_state(state='PROGRESS', meta={'current': percentage_complete, 'total': 100,
                                               'text': 'Starting Wikidata Search...'})
@@ -50,6 +50,7 @@ def search_wikidata_entries(self, dictionary_id, user_id):
     number_of_entries = dictionary.entries.count()
     for entry in dictionary.entries.all():
         # Perform Wikidata search for each entry
+        results = query_wikidata(entity_type, entry.label, language)
 
         # Update the progress
         percentage_complete = (entry.id / number_of_entries) * 100
@@ -59,7 +60,6 @@ def search_wikidata_entries(self, dictionary_id, user_id):
     percentage_complete = 100
     self.update_state(state='SUCCESS', meta={'current': percentage_complete, 'total': 100,
                                              'text': 'Wikidata Search Completed.'})
-
 
 
 @shared_task(bind=True)

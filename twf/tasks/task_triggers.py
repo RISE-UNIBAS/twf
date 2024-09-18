@@ -57,8 +57,11 @@ def start_wikidata_batch(request):
     dictionary_id = request.GET.get('dictionary_id')
     user_id = request.user.id
 
+    entity_type = request.GET.get('entity_type')
+    language = request.GET.get('language')
+
     # Trigger the task
-    task = search_wikidata_entries.delay(dictionary_id, user_id)
+    task = search_wikidata_entries.delay(dictionary_id, user_id, entity_type, language)
     return JsonResponse({'status': 'success', 'task_id': task.id})
 
 
