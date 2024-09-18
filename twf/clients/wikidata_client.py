@@ -32,11 +32,11 @@ def get_coordinates(entity_data):
 
 
 # Example usage:
-entity_id = 'Q64'  # Berlin
+"""entity_id = 'Q64'  # Berlin
 entity_data = get_wikidata_entity(entity_id)
 coordinates = get_coordinates(entity_data)
 
 if coordinates:
     print(f"Coordinates for {entity_id}: Latitude = {coordinates[0]}, Longitude = {coordinates[1]}")
 else:
-    print(f"Entity {entity_id} does not have coordinates.")
+    print(f"Entity {entity_id} does not have coordinates.")"""
