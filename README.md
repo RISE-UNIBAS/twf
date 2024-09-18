@@ -1,3 +1,3 @@
 Transkribus workflow
 ====================
-![pylint score](https://mperlet.github.io/pybadge/badges/9.01.svg)
+![pylint score](https://mperlet.github.io/pybadge/badges/8.98.svg)
