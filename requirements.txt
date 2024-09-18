@@ -74,3 +74,4 @@ django-appconf~=1.0.6
 SPARQLWrapper~=2.0.0
 isodate~=0.6.1
 rdflib~=7.0.0
+uvicorn~=0.30.6
