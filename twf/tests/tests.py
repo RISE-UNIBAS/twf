@@ -2,16 +2,30 @@
 from django.test import TestCase
 
 from twf.clients.simple_ai_clients import AiApiClient
+from twf.models import Document, Project, User
 
 
 class TestTagAssigner(TestCase):
     """Test the tag_assigner function."""
     def test_tag_assigner(self):
         """Test the tag_assigner function."""
-        key = "sk-yHreKbExQk0cQ2lLUVmz441rTjYK-VuU0J2rY3CvGuT3BlbkFJAVtA-jIXTatjgJG_XKJMa9tuEh2FORvdrP9S9iOe0A"
-        client = AiApiClient(api='openai', api_key=key)
-        response, elapsed_time = client.prompt(model="gpt-4-turbo", prompt="What is the capital of France?")
-        print(response.choices[0].message.content)
-        self.assertTrue(True)
+        self.user = User.objects.create_user(
+            username='testuser',
+            password='password123',
+            email='testuser@example.com'
+        )
+        self.userprofile = self.user.profile
 
+        self.project = Project(
+            title="Test Project",
+            collection_id="test_collection",
+            description="A test project",
+            owner=self.userprofile
+        )
+        self.project.save(current_user=self.user)
+
+        doc_instance, created = Document.objects.get_or_create(project=self.project,
+                                                               document_id='12345',
+                                                               created_by=self.user,
+                                                               modified_by=self.user)
 

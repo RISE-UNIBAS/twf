@@ -245,7 +245,7 @@ class Document(TimeStampedModel):
     last_parsed_at = models.DateTimeField(null=True, blank=True)
     """The last time the document was parsed."""
 
-    is_parked = models.BooleanField(default=False)
+    is_parked = models.BooleanField(default=False, blank=True)
     """Whether the document is parked."""
 
     workflow_remarks = models.TextField(blank=True, default='')

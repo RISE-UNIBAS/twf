@@ -103,6 +103,16 @@ class TWFDocumentCreateView(FormView, TWFDocumentView):
         return context
 
 
+class TWFDocumentDetailView(TWFDocumentView):
+    template_name = 'twf/documents/document.html'
+    page_title = 'Document Detail'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["document"] = Document.objects.get(pk=self.kwargs.get('pk'))
+        return context
+
+
 class TWFDocumentNameView(TWFDocumentView):
     template_name = 'twf/documents/name_documents.html'
     page_title = 'Name Documents'

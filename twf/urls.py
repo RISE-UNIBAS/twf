@@ -11,7 +11,7 @@ from twf.views.dictionaries.views_batches import TWFDictionaryGNDBatchView, TWFD
 from twf.views.dictionaries.views_requests import TWFDictionaryGNDRequestView, TWFDictionaryGeonamesRequestView, \
     TWFDictionaryWikidataRequestView, TWFDictionaryOpenaiRequestView
 from twf.views.documents.views_documents import TWFDocumentsOverviewView, TWFDocumentsBrowseView, TWFDocumentCreateView, \
-    TWFDocumentNameView
+    TWFDocumentNameView, TWFDocumentDetailView
 from twf.views.home.views_home import TWFHomeView, TWFHomeLoginView, TWFHomePasswordChangeView, TWFHomeUserOverView, \
     TWFHomeUserManagementView, TWFSelectProjectView
 from twf.views.project.views_project_setup import TWFProjectSetupView
@@ -87,7 +87,7 @@ urlpatterns = [
     path('documents/browse/', TWFDocumentsBrowseView.as_view(), name='documents_browse'),
     path('documents/create/', TWFDocumentCreateView.as_view(), name='documents_create'),
     path('documents/name/', TWFDocumentNameView.as_view(), name='name_documents'),
-    path('document/<int:pk>/', TWFDocumentsBrowseView.as_view(), name='view_document'),
+    path('document/<int:pk>/', TWFDocumentDetailView.as_view(), name='view_document'),
 
     #############################
     # TAGS

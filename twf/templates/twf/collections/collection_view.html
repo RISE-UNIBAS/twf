@@ -5,7 +5,8 @@
 {% block sub_content %}
      <div class="border rounded bg-light mt-0 p-3">
         <h1 class="display-6">Collection {{ collection.title }}</h1>
-        <p class="lead">Manage your collection</p>
+        <p class="lead">Your collection has <strong>{{ items|length }}</strong></p>
+     
          {% for item in items|slice:":10" %}
             <div>
                 <p>Title <input type="text" value="{{ item.title }}" name="song_title"></p>
