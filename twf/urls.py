@@ -31,7 +31,8 @@ from twf.views.dictionaries.views_dictionaries import TWFDictionaryOverviewView,
 from twf.views.export.views_export import TWFExportDocumentsView, TWFExportCollectionsView, TWFExportProjectView, \
     TWFExportOverviewView, TWFExportTagsView, TWFExportDictionariesView, TWFExportDictionaryView
 from twf.views.metadata.views_metadata import TWFMetadataReviewDocumentsView, \
-    TWFMetadataLoadDataView, TWFMetadataExtractTagsView, TWFMetadataReviewPagesView, TWFMetadataOverviewView
+    TWFMetadataLoadDataView, TWFMetadataExtractTagsView, TWFMetadataReviewPagesView, TWFMetadataOverviewView, \
+    TWFMetadataLoadSheetsDataView
 from twf.views.project.views_project import select_project, \
     TWFProjectSettingsView, TWFProjectQueryView, TWFProjectOverviewView
 from twf.views.project.views_project_ai import TWFProjectAIBatchView, TWFProjectAIQueryView
@@ -204,6 +205,7 @@ urlpatterns = [
     path('metadata/overview/', TWFMetadataOverviewView.as_view(), name='metadata_overview'),
 
     path('metadata/load/metadata/', TWFMetadataLoadDataView.as_view(), name='metadata_load_metadata'),
+    path('metadata/load/sheets/metadata/', TWFMetadataLoadSheetsDataView.as_view(), name='metadata_load_sheets_metadata'),
     path('metadata/extract/tags/', TWFMetadataExtractTagsView.as_view(), name='metadata_extract'),
 
     path('metadata/review/documents/', TWFMetadataReviewDocumentsView.as_view(), name='metadata_review_documents'),

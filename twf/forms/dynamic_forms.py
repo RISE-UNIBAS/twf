@@ -10,11 +10,28 @@ from django_select2.forms import Select2Widget
 from twf.models import Dictionary
 
 
+def get_nested_value(d, keys):
+    """Helper function to retrieve a value from a nested dictionary using a list of keys."""
+    for key in keys:
+        try:
+            key = int(key) if key.isdigit() else key
+            d = d[key]
+        except (KeyError, IndexError, TypeError):
+            return ''
+    return d
+
+
 def parse_config(json_config, json_data):
     """Parse JSON configuration and return form fields."""
     form_fields = []
     for field_name, field_config in json_config.items():
-        field_value = json_data.get(field_name, '')
+        # Split the field_name by dot to get the nested keys
+        nested_keys = field_name.split('.')
+
+        # Retrieve the value using the helper function
+        field_value = get_nested_value(json_data, nested_keys)
+
+        # Prepare the field configuration
         field_config['name'] = field_name
         field_config['value'] = field_value
         form_fields.append(field_config)
@@ -29,7 +46,8 @@ class DynamicForm(forms.Form):
         super(DynamicForm, self).__init__(*args, **kwargs)
 
         form_field_config = parse_config(json_config, json_data)
-        # print(form_field_config)
+        # TODO HERE WE ARE
+        print(form_field_config)
 
         self.helper = FormHelper()
         self.helper.form_id = 'review-form'

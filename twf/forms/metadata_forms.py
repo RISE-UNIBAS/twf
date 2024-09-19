@@ -29,7 +29,7 @@ class LoadMetadataForm(forms.Form):
     match_to_field = forms.ChoiceField(
         label='Match to Field',
         choices=[('dbid', 'Database ID'),
-                 ('docid', 'Transkribus Document ID')],
+                 ('docid', 'Transkribus Document/Page ID')],
         required=False,
         widget=forms.Select(attrs={'class': 'form-control'})
     )
