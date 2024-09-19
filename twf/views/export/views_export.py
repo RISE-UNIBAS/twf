@@ -63,7 +63,7 @@ class TWFExportDocumentsView(FormView, TWFExportView):
     template_name = "twf/export/export_documents.html"
     page_title = 'Export Data'
     form_class = ExportConfigForm
-    success_url = reverse_lazy('twf:project_export_documents')
+    success_url = reverse_lazy('twf:export_documents')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -108,7 +108,7 @@ class TWFExportCollectionsView(FormView, TWFExportView):
     template_name = "twf/export/export_collections.html"
     page_title = 'Export Collections'
     form_class = ExportConfigForm
-    success_url = reverse_lazy('twf:project_export_collections')
+    success_url = reverse_lazy('twf:export_collections')
 
     def form_valid(self, form):
         project = self.get_project()

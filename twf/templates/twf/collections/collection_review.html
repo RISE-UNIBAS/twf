@@ -39,9 +39,7 @@
             </ul>
             
             <div>
-                <textarea placeholder="Notes on Collection Item" name="notes" class="form-control">
-                    {% if item.notes %}{{ item.notes }}{% endif %}
-                </textarea>
+                <textarea placeholder="Notes on Collection Item" name="notes" class="form-control">{% if item.notes %}{{ item.notes }}{% endif %}</textarea>
             </div>
             
             <div class="mt-4">
