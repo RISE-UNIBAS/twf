@@ -40,6 +40,9 @@ def parse_config(json_config, json_data):
 
 class DynamicForm(forms.Form):
     """Dynamic form based on JSON configuration."""
+
+    remarks_field = forms.CharField(label='Remarks', widget=forms.Textarea, required=False)
+
     def __init__(self, *args, **kwargs):
         json_config = kwargs.pop('json_config', None)
         json_data = kwargs.pop('json_data', None)
@@ -118,8 +121,13 @@ class DynamicForm(forms.Form):
             )
             self.helper.layout.append(row_to_append)
 
+        self.helper.layout.append(Row(
+                Column('remarks_field', css_class='form-group col-12 mb-3'),
+                css_class='row form-row'
+            ))
         self.helper.layout.append(Div(
-                Submit('submit', 'Save And Next', css_class='btn btn-dark'),
+            Submit('submit_park', 'Park And Next', css_class='btn btn-secondary', title='Save only remarks, mark as parked and continue'),
+                Submit('submit_save', 'Save And Next', css_class='btn btn-dark', title='Save all data and continue'),
                 css_class='text-end pt-3'
             ))
         self.is_valid()

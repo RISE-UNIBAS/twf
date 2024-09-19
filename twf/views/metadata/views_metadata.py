@@ -1,5 +1,6 @@
 import json
 
+from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse, reverse_lazy
 from django.views.generic import FormView
@@ -310,17 +311,36 @@ class TWFMetadataReviewDocumentsView(FormView, TWFMetadataView):
 
         # Retrieve the document to update its metadata
         next_document = self.get_next_document()
+        message = None
+
         if next_document:
             metadata = next_document.metadata  # Get the existing metadata
 
-            # Update the metadata based on the cleaned form data
-            for key, value in cleaned_data.items():
-                keys = key.split('.')  # Split by dot notation to get the path
-                set_nested_value(metadata, keys, value)
+            if "submit_park" in self.request.POST:
+                print("Would park the document")
+                next_document.is_parked = True
+                next_document.workflow_remarks = cleaned_data['remarks_field']
+                message = f"Parked document {next_document}"
 
-            # Save the updated metadata back to the document
-            next_document.metadata = metadata
+            if "submit_save" in self.request.POST:
+                # Update the metadata based on the cleaned form data
+                for key, value in cleaned_data.items():
+                    if key == 'remarks_field':
+                        next_document.workflow_remarks = value
+                        continue
+                    keys = key.split('.')  # Split by dot notation to get the path
+                    set_nested_value(metadata, keys, value)
+
+                # Save the updated metadata back to the document
+                next_document.metadata = metadata
+                message = f"Saved metadata for document {next_document}"
+
             next_document.save()
-            print("Saved document", next_document.id)
+            if message:
+                messages.success(self.request, message)
+            else:
+                messages.error(self.request, "No action taken")
+        else:
+            messages.error(self.request, "No document found to update")
 
         return super().form_valid(form)

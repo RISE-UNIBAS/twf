@@ -245,6 +245,12 @@ class Document(TimeStampedModel):
     last_parsed_at = models.DateTimeField(null=True, blank=True)
     """The last time the document was parsed."""
 
+    is_parked = models.BooleanField(default=False)
+    """Whether the document is parked."""
+
+    workflow_remarks = models.TextField(blank=True, default='')
+    """Workflow remarks for the document."""
+
     class Meta:
         """Meta options for the Document model."""
         ordering = ['document_id']
