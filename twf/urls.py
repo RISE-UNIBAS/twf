@@ -5,13 +5,14 @@ from django.contrib.auth import views as auth_views
 from twf.tasks.task_status import task_status_view
 from twf.tasks.task_triggers import start_task_creation, start_extraction, start_gnd_batch, start_geonames_batch, \
     start_wikidata_batch, start_openai_batch, start_gnd_request, start_geonames_request, start_wikidata_request, \
-    start_openai_request
+    start_openai_request, start_gemini_doc_batch, start_openai_doc_batch, start_claude_doc_batch
 from twf.views.dictionaries.views_batches import TWFDictionaryGNDBatchView, TWFDictionaryGeonamesBatchView, \
     TWFDictionaryWikidataBatchView, TWFDictionaryOpenaiBatchView
 from twf.views.dictionaries.views_requests import TWFDictionaryGNDRequestView, TWFDictionaryGeonamesRequestView, \
     TWFDictionaryWikidataRequestView, TWFDictionaryOpenaiRequestView
 from twf.views.documents.views_documents import TWFDocumentsOverviewView, TWFDocumentsBrowseView, TWFDocumentCreateView, \
     TWFDocumentNameView, TWFDocumentDetailView
+from twf.views.documents.views_documents_ai import TWFDocumentAIBatchView
 from twf.views.home.views_home import TWFHomeView, TWFHomeLoginView, TWFHomePasswordChangeView, TWFHomeUserOverView, \
     TWFHomeUserManagementView, TWFSelectProjectView
 from twf.views.project.views_project_setup import TWFProjectSetupView
@@ -78,9 +79,6 @@ urlpatterns = [
     path('project/query/', TWFProjectQueryView.as_view(), name='project_query'),
     path('project/ai/query/', TWFProjectAIQueryView.as_view(), name='project_ai_query'),
 
-    path('project/batch/openai/', TWFProjectAIBatchView.as_view(), name='project_batch_openai'),
-    path('project/batch/openai/ask-chatgpt/', TWFProjectAIBatchView.as_view(), name='project_batch_openai_ask-chatgpt'),
-
     #############################
     # DOCUMENTS
     path('documents/', TWFDocumentsOverviewView.as_view(), name='documents_overview'),
@@ -88,6 +86,10 @@ urlpatterns = [
     path('documents/create/', TWFDocumentCreateView.as_view(), name='documents_create'),
     path('documents/name/', TWFDocumentNameView.as_view(), name='name_documents'),
     path('document/<int:pk>/', TWFDocumentDetailView.as_view(), name='view_document'),
+
+    path('documents/batch/openai/', TWFDocumentAIBatchView.as_view(), name='documents_batch_openai'),
+    path('documents/batch/gemini/', TWFDocumentAIBatchView.as_view(), name='documents_batch_gemini'),
+    path('documents/batch/claude/', TWFDocumentAIBatchView.as_view(), name='documents_batch_claude'),
 
     #############################
     # TAGS
@@ -169,6 +171,10 @@ urlpatterns = [
 
     path('celery/transkribus/extract/', start_extraction, name='task_transkribus_extract_export'),
     path('celery/transkribus/tags/extract/', start_task_creation, name='task_transkribus_extract_tags'),
+
+    path('celery/documents/batch/openai/', start_openai_doc_batch, name='task_documents_batch_openai'),
+    path('celery/documents/batch/gemini/', start_gemini_doc_batch, name='task_documents_batch_gemini'),
+    path('celery/documents/batch/claude/', start_claude_doc_batch, name='task_documents_batch_claude'),
 
     path('celery/dictionaries/batch/gnd/', start_gnd_batch, name='task_dictionaries_batch_gnd'),
     path('celery/dictionaries/batch/geonames/', start_geonames_batch, name='task_dictionaries_batch_geonames'),

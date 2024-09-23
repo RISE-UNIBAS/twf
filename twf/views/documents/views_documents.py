@@ -28,11 +28,20 @@ class TWFDocumentView(LoginRequiredMixin, TWFView):
                 ]
             },
             {
+                'name': 'Document Batch',
+                'options': [
+                    {'url': reverse('twf:documents_batch_openai'), 'value': 'ChatGPT'},
+                    {'url': reverse('twf:documents_batch_gemini'), 'value': 'Gemini'},
+                    {'url': reverse('twf:documents_batch_claude'), 'value': 'Claude'},
+                ]
+            },
+            {
                 'name': 'Create Documents',
                 'options': [
                     {'url': reverse('twf:documents_create'), 'value': 'Manual Document Creation'},
                 ]
             },
+
         ]
         return sub_nav
 

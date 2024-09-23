@@ -187,6 +187,15 @@ class Project(TimeStampedModel):
                                       help_text='The API key for the Open AI API.')
     """The API key for the Open AI API."""
 
+    gemini_api_key = models.CharField(max_length=100, blank=True, null=True,
+                                      verbose_name='Gemini API Key',
+                                      help_text='The API key for the Gemini API.')
+    """The API key for the Gemini API."""
+
+    claude_api_key = models.CharField(max_length=100, blank=True, null=True,
+                                      verbose_name='Claude API Key',
+                                      help_text='The API key for the Claude API.')
+
     selected_dictionaries = models.ManyToManyField('Dictionary', related_name='selected_projects',
                                                    blank=True, verbose_name='Selected Dictionaries',
                                                    help_text='The dictionaries selected for this project.')

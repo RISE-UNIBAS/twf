@@ -1,7 +1,9 @@
 from django.http import JsonResponse
+
+from twf.tasks.document_tasks import search_openai_for_docs, search_gemini_for_docs, search_claude_for_docs
 from twf.tasks.structure_tasks import extract_zip_export_task
-from twf.tasks.dictionary_tasks import search_gnd_entries, search_geonames_entries, search_wikidata_entries,\
-    search_openai_entries, search_gnd_entry, search_geonames_entry, search_wikidata_entry
+from twf.tasks.dictionary_tasks import search_gnd_entries, search_geonames_entries, search_wikidata_entries, \
+    search_openai_entries, search_gnd_entry, search_geonames_entry, search_wikidata_entry, search_openai_entry
 from twf.tasks.tags_tasks import create_page_tags
 from twf.views.views_base import TWFView
 
@@ -115,4 +117,31 @@ def start_openai_request(request):
 
     # Trigger the task
     task = search_openai_entry.delay(dictionary_id, user_id)
+    return JsonResponse({'status': 'success', 'task_id': task.id})
+
+
+def start_openai_doc_batch(request):
+    """ Start the OpenAI requests as a Celery task."""
+    return start_ai_doc_batch(request, search_openai_for_docs)
+
+
+def start_gemini_doc_batch(request):
+    """ Start the Gemini requests as a Celery task."""
+    return start_ai_doc_batch(request, search_gemini_for_docs)
+
+
+def start_claude_doc_batch(request):
+    """ Start the Claude requests as a Celery task."""
+    return start_ai_doc_batch(request, search_claude_for_docs)
+
+
+def start_ai_doc_batch(request, task_function_name):
+    """ Start the AI requests as a Celery task."""
+    project = TWFView.s_get_project(request)
+    user_id = request.user.id
+    prompt = request.GET.get('prompt')
+    role_description = request.GET.get('role_description')
+
+    # Trigger the task
+    task = task_function_name.delay(project.id, user_id, prompt, role_description)
     return JsonResponse({'status': 'success', 'task_id': task.id})

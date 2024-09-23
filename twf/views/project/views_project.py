@@ -42,14 +42,6 @@ class TWFProjectView(LoginRequiredMixin, TWFView):
                     {'url': reverse('twf:project_ai_query'), 'value': 'Ask ChatGPT'},
                 ]
             },
-            {
-                'name': 'Project Batch',
-                'options': [
-                    {'url': reverse('twf:project_batch_openai'), 'value': 'ChatGPT'},
-                    {'url': reverse('twf:project_batch_openai'), 'value': 'Gemini'},
-                    {'url': reverse('twf:project_batch_openai'), 'value': 'Claude'},
-                ]
-            },
         ]
         return sub_nav
 
