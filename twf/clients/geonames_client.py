@@ -38,9 +38,9 @@ def clean_location(locations, original_query, threshold=80):
         similarity_ratio = fuzz.ratio(location.raw['name'], original_query)
         if similarity_ratio > int(threshold):
             c_location = {
-                'id': location.raw['geonameId'],
-                'name': location.raw['name'],
-                'country': location.raw['countryName'],
+                'id': location.raw.get('geonameId', 'Error getting Id'),
+                'name': location.raw.get('name', 'Error getting name'),
+                'country': location.raw.get('countryName', ''),
                 'lat': location.latitude,
                 'lng': location.longitude
             }

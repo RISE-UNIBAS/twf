@@ -64,6 +64,7 @@ def search_wikidata_entries(self, dictionary_id, user_id, entity_type, language)
 
 @shared_task(bind=True)
 def search_geonames_entries(self, dictionary_id, user_id, geonames_username, country_restriction, similarity_threshold):
+    """ Search for locations using the GeoNames API for all entries in a dictionary"""
     percentage_complete = 0
     self.update_state(state='PROGRESS', meta={'current': percentage_complete, 'total': 100,
                                               'text': 'Starting Geonames Search...'})

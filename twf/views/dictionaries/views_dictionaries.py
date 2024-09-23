@@ -48,7 +48,7 @@ class TWFDictionaryView(LoginRequiredMixin, TWFView):
                 'options': options
             },
             {
-                'name': 'Supervised Workflows',
+                'name': 'Automated Workflows',
                 'options': [
                     {'url': reverse('twf:dictionaries_batch_gnd'), 'value': 'GND'},
                     {'url': reverse('twf:dictionaries_batch_wikidata'), 'value': 'Wikidata'},
@@ -57,7 +57,7 @@ class TWFDictionaryView(LoginRequiredMixin, TWFView):
                 ]
             },
             {
-                'name': 'Automated Workflows',
+                'name': 'Supervised Workflows',
                 'options': [
                     {'url': reverse('twf:dictionaries_request_gnd'), 'value': 'GND'},
                     {'url': reverse('twf:dictionaries_request_wikidata'), 'value': 'Wikidata'},

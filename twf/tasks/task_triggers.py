@@ -46,6 +46,9 @@ def start_geonames_batch(request):
     country_restriction = request.GET.get('only_search_in')
     similarity_threshold = request.GET.get('similarity_threshold')
 
+    if geonames_username is None or geonames_username == '':
+        return JsonResponse({'status': 'error', 'message': 'No GeoNames username set'})
+
     # Trigger the task
     task = search_geonames_entries.delay(dictionary_id, user_id, geonames_username,
                                          country_restriction, similarity_threshold)

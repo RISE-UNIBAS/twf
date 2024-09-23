@@ -19,7 +19,6 @@ class TWFCollectionsView(LoginRequiredMixin, TWFView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['collections'] = Collection.objects.filter(project_id=self.request.session.get('project_id'))
-        context['context_sub_nav'] = self.get_sub_navigation()
         return context
 
     def get_sub_navigation(self):
@@ -70,7 +69,6 @@ class TWFProjectCollectionsCreateView(FormView, TWFCollectionsView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['context_sub_nav'] = self.get_sub_navigation()
         return context
 
 
@@ -84,7 +82,6 @@ class TWFProjectCollectionsDetailView(TWFCollectionsView):
         collection = Collection.objects.get(pk=self.kwargs.get('pk'))
         context['collection'] = collection
         context['items'] = collection.items.all()
-        context['context_sub_nav'] = self.get_sub_navigation()
         return context
 
 
@@ -116,7 +113,6 @@ class TWFProjectCollectionsAddDocumentView(FormView, TWFCollectionsView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['context_sub_nav'] = self.get_sub_navigation()
         return context
 
 
@@ -133,7 +129,6 @@ class TWFProjectCollectionsReviewView(TWFCollectionsView):
         item = collection.items.filter(status__in=['open', '', None]).first()
         context['item'] = item
         context['collection'] = collection
-        context['context_sub_nav'] = self.get_sub_navigation()
 
         return context
 

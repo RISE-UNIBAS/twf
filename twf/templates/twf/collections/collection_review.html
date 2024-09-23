@@ -2,7 +2,7 @@
 {% load tk_tags %}
 {% load nav_tags %}
 
-{% block sub_content %}
+{% block content %}
     <div class="border rounded bg-light mt-0 p-3">
         <form method="post" action="{% url 'twf:project_collections_item_update' item.id %}">
             {% csrf_token %}
