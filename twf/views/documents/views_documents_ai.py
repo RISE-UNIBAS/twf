@@ -4,6 +4,7 @@ from django.http import JsonResponse
 
 from django.contrib import messages
 from django.shortcuts import render
+from django.urls import reverse_lazy
 from django.views.generic import FormView
 
 from twf.forms.project_forms import AIQueryDatabaseForm, BatchOpenAIForm
@@ -14,34 +15,40 @@ from twf.tasks.openai_tasks import ask_chatgpt_task
 logger = logging.getLogger(__name__)
 
 
-class TWFDocumentAIBatchView(FormView, TWFProjectView):
-    template_name = 'twf/documents/batches/ai_batch_query.html'
-    page_title = 'AI Query'
+class TWFDocumentOpenAIBatchView(FormView, TWFProjectView):
+    """Ask ChatGPT."""
+    template_name = 'twf/documents/batches/openai_batch_query.html'
+    page_title = 'Geonames Batch'
     form_class = BatchOpenAIForm
-    results = None
+    success_url = reverse_lazy('twf:documents_batch_openai')
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        # Add your custom argument here
         kwargs['project'] = self.get_project()
         return kwargs
 
-    def form_valid(self, form):
-        project = self.get_project()
 
-        # Ensure form is valid before processing
-        if form.is_valid():
-            selection = form.cleaned_data['selection']
-            role_description = form.cleaned_data['role_description']
-            prompt = form.cleaned_data['prompt']
+class TWFDocumentGeminiBatchView(FormView, TWFProjectView):
+    """Ask Gemini."""
+    template_name = 'twf/documents/batches/gemini_batch_query.html'
+    page_title = 'Gemini Batch'
+    form_class = BatchOpenAIForm
+    success_url = reverse_lazy('twf:documents_batch_gemini')
 
-            # Correct project.id instead of project.d
-            task = ask_chatgpt_task.delay(project.id, selection, role_description, prompt)
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['project'] = self.get_project()
+        return kwargs
 
-            return JsonResponse({'status': 'success', 'task_id': task.id})
-        else:
-            return JsonResponse({'status': 'error', 'errors': form.errors}, status=400)
 
-    def form_invalid(self, form):
-        # If form is invalid, return an error response
-        return JsonResponse({'status': 'error', 'errors': form.errors}, status=400)
+class TWFDocumentClaudeBatchView(FormView, TWFProjectView):
+    """Ask Claude."""
+    template_name = 'twf/documents/batches/claude_batch_query.html'
+    page_title = 'Claude Batch'
+    form_class = BatchOpenAIForm
+    success_url = reverse_lazy('twf:documents_batch_claude')
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['project'] = self.get_project()
+        return kwargs

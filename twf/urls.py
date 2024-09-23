@@ -12,7 +12,8 @@ from twf.views.dictionaries.views_requests import TWFDictionaryGNDRequestView, T
     TWFDictionaryWikidataRequestView, TWFDictionaryOpenaiRequestView
 from twf.views.documents.views_documents import TWFDocumentsOverviewView, TWFDocumentsBrowseView, TWFDocumentCreateView, \
     TWFDocumentNameView, TWFDocumentDetailView
-from twf.views.documents.views_documents_ai import TWFDocumentAIBatchView
+from twf.views.documents.views_documents_ai import TWFDocumentOpenAIBatchView, \
+    TWFDocumentGeminiBatchView, TWFDocumentClaudeBatchView
 from twf.views.home.views_home import TWFHomeView, TWFHomeLoginView, TWFHomePasswordChangeView, TWFHomeUserOverView, \
     TWFHomeUserManagementView, TWFSelectProjectView
 from twf.views.project.views_project_setup import TWFProjectSetupView
@@ -87,9 +88,9 @@ urlpatterns = [
     path('documents/name/', TWFDocumentNameView.as_view(), name='name_documents'),
     path('document/<int:pk>/', TWFDocumentDetailView.as_view(), name='view_document'),
 
-    path('documents/batch/openai/', TWFDocumentAIBatchView.as_view(), name='documents_batch_openai'),
-    path('documents/batch/gemini/', TWFDocumentAIBatchView.as_view(), name='documents_batch_gemini'),
-    path('documents/batch/claude/', TWFDocumentAIBatchView.as_view(), name='documents_batch_claude'),
+    path('documents/batch/openai/', TWFDocumentOpenAIBatchView.as_view(), name='documents_batch_openai'),
+    path('documents/batch/gemini/', TWFDocumentGeminiBatchView.as_view(), name='documents_batch_gemini'),
+    path('documents/batch/claude/', TWFDocumentClaudeBatchView.as_view(), name='documents_batch_claude'),
 
     #############################
     # TAGS
