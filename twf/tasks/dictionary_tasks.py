@@ -1,3 +1,4 @@
+"""Celery tasks for searching entities in dictionaries"""
 from celery import shared_task
 
 from twf.clients.geonames_client import search_location
@@ -7,7 +8,11 @@ from twf.tasks.task_base import start_task, update_task, end_task, fail_task
 
 
 def get_dictionary_and_user(broker, task, dictionary_id, user_id):
-    """Get the dictionary and user objects"""
+    """Get the dictionary and user objects
+    :param broker: Celery broker
+    :param task: Task object
+    :param dictionary_id: Dictionary ID
+    :param user_id: User ID"""
     try:
         dictionary = Dictionary.objects.get(id=dictionary_id)
         user = User.objects.get(id=user_id)

@@ -4,7 +4,7 @@ from twf.models import Task
 
 
 def start_task(broker, project, user_id, title="Task Title",
-               description="Task description", text="Starting Task", percentage_complete=0):
+               description="ongoing task", text="Starting Task", percentage_complete=0):
     """Start a new task. Create a new Task object and update the state of the Celery broker.
     :param broker: Celery broker
     :param project: Project object
@@ -33,11 +33,21 @@ def update_task(broker, task, text, processed_entries, number_of_entries):
     :param number_of_entries: Total number of entries
     :return: Task object, percentage complete"""
 
+    percentage_complete = (processed_entries / number_of_entries) * 100
+    return update_task_percentage(broker, task, text, percentage_complete)
+
+
+def update_task_percentage(broker, task, text, percentage_complete):
+    """Update the task. Update the Task object and update the state of the Celery broker.
+    :param broker: Celery broker
+    :param task: Task object
+    :param text: Task text
+    :param percentage_complete: Percentage complete
+    :return: Task object, percentage complete"""
+
     task.status = 'PROGRESS'
     task.text = text
     task.save()
-
-    percentage_complete = (processed_entries / number_of_entries) * 100
     broker.update_state(state='PROGRESS', meta={'current': percentage_complete, 'total': 100, 'text': text})
 
     return task, percentage_complete

@@ -1,3 +1,4 @@
+"""Celery tasks for extracting Transkribus export files."""
 import logging
 import os
 import zipfile
@@ -9,17 +10,15 @@ from simple_alto_parser import PageFileParser
 
 from twf.models import Project, User, Document, Page
 from twf.page_file_meta_data_reader import extract_transkribus_file_metadata
+from twf.tasks.task_base import start_task, update_task_percentage, end_task, fail_task
 from twf.utils.file_utils import delete_all_in_folder
 
 
 @shared_task(bind=True)
 def extract_zip_export_task(self, project_id, user_id):
-    print(f"Starting task with project_id: {project_id} and user_id: {user_id}")
-    percentage_complete = 0
-    self.update_state(state='PROGRESS', meta={'current': percentage_complete, 'total': 100,
-                                              'text': 'Starting...'})
+    task, percentage_complete = start_task(self, project_id, user_id, text="Starting Transkribus Export Extraction...",
+                                           title="Transkribus Export Extraction")
 
-    # self.update_state(state='FAILURE', meta={'error': str(e)})
     try:
         # Get the projects to save the documents to
         project = Project.objects.get(pk=project_id)
@@ -34,8 +33,8 @@ def extract_zip_export_task(self, project_id, user_id):
         # Clear the folder before extracting
         delete_all_in_folder(extract_to_path)
         percentage_complete = 2
-        self.update_state(state='PROGRESS', meta={'current': percentage_complete, 'total': 100,
-                                                  'text': 'Preparing...'})
+        task, percentage_complete = update_task_percentage(self, task, f'Preparing...',
+                                                           percentage_complete)
 
         # Extract the zip file and search for page.xml files
         with zipfile.ZipFile(zip_file.path, 'r') as zip_ref:
@@ -45,8 +44,9 @@ def extract_zip_export_task(self, project_id, user_id):
 
             total_files = len(valid_files)
             processed_files = 0
-            self.update_state(state='PROGRESS', meta={'current': percentage_complete, 'total': 100,
-                                                      'text': f'Extracting {total_files} files...'})
+            percentage_complete = 3
+            task, percentage_complete = update_task_percentage(self, task, f'Extracting {total_files} files...',
+                                                               percentage_complete)
 
             # Save the extracted files to the folder
             unique_id = 1
@@ -70,21 +70,19 @@ def extract_zip_export_task(self, project_id, user_id):
                 # Update Processing state
                 processed_files += 1
                 percentage_of_extraction = (processed_files / total_files) * 100
-                self.update_state(state='PROGRESS', meta={'current': percentage_complete + percentage_of_extraction/3,
-                                                          'total': 100, 'text': f'Extracted {processed_files} files...'})
+                task, percentage_complete = update_task_percentage(self, task, f'Extracted {processed_files} files...',
+                                                                   percentage_complete + percentage_of_extraction/3)
 
         percentage_complete = 32
-        self.update_state(state='PROGRESS', meta={'current': percentage_complete,
-                                                  'total': 100, 'text': f'All files extracted. Processing...'})
+        task, percentage_complete = update_task_percentage(self, task, f'Extracted {total_files} files...',
+                                                           percentage_complete)
+
         #############################
         # Process the extracted files
         # Document and Page instances are only created if they do not exist yet
         all_existing_documents = list(Document.objects.filter(project=project).values_list('document_id', flat=True))
         created_documents = 0
         processed_documents = 0
-
-        self.update_state(state='PROGRESS', meta={'current': percentage_complete, 'total': 100,
-                                                  'text': f'Processing {total_files} documents...'})
 
         for file in copied_files:
             if file.endswith('metadata.xml') or file.endswith('mets.xml'):
@@ -122,8 +120,8 @@ def extract_zip_export_task(self, project_id, user_id):
                     # Update Processing state
                     processed_documents += 1
                     percentage_of_extraction = (processed_documents / total_files) * 100
-                    self.update_state(state='PROGRESS', meta={'current': percentage_complete + percentage_of_extraction/3,
-                                                              'total': 100, 'text': f'Processed {processed_documents} documents...'})
+                    task, percentage_complete = update_task_percentage(self, task, f'Processed {processed_documents} documents...',
+                                                                       percentage_complete + percentage_of_extraction/3)
 
                 else:
                     print("ERROR")  # TODO: Handle error
@@ -133,8 +131,8 @@ def extract_zip_export_task(self, project_id, user_id):
             Document.objects.filter(project=project, document_id=doc_id).delete()
 
         percentage_complete = 66
-        self.update_state(state='PROGRESS', meta={'current': percentage_complete, 'total': 100,
-                                                  'text': 'All documents processed. Parsing...'})
+        task, percentage_complete = update_task_percentage(self, task, f'Processed {processed_documents} documents...',
+                                                           percentage_complete)
 
         #############################
         # PARSE THE PAGES
@@ -163,20 +161,24 @@ def extract_zip_export_task(self, project_id, user_id):
             # Update Processing state
             processed_pages += 1
             percentage_of_parsing = (processed_pages / total_pages) * 100
-            self.update_state(state='PROGRESS', meta={'current': percentage_complete + percentage_of_parsing/3,
-                                                      'total': 100, 'text': f'Parsed {processed_pages} pages...'})
+            task, percentage_complete = update_task_percentage(self, task, f'Parsed {processed_pages} pages...',
+                                                               percentage_complete + percentage_of_parsing/3)
 
-        percentage_complete = 100
-        self.update_state(state='PROGRESS', meta={'current': percentage_complete, 'total': 100,
-                                                  'text': 'All pages parsed. Done!'})
+        end_task(self, task, 'Transkribus Export Extraction Completed.',
+                 description=f'Transkribus Export Extraction for project "{project.title}". '
+                             f'Extracted {total_files} files, created {created_documents} documents, '
+                             f'processed {processed_documents} documents and parsed {processed_pages} pages.')
 
         return {'status': 'completed'}
 
     except Project.DoesNotExist:
         error_message = f"Project with id {project_id} does not exist."
-        self.update_state(state='FAILURE', meta={'error': error_message})
+        fail_task(self, task, error_message)
         raise ValueError(error_message)
     except User.DoesNotExist:
         error_message = f"User with id {user_id} does not exist."
-        self.update_state(state='FAILURE', meta={'error': error_message})
+        fail_task(self, task, error_message)
         raise ValueError(error_message)
+    except Exception as e:
+        fail_task(self, task, str(e))
+        raise ValueError(str(e))

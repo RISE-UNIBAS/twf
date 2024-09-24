@@ -9,6 +9,14 @@ logger = logging.getLogger(__name__)
 
 @shared_task(bind=True)
 def ask_chatgpt_task(self, project_id, selection_type, role_description, prompt):
+    """Ask ChatGPT to summarize the selected documents in a project.
+    :param self: Celery task
+    :param project_id: Project ID
+    :param selection_type: Type of selection (random, top, bottom)
+    :param role_description: Role description for the AI model
+    :param prompt: Prompt text
+    :return: Task status"""
+
     try:
         project = Project.objects.get(id=project_id)
 
@@ -36,12 +44,10 @@ def ask_chatgpt_task(self, project_id, selection_type, role_description, prompt)
 
     except Project.DoesNotExist as e:
         error_message = f"Project with id {project_id} does not exist."
-        logger.error(error_message)
         self.update_state(state='FAILURE', meta={'error': error_message})
         raise ValueError(error_message)  # Use ValueError for easy serialization
 
     except Exception as e:
         error_message = f"An unexpected error occurred: {str(e)}"
-        logger.error(error_message)
         self.update_state(state='FAILURE', meta={'error': error_message})
-        raise ValueError(error_message)  # Re-raise as ValueError
+        raise ValueError(error_message)

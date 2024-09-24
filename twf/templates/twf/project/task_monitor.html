@@ -34,11 +34,11 @@
                     <p class="card-text"><strong>Description:</strong> {{ task.description }}</p>
         
                     <!-- Progress Bar for Tasks In Progress -->
-                    {% if task.status == "STARTED" %}
+                    {% if task.status == "STARTED" or task.status == "PROGRESS" %}
                         <div class="progress mb-3">
                             <div id="taskProgressBar-{{ task.id }}" class="progress-bar progress-bar-striped progress-bar-animated" 
-                                 role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%;">
-                                0%
+                                 role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 100%;">
+                               Running...
                             </div>
                         </div>
                         <button class="btn btn-danger btn-sm" onclick="removeTask({{ task.id }})">Cancel Task</button>
@@ -56,7 +56,7 @@
                         | Ended: {{ task.end_time|date:"Y-m-d H:i:s" }}
                         | Elapsed Time: {{ task.end_time|timeuntil:task.start_time }}
                     {% else %}
-                        | Elapsed Time: {{ task.start_time|timesince:now }} <!-- Ongoing task -->
+                        | ongoing
                     {% endif %}
                 </div>
             </div>

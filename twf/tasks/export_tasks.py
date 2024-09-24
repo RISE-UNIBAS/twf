@@ -1,3 +1,4 @@
+"""Celery tasks for exporting data from the project."""
 import json
 import csv
 import pandas as pd
@@ -7,6 +8,14 @@ from twf.models import Project
 
 @shared_task(bind=True)
 def export_data_task(self, project_id, export_type, export_format, schema):
+    """Export data from a project.
+    :param self: Celery task
+    :param project_id: Project ID
+    :param export_type: Type of data to export (documents or collections)
+    :param export_format: Format of the export (json, csv, excel)
+    :param schema: Optional schema for filtering the data
+    :return: Exported data in the specified format"""
+
     try:
         # Fetch the project
         project = Project.objects.get(id=project_id)
@@ -46,11 +55,16 @@ def filter_data_by_schema(data, schema_fields):
 
 
 def generate_json(data):
+    """Convert data to JSON string
+    :param data: Data to export
+    :return: JSON string"""
     return json.dumps([item.to_dict() for item in data], indent=4)
 
 
 def generate_csv(data):
-    # Convert data to CSV string
+    """Convert data to CSV string
+    :param data: Data to export
+    :return: CSV string"""
     output = []
     fieldnames = data[0].keys() if data else []
 
@@ -63,7 +77,10 @@ def generate_csv(data):
 
 
 def generate_excel(data):
-    # Use pandas to export to Excel
+    """Convert data to Excel file
+    :param data: Data to export
+    :return: Excel file"""
     df = pd.DataFrame(data)
     output = df.to_excel(index=False)
     return output
+
