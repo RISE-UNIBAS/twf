@@ -2,6 +2,9 @@ import logging
 
 from celery.result import AsyncResult
 from django.http import JsonResponse
+from django.utils import timezone
+
+from twf.models import Task
 
 logger = logging.getLogger(__name__)
 
@@ -48,3 +51,15 @@ def task_status_view(request, task_id):
     except Exception as e:
         # Catch any other unexpected exceptions and return as error
         return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+
+
+def task_cancel_view(request, task_id):
+    try:
+        task = Task.objects.get(task_id=task_id)
+        AsyncResult(task_id).revoke(terminate=True)
+        task.status = 'CANCELED'
+        task.end_time = timezone.now()
+        task.save()
+        return JsonResponse({'status': 'success', 'message': 'Task canceled'})
+    except Task.DoesNotExist:
+        return JsonResponse({'status': 'error', 'message': 'Task not found'}, status=404)

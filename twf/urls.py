@@ -2,7 +2,7 @@
 from django.urls import path
 from django.contrib.auth import views as auth_views
 
-from twf.tasks.task_status import task_status_view
+from twf.tasks.task_status import task_status_view, task_cancel_view
 from twf.tasks.task_triggers import start_task_creation, start_extraction, start_gnd_batch, start_geonames_batch, \
     start_wikidata_batch, start_openai_batch, start_gnd_request, start_geonames_request, start_wikidata_request, \
     start_openai_request, start_gemini_doc_batch, start_openai_doc_batch, start_claude_doc_batch
@@ -36,7 +36,7 @@ from twf.views.metadata.views_metadata import TWFMetadataReviewDocumentsView, \
     TWFMetadataLoadDataView, TWFMetadataExtractTagsView, TWFMetadataReviewPagesView, TWFMetadataOverviewView, \
     TWFMetadataLoadSheetsDataView
 from twf.views.project.views_project import select_project, \
-    TWFProjectSettingsView, TWFProjectQueryView, TWFProjectOverviewView
+    TWFProjectSettingsView, TWFProjectQueryView, TWFProjectOverviewView, TWFProjectTaskMonitorView
 from twf.views.project.views_project_ai import TWFProjectAIQueryView
 from twf.views.tags.views_tags import TWFTagsView, TWFProjectTagsView, TWFProjectTagsOpenView, TWFProjectTagsParkedView, \
     TWFProjectTagsResolvedView, TWFProjectTagsIgnoredView, TWFTagsDatesView, TWFTagsGroupView, TWFTagsOverviewView, \
@@ -74,6 +74,8 @@ urlpatterns = [
     path('project/setup/sheets/metadata/', TWFProjectSetupView.as_view(template_name='twf/project/setup_metadata.html',
                                                                        page_title='Project Sheets Metadata'),
          name='project_sheets_metadata'),
+
+    path('project/task/monitor/', TWFProjectTaskMonitorView.as_view(), name='project_task_monitor'),
     path('project/settings/', TWFProjectSettingsView.as_view(), name='project_settings'),
 
     # Project options
@@ -169,6 +171,7 @@ urlpatterns = [
     #############################
     # CELERY TASKS
     path('celery/status/<str:task_id>/', task_status_view, name='celery_task_status'),
+    path('celery/cancel/<str:task_id>/', task_cancel_view, name='celery_task_cancel'),
 
     path('celery/transkribus/extract/', start_extraction, name='task_transkribus_extract_export'),
     path('celery/transkribus/tags/extract/', start_task_creation, name='task_transkribus_extract_tags'),

@@ -30,19 +30,20 @@ def start_task_creation(request):
 
 def start_gnd_batch(request):
     """Start the GND requests as a Celery task."""
+    project = TWFView.s_get_project(request)
     dictionary_id = request.GET.get('dictionary_id')
     user_id = request.user.id
 
     # Trigger the task
-    task = search_gnd_entries.delay(dictionary_id, user_id)
+    task = search_gnd_entries.delay(project, dictionary_id, user_id)
     return JsonResponse({'status': 'success', 'task_id': task.id})
 
 
 def start_geonames_batch(request):
     """Start the GND requests as a Celery task."""
+    project = TWFView.s_get_project(request)
     dictionary_id = request.GET.get('dictionary_id')
     user_id = request.user.id
-    project = TWFView.s_get_project(request)
 
     geonames_username = project.geonames_username
     country_restriction = request.GET.get('only_search_in')
@@ -52,13 +53,14 @@ def start_geonames_batch(request):
         return JsonResponse({'status': 'error', 'message': 'No GeoNames username set'})
 
     # Trigger the task
-    task = search_geonames_entries.delay(dictionary_id, user_id, geonames_username,
+    task = search_geonames_entries.delay(project.id, dictionary_id, user_id, geonames_username,
                                          country_restriction, similarity_threshold)
     return JsonResponse({'status': 'success', 'task_id': task.id})
 
 
 def start_wikidata_batch(request):
     """Start the GND requests as a Celery task."""
+    project = TWFView.s_get_project(request)
     dictionary_id = request.GET.get('dictionary_id')
     user_id = request.user.id
 
@@ -66,57 +68,62 @@ def start_wikidata_batch(request):
     language = request.GET.get('language')
 
     # Trigger the task
-    task = search_wikidata_entries.delay(dictionary_id, user_id, entity_type, language)
+    task = search_wikidata_entries.delay(project, dictionary_id, user_id, entity_type, language)
     return JsonResponse({'status': 'success', 'task_id': task.id})
 
 
 def start_openai_batch(request):
     """Start the GND requests as a Celery task."""
+    project = TWFView.s_get_project(request)
     dictionary_id = request.GET.get('dictionary_id')
     user_id = request.user.id
 
     # Trigger the task
-    task = search_openai_entries.delay(dictionary_id, user_id)
+    task = search_openai_entries.delay(project, dictionary_id, user_id)
     return JsonResponse({'status': 'success', 'task_id': task.id})
 
 
 def start_gnd_request(request):
     """Start the GND requests as a Celery task."""
+    project = TWFView.s_get_project(request)
     dictionary_id = request.GET.get('dictionary_id')
     user_id = request.user.id
 
     # Trigger the task
-    task = search_gnd_entry.delay(dictionary_id, user_id)
+    task = search_gnd_entry.delay(project, dictionary_id, user_id)
     return JsonResponse({'status': 'success', 'task_id': task.id})
 
 
 def start_geonames_request(request):
     """Start the GND requests as a Celery task."""
+    project = TWFView.s_get_project(request)
     dictionary_id = request.GET.get('dictionary_id')
     user_id = request.user.id
 
     # Trigger the task
-    task = search_geonames_entry.delay(dictionary_id, user_id)
+    task = search_geonames_entry.delay(project, dictionary_id, user_id)
     return JsonResponse({'status': 'success', 'task_id': task.id})
 
 
 def start_wikidata_request(request):
     """Start the GND requests as a Celery task."""
+    project = TWFView.s_get_project(request)
     dictionary_id = request.GET.get('dictionary_id')
     user_id = request.user.id
 
     # Trigger the task
-    task = search_wikidata_entry.delay(dictionary_id, user_id)
+    task = search_wikidata_entry.delay(project, dictionary_id, user_id)
     return JsonResponse({'status': 'success', 'task_id': task.id})
 
 
 def start_openai_request(request):
     """Start the GND requests as a Celery task."""
+    project = TWFView.s_get_project(request)
     dictionary_id = request.GET.get('dictionary_id')
     user_id = request.user.id
 
     # Trigger the task
-    task = search_openai_entry.delay(dictionary_id, user_id)
+    task = search_openai_entry.delay(project, dictionary_id, user_id)
     return JsonResponse({'status': 'success', 'task_id': task.id})
 
 

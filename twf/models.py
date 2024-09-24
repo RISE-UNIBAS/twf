@@ -2,6 +2,7 @@
 from django.conf import settings
 from django.db import models
 from django.contrib.auth import get_user_model
+from django.utils import timezone
 from fuzzywuzzy import process
 
 from twf.templatetags.tk_tags import tk_iiif_url, tk_bounding_box
@@ -234,6 +235,31 @@ class Project(TimeStampedModel):
     def __str__(self):
         """Return the string representation of the Project."""
         return self.title
+
+
+class Task(models.Model):
+    """Model to store Celery tasks."""
+    TASK_STATUS_CHOICES = [
+        ('PENDING', 'Pending'),
+        ('STARTED', 'Started'),
+        ('SUCCESS', 'Success'),
+        ('FAILURE', 'Failure'),
+        ('PROGRESS', 'Progress'),
+        ('CANCELLED', 'Cancelled'),
+    ]
+
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name="tasks")
+    user = models.ForeignKey(User, on_delete=models.RESTRICT, related_name="tasks")
+    task_id = models.CharField(max_length=255, unique=True)
+    status = models.CharField(max_length=10, choices=TASK_STATUS_CHOICES, default='PENDING')
+    start_time = models.DateTimeField(default=timezone.now)
+    end_time = models.DateTimeField(null=True, blank=True)
+    title = models.CharField(max_length=255, blank=True, default='')
+    description = models.TextField(blank=True, default='')
+    text = models.TextField(blank=True, default='')
+
+    def __str__(self):
+        return f"Task - {self.task_id} ({self.status})"
 
 
 class Document(TimeStampedModel):

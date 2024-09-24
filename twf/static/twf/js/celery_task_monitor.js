@@ -62,6 +62,9 @@
                     $(logTextareaId).append('Task completed\n' + data.result.text + '\n');
                     scrollToBottom(logTextareaId);
                 } else if (status === 'FAILURE') {
+                    progressBar.css('width', '100%');
+                    progressBar.addClass('bg-danger'); // Change the progress bar color to red
+                    progressBar.text('Failed');
                     $(logTextareaId).append('Error: ' + data.error + '\n');
                     scrollToBottom(logTextareaId);
                 }

@@ -25,6 +25,7 @@ class TWFProjectView(LoginRequiredMixin, TWFView):
                 'name': 'Project',
                 'options': [
                     {'url': reverse('twf:project_overview'), 'value': 'Overview'},
+                    {'url': reverse('twf:project_task_monitor'), 'value': 'Task Monitor'},
                     {'url': reverse('twf:project_settings'), 'value': 'Project Settings'},
                 ]
             },
@@ -58,6 +59,16 @@ class TWFProjectView(LoginRequiredMixin, TWFView):
         super().__init__(*args, **kwargs)
         if self.page_title is None:
             self.page_title = kwargs.get('page_title', 'Project View')
+
+
+class TWFProjectTaskMonitorView(TWFProjectView):
+    template_name = 'twf/project/task_monitor.html'
+    page_title = 'Task Monitor'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['tasks'] = self.get_project().tasks.all()
+        return context
 
 
 class TWFProjectSettingsView(FormView, TWFProjectView):
