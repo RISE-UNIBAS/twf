@@ -6,9 +6,9 @@
      <div class="border rounded bg-light mt-0 p-3">
         <h1 class="display-6">Ask ChatGPT</h1>
          <p class="lead">Ask questions</p>
-         
+
          {% crispy form %}
-     
+
      </div>
 {% endblock %}
 
@@ -17,11 +17,11 @@
     <script>
         $(document).ready(function() {
             $('#button-id-startbatch').click(function() {
-                
+
                 const prompt = $('#id_prompt').val();
-                const role = $('#id_role').val();
-                
-                const startUrl = 'celery/documents/batch/openai/'; // Task start URL
+                const role = $('#id_role_description').val();
+
+                const startUrl = '/celery/documents/batch/openai/'; // Task start URL
                 const progressUrlBase = '/celery/status/'; // Base URL for polling progress
                 const progressBarId = '#taskProgressBar'; // ID of the progress bar element
                 const logTextareaId = '#id_progress_details'; // ID of the textarea to display logs
@@ -29,7 +29,7 @@
                     prompt: prompt,
                     role: role,
                 };
-                
+
                 // Start the task
                 startTask(startUrl, progressUrlBase, progressBarId, logTextareaId, data);
             });

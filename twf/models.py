@@ -182,17 +182,17 @@ class Project(TimeStampedModel):
                                          help_text='The username for the Geonames API.')
     """The username for the Geonames API."""
 
-    openai_api_key = models.CharField(max_length=100, blank=True, null=True,
+    openai_api_key = models.CharField(max_length=255, blank=True, null=True,
                                       verbose_name='Open AI API Key',
                                       help_text='The API key for the Open AI API.')
     """The API key for the Open AI API."""
 
-    gemini_api_key = models.CharField(max_length=100, blank=True, null=True,
+    gemini_api_key = models.CharField(max_length=255, blank=True, null=True,
                                       verbose_name='Gemini API Key',
                                       help_text='The API key for the Gemini API.')
     """The API key for the Gemini API."""
 
-    claude_api_key = models.CharField(max_length=100, blank=True, null=True,
+    claude_api_key = models.CharField(max_length=255, blank=True, null=True,
                                       verbose_name='Claude API Key',
                                       help_text='The API key for the Claude API.')
 

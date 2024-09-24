@@ -7,7 +7,7 @@ from django_filters.views import FilterView
 from django_tables2 import SingleTableView
 
 from twf.filters import DocumentFilter
-from twf.forms.project_forms import DocumentForm
+from twf.forms.documents.document_forms import DocumentForm
 from twf.models import Document
 from twf.tables.tables import DocumentTable
 from twf.views.views_base import TWFView

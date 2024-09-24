@@ -4,7 +4,7 @@
 
 {% block content %}
      <div class="border rounded bg-light mt-0 p-3">
-        <h1 class="display-6">Ask ChatGPT</h1>
+        <h1 class="display-6">Ask Gemini</h1>
          <p class="lead">Ask questions</p>
          
          {% crispy form %}
@@ -19,9 +19,9 @@
             $('#button-id-startbatch').click(function() {
                 
                 const prompt = $('#id_prompt').val();
-                const role = $('#id_role').val();
+                const role = $('#id_role_description').val();
                 
-                const startUrl = 'celery/documents/batch/gemini/'; // Task start URL
+                const startUrl = '/celery/documents/batch/gemini/'; // Task start URL
                 const progressUrlBase = '/celery/status/'; // Base URL for polling progress
                 const progressBarId = '#taskProgressBar'; // ID of the progress bar element
                 const logTextareaId = '#id_progress_details'; // ID of the textarea to display logs

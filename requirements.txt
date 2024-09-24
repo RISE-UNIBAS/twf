@@ -75,3 +75,6 @@ SPARQLWrapper~=2.0.0
 isodate~=0.6.1
 rdflib~=7.0.0
 uvicorn~=0.30.6
+anthropic~=0.34.2
+PyYAML~=6.0.2
+fsspec~=2024.9.0

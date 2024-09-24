@@ -37,7 +37,7 @@ from twf.views.metadata.views_metadata import TWFMetadataReviewDocumentsView, \
     TWFMetadataLoadSheetsDataView
 from twf.views.project.views_project import select_project, \
     TWFProjectSettingsView, TWFProjectQueryView, TWFProjectOverviewView
-from twf.views.project.views_project_ai import TWFProjectAIBatchView, TWFProjectAIQueryView
+from twf.views.project.views_project_ai import TWFProjectAIQueryView
 from twf.views.tags.views_tags import TWFTagsView, TWFProjectTagsView, TWFProjectTagsOpenView, TWFProjectTagsParkedView, \
     TWFProjectTagsResolvedView, TWFProjectTagsIgnoredView, TWFTagsDatesView, TWFTagsGroupView, TWFTagsOverviewView, \
     TWFTagsExtractView

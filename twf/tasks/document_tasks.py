@@ -10,7 +10,7 @@ def get_project_and_user(dictionary_id, user_id):
     try:
         project = Project.objects.get(id=dictionary_id)
         user = User.objects.get(id=user_id)
-        number_of_documents = project.entries.count()
+        number_of_documents = project.documents.count()
         return project, user, number_of_documents
     except Dictionary.DoesNotExist as e:
         raise ValueError(str(e))
@@ -40,19 +40,22 @@ def search_openai_for_docs(self, project_id, user_id, prompt, role_description):
                          api_key=project.openai_api_key,
                          gpt_role_description=role_description)
 
+    processed_documents = 0
     for document in project.documents.all():
+        # Update the progress
+        percentage_complete = (processed_documents / number_of_documents) * 100
+        self.update_state(state='PROGRESS', meta={'current': percentage_complete, 'total': 100,
+                                                  'text': f'OpenAI Search in progress for document {document.id}...'})
+
         # Perform OpenAI search for each document
         context = get_text_from_document(document)
         prompt = prompt + "\n\n" + "Context:\n" + context
-        response, elapsed_time = client.prompt(model=project.openai_model,
+        response, elapsed_time = client.prompt(model="gpt-4-turbo",
                                                prompt=prompt)
-        document.metadata['openai_response'] = response
+        response_dict = response.to_dict()
+        document.metadata['openai_response'] = response_dict
         document.save(current_user=user)
-
-        # Update the progress
-        percentage_complete = (document.id / number_of_documents) * 100
-        self.update_state(state='PROGRESS', meta={'current': percentage_complete, 'total': 100,
-                                                  'text': f'OpenAI Search in progress for document {document.id}...'})
+        processed_documents += 1
 
     percentage_complete = 100
 
@@ -67,24 +70,26 @@ def search_gemini_for_docs(self, project_id, user_id, prompt, role_description):
                                               'text': 'Starting Gemini Search...'})
 
     project, user, number_of_documents = get_project_and_user(project_id, user_id)
-    client = AiApiClient(api='gemini',
+    client = AiApiClient(api='genai',
                          api_key=project.gemini_api_key,
                          gpt_role_description=role_description)
 
+    processed_documents = 0
     for document in project.documents.all():
-        # Perform OpenAI search for each document
-        context = get_text_from_document(document)
+        # Update the progress
+        percentage_complete = (processed_documents / number_of_documents) * 100
+        self.update_state(state='PROGRESS', meta={'current': percentage_complete, 'total': 100,
+                                                  'text': f'OpenAI Search in progress for document {document.id}...'})
 
+        context = get_text_from_document(document)
         prompt = prompt + "\n\n" + "Context:\n" + context
-        response, elapsed_time = client.prompt(model=project.openai_model,
+        response, elapsed_time = client.prompt(model="gemini-1.5-flash",
                                                prompt=prompt)
         document.metadata['gemini_response'] = response
         document.save(current_user=user)
 
-        # Update the progress
-        percentage_complete = (document.id / number_of_documents) * 100
-        self.update_state(state='PROGRESS', meta={'current': percentage_complete, 'total': 100,
-                                                  'text': f'OpenAI Search in progress for document {document.id}...'})
+
+        processed_documents += 1
 
     percentage_complete = 100
 
@@ -99,24 +104,27 @@ def search_claude_for_docs(self, project_id, user_id, prompt, role_description):
                                               'text': 'Starting Claude Search...'})
 
     project, user, number_of_documents = get_project_and_user(project_id, user_id)
-    client = AiApiClient(api='claude',
+    client = AiApiClient(api='anthropic',
                          api_key=project.claude_api_key,
                          gpt_role_description=role_description)
 
+    processed_documents = 0
     for document in project.documents.all():
+        # Update the progress
+        percentage_complete = (processed_documents / number_of_documents) * 100
+        self.update_state(state='PROGRESS', meta={'current': percentage_complete, 'total': 100,
+                                                  'text': f'OpenAI Search in progress for document {document.id}...'})
+
         # Perform OpenAI search for each document
         context = get_text_from_document(document)
 
         prompt = prompt + "\n\n" + "Context:\n" + context
-        response, elapsed_time = client.prompt(model=project.openai_model,
+        response, elapsed_time = client.prompt(model="claude-3-5-sonnet-20240620",
                                                prompt=prompt)
-        document.metadata['claude_response'] = response
+        document.metadata['claude_response'] = response.to_dict()
         document.save(current_user=user)
 
-        # Update the progress
-        percentage_complete = (document.id / number_of_documents) * 100
-        self.update_state(state='PROGRESS', meta={'current': percentage_complete, 'total': 100,
-                                                  'text': f'OpenAI Search in progress for document {document.id}...'})
+        processed_documents += 1
 
     percentage_complete = 100
 

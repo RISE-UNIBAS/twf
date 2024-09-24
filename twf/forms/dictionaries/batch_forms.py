@@ -1,6 +1,6 @@
 """Contains all forms concerning batch processes."""
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, Row, Column, Div, Submit, HTML, Button
+from crispy_forms.layout import Layout, Row, Column, Div,  HTML, Button
 from django import forms
 from django_select2.forms import Select2Widget
 

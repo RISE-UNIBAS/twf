@@ -1,11 +1,10 @@
 """Simple AI API client for OpenAI, GenAI, and Anthropic."""
 import base64
-import json
 import time
 
 import google.generativeai as genai
-import requests
 from openai import OpenAI
+from anthropic import Anthropic
 
 
 class AiApiClient:
@@ -45,8 +44,9 @@ class AiApiClient:
             genai.configure(api_key=self.api_key)
 
         if self.api == 'anthropic':
-            # No client to initialize
-            pass
+            self.api_client = Anthropic(
+                api_key=self.api_key,
+            )
 
     @property
     def elapsed_time(self):
@@ -113,23 +113,17 @@ class AiApiClient:
             answer = message
 
         if self.api == 'anthropic':
-            headers = {
-                'x-api-key': f'{self.api_key}',
-                'anthropic-version': '2023-06-01',
-                'Content-Type': 'application/json',
-            }
-            data = {
-                "model": model,
-                "max_tokens_to_sample": 1024,
-                "prompt": f"\n\nHuman: {prompt}\nAssistant:"
-            }
-            api_url = 'https://api.anthropic.com/v1/complete'
-            response = requests.post(api_url, headers=headers, data=json.dumps(data))
-
-            if response.status_code == 200:
-                answer = response.json()
-            else:
-                answer = f"Error: {response.status_code}: {response.text}"
+            message = self.api_client.messages.create(
+                max_tokens=1024,
+                messages=[
+                    {
+                        "role": "user",
+                        "content": prompt,
+                    }
+                ],
+                model="claude-3-opus-20240229",
+            )
+            answer = message
 
         end_time = time.time()
         elapsed_time = end_time - prompt_start

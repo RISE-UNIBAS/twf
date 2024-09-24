@@ -30,7 +30,7 @@ class ProjectForm(forms.ModelForm):
                   'owner', 'members', 'selected_dictionaries',
                   'tag_type_translator', 'ignored_tag_types',
                   'transkribus_username', 'transkribus_password',
-                  'geonames_username', 'openai_api_key',
+                  'geonames_username', 'openai_api_key', 'gemini_api_key', 'claude_api_key',
                   'document_metadata_fields', 'page_metadata_fields',
                   'document_export_configuration', 'page_export_configuration']
         widgets = {
@@ -153,6 +153,11 @@ class ProjectForm(forms.ModelForm):
                 css_class='row form-row'
             ),
             Row(
+                Column('gemini_api_key', css_class='form-group col-6 mb-3'),
+                Column('claude_api_key', css_class='form-group col-6 mb-3'),
+                css_class='row form-row'
+            ),
+            Row(
                 Div(
                     HTML(
                         '<strong>6.) Metadata Settings</strong>'
@@ -187,6 +192,7 @@ class ProjectForm(forms.ModelForm):
         )
 
         self.helper = helper
+
 
 class AIQueryDatabaseForm(forms.Form):
     """Form for querying the AI model with a question and documents."""
@@ -331,82 +337,3 @@ class CollectionAddDocumentForm(forms.Form):
                 css_class='text-end pt-3'
             )
         )
-
-
-class DocumentForm(forms.ModelForm):
-    """Form for creating and updating documents."""
-
-    class Meta:
-        model = Document
-        fields = ['title', 'document_id', 'metadata']
-        widgets = {
-            'metadata': forms.Textarea(attrs={'rows': 5}),
-        }
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        helper = FormHelper()
-        helper.form_method = 'post'
-        helper.form_class = 'form form-control'
-
-        layout = helper.layout = Layout(
-            Row(
-                Column('title', css_class='form-group col-6 mb-3'),
-                Column('document_id', css_class='form-group col-6 mb-3'),
-                css_class='row form-row'
-            ),
-            Row(
-                Column('metadata', css_class='form-group col-12 mb-3'),
-                css_class='row form-row'
-            ),
-            Div(
-                Submit('submit', 'Create Document', css_class='btn btn-dark'),
-                css_class='text-end pt-3'
-            ),
-        )
-
-        self.helper = helper
-
-
-class BatchOpenAIForm(forms.Form):
-    CHOICES = [
-        ('documents', 'Documents'),
-        ('collection', 'Collection')
-    ]
-
-    selection = forms.ChoiceField(choices=CHOICES, widget=forms.RadioSelect, label="Choose Type")
-    role_description = forms.CharField(max_length=200, widget=forms.TextInput(attrs={
-        'placeholder': 'Describe the role here...'
-    }), label="Role Description")
-    prompt = forms.CharField(widget=forms.Textarea(attrs={
-        'placeholder': 'Enter your prompt here...'
-    }), label="Prompt")
-
-    def __init__(self, *args, **kwargs):
-        project = kwargs.pop('project')
-        super().__init__(*args, **kwargs)
-        helper = FormHelper()
-        helper.form_method = 'post'
-        helper.form_class = 'form form-control'
-        helper.form_id = 'batch-openai-form'
-
-        helper.layout = Layout(
-            Row(
-                Column('selection', css_class='form-group col-12 mb-3'),
-                css_class='row form-row'
-            ),
-            Row(
-                Column('role_description', css_class='form-group col-12 mb-3'),
-                css_class='row form-row'
-            ),
-            Row(
-                Column('prompt', css_class='form-group col-12 mb-3'),
-                css_class='row form-row'
-            ),
-            Div(
-                Submit('submit', 'Start Project Batch', css_class='btn btn-dark'),
-                css_class='text-end pt-3'
-            ),
-        )
-
-        self.helper = helper
