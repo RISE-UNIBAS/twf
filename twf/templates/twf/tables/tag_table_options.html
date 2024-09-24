@@ -8,5 +8,5 @@
             <a href="{% url 'twf:tags_park' record.pk %}" class="btn btn-sm btn-dark btn-sm mb-2" style="width: 100%;">Park</a>
         {% endif %}
     {% endif %}
-    <a href="{{ record.get_transkribus_url }}" class="btn btn-sm btn-dark btn-sm" style="width: 100%;">Transkribus</a>
+    <a href="{{ record.get_transkribus_url }}" class="btn btn-sm btn-dark btn-sm" target="_blank" style="width: 100%;">Transkribus</a>
 </div>
