@@ -31,6 +31,7 @@ SECRET_KEY = "django-insecure-4*2k!-i77$g_vj%^ks!%!3$ka6n1x3d^xu9$a8cs3_^2x4#wkd
 DEBUG = True
 
 ALLOWED_HOSTS = ['rise-test1.philhist.unibas.ch', 'localhost']
+CSRF_TRUSTED_ORIGINS = ['rise-test1.philhist.unibas.ch', 'localhost']
 
 
 # Application definition
