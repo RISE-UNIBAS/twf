@@ -30,7 +30,7 @@ SECRET_KEY = "django-insecure-4*2k!-i77$g_vj%^ks!%!3$ka6n1x3d^xu9$a8cs3_^2x4#wkd
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['rise-test1.philhist.unibas.ch', 'localhost']
 
 
 # Application definition
@@ -164,10 +164,18 @@ CACHES = {
 }
 
 # Celery Configuration
-CELERY_BROKER_URL = 'redis://172.24.94.219:6379/0'  # Or your broker URL
-CELERY_RESULT_BACKEND = 'redis://172.24.94.219:6379/0'
+CELERY_BROKER_URL = 'redis://localhost:6379/0'  # Or your broker URL
+CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
 CELERY_ACCEPT_CONTENT = ['json', 'pickle']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = 'UTC'
 CELERY_BROKER_TRANSPORT_OPTIONS = {'visibility_timeout': 3600}
+
+# Read version from the VERSION file
+VERSION_FILE = Path(BASE_DIR) / 'TWF' / 'VERSION'
+if VERSION_FILE.exists():
+    with open(VERSION_FILE) as f:
+        TWF_VERSION = f.read().strip()
+else:
+    TWF_VERSION = "Unknown"

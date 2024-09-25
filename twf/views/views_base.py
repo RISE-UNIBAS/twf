@@ -2,15 +2,11 @@
 from abc import ABC, abstractmethod
 
 from django.contrib import messages
-from django.contrib.auth.views import LoginView, PasswordChangeView
 from django.shortcuts import redirect
-from django.urls import reverse, reverse_lazy
-from django.utils.timezone import now, timedelta
+from django.urls import reverse
 from django.views.generic import TemplateView
-
-from twf.forms.user_forms import LoginForm, ChangePasswordForm
-from twf.models import Project, Document, Page, Dictionary, DictionaryEntry, PageTag, Variation, DateVariation, \
-    TWF_GROUPS
+from django.conf import settings
+from twf.models import Project
 
 
 class TWFView(TemplateView, ABC):
@@ -115,7 +111,8 @@ class TWFView(TemplateView, ABC):
                 },
                 'context_nav': {
                     'groups': self.get_sub_navigation()
-                }
+                },
+                'version': settings.TWF_VERSION
             }
         )
 
