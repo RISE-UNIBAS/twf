@@ -22,7 +22,7 @@
                         <tr>
                             <td>{{ variation }}</td>
                             <td>
-                                <a href="" class="btn btn-outline-danger">Delete</a>
+                                <a href="{% url 'twf:dictionaries_delete_variation' variation.pk %}" class="btn btn-outline-danger">Delete</a>
                             </td>
                         </tr>
                     {% endfor %}

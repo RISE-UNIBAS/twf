@@ -1,7 +1,9 @@
 import logging
 
 from celery.result import AsyncResult
+from django.contrib import messages
 from django.http import JsonResponse
+from django.shortcuts import redirect
 from django.utils import timezone
 
 from twf.models import Task
@@ -63,3 +65,16 @@ def task_cancel_view(request, task_id):
         return JsonResponse({'status': 'success', 'message': 'Task canceled'})
     except Task.DoesNotExist:
         return JsonResponse({'status': 'error', 'message': 'Task not found'}, status=404)
+
+
+def task_remove_view(request, pk):
+    """Remove a task from the database. """
+    try:
+        task = Task.objects.get(pk=pk)
+        task.delete()
+        messages.success(request, 'Task removed successfully.')
+        # return to the task list page
+        return redirect('twf:project_task_monitor')
+    except Task.DoesNotExist:
+        messages.error(request, 'Task not found.')
+        return redirect('twf:project_task_monitor')

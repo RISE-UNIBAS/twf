@@ -42,11 +42,9 @@
                             </div>
                         </div>
                         <button class="btn btn-danger btn-sm" onclick="removeTask({{ task.id }})">Cancel Task</button>
+                    {% else %}
+                       <a class="btn btn-dark btn-sm" href="{% url 'twf:celery_task_remove' task.id %}">Remove Task</a>
                     {% endif %}
-        
-                    <!-- Remove Task Button -->
-                    
-                    <button class="btn btn-dark btn-sm" onclick="removeTask({{ task.id }})">Remove Task</button>
                 </div>
         
                 <!-- Task Footer with Timestamp -->

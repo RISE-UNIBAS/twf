@@ -5,7 +5,8 @@
 {% block content %}
      <div class="border rounded bg-light mt-0 p-3">
         <h1 class="display-6">Ask ChatGPT</h1>
-         <p class="lead">Ask questions</p>
+         <p class="lead">Ask questions to OpenAI's ChatGPT AI.</p>
+         {% include 'twf/documents/batches/notice.html' %}
 
          {% crispy form %}
 

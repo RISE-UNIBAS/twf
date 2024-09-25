@@ -307,34 +307,6 @@ class TWFDictionaryDictionaryEntryEditView(FormView, TWFDictionaryView):
         return super().form_valid(form)
 
 
-class TWFDictionaryBatchGNDView(FormView, TWFDictionaryView):
-    """Batch process for GND."""
-    template_name = 'twf/dictionaries/batches/geonames.html'
-    page_title = 'Batch Geonames'
-    form_class = GeonamesBatchForm
-
-
-class TWFDictionaryBatchWikidataView(FormView, TWFDictionaryView):
-    """Batch process for Wikidata."""
-    template_name = 'twf/dictionaries/batches/geonames.html'
-    page_title = 'Batch Geonames'
-    form_class = GeonamesBatchForm
-
-
-class TWFDictionaryBatchGeonamesView(FormView, TWFDictionaryView):
-    """Batch process for Geonames."""
-    template_name = 'twf/dictionaries/batches/geonames.html'
-    page_title = 'Batch Geonames'
-    form_class = GeonamesBatchForm
-
-
-class TWFDictionaryBatchOpenaiView(FormView, TWFDictionaryView):
-    """Batch process for OpenAI."""
-    template_name = 'twf/dictionaries/batches/geonames.html'
-    page_title = 'Batch Geonames'
-    form_class = GeonamesBatchForm
-
-
 def delete_variation(request, pk):
     """Delete a variation."""
     variation = get_object_or_404(Variation, pk=pk)

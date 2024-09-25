@@ -2,7 +2,7 @@
 from django.urls import path
 from django.contrib.auth import views as auth_views
 
-from twf.tasks.task_status import task_status_view, task_cancel_view
+from twf.tasks.task_status import task_status_view, task_cancel_view, task_remove_view
 from twf.tasks.task_triggers import start_task_creation, start_extraction, start_gnd_batch, start_geonames_batch, \
     start_wikidata_batch, start_openai_batch, start_gnd_request, start_geonames_request, start_wikidata_request, \
     start_openai_request, start_gemini_doc_batch, start_openai_doc_batch, start_claude_doc_batch
@@ -125,7 +125,7 @@ urlpatterns = [
          TWFDictionaryDictionaryEntryEditView.as_view(), name='dictionaries_entry_edit'),
     path('dictionaries/import/', TWFDictionaryImportView.as_view(), name='dictionaries_import'),
     path('dictionaries/normalization/wizard/', TWFDictionaryNormDataView.as_view(), name='dictionaries_normalization'),
-    path('dictionaries/variations/delete/<int:pk>/', delete_variation, name='delete_variation'),
+    path('dictionaries/variations/delete/<int:pk>/', delete_variation, name='dictionaries_delete_variation'),
 
     path('dictionaries/batch/gnd/', TWFDictionaryGNDBatchView.as_view(), name='dictionaries_batch_gnd'),
     path('dictionaries/batch/geonames/', TWFDictionaryGeonamesBatchView.as_view(), name='dictionaries_batch_geonames'),
@@ -172,6 +172,7 @@ urlpatterns = [
     # CELERY TASKS
     path('celery/status/<str:task_id>/', task_status_view, name='celery_task_status'),
     path('celery/cancel/<str:task_id>/', task_cancel_view, name='celery_task_cancel'),
+    path('celery/remove/<int:pk>/', task_remove_view, name='celery_task_remove'),
 
     path('celery/transkribus/extract/', start_extraction, name='task_transkribus_extract_export'),
     path('celery/transkribus/tags/extract/', start_task_creation, name='task_transkribus_extract_tags'),

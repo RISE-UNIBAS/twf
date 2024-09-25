@@ -1,0 +1,12 @@
+<div class="alert alert-info d-flex align-items-center" role="alert">
+  <i class="fas fa-info-circle me-2"></i>
+  <div class="small">
+    You are about to use a batch operation which might take a long time. You can leave this page while a task is
+    running, and it will continue in the background. The progress feedback will be lost, but you can track tasks
+    in the <a href="{% url 'twf:project_task_monitor' %}">Task Monitor</a>. Note that you might need to set credentials 
+      (API keys) in the <a href="{% url 'twf:project_settings' %}">Project Settings</a>.<br/>
+    <strong>How it works</strong>: The AI system is presented with your prompt and the contents of your documents.
+      For each document the same prompt is presented to the AI system. The AI system then generates a response based 
+      on the prompt and the document content. The response is then saved as metadata.
+  </div>
+</div>
