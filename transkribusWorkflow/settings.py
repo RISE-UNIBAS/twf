@@ -174,7 +174,7 @@ CELERY_TIMEZONE = 'UTC'
 CELERY_BROKER_TRANSPORT_OPTIONS = {'visibility_timeout': 3600}
 
 # Read version from the VERSION file
-VERSION_FILE = Path(BASE_DIR) / 'TWF' / 'VERSION'
+VERSION_FILE = Path(BASE_DIR) / 'twf' / 'VERSION'
 if VERSION_FILE.exists():
     with open(VERSION_FILE) as f:
         TWF_VERSION = f.read().strip()
