@@ -5,7 +5,7 @@ from django.contrib.auth import views as auth_views
 from twf.tasks.task_status import task_status_view, task_cancel_view, task_remove_view
 from twf.tasks.task_triggers import start_task_creation, start_extraction, start_gnd_batch, start_geonames_batch, \
     start_wikidata_batch, start_openai_batch, start_gnd_request, start_geonames_request, start_wikidata_request, \
-    start_openai_request, start_gemini_doc_batch, start_openai_doc_batch, start_claude_doc_batch
+    start_openai_request, start_gemini_doc_batch, start_openai_doc_batch, start_claude_doc_batch, start_sheet_metadata
 from twf.views.dictionaries.views_batches import TWFDictionaryGNDBatchView, TWFDictionaryGeonamesBatchView, \
     TWFDictionaryWikidataBatchView, TWFDictionaryOpenaiBatchView
 from twf.views.dictionaries.views_requests import TWFDictionaryGNDRequestView, TWFDictionaryGeonamesRequestView, \
@@ -20,7 +20,6 @@ from twf.views.project.views_project_setup import TWFProjectSetupView
 from twf.views.views_ajax_download import ajax_transkribus_download_export, download_progress_view
 from twf.views.views_ajax_export import ajax_transkribus_request_export, ajax_transkribus_request_export_status, \
     ajax_transkribus_reset_export
-from twf.views.views_ajax_metadata import start_metadata_extraction, stream_metadata_extraction_progress
 from twf.views.views_ajax_validation import validate_page_field, validate_document_field
 from twf.views.dollections.views_collection import RemovePartView, SplitCollectionItemView, \
     UpdateCollectionItemView, TWFCollectionsView, TWFProjectCollectionsCreateView, \
@@ -28,10 +27,11 @@ from twf.views.dollections.views_collection import RemovePartView, SplitCollecti
 from twf.views.views_command import park_tag, unpark_tag, ungroup_tag
 from twf.views.dictionaries.views_dictionaries import TWFDictionaryOverviewView, TWFDictionaryDictionaryView, \
     delete_variation, TWFDictionaryDictionaryEditView, TWFDictionaryDictionaryEntryEditView, \
-    TWFDictionaryDictionaryEntryView, TWFDictionaryImportView, \
+    TWFDictionaryDictionaryEntryView, \
     TWFDictionaryNormDataView, TWFDictionaryCreateView, skip_entry
 from twf.views.export.views_export import TWFExportDocumentsView, TWFExportCollectionsView, TWFExportProjectView, \
-    TWFExportOverviewView, TWFExportTagsView, TWFExportDictionariesView, TWFExportDictionaryView
+    TWFExportOverviewView, TWFExportTagsView, TWFExportDictionariesView, TWFExportDictionaryView, \
+    TWFImportDictionaryView
 from twf.views.metadata.views_metadata import TWFMetadataReviewDocumentsView, \
     TWFMetadataLoadDataView, TWFMetadataExtractTagsView, TWFMetadataReviewPagesView, TWFMetadataOverviewView, \
     TWFMetadataLoadSheetsDataView
@@ -123,7 +123,6 @@ urlpatterns = [
     path('dictionaries/entry/<int:pk>/skip/', skip_entry, name='dictionaries_entry_skip'),
     path('dictionaries/entry/<int:pk>/edit/',
          TWFDictionaryDictionaryEntryEditView.as_view(), name='dictionaries_entry_edit'),
-    path('dictionaries/import/', TWFDictionaryImportView.as_view(), name='dictionaries_import'),
     path('dictionaries/normalization/wizard/', TWFDictionaryNormDataView.as_view(), name='dictionaries_normalization'),
     path('dictionaries/variations/delete/<int:pk>/', delete_variation, name='dictionaries_delete_variation'),
 
@@ -166,6 +165,7 @@ urlpatterns = [
 
     path('export/dictionaries/', TWFExportDictionariesView.as_view(), name='export_dictionaries'),
     path('export/dictionaries/<int:pk>/', TWFExportDictionaryView.as_view(), name='export_dictionary'),
+    path('import/dictionaries/', TWFImportDictionaryView.as_view(), name='import_dictionaries'),
 
 
     #############################
@@ -175,7 +175,10 @@ urlpatterns = [
     path('celery/remove/<int:pk>/', task_remove_view, name='celery_task_remove'),
 
     path('celery/transkribus/extract/', start_extraction, name='task_transkribus_extract_export'),
+
     path('celery/transkribus/tags/extract/', start_task_creation, name='task_transkribus_extract_tags'),
+
+    path('celery/metadata/sheets/load/', start_sheet_metadata, name='task_metadata_load_sheets'),
 
     path('celery/documents/batch/openai/', start_openai_doc_batch, name='task_documents_batch_openai'),
     path('celery/documents/batch/gemini/', start_gemini_doc_batch, name='task_documents_batch_gemini'),
@@ -203,13 +206,6 @@ urlpatterns = [
          ajax_transkribus_download_export, name='ajax_transkribus_download_export'),
     path('ajax/transkribus/export/monitor/download/',
          download_progress_view, name='download_progress'),
-
-
-    path('ajax/transkribus/extract/metadata/', start_metadata_extraction,
-         name='start_metadata_extraction'),
-    path('ajax/transkribus/extract/metadata/monitor/', stream_metadata_extraction_progress,
-         name='stream_metadata_extraction_progress'),
-
 
     #############################
     # METADATA

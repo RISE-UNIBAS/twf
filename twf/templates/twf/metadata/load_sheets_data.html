@@ -1,0 +1,45 @@
+{% extends 'twf/base/base.html' %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+     <div class="border rounded bg-light mt-0 p-3">
+        <h1 class="display-6">Load Google Sheets Metadata</h1>
+        <p class="lead">Load metadata from a google sheet. Set the credentials etc. in the <a href="{% url 'twf:project_settings' %}">project settings</a>.</p>
+         
+         <!-- Info box -->
+        <div class="alert alert-info">
+            <small>
+                You are retrieving data from <a href="https://docs.google.com/spreadsheets/d/{{ project.metadata_google_sheet_id }}/edit" target="_blank">this Google Sheet</a>.
+                The specified range is <code>{{ project.metadata_google_sheet_range }}</code>. This column tying the metadata to the document is <code>{{ project.metadata_google_doc_id_column }}</code>,
+                the title column is <code>{{ project.metadata_google_title_column }}</code>, and <code>{{ project.metadata_google_valid_columns }}</code> are the valid columns.
+            </small>
+        </div>
+         
+        <div class="row">
+            <div class="col-12">
+                {% crispy form %}
+            </div>
+        </div>
+     </div>
+{% endblock %}
+
+{% block script %}
+    <script src="{% static 'twf/js/celery_task_monitor.js' %}"></script>
+    <script>
+        $(document).ready(function() {
+            $('#button-id-startbatch').click(function() {
+                
+                const startUrl = '/celery/metadata/sheets/load/'; // Task start URL
+                const progressUrlBase = '/celery/status/'; // Base URL for polling progress
+                const progressBarId = '#taskProgressBar'; // ID of the progress bar element
+                const logTextareaId = '#id_progress_details'; // ID of the textarea to display logs
+                const data = {};
+                
+                // Start the task
+                startTask(startUrl, progressUrlBase, progressBarId, logTextareaId, data);
+            });
+        });
+        
+    </script>
+{% endblock %}

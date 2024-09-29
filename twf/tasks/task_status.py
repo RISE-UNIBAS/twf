@@ -52,6 +52,7 @@ def task_status_view(request, task_id):
 
     except Exception as e:
         # Catch any other unexpected exceptions and return as error
+        print("EXCEPTION", e)
         return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
 
 
