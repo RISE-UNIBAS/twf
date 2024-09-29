@@ -4,18 +4,13 @@
 {% block content %}
     <div class="border rounded bg-light mt-0 p-3">
         <h1 class="display-6">
-            Edit {{ entry.label }}
-            <a href="" class="mt-2 btn btn-outline-dark float-end">Go Back</a>
+            View "{{ entry.label }}"
+            <a href="{% url 'twf:' %}" class="mt-2 btn btn-outline-dark float-end">Go Back</a>
         </h1>
         <hr/>
         <p class="lead">Text. </p>
         {% render_table table %}
         
-        <h1 class="display-6">
-            Delete {{ entry.label }}
-        </h1>
-        <hr/>
-        <a href="" class="mt-2 btn btn-outline-danger">Delete Dictionary Entry {{ entry.label }}</a>
     </div>
     
     {% for var in entry.variations.all %}
