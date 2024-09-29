@@ -7,6 +7,8 @@ import sys
 import django
 
 sys.path.append(os.path.abspath('../'))
+sys.path.append(os.path.abspath('../twf'))
+
 os.environ['DJANGO_SETTINGS_MODULE'] = 'transkribusWorkflow.settings'  # Adjust as necessary
 django.setup()
 
@@ -14,7 +16,7 @@ django.setup()
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project = 'TWF - Transkribus Workflow'
-copyright = '2024, Sorin Marti'
+copyright = '2024, RISE, University of Basel'
 author = 'Sorin Marti'
 release = '0.0.1'
 
@@ -25,7 +27,6 @@ extensions = [
     'sphinx.ext.duration',
     'sphinx.ext.doctest',
     'sphinx.ext.autodoc',
-    'sphinx.ext.autosummary',
     'sphinx.ext.intersphinx',
 ]
 
@@ -38,6 +39,7 @@ intersphinx_disabled_domains = ['std']
 templates_path = ['_templates']
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 
+autosummary_generate = True
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
