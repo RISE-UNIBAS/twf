@@ -52,6 +52,7 @@ class TWFMetadataView(LoginRequiredMixin, TWFView):
 
 
 class TWFMetadataOverviewView(TWFMetadataView):
+    """View for the metadata overview."""
     template_name = 'twf/metadata/overview.html'
     page_title = 'Metadata Overview'
 
@@ -76,6 +77,7 @@ class TWFMetadataOverviewView(TWFMetadataView):
 
 
 class TWFMetadataLoadDataView(FormView, TWFMetadataView):
+    """View for loading metadata from a JSON file."""
     template_name = 'twf/metadata/load_data.html'
     page_title = 'Load Metadata'
     form_class = LoadMetadataForm
@@ -135,6 +137,7 @@ class TWFMetadataLoadDataView(FormView, TWFMetadataView):
 
 
 class TWFMetadataLoadSheetsDataView(FormView, TWFMetadataView):
+    """View for loading metadata from Google Sheets."""
     template_name = 'twf/metadata/load_sheets_data.html'
     page_title = 'Load Google Sheets Metadata'
     form_class = LoadSheetsMetadataForm
@@ -150,6 +153,7 @@ class TWFMetadataLoadSheetsDataView(FormView, TWFMetadataView):
 
 
 class TWFMetadataExtractTagsView(FormView, TWFMetadataView):
+    """View for extracting metadata values."""
     template_name = 'twf/metadata/extract.html'
     page_title = 'Extract Metadata Values'
     form_class = ExtractMetadataValuesForm
@@ -207,6 +211,7 @@ class TWFMetadataExtractTagsView(FormView, TWFMetadataView):
 
 
 class TWFMetadataReviewPagesView(FormView, TWFMetadataView):
+    """View for reviewing page metadata."""
     template_name = 'twf/metadata/review_page.html'
     page_title = 'Review Page Metadata'
     form_class = DynamicForm
@@ -285,6 +290,7 @@ def set_nested_value(d, keys, value):
 
 
 class TWFMetadataReviewDocumentsView(FormView, TWFMetadataView):
+    """View for reviewing document metadata."""
     template_name = 'twf/metadata/review_document.html'
     page_title = 'Review Document Metadata'
     form_class = DynamicForm

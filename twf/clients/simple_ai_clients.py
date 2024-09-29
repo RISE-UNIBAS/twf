@@ -35,6 +35,7 @@ class AiApiClient:
         self.init_client()
 
     def init_client(self):
+        """Initialize the AI client."""
         if self.api == 'openai':
             self.api_client = OpenAI(
                 api_key=self.api_key,

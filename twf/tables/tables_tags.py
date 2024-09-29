@@ -1,3 +1,5 @@
+# pylint: disable=too-few-public-methods
+"""Table classes for displaying tags."""
 import django_tables2 as tables
 
 from twf.models import PageTag
@@ -11,6 +13,7 @@ class TagTable(tables.Table):
                                     orderable=False)
 
     class Meta:
+        """Meta class for the TagTable."""
         model = PageTag
         template_name = "django_tables2/bootstrap.html"
         fields = ("variation", "variation_type", "dictionary_entry")
@@ -31,6 +34,7 @@ class TagDateTable(tables.Table):
                                     orderable=False)
 
     class Meta:
+        """Meta class for the TagTable."""
         model = PageTag
         template_name = "django_tables2/bootstrap.html"
         fields = ("variation", "additional_information")

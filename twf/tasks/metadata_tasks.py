@@ -14,18 +14,18 @@ def load_sheets_metadata(self, project_id, user_id):
 
     try:
         project = Project.objects.get(pk=project_id)
-    except Project.DoesNotExist:
+    except Project.DoesNotExist as e:
         self.update_state(state='FAILURE', meta={'error': f'Project with ID {project_id} not found.'})
-        raise ValueError(f'Project with ID {project_id} not found.')
+        raise ValueError(f'Project with ID {project_id} not found.') from e
 
     task, percentage_complete = start_task(self, project, user_id, "Load Metadata from Google Sheets",
                                            text="Starting to load metadata from Google Sheets...")
 
     try:
         user = User.objects.get(pk=user_id)
-    except User.DoesNotExist:
+    except User.DoesNotExist as e:
         fail_task(self, task, f'User with ID {user_id} not found.')
-        raise ValueError(f'User with ID {user_id} not found.')
+        raise ValueError(f'User with ID {user_id} not found.') from e
 
     auth_json = 'transkribusWorkflow/google_key.json'
     table_data = GoogleSheetsClient.get_data_from_spreadsheet(auth_json,
@@ -70,5 +70,3 @@ def load_sheets_metadata(self, project_id, user_id):
         processed_table_lines += 1
 
     end_task(self, task, "Finished loading metadata from Google Sheets.")
-
-

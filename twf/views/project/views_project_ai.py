@@ -16,6 +16,8 @@ logger = logging.getLogger(__name__)
 
 
 class TWFProjectAIQueryView(FormView, TWFProjectView):
+    """View for querying the AI model."""
+
     template_name = 'twf/project/ai_query.html'
     page_title = 'AI Query'
     form_class = AIQueryDatabaseForm
@@ -60,36 +62,3 @@ class TWFProjectAIQueryView(FormView, TWFProjectView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         return context
-
-
-class TWFProjectAIBatchView(FormView, TWFProjectView):  # TODO: Unused
-    template_name = 'twf/project/ai_batch_query.html'
-    page_title = 'AI Query'
-    form_class = BatchOpenAIForm
-    results = None
-
-    def get_form_kwargs(self):
-        kwargs = super().get_form_kwargs()
-        # Add your custom argument here
-        kwargs['project'] = self.get_project()
-        return kwargs
-
-    def form_valid(self, form):
-        project = self.get_project()
-
-        # Ensure form is valid before processing
-        if form.is_valid():
-            selection = form.cleaned_data['selection']
-            role_description = form.cleaned_data['role_description']
-            prompt = form.cleaned_data['prompt']
-
-            # Correct project.id instead of project.d
-            task = ask_chatgpt_task.delay(project.id, selection, role_description, prompt)
-
-            return JsonResponse({'status': 'success', 'task_id': task.id})
-        else:
-            return JsonResponse({'status': 'error', 'errors': form.errors}, status=400)
-
-    def form_invalid(self, form):
-        # If form is invalid, return an error response
-        return JsonResponse({'status': 'error', 'errors': form.errors}, status=400)

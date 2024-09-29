@@ -1,3 +1,4 @@
+"""This module contains the views for triggering the Celery tasks."""
 from django.http import JsonResponse
 
 from twf.tasks.document_tasks import search_openai_for_docs, search_gemini_for_docs, search_claude_for_docs

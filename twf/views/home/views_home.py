@@ -10,6 +10,7 @@ from twf.views.views_base import TWFView
 
 
 class TWFHomeView(TWFView):
+    """Base view for the home view."""
     project_required = False
 
     """Base view for the home view."""

@@ -2,7 +2,7 @@
 from datetime import datetime
 
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, Field, Submit, Row, Column, HTML, Div
+from crispy_forms.layout import Layout, Submit, Row, Column, HTML, Div
 from django import forms
 from django.core.exceptions import ValidationError
 from django_select2.forms import Select2Widget
@@ -126,9 +126,13 @@ class DynamicForm(forms.Form):
                 css_class='row form-row'
             ))
         self.helper.layout.append(Div(
-            Submit('submit_park', 'Park And Next', css_class='btn btn-secondary', title='Save only remarks, mark as parked and continue'),
-                Submit('submit_save', 'Save And Next', css_class='btn btn-dark', title='Save all data and continue'),
-                css_class='text-end pt-3'
+            Submit('submit_park', 'Park And Next',
+                   css_class='btn btn-secondary',
+                   title='Save only remarks, mark as parked and continue'),
+            Submit('submit_save', 'Save And Next',
+                   css_class='btn btn-dark',
+                   title='Save all data and continue'),
+            css_class='text-end pt-3'
             ))
         self.is_valid()
 

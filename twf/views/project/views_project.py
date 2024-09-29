@@ -62,6 +62,7 @@ class TWFProjectView(LoginRequiredMixin, TWFView):
 
 
 class TWFProjectTaskMonitorView(TWFProjectView):
+    """View for the project task monitor."""
     template_name = 'twf/project/task_monitor.html'
     page_title = 'Task Monitor'
 
@@ -72,6 +73,7 @@ class TWFProjectTaskMonitorView(TWFProjectView):
 
 
 class TWFProjectSettingsView(FormView, TWFProjectView):
+    """View for the project settings."""
     template_name = 'twf/project/settings.html'
     page_title = 'Project Settings'
     form_class = ProjectForm
@@ -96,8 +98,8 @@ class TWFProjectSettingsView(FormView, TWFProjectView):
         return super().form_valid(form)
 
 
-
 class TWFProjectQueryView(FormView, TWFProjectView):
+    """View for querying the database."""
     template_name = 'twf/project/query.html'
     page_title = 'SQL Query'
     form_class = QueryDatabaseForm
@@ -130,6 +132,7 @@ class TWFProjectQueryView(FormView, TWFProjectView):
 
 
 class TWFProjectOverviewView(TWFProjectView):
+    """View for the project overview."""
     template_name = 'twf/project/overview.html'
     page_title = 'Project Overview'
 
@@ -235,7 +238,7 @@ from django.shortcuts import render"""
 
 
 def dynamic_form_view(request, pk):
-    # Example JSON data
+    """View for displaying a dynamic form."""
 
     json_data = Page.objects.get(pk=pk).metadata
 

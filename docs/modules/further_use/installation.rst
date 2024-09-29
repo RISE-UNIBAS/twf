@@ -16,16 +16,13 @@ file in the root of the repository.
 .. note::
 
     - This guide assumes you have a working installation of Python 3.10 or later.
-    If you do not, you will need to install it before proceeding.
-
+      If you do not, you will need to install it before proceeding.
 
     - This guide assumes you have a working installation of PostgreSQL. If you do not,
-    you will need to install it before proceeding.
-
+      you will need to install it before proceeding.
 
     - This guide assumes you have a working installation of Redis. If you do not,
-    you will need to install it before proceeding.
-
+      you will need to install it before proceeding.
 
 
 Preparation

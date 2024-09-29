@@ -20,13 +20,13 @@ def get_dictionary_and_user(broker, task, dictionary_id, user_id):
         return dictionary, user, number_of_entries
     except Dictionary.DoesNotExist as e:
         fail_task(broker, task, f"Dictionary not found: {dictionary_id}")
-        raise ValueError(str(e))
+        raise ValueError(str(e)) from e
     except User.DoesNotExist as e:
         fail_task(broker, task, f"User not found: {user_id}")
-        raise ValueError(str(e))
+        raise ValueError(str(e)) from e
     except Exception as e:
         fail_task(broker, task, str(e))
-        raise ValueError(str(e))
+        raise ValueError(str(e)) from e
 
 
 @shared_task(bind=True)
@@ -69,7 +69,8 @@ def search_wikidata_entries(self, project, dictionary_id, user_id, entity_type, 
 
 
 @shared_task(bind=True)
-def search_geonames_entries(self, project_id, dictionary_id, user_id, geonames_username, country_restriction, similarity_threshold):
+def search_geonames_entries(self, project_id, dictionary_id, user_id, geonames_username,
+                            country_restriction, similarity_threshold):
     """ Search for locations using the GeoNames API for all entries in a dictionary"""
     project = Project.objects.get(id=project_id)
     task, percentage_complete = start_task(self, project, user_id, text="Starting Geonames Search...",
@@ -95,7 +96,8 @@ def search_geonames_entries(self, project_id, dictionary_id, user_id, geonames_u
                 found_entries += 1
 
             # Update the progress
-            task, percentage_complete = update_task(self, task, f'Geonames Search in progress for entry {entry.label}...',
+            task, percentage_complete = update_task(self, task,
+                                                    f'Geonames Search in progress for entry {entry.label}...',
                                                     completed_entries, number_of_entries)
         except Exception as e:
             fail_task(self, task, str(e))
@@ -108,6 +110,7 @@ def search_geonames_entries(self, project_id, dictionary_id, user_id, geonames_u
 
 @shared_task(bind=True)
 def search_openai_entries(self, project, dictionary_id, user_id):
+    """ Search for entities using the Openai API for all entries in a dictionary"""
     task, percentage_complete = start_task(self, project, user_id, text="Starting Openai Search...",
                                            title="Dictionary Openai Search")
 
@@ -128,6 +131,7 @@ def search_openai_entries(self, project, dictionary_id, user_id):
 
 @shared_task(bind=True)
 def search_gnd_entry(self, project, dictionary_id, user_id):
+    """Search for a single entry in the GND API"""
     try:
         # Fetch the dictionary
         dictionary = Dictionary.objects.get(id=dictionary_id)
@@ -161,13 +165,13 @@ def search_geonames_entry(self, project, dictionary_id, user_id):
                                                  'text': 'Geonames Search Completed.'})
     except Dictionary.DoesNotExist as e:
         self.update_state(state='FAILURE', meta={'error': "Dictionary not found"})
-        raise ValueError(str(e))
+        raise ValueError(str(e)) from e
     except User.DoesNotExist as e:
         self.update_state(state='FAILURE', meta={'error': "User not found"})
-        raise ValueError(str(e))
+        raise ValueError(str(e)) from e
     except Exception as e:
         self.update_state(state='FAILURE', meta={'error': str(e)})
-        raise ValueError(str(e))
+        raise ValueError(str(e)) from e
 
 
 @shared_task(bind=True)

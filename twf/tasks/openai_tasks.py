@@ -45,9 +45,9 @@ def ask_chatgpt_task(self, project_id, selection_type, role_description, prompt)
     except Project.DoesNotExist as e:
         error_message = f"Project with id {project_id} does not exist."
         self.update_state(state='FAILURE', meta={'error': error_message})
-        raise ValueError(error_message)  # Use ValueError for easy serialization
+        raise ValueError(error_message) from e
 
     except Exception as e:
         error_message = f"An unexpected error occurred: {str(e)}"
         self.update_state(state='FAILURE', meta={'error': error_message})
-        raise ValueError(error_message)
+        raise ValueError(error_message) from e

@@ -14,6 +14,7 @@ from twf.views.views_base import TWFView
 
 
 class TWFExportView(LoginRequiredMixin, TWFView):
+    """Base view for all export views."""
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -57,6 +58,7 @@ class TWFExportView(LoginRequiredMixin, TWFView):
 
 
 class TWFExportOverviewView(TWFExportView):
+    """View for the export overview."""
     template_name = "twf/export/export_overview.html"
     page_title = 'Export Overview'
 
@@ -66,6 +68,7 @@ class TWFExportOverviewView(TWFExportView):
 
 
 class TWFExportDocumentsView(FormView, TWFExportView):
+    """View for exporting documents."""
     template_name = "twf/export/export_documents.html"
     page_title = 'Export Data'
     form_class = ExportConfigForm
@@ -111,6 +114,7 @@ class TWFExportDocumentsView(FormView, TWFExportView):
 
 
 class TWFExportCollectionsView(FormView, TWFExportView):
+    """View for exporting collections."""
     template_name = "twf/export/export_collections.html"
     page_title = 'Export Collections'
     form_class = ExportConfigForm
@@ -129,6 +133,7 @@ class TWFExportCollectionsView(FormView, TWFExportView):
 
 
 class TWFExportDictionariesView(TWFExportView):
+    """View for exporting dictionaries."""
     template_name = "twf/export/export_dictionaries.html"
     page_title = 'Export Dictionaries'
 
@@ -199,6 +204,8 @@ class TWFExportDictionaryView(TWFExportView):
 
 
 class TWFExportTagsView(TWFExportView):
+    """View for exporting tags."""
+
     template_name = "twf/export/export_tags.html"
     page_title = 'Export Tags'
 
@@ -208,6 +215,8 @@ class TWFExportTagsView(TWFExportView):
 
 
 class TWFExportProjectView(TWFExportView):
+    """View for exporting a project"""
+
     template_name = "twf/export/export_project.html"
     page_title = 'Export Project'
 
@@ -218,6 +227,7 @@ class TWFExportProjectView(TWFExportView):
 
 class TWFImportDictionaryView(FormView, TWFExportView):
     """View for importing a dictionary."""
+
     template_name = 'twf/export/import_dictionaries.html'
     page_title = 'Import Dictionary'
     form_class = DictionaryImportForm   # TODO Move form class

@@ -1,3 +1,4 @@
+""" This module contains functions to search for locations using the GeoNames API"""
 from geopy.geocoders import GeoNames
 from fuzzywuzzy import fuzz
 
@@ -18,11 +19,11 @@ def search_location(query, geonames_username, exactly_one=False, country=None, t
         if isinstance(location, list):
             clean_locations = clean_location(location, query, threshold)
             return clean_locations
-        else:
-            clean_locations = clean_location([location, ], query, threshold)
-            return clean_locations
-    else:
-        return None
+
+        clean_locations = clean_location([location, ], query, threshold)
+        return clean_locations
+
+    return None
 
 
 def clean_location(locations, original_query, threshold=80):

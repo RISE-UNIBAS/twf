@@ -65,14 +65,14 @@ def create_page_tags(self, project_id, user_id):
                  description=f'Extracted {total_tags} tags from {processed_pages} pages. '
                              f'Assigned {assigned_tags} tags.')
 
-    except Project.DoesNotExist:
+    except Project.DoesNotExist as e:
         error_message = f'Project {project_id} does not exist.'
         fail_task(self, task, error_message)
-        raise ValueError(error_message)
-    except User.DoesNotExist:
+        raise ValueError(error_message) from e
+    except User.DoesNotExist as e:
         error_message = f'User {user_id} does not exist.'
         fail_task(self, task, error_message)
-        raise ValueError(error_message)
+        raise ValueError(error_message) from e
     except Exception as e:
         fail_task(self, task, str(e))
-        raise ValueError(str(e))
+        raise ValueError(str(e)) from e

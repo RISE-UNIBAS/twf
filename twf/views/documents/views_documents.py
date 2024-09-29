@@ -73,16 +73,19 @@ class TWFDocumentsBrowseView(SingleTableView, FilterView, TWFDocumentView):
     model = Document
 
     def get_queryset(self):
+        """Get the queryset for the view."""
         queryset = Document.objects.filter(project_id=self.request.session.get('project_id'))
         self.filterset = self.filterset_class(self.request.GET, queryset=queryset)
         return self.filterset.qs
 
     def get(self, request, *args, **kwargs):
+        """Get the view."""
         self.object_list = self.get_queryset()
         context = self.get_context_data()
         return self.render_to_response(context)
 
     def get_context_data(self, **kwargs):
+        """Get the context data for the view."""
         context = super().get_context_data(**kwargs)
         context['page_title'] = self.page_title
         context['filter'] = self.get_filterset(self.filterset_class)
@@ -90,6 +93,7 @@ class TWFDocumentsBrowseView(SingleTableView, FilterView, TWFDocumentView):
 
 
 class TWFDocumentCreateView(FormView, TWFDocumentView):
+    """View for creating a document."""
     template_name = 'twf/documents/create_document.html'
     page_title = 'Create Document'
     form_class = DocumentForm
@@ -113,6 +117,7 @@ class TWFDocumentCreateView(FormView, TWFDocumentView):
 
 
 class TWFDocumentDetailView(TWFDocumentView):
+    """View for displaying a document."""
     template_name = 'twf/documents/document.html'
     page_title = 'Document Detail'
 
@@ -123,6 +128,7 @@ class TWFDocumentDetailView(TWFDocumentView):
 
 
 class TWFDocumentNameView(TWFDocumentView):
+    """View for naming documents."""
     template_name = 'twf/documents/name_documents.html'
     page_title = 'Name Documents'
 

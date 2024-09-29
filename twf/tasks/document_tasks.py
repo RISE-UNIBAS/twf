@@ -18,13 +18,13 @@ def get_project_and_user(broker, task, project_id, user_id):
         return project, user, number_of_documents
     except Project.DoesNotExist as e:
         fail_task(broker, task, f"Project not found: {project_id}")
-        raise ValueError(str(e))
+        raise ValueError(str(e)) from e
     except User.DoesNotExist as e:
         fail_task(broker, task, f"User not found: {user_id}")
-        raise ValueError(str(e))
+        raise ValueError(str(e)) from e
     except Exception as e:
         fail_task(broker, task, str(e))
-        raise ValueError(str(e))
+        raise ValueError(str(e)) from e
 
 
 def get_text_from_document(document):

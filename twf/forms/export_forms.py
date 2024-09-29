@@ -1,11 +1,14 @@
+""" This module contains forms for exporting data from the application. """
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, Submit, Column, Div, Row, HTML
+from crispy_forms.layout import Layout, Submit, Column, Div, Row
 from django import forms
 
 from twf.models import Project
 
 
 class ExportConfigForm(forms.ModelForm):
+    """Form for configuring export settings."""
+
     class Meta:
         model = Project
         fields = ['document_export_configuration', 'page_export_configuration']
@@ -39,6 +42,8 @@ class ExportConfigForm(forms.ModelForm):
 
 
 class ExportDataForm(forms.Form):
+    """Form for exporting data."""
+
     FORMAT_CHOICES = [
         ('json', 'JSON'),
         ('csv', 'CSV'),

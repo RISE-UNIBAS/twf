@@ -1,3 +1,4 @@
+""" This module contains the views for checking the status of a task and canceling a task. """
 import logging
 
 from celery.result import AsyncResult
@@ -12,6 +13,7 @@ logger = logging.getLogger(__name__)
 
 
 def task_status_view(request, task_id):
+    """View to check the status of a task by its task_id and return the progress or result."""
     try:
         # Get the task result by its task_id
         task_result = AsyncResult(task_id)
@@ -57,6 +59,7 @@ def task_status_view(request, task_id):
 
 
 def task_cancel_view(request, task_id):
+    """Cancel a task by its task_id. """
     try:
         task = Task.objects.get(task_id=task_id)
         AsyncResult(task_id).revoke(terminate=True)

@@ -171,14 +171,14 @@ def extract_zip_export_task(self, project_id, user_id):
 
         return {'status': 'completed'}
 
-    except Project.DoesNotExist:
+    except Project.DoesNotExist as e:
         error_message = f"Project with id {project_id} does not exist."
         fail_task(self, task, error_message)
-        raise ValueError(error_message)
-    except User.DoesNotExist:
+        raise ValueError(error_message) from e
+    except User.DoesNotExist as e:
         error_message = f"User with id {user_id} does not exist."
         fail_task(self, task, error_message)
-        raise ValueError(error_message)
+        raise ValueError(error_message) from e
     except Exception as e:
         fail_task(self, task, str(e))
-        raise ValueError(str(e))
+        raise ValueError(str(e)) from e

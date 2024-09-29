@@ -1,7 +1,9 @@
+""" Simple functions to get Wikidata entities and their coordinates. """
 import requests
 
 
 def get_wikidata_entity(entity_id):
+    """ Get the data for a Wikidata entity. """
     url = "https://www.wikidata.org/w/api.php"
     params = {
         'action': 'wbgetentities',
@@ -10,17 +12,19 @@ def get_wikidata_entity(entity_id):
         'props': 'claims'   # We're only interested in the claims (properties) of the entity
     }
 
-    response = requests.get(url, params=params)
+    response = requests.get(url, params=params, timeout=10)
     print("Entity", response.json())
     return response.json()
 
 
 def has_coordinates(entity_data):
+    """ Check if the Wikidata entity has coordinates. """
     claims = entity_data['entities'].get('Q64', {}).get('claims', {})
     return 'P625' in claims  # Check if the coordinates property (P625) exists
 
 
 def get_coordinates(entity_data):
+    """ Get the coordinates for a Wikidata entity. """
     claims = entity_data['entities'].get('Q64', {}).get('claims', {})
     if 'P625' in claims:
         # Extract the coordinates (latitude and longitude)
