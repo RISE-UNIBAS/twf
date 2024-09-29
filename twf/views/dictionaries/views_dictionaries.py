@@ -39,7 +39,6 @@ class TWFDictionaryView(LoginRequiredMixin, TWFView):
                 'name': 'Dictionaries Options',
                 'options': [
                     {'url': reverse('twf:dictionaries'), 'value': 'Overview'},
-                    {'url': reverse('twf:dictionaries_import'), 'value': 'Import'},
                     {'url': reverse('twf:dictionaries_normalization'), 'value': 'Norm Data Wizard'},
                 ]
             },
@@ -196,20 +195,6 @@ class TWFDictionaryDictionaryEntryView(SingleTableView, TWFDictionaryView):
         context['page_title'] = self.page_title
         context['entry'] = DictionaryEntry.objects.get(pk=self.kwargs.get('pk'))
         return context
-
-
-class TWFDictionaryImportView(FormView, TWFDictionaryView):
-    """View for importing a dictionary."""
-    template_name = 'twf/dictionaries/import.html'
-    page_title = 'Import Dictionary'
-    form_class = DictionaryImportForm
-
-    def get_form_kwargs(self):
-        kwargs = super().get_form_kwargs()
-        return kwargs
-
-    def form_valid(self, form):
-        return super().form_valid(form)
 
 
 class TWFDictionaryDictionaryEditView(FormView, TWFDictionaryView):

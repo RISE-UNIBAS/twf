@@ -180,3 +180,7 @@ if VERSION_FILE.exists():
         TWF_VERSION = f.read().strip()
 else:
     TWF_VERSION = "Unknown"
+
+# Set the maximum size in bytes (5 MB = 5 * 1024 * 1024 bytes)
+DATA_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024  # 10MB
+FILE_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024  # 10MB

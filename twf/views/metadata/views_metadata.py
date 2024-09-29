@@ -6,7 +6,7 @@ from django.urls import reverse, reverse_lazy
 from django.views.generic import FormView
 
 from twf.forms.dynamic_forms import DynamicForm
-from twf.forms.metadata_forms import LoadMetadataForm, ExtractMetadataValuesForm
+from twf.forms.metadata_forms import LoadMetadataForm, ExtractMetadataValuesForm, LoadSheetsMetadataForm
 from twf.models import Page, Document, PageTag
 from twf.views.views_base import TWFView
 
@@ -135,10 +135,18 @@ class TWFMetadataLoadDataView(FormView, TWFMetadataView):
 
 
 class TWFMetadataLoadSheetsDataView(FormView, TWFMetadataView):
-    template_name = 'twf/metadata/load_data.html'
-    page_title = 'Load Metadata'
-    form_class = LoadMetadataForm
+    template_name = 'twf/metadata/load_sheets_data.html'
+    page_title = 'Load Google Sheets Metadata'
+    form_class = LoadSheetsMetadataForm
     success_url = reverse_lazy('twf:metadata_load_metadata')
+
+    def form_valid(self, form):
+        super().form_valid(form)
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['project'] = self.get_project()
+        return kwargs
 
 
 class TWFMetadataExtractTagsView(FormView, TWFMetadataView):

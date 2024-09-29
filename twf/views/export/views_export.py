@@ -6,6 +6,7 @@ from django.urls import reverse_lazy
 from django.http import JsonResponse, HttpResponse
 from django.views.generic import FormView
 
+from twf.forms.dictionaries.dictionary_forms import DictionaryImportForm
 from twf.forms.export_forms import ExportConfigForm
 from twf.models import Dictionary
 from twf.views.export.export_utils import create_data, flatten_dict_keys
@@ -28,6 +29,12 @@ class TWFExportView(LoginRequiredMixin, TWFView):
                 'name': 'Overview',
                 'options': [
                     {'url': reverse_lazy('twf:export_overview'), 'value': 'Export Overview'},
+                ]
+            },
+            {
+                'name': 'Import Data',
+                'options': [
+                    {'url': reverse_lazy('twf:import_dictionaries'), 'value': 'Import Dictionaries'},
                 ]
             },
             {
@@ -208,3 +215,17 @@ class TWFExportProjectView(TWFExportView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         return context
+
+
+class TWFImportDictionaryView(FormView, TWFExportView):
+    """View for importing a dictionary."""
+    template_name = 'twf/export/import_dictionaries.html'
+    page_title = 'Import Dictionary'
+    form_class = DictionaryImportForm   # TODO Move form class
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        return kwargs
+
+    def form_valid(self, form):
+        return super().form_valid(form)
