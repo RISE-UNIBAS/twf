@@ -2,19 +2,42 @@
 import datetime
 import os
 import threading
-
+import time
 import requests
+
+from django.core.cache import cache
 from django.core.files import File
 from django.core.files.storage import FileSystemStorage
 from django.http import JsonResponse, StreamingHttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 from twf.models import Project
-from twf.views.views_ajax_base import set_progress, base_event_stream, calculate_and_set_progress
+
 
 PROGRESS_JOB_NAME = "extract-progress"
 DETAIL_JOB_NAME = "extract-progress-detail"
 
+
+def calculate_and_set_progress(processed_steps, total_steps, project_id, job_name):
+    """This function calculates the progress of a process and saves it to the cache."""
+    progress = (processed_steps / total_steps) * 100
+    set_progress(progress, project_id, job_name)
+
+
+def set_progress(progress, project_id, job_name):
+    """This function saves the progress of a process to the cache."""
+    cache.set(f'{project_id}_{job_name}', progress)
+
+
+def base_event_stream(project_id, job_name, sleep_time=1):
+    """This function streams the progress of a process to the client."""
+
+    while True:
+        progress = cache.get(f'{project_id}_{job_name}', 0)
+        yield f'data: {progress}\n\n'
+        if progress >= 100:
+            break
+        time.sleep(sleep_time)
 
 @require_http_methods(["GET"])
 @csrf_exempt
