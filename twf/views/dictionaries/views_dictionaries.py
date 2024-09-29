@@ -39,6 +39,7 @@ class TWFDictionaryView(LoginRequiredMixin, TWFView):
                 'name': 'Dictionaries Options',
                 'options': [
                     {'url': reverse('twf:dictionaries'), 'value': 'Overview'},
+                    {"url": reverse('twf:dictionary_create'), "value": "Create New Dictionary"},
                     {'url': reverse('twf:dictionaries_normalization'), 'value': 'Norm Data Wizard'},
                 ]
             },
@@ -107,12 +108,6 @@ class TWFDictionaryOverviewView(SingleTableView, TWFDictionaryView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['page_title'] = self.page_title
-        context['context_sub_nav'] = {"options": [
-            {"url": reverse('twf:dictionaries'), "value": "Overview"},
-            {"url": reverse('twf:dictionary_create'), "value": "Create New Dictionary"},
-            {"url": reverse('twf:project_settings'),
-             "value": mark_safe('<i class="fa-solid fa-arrow-right-from-bracket"></i> Project Settings')},
-        ]}
         return context
 
 
@@ -138,12 +133,6 @@ class TWFDictionaryCreateView(FormView, TWFDictionaryView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['page_title'] = 'Create New Dictionary'
-        context['context_sub_nav'] = {"options": [
-            {"url": reverse('twf:dictionaries'), "value": "Overview"},
-            {"url": reverse('twf:dictionary_create'), "value": "Create New Dictionary"},
-            {"url": reverse('twf:project_settings'),
-             "value": mark_safe('<i class="fa-solid fa-arrow-right-from-bracket"></i> Project Settings')},
-        ]}
         return context
 
 
