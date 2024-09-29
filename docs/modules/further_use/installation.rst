@@ -1,128 +1,130 @@
 Installation Guide
 ==================
 
-This guide will walk you through the process of setting up a Django project and adding 'twf' as a module to the project. We will also cover how to create a Gunicorn service and serve it over Nginx.
+This guide will help you install the necessary software to run TWF in
+your own environment. It is meant to be installed on a server and not
+on a local machine. This guide assumes you have a basic understanding
+of how to use a command line interface and are installing on a Linux
+server.
 
-Installing Django and Starting a Project
-----------------------------------------
+TWF is a Django application and it uses Celery for background tasks.
+It uses PostgreSQL as the database. Other types of databases may work,
+but they are not officially supported (mainly because of the use of JSON fields).
+TWF uses a number of third-party libraries, which are listed in the `requirements.txt`
+file in the root of the repository.
 
-First, you need to install Django. You can do this using pip:
+.. note::
 
-.. code-block:: bash
+    - This guide assumes you have a working installation of Python 3.10 or later.
+    If you do not, you will need to install it before proceeding.
 
-   pip install django
 
-Once Django is installed, you can create a new project:
+    - This guide assumes you have a working installation of PostgreSQL. If you do not,
+    you will need to install it before proceeding.
 
-.. code-block:: bash
 
-   django-admin startproject myproject
+    - This guide assumes you have a working installation of Redis. If you do not,
+    you will need to install it before proceeding.
 
-Adding 'twf' as a Module to the Project
----------------------------------------
 
-To add 'twf' as a module to your project, you first need to create a new application within your project:
 
-.. code-block:: bash
-
-   python manage.py startapp twf
-
-Then, add 'twf' to the `INSTALLED_APPS` list in your project's settings:
-
-.. code-block:: python
-
-   INSTALLED_APPS = [
-       ...
-       'twf',
-       ...
-   ]
-
-Finally, include the 'twf' URL configuration in your project's `urls.py` file:
-
-.. code-block:: python
-
-   from django.urls import include
-
-   urlpatterns = [
-       ...
-       path('twf/', include('twf.urls')),
-       ...
-   ]
-
-Creating a Gunicorn Service
----------------------------
-
-To create a Gunicorn service, first install Gunicorn:
+Preparation
+-----------
+Create a new directory for the TWF installation and change to that directory:
 
 .. code-block:: bash
 
-   pip install gunicorn
+    mkdir twf
+    cd twf
 
-Then, create a Gunicorn systemd service file:
-
-.. code-block:: bash
-
-   sudo nano /etc/systemd/system/gunicorn.service
-
-In the service file, add the following:
-
-.. code-block:: ini
-
-   [Unit]
-   Description=gunicorn daemon
-   After=network.target
-
-   [Service]
-   User=sorinmarti
-   Group=www-data
-   WorkingDirectory=/path/to/your/project
-   ExecStart=/path/to/your/venv/bin/gunicorn --access-logfile - --workers 3 --bind unix:/path/to/your/project.sock myproject.wsgi:application
-
-   [Install]
-   WantedBy=multi-user.target
-
-Replace `/path/to/your/project` and `/path/to/your/venv` with the actual paths to your project and virtual environment.
-
-Serving the Application Over Nginx
-----------------------------------
-
-First, install Nginx:
+Create a new virtual environment and activate it:
 
 .. code-block:: bash
 
-   sudo apt-get install nginx
+    python3 -m venv venv
+    source venv/bin/activate
 
-Then, create a new Nginx server block configuration:
-
-.. code-block:: bash
-
-   sudo nano /etc/nginx/sites-available/myproject
-
-In the server block configuration, add the following:
-
-.. code-block:: nginx
-
-   server {
-       listen 80;
-       server_name your_domain www.your_domain;
-
-       location = /favicon.ico { access_log off; log_not_found off; }
-       location /static/ {
-           root /path/to/your/project;
-       }
-
-       location / {
-           include proxy_params;
-           proxy_pass http://unix:/path/to/your/project.sock;
-       }
-   }
-
-Replace `your_domain` with your actual domain, and `/path/to/your/project` with the actual path to your project.
-
-Finally, enable the Nginx server block configuration:
+Clone the TWF repository:
 
 .. code-block:: bash
 
-   sudo ln -s /etc/nginx/sites-available/myproject /etc/nginx/sites-enabled
-   sudo nginx -t
-   sudo service nginx restart
+    git clone https://github.com/RISE-UNIBAS/twf.git
+
+Change to the TWF directory:
+
+.. code-block:: bash
+
+    cd twf
+
+Install the required Python packages:
+
+.. code-block:: bash
+
+    pip install -r requirements.txt
+
+Create a new PostgreSQL database and user:
+
+.. code-block:: bash
+
+    sudo -u postgres psql
+    CREATE DATABASE twf;
+    CREATE USER
+    twf WITH PASSWORD 'password';
+    GRANT ALL PRIVILEGES ON DATABASE twf TO twf;
+    \q
+
+Create a new Redis database and enable it:
+
+.. code-block:: bash
+
+    sudo apt-get install redis-server
+    sudo systemctl enable redis-server
+
+
+Configuration
+-------------
+Adjust transkribusWorkflow/settings.py to match your environment. The most important settings are:
+
+- `SECRET_KEY`: A random string used to secure the application. You can generate one using `python -c 'import secrets; print(secrets.token_urlsafe(50))'`.
+- `DEBUG`: Set to `False` in production.
+- `ALLOWED_HOSTS`: A list of hostnames that the application is allowed to run on.
+- `DATABASES`: The database configuration. You will need to adjust the `USER`, `PASSWORD`, and `HOST` settings.
+- `CELERY_BROKER_URL`: The URL of the Redis server.
+- `CELERY_RESULT_BACKEND`: The URL of the Redis server.
+
+Run the migrations and collect the static files:
+
+.. code-block:: bash
+
+    python manage.py migrate
+    python manage.py collectstatic
+
+(You might also need to create a `media` directory in the root of the project)
+
+Create a superuser:
+
+.. code-block:: bash
+
+    python manage.py createsuperuser
+
+Start the Celery worker:
+
+.. code-block:: bash
+
+    celery -A transkribusWorkflow worker -l info
+
+Start the Django development server:
+
+.. code-block:: bash
+
+    python manage.py runserver
+
+
+Notes on Deployment
+-------------------
+This guide is meant to get you up and running quickly. For a production
+deployment, you will need to use a more robust setup. This includes
+using a WSGI server like Gunicorn, a reverse proxy like Nginx, and a
+process manager like Supervisor. You will also need to set up HTTPS
+using a service like Let's Encrypt.
+

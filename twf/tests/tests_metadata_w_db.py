@@ -1,7 +1,7 @@
 from django.test import TestCase
 
 from twf.models import Document, Page, User, Project
-from twf.views.export.export_utils import create_data_from_config, create_page_data, create_data
+from twf.export_utils import create_data
 
 
 class MetadataTransformationTest(TestCase):

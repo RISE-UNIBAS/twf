@@ -9,8 +9,7 @@ from django.views.generic import FormView
 from twf.forms.dictionaries.dictionary_forms import DictionaryImportForm
 from twf.forms.export_forms import ExportConfigForm
 from twf.models import Dictionary
-from twf.views.export.export_utils import create_data, flatten_dict_keys
-from twf.views.project.views_project import TWFProjectView
+from twf.export_utils import create_data, flatten_dict_keys
 from twf.views.views_base import TWFView
 
 

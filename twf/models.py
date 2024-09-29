@@ -1,4 +1,11 @@
-"""This module contains the models for the twf app."""
+"""This module contains the models for the twf app. The models are used to store data in the database.
+Each module class represents a table in the database. The classes are subclasses of Django's models.Model class.
+
+The main model is the Project model, which represents a project in the app. Most other models rely directly or
+indirectly on the Project model. Most models extend the TimeStampedModel class, which provides self-updating
+'created' and 'modified' fields. This means, every time an object is created or modified, the 'created_at' and
+'modified_at' fields are updated automatically, but the user who created or modified the object must be provided.
+"""
 from django.conf import settings
 from django.db import models
 from django.contrib.auth import get_user_model
@@ -7,12 +14,30 @@ from fuzzywuzzy import process
 
 from twf.templatetags.tk_tags import tk_iiif_url, tk_bounding_box
 
+# The User model is retrieved dynamically to allow for custom user models
 User = get_user_model()
+
+# The permission groups in the app (#TODO this is not implemented yet)
 TWF_GROUPS = ['Setup Project', 'Group Tags', 'Run Batches', 'Import Dictionaries', 'Manipulate Dictionaries']
 
 
 class TimeStampedModel(models.Model):
-    """An abstract base class model that provides self-updating 'created' and 'modified' fields."""
+    """
+    TimeStampedModel
+    ----------------
+    An abstract base class model that provides self-updating 'created' and 'modified' fields.
+
+    Attributes
+    ~~~~~~~~~~
+    created_at : DateTimeField
+        The date and time the object was created.
+    modified_at : DateTimeField
+        The date and time the object was last modified.
+    created_by : ForeignKey
+        The user who created the object.
+    modified_by : ForeignKey
+        The user who last modified the object.
+    """
 
     created_at = models.DateTimeField(auto_now_add=True)
     """The date and time the object was created."""
@@ -43,7 +68,20 @@ class TimeStampedModel(models.Model):
 
 
 class UserProfile(models.Model):
-    """A user profile."""
+    """
+    User Profile Model
+    ------------------
+    User profiles are used to store additional information about users. This model extends the Django User model
+    and provides additional fields to store user-specific data. The UserProfile model is linked to the User model
+    via a OneToOneField, which means that each user can have only one profile.
+
+    Attributes
+    ~~~~~~~~~~
+    user : OneToOneField
+        The user this profile belongs to.
+    clearance_level : IntegerField
+        The clearance level of the user. This can be used to define different levels of access or permissions.
+    """
 
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
     """The user this profile belongs to."""
@@ -66,7 +104,73 @@ class UserProfile(models.Model):
 
 
 class Project(TimeStampedModel):
-    """A project."""
+    """
+    Project Model
+    -------------
+    Projects are the main entities in the app. Each project represents a collection of documents and pages that
+    are related to a specific task or topic. Projects can have multiple members, each with different roles and
+    permissions. The Project model extends the TimeStampedModel, which provides self-updating 'created' and 'modified'
+    fields.
+
+    Attributes
+    ~~~~~~~~~~
+    title : CharField
+        The title of the project. This is descriptive and should be unique.
+    collection_id : CharField
+        The Transkribus collection ID. This is needed to export data from Transkribus.
+    transkribus_job_id : CharField
+        The Transkribus job ID of the last requested export.
+    job_download_url : URLField
+        The download URL of the last requested export.
+    downloaded_at : DateTimeField
+        The time the last export was downloaded.
+    downloaded_zip_file : FileField
+        The last downloaded export file.
+    metadata_google_sheet_id : CharField
+        The ID of the Google Sheet containing metadata.
+    metadata_google_sheet_range : CharField
+        The range of the Google Sheet containing metadata.
+    metadata_google_doc_id_column : CharField
+        The name of the column containing the document IDs.
+    metadata_google_title_column : CharField
+        The name of the column containing the document titles.
+    metadata_google_valid_columns : CharField
+        A coma-separated list of valid column names for metadata. Leave blank for all columns.
+    description : TextField
+        The description of the project.
+    status : CharField
+        The status of the project.
+    owner : ForeignKey
+        The owner of the project.
+    members : ManyToManyField
+        The members of the project.
+    tag_type_translator : JSONField
+        A dictionary to translate tag types into dictionary types if they are not equal.
+    ignored_tag_types : JSONField
+        A list of tag types to ignore.
+    transkribus_username : CharField
+        The username for the Transk
+    transkribus_password : CharField
+        The password for the Transkribus API.
+    geonames_username : CharField
+        The username for the Geonames API.
+    openai_api_key : CharField
+        The API key for the Open AI API.
+    gemini_api_key : CharField
+        The API key for the Gemini API.
+    claude_api_key : CharField
+        The API key for the Claude API.
+    selected_dictionaries : ManyToManyField
+        The dictionaries selected for this project.
+    document_metadata_fields : JSONField
+        A dictionary of metadata fields for documents.
+    page_metadata_fields : JSONField
+        A dictionary of metadata fields for pages.
+    document_export_configuration : JSONField
+        A dictionary of export configurations for documents.
+    page_export_configuration : JSONField
+        A dictionary of export configurations for pages.
+    """
 
     STATUS_CHOICES = (
         ('open', 'Open'),
@@ -238,7 +342,35 @@ class Project(TimeStampedModel):
 
 
 class Task(models.Model):
-    """Model to store Celery tasks."""
+    """
+    Task Model
+    ----------
+    Tasks are used to store Celery tasks in the database. This model is used to keep track of the status of tasks
+    and to store additional information about the tasks. The Task model is linked to the Project model via a ForeignKey,
+    which means that each task belongs to a specific project.
+
+    Attributes
+    ~~~~~~~~~~
+    project : ForeignKey
+        The project this task belongs to.
+    user : ForeignKey
+        The user who created the task.
+    task_id : CharField
+        The ID of the Celery task.
+    status : CharField
+        The status of the task.
+    start_time : DateTimeField
+        The time the task was started.
+    end_time : DateTimeField
+        The time the task was completed.
+    title : CharField
+        The title of the task.
+    description : TextField
+        The description of the task.
+    text : TextField
+        The text of the task.
+    """
+
     TASK_STATUS_CHOICES = [
         ('PENDING', 'Pending'),
         ('STARTED', 'Started'),
@@ -263,7 +395,30 @@ class Task(models.Model):
 
 
 class Document(TimeStampedModel):
-    """A document in a project."""
+    """
+    Document Model
+    --------------
+    Documents are used to store information about the documents in a project. Each document belongs to a specific
+    project and can have multiple pages. The Document model extends the TimeStampedModel, which provides self-updating
+    'created' and 'modified' fields.
+
+    Attributes
+    ~~~~~~~~~~
+    project : ForeignKey
+        The project this document belongs to.
+    title : CharField
+        The title of the document.
+    document_id : CharField
+        The Transkribus document ID.
+    metadata : JSONField
+        Metadata for the document.
+    last_parsed_at : DateTimeField
+        The last time the document was parsed.
+    is_parked : BooleanField
+        Whether the document is parked.
+    workflow_remarks : TextField
+        Workflow remarks for the document.
+    """
 
     project = models.ForeignKey(Project, related_name='documents', on_delete=models.CASCADE)
     """The project this document belongs to."""
@@ -534,7 +689,20 @@ class PageTag(TimeStampedModel):
 
 
 class Variation(TimeStampedModel):
-    """A variation of a dictionary entry."""
+    """
+    Variation Model
+    ---------------
+    Variations are used to store different variations of dictionary entries. This model is used to store variations
+    of dictionary entries and to link them to the dictionary entries. The Variation model is linked to the DictionaryEntry
+    model via a ForeignKey, which means that each variation belongs to a specific dictionary entry.
+
+    Attributes
+    ~~~~~~~~~~
+    entry : ForeignKey
+        The dictionary entry this variation belongs to.
+    variation : CharField
+        The text of the variation.
+    """
 
     entry = models.ForeignKey(DictionaryEntry, related_name='variations', on_delete=models.CASCADE)
     """The dictionary entry this variation belongs to."""
@@ -573,12 +741,29 @@ class DateVariation(TimeStampedModel):
 
 
 class Collection(TimeStampedModel):
-    """A collection of documents."""
+    """
+    Collection Model
+    ----------------
+    Collections are (who would've thought) collections of documents or document parts.
+    A collection belongs to a project and can be used to group its documents in a meaningful way.
+    This model extends the TimeStampedModel, which provides self-updating 'created' and 'modified' fields.
+
+    Attributes
+    ~~~~~~~~~~
+    project : ForeignKey
+        The project this collection belongs to.
+    title : CharField
+        The title of the collection. This is descriptive and should be unique within the project.
+    description : TextField
+        The description of the collection
+
+    """
 
     project = models.ForeignKey(Project, related_name='collections', on_delete=models.CASCADE)
+    """The project this collection belongs to."""
 
     title = models.CharField(max_length=100)
-    """The title of the collection."""
+    """The title of the collection. This is descriptive and should be unique within the project."""
 
     description = models.TextField(blank=True, default='')
     """The description of the collection."""

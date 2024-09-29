@@ -21,7 +21,7 @@ from twf.views.views_ajax_download import ajax_transkribus_download_export, down
 from twf.views.views_ajax_export import ajax_transkribus_request_export, ajax_transkribus_request_export_status, \
     ajax_transkribus_reset_export
 from twf.views.views_ajax_validation import validate_page_field, validate_document_field
-from twf.views.dollections.views_collection import RemovePartView, SplitCollectionItemView, \
+from twf.views.collections.views_collection import RemovePartView, SplitCollectionItemView, \
     UpdateCollectionItemView, TWFCollectionsView, TWFProjectCollectionsCreateView, \
     TWFProjectCollectionsDetailView, TWFProjectCollectionsReviewView, TWFProjectCollectionsAddDocumentView
 from twf.views.views_command import park_tag, unpark_tag, ungroup_tag

@@ -62,7 +62,7 @@ class TWFProjectAIQueryView(FormView, TWFProjectView):
         return context
 
 
-class TWFProjectAIBatchView(FormView, TWFProjectView):
+class TWFProjectAIBatchView(FormView, TWFProjectView):  # TODO: Unused
     template_name = 'twf/project/ai_batch_query.html'
     page_title = 'AI Query'
     form_class = BatchOpenAIForm

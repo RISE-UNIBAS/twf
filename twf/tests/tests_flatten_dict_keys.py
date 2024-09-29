@@ -1,6 +1,6 @@
 from django.test import TestCase
 
-from twf.views.export.export_utils import flatten_dict_keys
+from twf.export_utils import flatten_dict_keys
 
 
 class FlattenDictKeysTest(TestCase):
