@@ -3,6 +3,83 @@ import re
 from twf.models import Document, Page, Project
 
 
+def get_nested_value(data, key, default=None):
+    """
+    Retrieve a value from a nested dictionary or list using dot notation.
+
+    Example:
+    - "my.list.0.nested.item" will access data['my']['list'][0]['nested']['item']
+
+    :param data: The dictionary, list, or object from which to extract the value.
+    :param key: A dot-notated string representing the nested keys.
+    :param default: The default value to return if the key is not found.
+    :return: The retrieved value or the default value if key is not found.
+    """
+    keys = key.split('.')
+    val = data
+    try:
+        for k in keys:
+            # Check if the current level is a list and if the key is an index
+            if isinstance(val, list):
+                k = int(k)  # Convert key to integer to access list index
+                val = val[k]
+            elif isinstance(val, dict):
+                val = val[k]
+            else:
+                val = getattr(val, k, default)
+        return val
+    except (KeyError, AttributeError, IndexError, ValueError, TypeError):
+        return default
+
+
+def create_data_from_config(metadata, config, db_object=None, return_warnings=False):
+    transformed = {}
+    warnings = []
+
+    for key, mapping in config.items():
+        value_expression = mapping.get('value', "")
+        empty_value = mapping.get('empty_value', "")
+
+        # Handle nested keys and DB field references
+        if value_expression.startswith('{__') and value_expression.endswith('__}'):
+            # Handle DB field access like "{__tk_page_number__}"
+            db_field = value_expression[3:-3]
+            if db_object:
+                value = get_nested_value(db_object, db_field, empty_value)
+                if value == empty_value:
+                    warnings.append(f"Key '{key}' ({db_field}) missing in DB object")
+            else:
+                warnings.append(f"Key '{key}' requires a DB object")
+                value = empty_value
+        elif value_expression.startswith('{') and value_expression.endswith('}'):
+            # Handle metadata dynamic reference like "{tags1}"
+            metadata_key = value_expression[1:-1]
+            value = get_nested_value(metadata, metadata_key, empty_value)
+        elif '{' in value_expression and '}' in value_expression:
+            # Handle formatted strings like "p. {page}"
+            try:
+                value = value_expression.format(**metadata)
+            except KeyError:
+                warnings.append(f"Key '{key}' missing in metadata")
+                value = empty_value
+        else:
+            # Handle static values
+            value = value_expression
+
+        # Assign value to the transformed dictionary (handle nested keys)
+        keys = key.split('.')
+        current_level = transformed
+        for i, sub_key in enumerate(keys):
+            if i == len(keys) - 1:
+                current_level[sub_key] = value
+            else:
+                current_level = current_level.setdefault(sub_key, {})
+
+    if return_warnings:
+        return transformed, warnings
+    return transformed
+
+
 def create_data(db_object, return_warnings=False):
     if isinstance(db_object, Project):
         return create_project_data(db_object, return_warnings)
@@ -33,8 +110,10 @@ def create_project_data(project, return_warnings=False):
 
 def create_document_data(document, return_warnings=False):
     data = {**document.metadata}
+
     all_warnings = []
     config = document.project.document_export_configuration
+
     if return_warnings:
         doc_export, warnings = create_data_from_config(data, config, document, True)
         all_warnings.extend(warnings)
@@ -59,116 +138,6 @@ def create_page_data(page, return_warnings=False):
     data = {**page.parsed_data, **page.metadata}
     config = page.document.project.page_export_configuration
     return create_data_from_config(data, config, page, return_warnings)
-
-
-def create_data_from_config(metadata, config, db_object=None, return_warnings=False):
-    transformed = {}
-    warnings = []
-
-    for key, mapping in config.items():
-        if "value" not in mapping:
-            warnings.append(f"Missing 'value' key in mapping for '{key}'")
-            value_expression = ""
-        else:
-            value_expression = mapping['value']
-
-        if "empty_value" not in mapping:
-            empty_value = ""
-        else:
-            empty_value = mapping['empty_value']
-
-        # Handle nested structures (e.g., "project.name.short")
-        if '.' in key:
-            keys = key.split('.')
-            current_level = transformed
-
-            # Traverse the keys to create the nested dictionary
-            for i, sub_key in enumerate(keys):
-                if i == len(keys) - 1:
-                    # Final key: assign the value
-                    if value_expression.startswith('{__') and value_expression.endswith('__}'):
-                        # Handle access to DB fields like "{__tk_page_number__}"
-                        db_field = value_expression[3:-3]
-                        if db_object:
-                            try:
-                                attr = getattr(db_object, db_field)
-                                if callable(attr):
-                                    # If it's a method, call it
-                                    current_level[sub_key] = attr()
-                                else:
-                                    # Otherwise, it's a field, so just assign its value
-                                    current_level[sub_key] = attr
-                            except AttributeError:
-                                warnings.append(f"Key '{key}' ({db_field}) missing in DB object")
-                                current_level[sub_key] = empty_value
-                        else:
-                            warnings.append(f"Key '{key}' requires a DB object")
-                            transformed[key] = empty_value
-                    elif value_expression.startswith('{') and value_expression.endswith('}'):
-                        # Handle simple dynamic references like "{tags1}"
-                        metadata_key = value_expression[1:-1]
-                        current_level[sub_key] = metadata.get(metadata_key, empty_value)
-                    elif '{' in value_expression and '}' in value_expression:
-                        # Handle formatted strings like "p. {page}"
-                        try:
-                            current_level[sub_key] = value_expression.format(**metadata)
-                        except KeyError:
-                            warnings.append(f"Key '{key}' ({sub_key}) missing in metadata")
-                            current_level[sub_key] = empty_value
-                    else:
-                        # Handle static values
-                        current_level[sub_key] = value_expression
-                else:
-                    # Traverse deeper, create nested dictionary if needed
-                    if sub_key not in current_level:
-                        current_level[sub_key] = {}
-                    current_level = current_level[sub_key]
-        else:
-            # No nested structure
-            if value_expression.startswith('{__') and value_expression.endswith('__}'):
-                # Handle access to DB fields like "{__tk_page_number__}"
-                db_field = value_expression[3:-3]
-                if db_object:
-                    try:
-                        attr = getattr(db_object, db_field)
-                        if callable(attr):
-                            # If it's a method, call it
-                            transformed[key] = attr()
-                        else:
-                            # Otherwise, it's a field, so just assign its value
-                            transformed[key] = attr
-                    except AttributeError:
-                        warnings.append(f"Key '{key}' ({db_field}) missing in DB object")
-                        transformed[key] = empty_value
-                else:
-                    warnings.append(f"Key '{key}' requires a DB object")
-                    transformed[key] = empty_value
-            elif value_expression.startswith('{') and value_expression.endswith('}'):
-                # Handle simple dynamic references like "{tags1}"
-                metadata_key = value_expression[1:-1]
-                transformed[key] = metadata.get(metadata_key, empty_value)
-            elif '{__' in value_expression and '__}' in value_expression:
-                # Handle access to DB fields in formatted strings like "p. {__tk_page_number__}"
-                db_field = re.findall(r'{__(.*?)__}', value_expression)[0]
-                if db_object:
-                    transformed[key] = value_expression.format(**{"__"+db_field+"__": getattr(db_object, db_field)})
-                else:
-                    warnings.append(f"Key '{key}' requires a DB object")
-                    transformed[key] = empty_value
-            elif '{' in value_expression and '}' in value_expression:
-                # Handle formatted strings like "p. {page}"
-                try:
-                    transformed[key] = value_expression.format(**metadata)
-                except KeyError:
-                    warnings.append(f"Key '{key}' missing in metadata")
-                    transformed[key] = empty_value
-            else:
-                # Handle static values
-                transformed[key] = value_expression
-
-    if return_warnings:
-        return transformed, warnings
-    return transformed
 
 
 def flatten_dict_keys(d, parent_key='', sep='.'):

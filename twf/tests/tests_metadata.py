@@ -97,3 +97,29 @@ class MetadataTransformationTest(TestCase):
 
         # Assert the transformed result is empty or minimally structured
         self.assertEqual(result, expected_output)
+
+    def test_google_sheets_metadata(self):
+        """
+        Test the extraction of 'document.original_id' from 'google_sheets.original_id'.
+        """
+        self.config.update({
+            "document.original_id": {
+                "value": "{google_sheets.original_id}"
+            }
+        })
+
+        # Extend metadata with google_sheets data
+        self.metadata.update({
+            "google_sheets": {
+                "original_id": "GS12345"
+            }
+        })
+
+        expected_output = self.expected_output
+        expected_output["document"] = {
+            "original_id": "GS12345"
+        }
+
+        result = create_data_from_config(self.metadata, self.config)
+
+        self.assertEqual(result, expected_output)
