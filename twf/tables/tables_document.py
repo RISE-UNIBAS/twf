@@ -23,9 +23,11 @@ class DocumentTable(tables.Table):
 
     def render_document_id(self, value, record):
         """Renders the document_id column with the title and metadata of the document."""
-        html = f"<strong>{value}: {record.title}</strong>"
+        html = f"<strong>{value}: {record.title}</strong><br/>Metadata: "
         for item in record.metadata.items():
-            html += f'<br/><span class="small"><u>{item[0]}</u>: {item[1]}</span>'
+            # html += f'<br/><span class="small"><u>{item[0]}</u>: {item[1]}</span>'
+            html += f'<code>{item[0]}</code>, '
+        html = html[:-2]
 
         return mark_safe(html)
 

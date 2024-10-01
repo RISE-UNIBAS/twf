@@ -16,7 +16,7 @@ from twf.views.views_base import TWFView
 
 class TWFProjectView(LoginRequiredMixin, TWFView):
     """Base view for all project views."""
-    template_name = 'twf/project/overview.html'
+    template_name = None
 
     def get_sub_navigation(self):
         """Get the sub navigation."""
@@ -149,6 +149,7 @@ class TWFProjectOverviewView(TWFProjectView):
         smallest_document = (Document.objects.annotate(num_pages=Count('pages'))
                              .filter(project=project).order_by('num_pages').first())
         pagetag_count = PageTag.objects.filter(page__document__project=project).count()
+
         unique_pagetag_count = (PageTag.objects.filter(page__document__project=project)
         .aggregate(unique_variations=Count('variation', distinct=True))['unique_variations'])
         average_pagetags_per_document = (Document.objects.annotate(num_pagetags=Count('pages__tags'))

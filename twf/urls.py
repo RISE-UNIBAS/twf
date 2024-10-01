@@ -7,14 +7,14 @@ from twf.tasks.task_triggers import start_task_creation, start_extraction, start
     start_wikidata_batch, start_openai_batch, start_gnd_request, start_geonames_request, start_wikidata_request, \
     start_openai_request, start_gemini_doc_batch, start_openai_doc_batch, start_claude_doc_batch, start_sheet_metadata
 from twf.views.ajax.views_ajax_field_validation import validate_page_field, validate_document_field
-from twf.views.ajax.views_ajax_transkribus_export import ajax_transkribus_request_export, ajax_transkribus_reset_export, \
-    ajax_transkribus_request_export_status
+from twf.views.ajax.views_ajax_transkribus_export import ajax_transkribus_request_export, \
+    ajax_transkribus_reset_export, ajax_transkribus_request_export_status
 from twf.views.dictionaries.views_batches import TWFDictionaryGNDBatchView, TWFDictionaryGeonamesBatchView, \
     TWFDictionaryWikidataBatchView, TWFDictionaryOpenaiBatchView
 from twf.views.dictionaries.views_requests import TWFDictionaryGNDRequestView, TWFDictionaryGeonamesRequestView, \
     TWFDictionaryWikidataRequestView, TWFDictionaryOpenaiRequestView
-from twf.views.documents.views_documents import TWFDocumentsOverviewView, TWFDocumentsBrowseView, TWFDocumentCreateView, \
-    TWFDocumentNameView, TWFDocumentDetailView
+from twf.views.documents.views_documents import TWFDocumentsOverviewView, TWFDocumentsBrowseView, \
+    TWFDocumentCreateView, TWFDocumentNameView, TWFDocumentDetailView
 from twf.views.documents.views_documents_ai import TWFDocumentOpenAIBatchView, \
     TWFDocumentGeminiBatchView, TWFDocumentClaudeBatchView
 from twf.views.home.views_home import TWFHomeView, TWFHomeLoginView, TWFHomePasswordChangeView, TWFHomeUserOverView, \
@@ -38,9 +38,9 @@ from twf.views.metadata.views_metadata import TWFMetadataReviewDocumentsView, \
 from twf.views.project.views_project import select_project, \
     TWFProjectSettingsView, TWFProjectQueryView, TWFProjectOverviewView, TWFProjectTaskMonitorView
 from twf.views.project.views_project_ai import TWFProjectAIQueryView
-from twf.views.tags.views_tags import TWFTagsView, TWFProjectTagsView, TWFProjectTagsOpenView, TWFProjectTagsParkedView, \
-    TWFProjectTagsResolvedView, TWFProjectTagsIgnoredView, TWFTagsDatesView, TWFTagsGroupView, TWFTagsOverviewView, \
-    TWFTagsExtractView
+from twf.views.tags.views_tags import TWFTagsView, TWFProjectTagsView, TWFProjectTagsOpenView, \
+    TWFProjectTagsParkedView, TWFProjectTagsResolvedView, TWFProjectTagsIgnoredView, TWFTagsDatesView, \
+    TWFTagsGroupView, TWFTagsOverviewView, TWFTagsExtractView
 
 urlpatterns = [
     #############################
@@ -61,8 +61,6 @@ urlpatterns = [
 
     #############################
     # PROJECT
-
-    # Project Data
     path('project/overview/', TWFProjectOverviewView.as_view(), name='project_overview'),
     path('project/setup/', TWFProjectSetupView.as_view(page_title='Project Setup'), name='project_setup'),
     path('project/setup/tk/export/',

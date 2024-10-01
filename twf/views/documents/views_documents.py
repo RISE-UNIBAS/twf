@@ -9,7 +9,7 @@ from django_tables2 import SingleTableView
 from twf.filters import DocumentFilter
 from twf.forms.documents.document_forms import DocumentForm
 from twf.models import Document
-from twf.tables.tables import DocumentTable
+from twf.tables.tables_document import DocumentTable
 from twf.views.views_base import TWFView
 
 
@@ -60,6 +60,7 @@ class TWFDocumentsOverviewView(TWFDocumentView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        
         return context
 
 

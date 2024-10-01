@@ -1,13 +1,21 @@
 {% extends 'twf/base/info_card.html' %}
 
 {% block title %}
-    Project Overview
+    {{ project.title }}
 {% endblock %}
 
 {% block info_text %}
      This section allows you to manage your project's core settings, configure setup options, 
-     and handle project-specific batches. Here, you can fine-tune project parameters, adjust 
-     configurations, and run batch operations to streamline your workflow.
+     and handle project-specific batches and tasks.<br/>
+     <u>Description:</u> <i>{% if project.description %}{{ project.description }}{% else %}&lt;no description&gt;{% endif %}</i><br/><br/>
+    <strong>{{ project.title }}</strong> was created by user <strong>{{ project.owner }}</strong> on <strong>{{ project.created_at }}</strong>
+     {%  if project.members.count > 0 %}
+        and the members are:
+        {% for member in project.members.all %}
+            {{ member }}
+            {% if not forloop.last %}, {% endif %}
+        {% endfor %}
+    {% endif %}. The project was last modified <strong>{{ project.modified_at|timesince }} ago</strong>.
 {% endblock %}
 
 {% block number_1 %}

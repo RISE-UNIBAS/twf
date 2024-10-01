@@ -2,24 +2,7 @@
 
 {% block content %}
      <div class="border rounded bg-light mt-0 mb-3 p-3">
-        {% include 'twf/project/info_card_project.html' with section_title=project.title|add:" Overview" %}    
-     </div>
-    
-    <div class="border rounded bg-light mt-0 mb-3 p-3">
-     
-     <h2 class="display-6 mt-3">{{ project.title }}</h2>
-    
-     <i>{{ project.description }}</i><br/><br/>
- 
-     <strong>{{ project.title }}</strong> was created by user <strong>{{ project.owner }}</strong> on <strong>{{ project.created_at }}</strong>
-     {%  if project.members.count > 0 %}
-        and the members are:
-        {% for member in project.members.all %}
-            {{ member }}
-            {% if not forloop.last %}, {% endif %}
-        {% endfor %}
-    {% endif %}. The project was last modified <strong>{{ project.modified_at|timesince }} ago</strong>.
-    
+        {% include 'twf/project/info_card_project.html' %}
      </div>
     
     <div class="border rounded bg-light mt-0 p-3">
