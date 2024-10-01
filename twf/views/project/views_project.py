@@ -11,6 +11,7 @@ from django.views.generic import FormView
 from twf.forms.dynamic_forms import DynamicForm
 from twf.forms.project_forms import ProjectForm, QueryDatabaseForm
 from twf.models import Project, Document, Page, PageTag
+from twf.project_statistics import get_document_statistics
 from twf.views.views_base import TWFView
 
 
@@ -51,8 +52,6 @@ class TWFProjectView(LoginRequiredMixin, TWFView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        if len(context['navigation']['items']) > 1:
-            context['navigation']['items'][1]['active'] = True
         return context
 
     def __init__(self, *args, **kwargs):
@@ -140,14 +139,8 @@ class TWFProjectOverviewView(TWFProjectView):
         context = super().get_context_data(**kwargs)
 
         project = self.get_project()
-        document_count = Document.objects.filter(project=project).count()
-        page_count = Page.objects.filter(document__project=project).count()
-        ignored_pages = Page.objects.filter(document__project=project, is_ignored=True).count()
-        ignored_percentage = (ignored_pages / page_count * 100) if page_count > 0 else 0
-        largest_document = (Document.objects.annotate(num_pages=Count('pages'))
-                            .filter(project=project).order_by('-num_pages').first())
-        smallest_document = (Document.objects.annotate(num_pages=Count('pages'))
-                             .filter(project=project).order_by('num_pages').first())
+        context['doc_stats'] = get_document_statistics(project)
+
         pagetag_count = PageTag.objects.filter(page__document__project=project).count()
 
         unique_pagetag_count = (PageTag.objects.filter(page__document__project=project)
@@ -166,12 +159,6 @@ class TWFProjectOverviewView(TWFProjectView):
             if total_pagetags > 0 else 0
 
         context['stats'] = {
-            'document_count': document_count,
-            'page_count': page_count,
-            'ignored_pages': ignored_pages,
-            'ignored_percentage': ignored_percentage,
-            'largest_document': largest_document,
-            'smallest_document': smallest_document,
             'pagetag_count': pagetag_count,
             'unique_pagetag_count': unique_pagetag_count,
             'average_pagetags_per_document': average_pagetags_per_document,

@@ -1,7 +1,9 @@
 """Views for the dictionary overview and the dictionary entries."""
+from collections import defaultdict
 
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.db.models import Count
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse, reverse_lazy
@@ -21,7 +23,7 @@ from twf.views.views_base import TWFView
 
 class TWFDictionaryView(LoginRequiredMixin, TWFView):
     """Base view for all dictionary views."""
-    template_name = 'twf/dictionaries/overview.html'
+    template_name = None
 
     def get_sub_navigation(self):
         """Get the sub navigation."""
@@ -108,6 +110,30 @@ class TWFDictionaryOverviewView(SingleTableView, TWFDictionaryView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['page_title'] = self.page_title
+        project = self.get_project()
+
+        # Prepare a dictionary to hold top 10 entries for each dictionary type
+        top_entries_per_type = defaultdict(list)
+
+        entry_counts = PageTag.objects.filter(
+            page__document__project=project
+        ).values(
+            'dictionary_entry__id',
+            'dictionary_entry__label',
+            'dictionary_entry__dictionary__type'
+        ).annotate(
+            count=Count('id')
+        ).order_by('dictionary_entry__dictionary__type', '-count')
+
+        for entry in entry_counts:
+            dtype = entry['dictionary_entry__dictionary__type']
+            if len(top_entries_per_type[dtype]) < 20:
+                top_entries_per_type[dtype].append(entry)
+
+        context['stats'] = {
+            'most_used_entries_per_type': dict(top_entries_per_type),
+        }
+
         return context
 
 

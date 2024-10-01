@@ -22,7 +22,7 @@ from twf.views.views_base import TWFView
 class TWFTagsView(LoginRequiredMixin, TWFView):
     """Base class for all tag views."""
 
-    template_name = 'twf/project/setup.html'
+    template_name = None
 
     def get_sub_navigation(self):
         """Get the sub navigation."""
