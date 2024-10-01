@@ -28,7 +28,7 @@ from twf.views.views_command import park_tag, unpark_tag, ungroup_tag
 from twf.views.dictionaries.views_dictionaries import TWFDictionaryOverviewView, TWFDictionaryDictionaryView, \
     delete_variation, TWFDictionaryDictionaryEditView, TWFDictionaryDictionaryEntryEditView, \
     TWFDictionaryDictionaryEntryView, \
-    TWFDictionaryNormDataView, TWFDictionaryCreateView, skip_entry
+    TWFDictionaryNormDataView, TWFDictionaryCreateView, skip_entry, TWFDictionaryDictionariesView
 from twf.views.export.views_export import TWFExportDocumentsView, TWFExportCollectionsView, TWFExportProjectView, \
     TWFExportOverviewView, TWFExportTagsView, TWFExportDictionariesView, TWFExportDictionaryView, \
     TWFImportDictionaryView
@@ -112,7 +112,8 @@ urlpatterns = [
 
     #############################
     # DICTIONARIES
-    path('dictionaries/', TWFDictionaryOverviewView.as_view(), name='dictionaries'),
+    path('dictionaries/overview', TWFDictionaryOverviewView.as_view(), name='dictionaries_overview'),
+    path('dictionaries/', TWFDictionaryDictionariesView.as_view(), name='dictionaries'),
     path('dictionaries/create/', TWFDictionaryCreateView.as_view(), name='dictionary_create'),
     path('dictionaries/<int:pk>/', TWFDictionaryDictionaryView.as_view(), name='dictionaries_view'),
     path('dictionaries/<int:pk>/edit/', TWFDictionaryDictionaryEditView.as_view(), name='dictionaries_edit'),

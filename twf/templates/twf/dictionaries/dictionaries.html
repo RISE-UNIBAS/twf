@@ -1,0 +1,9 @@
+{% extends 'twf/base/base.html' %}
+{% load django_tables2 %}
+
+{% block content %}
+     <div class="border rounded bg-light mt-0 p-3">
+         {% include 'twf/dictionaries/info_card_dictionaries.html' %}
+        {% render_table table %}
+     </div>
+{% endblock %}

@@ -1,12 +1,11 @@
 {% extends 'twf/base/base.html' %}
-{% load django_tables2 %}
 {% load nav_tags %}
 
 {% block content %}
      <div class="border rounded bg-light mt-0 p-3">
          {% include 'twf/dictionaries/info_card_dictionaries.html' %}
          
-         {% for dtype, entries in stats.most_used_entries_per_type.items %}
+         {% for dtype, entries in dict_stats.top_entries_per_type.items %}
             <div class="row">
                 <div class="col-8">
                      <div class="table-responsive">
@@ -69,7 +68,5 @@
                 </div>
             </div>
          {% endfor %}
-     
-        {% render_table table %}
      </div>
 {% endblock %}

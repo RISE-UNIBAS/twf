@@ -1,22 +1,19 @@
 """Views for the dictionary overview and the dictionary entries."""
-from collections import defaultdict
-
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.db.models import Count
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse, reverse_lazy
-from django.utils.safestring import mark_safe
 from django.views.generic import FormView
 from django_filters.views import FilterView
 from django_tables2 import SingleTableView
 
 from twf.filters import DictionaryEntryFilter
 from twf.forms.dictionaries.batch_forms import GeonamesBatchForm
-from twf.forms.dictionaries.dictionary_forms import DictionaryForm, DictionaryEntryForm, DictionaryImportForm
+from twf.forms.dictionaries.dictionary_forms import DictionaryForm, DictionaryEntryForm
 from twf.forms.enrich_forms import EnrichEntryManualForm, EnrichEntryForm
 from twf.models import Dictionary, DictionaryEntry, Variation, PageTag
+from twf.project_statistics import get_dictionary_statistics
 from twf.tables.tables_dictionary import DictionaryTable, DictionaryEntryTable, DictionaryEntryVariationTable
 from twf.views.views_base import TWFView
 
@@ -27,27 +24,15 @@ class TWFDictionaryView(LoginRequiredMixin, TWFView):
 
     def get_sub_navigation(self):
         """Get the sub navigation."""
-        dicts = self.get_dictionaries()
-        options = []
-        for twf_dict in dicts:
-            options.append({'url': reverse('twf:dictionaries_view', kwargs={'pk': twf_dict.pk}),
-                            'value': twf_dict.label,
-                            'active_on': [
-                                reverse('twf:dictionaries_edit', kwargs={'pk': twf_dict.pk}),
-                            ]})
-
         sub_nav = [
             {
                 'name': 'Dictionaries Options',
                 'options': [
-                    {'url': reverse('twf:dictionaries'), 'value': 'Overview'},
+                    {'url': reverse('twf:dictionaries_overview'), 'value': 'Overview'},
+                    {'url': reverse('twf:dictionaries'), 'value': 'Dictionaries'},
                     {"url": reverse('twf:dictionary_create'), "value": "Create New Dictionary"},
                     {'url': reverse('twf:dictionaries_normalization'), 'value': 'Norm Data Wizard'},
                 ]
-            },
-            {
-                'name': 'Dictionaries',
-                'options': options
             },
             {
                 'name': 'Automated Workflows',
@@ -86,13 +71,25 @@ class TWFDictionaryView(LoginRequiredMixin, TWFView):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         if self.page_title is None:
-            self.page_title = kwargs.get('page_title', 'Project View')
+            self.page_title = kwargs.get('page_title', 'Dictionary View')
 
 
-class TWFDictionaryOverviewView(SingleTableView, TWFDictionaryView):
-    """View for the dictionary overview. Provides a table of all dictionaries.
-    The table is filterable and sortable."""
+class TWFDictionaryOverviewView(TWFDictionaryView):
+    """View for the dictionary overview."""
     template_name = 'twf/dictionaries/overview.html'
+    page_title = 'Dictionaries Overview'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        project = self.get_project()
+        context['dict_stats'] = get_dictionary_statistics(project)
+        return context
+
+
+class TWFDictionaryDictionariesView(SingleTableView, TWFDictionaryView):
+    """View for the dictionaries. Provides a table of all dictionaries.
+    The table is filterable and sortable."""
+    template_name = 'twf/dictionaries/dictionaries.html'
     page_title = 'Dictionaries Overview'
     table_class = DictionaryTable
     paginate_by = 10
@@ -106,35 +103,6 @@ class TWFDictionaryOverviewView(SingleTableView, TWFDictionaryView):
         self.object_list = self.get_queryset()
         context = self.get_context_data()
         return self.render_to_response(context)
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['page_title'] = self.page_title
-        project = self.get_project()
-
-        # Prepare a dictionary to hold top 10 entries for each dictionary type
-        top_entries_per_type = defaultdict(list)
-
-        entry_counts = PageTag.objects.filter(
-            page__document__project=project
-        ).values(
-            'dictionary_entry__id',
-            'dictionary_entry__label',
-            'dictionary_entry__dictionary__type'
-        ).annotate(
-            count=Count('id')
-        ).order_by('dictionary_entry__dictionary__type', '-count')
-
-        for entry in entry_counts:
-            dtype = entry['dictionary_entry__dictionary__type']
-            if len(top_entries_per_type[dtype]) < 20:
-                top_entries_per_type[dtype].append(entry)
-
-        context['stats'] = {
-            'most_used_entries_per_type': dict(top_entries_per_type),
-        }
-
-        return context
 
 
 class TWFDictionaryCreateView(FormView, TWFDictionaryView):
