@@ -7,6 +7,7 @@
                 <div class="col-12">
                     <div class="card">
                         <div class="card-body">
+                            <h5 class="card-title">Document Details</h5>
                             <table class="table">
                                 <tr>
                                     <td>Document Database ID</td>                                
@@ -35,7 +36,7 @@
                         <div class="col-8 mb-3">
                             <div class="card">
                                 <div class="card-body">
-                                    <h5 class="card-title">{{ page.tk_document_id }} (p. {{ page.tk_page_number }})</h5>
+                                    <h5 class="card-title">Page {{ page.tk_page_number }} ({{ page.tk_page_id }})</h5>
                                     <p class="card-text small">
                                         Last parsed: <span class="badge bg-secondary">{{ page.last_parsed_at }}</span>
                                         Blocks: <span class="badge bg-secondary">{{ page.parsed_data|length }}</span>
