@@ -83,4 +83,3 @@ def generate_excel(data):
     df = pd.DataFrame(data)
     output = df.to_excel(index=False)
     return output
-

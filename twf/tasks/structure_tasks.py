@@ -16,6 +16,11 @@ from twf.utils.file_utils import delete_all_in_folder
 
 @shared_task(bind=True)
 def extract_zip_export_task(self, project_id, user_id):
+    """Extract the Transkribus export zip file and create Document and Page instances.
+    :param self: Celery task
+    :param project_id: Project ID
+    :param user_id: User ID"""
+
     try:
         project = Project.objects.get(pk=project_id)
     except Project.DoesNotExist as e:

@@ -1,5 +1,4 @@
-import re
-
+""" Utility functions for exporting data from the TWF database. """
 from twf.models import Document, Page, Project
 
 
@@ -33,6 +32,13 @@ def get_nested_value(data, key, default=None):
 
 
 def create_data_from_config(metadata, config, db_object=None, return_warnings=False):
+    """ Create a transformed dictionary from metadata using a configuration dictionary.
+    :param metadata: dictionary containing metadata
+    :param config: dictionary containing the transformation configuration
+    :param db_object: object containing additional data
+    :param return_warnings: boolean indicating whether to return warnings
+    :return:  transformed dictionary, list of warnings
+    """
     transformed = {}
     warnings = []
 
@@ -81,6 +87,11 @@ def create_data_from_config(metadata, config, db_object=None, return_warnings=Fa
 
 
 def create_data(db_object, return_warnings=False):
+    """ Create a dictionary from a database object.
+    :param db_object: object to create data from
+    :param return_warnings: boolean indicating whether to return warnings
+    :return: dictionary, list of warnings
+    """
     if isinstance(db_object, Project):
         return create_project_data(db_object, return_warnings)
     elif isinstance(db_object, Document):
@@ -92,6 +103,11 @@ def create_data(db_object, return_warnings=False):
 
 
 def create_project_data(project, return_warnings=False):
+    """ Create a dictionary from a project object.
+    :param project: Project object
+    :param return_warnings: boolean indicating whether to return warnings
+    :return: dictionary, list of warnings
+    """
     project_Export = []
     all_warnings = []
     for document in project.documents.all():
@@ -109,6 +125,7 @@ def create_project_data(project, return_warnings=False):
 
 
 def create_document_data(document, return_warnings=False):
+    """ Create a dictionary from a document object."""
     data = {**document.metadata}
 
     all_warnings = []
@@ -135,6 +152,7 @@ def create_document_data(document, return_warnings=False):
 
 
 def create_page_data(page, return_warnings=False):
+    """ Create a dictionary from a page object."""
     data = {**page.parsed_data, **page.metadata}
     config = page.document.project.page_export_configuration
     return create_data_from_config(data, config, page, return_warnings)
@@ -173,4 +191,3 @@ def flatten_dict_keys(d, parent_key='', sep='.'):
         # Add key for simple values
         keys.append(parent_key)
     return keys
-

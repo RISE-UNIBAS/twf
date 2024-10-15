@@ -101,7 +101,7 @@ def search_geonames_entries(self, project_id, dictionary_id, user_id, geonames_u
                                                     completed_entries, number_of_entries)
         except Exception as e:
             fail_task(self, task, str(e))
-            raise ValueError(str(e))
+            raise ValueError(str(e)) from e
 
     end_task(self, task, f'Geonames Search Completed. Found {found_entries} entries.',
              description=f'Geonames Search for all entries in the dictionary "{dictionary.label}". '
@@ -143,13 +143,13 @@ def search_gnd_entry(self, project, dictionary_id, user_id):
                                                  'text': 'GND Search Completed.'})
     except Dictionary.DoesNotExist as e:
         self.update_state(state='FAILURE', meta={'error': "Dictionary not found"})
-        raise ValueError(str(e))
+        raise ValueError(str(e)) from e
     except User.DoesNotExist as e:
         self.update_state(state='FAILURE', meta={'error': "User not found"})
-        raise ValueError(str(e))
+        raise ValueError(str(e)) from e
     except Exception as e:
         self.update_state(state='FAILURE', meta={'error': str(e)})
-        raise ValueError(str(e))
+        raise ValueError(str(e)) from e
 
 
 @shared_task(bind=True)
@@ -187,13 +187,13 @@ def search_wikidata_entry(self, project, dictionary_id, user_id):
                                                  'text': 'Wikidata Search Completed.'})
     except Dictionary.DoesNotExist as e:
         self.update_state(state='FAILURE', meta={'error': "Dictionary not found"})
-        raise ValueError(str(e))
+        raise ValueError(str(e)) from e
     except User.DoesNotExist as e:
         self.update_state(state='FAILURE', meta={'error': "User not found"})
-        raise ValueError(str(e))
+        raise ValueError(str(e)) from e
     except Exception as e:
         self.update_state(state='FAILURE', meta={'error': str(e)})
-        raise ValueError(str(e))
+        raise ValueError(str(e)) from e
 
 
 @shared_task(bind=True)
@@ -209,10 +209,10 @@ def search_openai_entry(self, project, dictionary_id, user_id):
                                                  'text': 'Openai Search Completed.'})
     except Dictionary.DoesNotExist as e:
         self.update_state(state='FAILURE', meta={'error': "Dictionary not found"})
-        raise ValueError(str(e))
+        raise ValueError(str(e)) from e
     except User.DoesNotExist as e:
         self.update_state(state='FAILURE', meta={'error': "User not found"})
-        raise ValueError(str(e))
+        raise ValueError(str(e)) from e
     except Exception as e:
         self.update_state(state='FAILURE', meta={'error': str(e)})
-        raise ValueError(str(e))
+        raise ValueError(str(e)) from e

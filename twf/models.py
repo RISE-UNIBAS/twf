@@ -338,7 +338,7 @@ class Project(TimeStampedModel):
 
     def __str__(self):
         """Return the string representation of the Project."""
-        return self.title
+        return self.title.__str__()
 
 
 class Task(models.Model):
@@ -552,7 +552,7 @@ class Dictionary(TimeStampedModel):
 
     def __str__(self):
         """Return the string representation of the Dictionary."""
-        return self.label
+        return self.label.__str__()
 
 
 class DictionaryEntry(TimeStampedModel):
@@ -693,8 +693,8 @@ class Variation(TimeStampedModel):
     Variation Model
     ---------------
     Variations are used to store different variations of dictionary entries. This model is used to store variations
-    of dictionary entries and to link them to the dictionary entries. The Variation model is linked to the DictionaryEntry
-    model via a ForeignKey, which means that each variation belongs to a specific dictionary entry.
+    of dictionary entries and to link them to the dictionary entries. The Variation model is linked to the
+    DictionaryEntry model via a ForeignKey, which means that each variation belongs to a specific dictionary entry.
 
     Attributes
     ~~~~~~~~~~

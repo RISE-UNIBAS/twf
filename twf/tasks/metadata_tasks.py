@@ -1,3 +1,4 @@
+"""This module contains Celery tasks for loading metadata from Google Sheets."""
 from celery import shared_task
 
 from twf.clients.google_sheets_client import GoogleSheetsClient

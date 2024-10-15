@@ -1,3 +1,4 @@
+"""Celery tasks for OpenAI API calls."""
 import logging
 
 from celery import shared_task
@@ -6,6 +7,7 @@ from twf.models import Project
 from twf.clients.simple_ai_clients import AiApiClient
 
 logger = logging.getLogger(__name__)
+
 
 @shared_task(bind=True)
 def ask_chatgpt_task(self, project_id, selection_type, role_description, prompt):
