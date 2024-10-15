@@ -16,12 +16,16 @@ from twf.utils.file_utils import delete_all_in_folder
 
 @shared_task(bind=True)
 def extract_zip_export_task(self, project_id, user_id):
-    task, percentage_complete = start_task(self, project_id, user_id, text="Starting Transkribus Export Extraction...",
+    try:
+        project = Project.objects.get(pk=project_id)
+    except Project.DoesNotExist as e:
+        error_message = f"Project with id {project_id} does not exist."
+        raise ValueError(error_message) from e
+
+    task, percentage_complete = start_task(self, project, user_id, text="Starting Transkribus Export Extraction...",
                                            title="Transkribus Export Extraction")
 
     try:
-        # Get the projects to save the documents to
-        project = Project.objects.get(pk=project_id)
         extracting_user = User.objects.get(pk=user_id)
         zip_file = project.downloaded_zip_file
         fs = FileSystemStorage()
@@ -167,14 +171,10 @@ def extract_zip_export_task(self, project_id, user_id):
         end_task(self, task, 'Transkribus Export Extraction Completed.',
                  description=f'Transkribus Export Extraction for project "{project.title}". '
                              f'Extracted {total_files} files, created {created_documents} documents, '
-                             f'processed {processed_documents} documents and parsed {processed_pages} pages.')
+                             f'processed and parsed {processed_pages} pages.')
 
         return {'status': 'completed'}
 
-    except Project.DoesNotExist as e:
-        error_message = f"Project with id {project_id} does not exist."
-        fail_task(self, task, error_message)
-        raise ValueError(error_message) from e
     except User.DoesNotExist as e:
         error_message = f"User with id {user_id} does not exist."
         fail_task(self, task, error_message)
