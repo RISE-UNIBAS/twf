@@ -80,23 +80,3 @@
         });
     </script>
 {% endblock %}
-
-{% block css %}
-<style>
-    .img-clickable {
-        transition: transform 0.3s ease;  /* Smooth transition when enlarging */
-        cursor: pointer;
-    }
-
-    /* Enlarged image will take the full viewport */
-    .img-enlarged {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100vw;
-        height: 100vh;
-        object-fit: contain;
-        z-index: 9999;  /* Ensure the image appears on top */
-    }
-</style>
-{% endblock %}

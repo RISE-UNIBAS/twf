@@ -1,11 +1,30 @@
 {% extends 'twf/base/base.html' %}
+{% load nav_tags %}
+
 {% block content %}
     <div class="border rounded bg-light mt-0 p-3">
         <div class="row mb-3">
                 <div class="col-12">
                     <div class="card">
                         <div class="card-body">
-                            {{document.num_tags}} tags in this document. 
+                            <table class="table">
+                                <tr>
+                                    <td>Document Database ID</td>                                
+                                    <td> {{ document.pk }}</td>
+                                </tr>
+                                <tr>
+                                    <td>Document Transkribus ID</td>                                
+                                    <td> {{ document.document_id }}</td>
+                                </tr>
+                                <tr>
+                                    <td>Document Title</td>                                
+                                    <td> {{ document.title }}</td>
+                                </tr>
+                                <tr>
+                                    <td>Tags in the document</td>                                
+                                    <td> </td>
+                                </tr>
+                            </table>
                         </div>
                     </div>
                 </div>
@@ -49,11 +68,100 @@
                             </div>
                         </div>
                         <div class="col-4 mb-3">
-                            <img src="{{ page.parsed_data.file.imgUrl }}" class="img-fluid" alt="Page image">
+                            <img src="{{ page.parsed_data.file.imgUrl }}" class="img-fluid img-clickable" alt="Page image">
                             <a href="{{ page.parsed_data.file.xmlUrl }}" target="_blank">Download PAGE.XML</a>
                         </div>
                     {% endif %}
                 {% endfor %}
             </div>
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Document Metadata</h5>
+                            <div class="card-text small">
+                                {% for key, value in document.metadata.items %}
+                                    <strong>{{ key }}</strong><br/>
+                                    <table class="table table-sm">
+                                        <tbody>
+                                            {% for k, v in value.items %}
+                                                <tr>
+                                                    <td><i>{{ k }}</i></td>
+                                                    <td>
+                                                       {% if v|type_check == 'str' %}
+                                                          {{ v }}
+                                                       {% elif v|type_check == 'list' %}
+                                                            <table class="table table-sm border">
+                                                                {% for list_item in v %}
+                                                                    {% if list_item|type_check == 'dict' %}
+                                                                        <tr>
+                                                                            <td><i>{{ forloop.counter0 }}</i></td>
+                                                                            <td>
+                                                                                <table class="table table-sm border">
+                                                                                    {% for kk, vv in list_item.items %}
+                                                                                        <tr>
+                                                                                            <td><i>{{ kk }}</i></td>
+                                                                                            <td>{{ vv }}</td>
+                                                                                        </tr>
+                                                                                    {% endfor %}
+                                                                                </table>
+                                                                            </td>
+                                                                        </tr>
+                                                                    {% else %}
+                                                                        <tr>
+                                                                            <td><i>{{ forloop.counter0 }}</i></td>
+                                                                            <td>{{ list_item }}</td>
+                                                                        </tr>
+                                                                    {% endif %}
+                                                                    
+                                                                {% endfor %}
+                                                            </table>
+                                                       {% elif v|type_check == 'dict' %}
+                                                           <table>
+                                                                {% for k, v in v.items %}
+                                                                    <tr>
+                                                                        <td><i>{{ k }}</i></td>
+                                                                        <td>{{ v }}</td>
+                                                                    </tr>
+                                                                {% endfor %}
+                                                            </table>
+                                                       {% elif v|type_check == 'NoneType' %}
+                                                          None
+                                                       {% elif v|type_check == 'int' %}
+                                                            {{ v }}
+                                                       {% else %}
+                                                          {{ v }}
+                                                       {% endif %}
+                                                    </td>
+                                                </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
     </div>
+{% endblock %}
+
+{% block script %}
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const images = document.querySelectorAll('.img-clickable');
+            
+            images.forEach(function (img) {
+                img.addEventListener('click', function () {
+                    if (img.classList.contains('img-enlarged')) {
+                        // If image is enlarged, restore its original size
+                        img.classList.remove('img-enlarged');
+                    } else {
+                        // If image is normal, enlarge it
+                        img.classList.add('img-enlarged');
+                    }
+                });
+            });
+        });
+    </script>
 {% endblock %}

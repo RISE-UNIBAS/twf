@@ -100,3 +100,9 @@ def pretty_json(value):
     except (TypeError, ValueError):
         # Return the original value if it's not JSON-serializable
         return value
+
+
+@register.filter(name='type_check')
+def type_check(value):
+    """Returns the type of the value."""
+    return type(value).__name__
