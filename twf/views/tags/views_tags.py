@@ -1,3 +1,4 @@
+""" Views for the tags section of the TWF app. """
 from collections import defaultdict
 from io import StringIO
 
@@ -45,7 +46,7 @@ class TWFTagsView(LoginRequiredMixin, TWFView):
                 'name': 'Tag Workflows',
                 'options': [
                     {'url': reverse('twf:tags_group'), 'value': 'Grouping Wizard'},
-                    {'url': reverse('twf:tags_dates'), 'value': 'Date Tags'},
+                    {'url': reverse('twf:tags_dates'), 'value': 'Date Normalization'},
                 ]
             },
             {
