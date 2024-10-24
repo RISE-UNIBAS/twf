@@ -23,7 +23,7 @@ month_abbreviations = {
 }
 
 
-def parse_date_string(date_string, resolve_to="day"):
+def parse_date_string(date_string, resolve_to="day", date_format="DMY"):
     """ Parse the date string using dateparser and return the date in EDTF format. """
 
     parsed_date = parse_year_only(date_string, resolve_to)
@@ -32,7 +32,7 @@ def parse_date_string(date_string, resolve_to="day"):
         parsed_date = parse_month_year(date_string, resolve_to)
 
     if not parsed_date:
-        parsed_date = parse_with_dateparser(date_string, resolve_to)
+        parsed_date = parse_with_dateparser(date_string, resolve_to, date_format)
 
     return parsed_date
 
@@ -73,7 +73,7 @@ def parse_month_year(date_string, resolve_to):
     return None
 
 
-def parse_with_dateparser(date_string, resolve_to):
+def parse_with_dateparser(date_string, resolve_to, date_format):
     """ Parse the date string using dateparser. """
 
     settings = {
@@ -82,6 +82,12 @@ def parse_with_dateparser(date_string, resolve_to):
         'RELATIVE_BASE': datetime.now(),  # To parse relative dates like 'today'
         'STRICT_PARSING': True,  # Avoid parsing incomplete dates unless valid
     }
+
+    if date_format == "DMY":
+        settings['DATE_ORDER'] = 'DMY'
+    elif date_format == "MDY":
+        settings['DATE_ORDER'] = 'MDY'
+
     parsed_date = dateparser.parse(date_string, settings=settings)
 
     if parsed_date:

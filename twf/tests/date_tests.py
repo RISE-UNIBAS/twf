@@ -22,3 +22,28 @@ class TestDateUtils(TestCase):
             self.assertEqual(parse_date_string(date_str, "day"), to_day)
             self.assertEqual(parse_date_string(date_str, "month"), to_month)
             self.assertEqual(parse_date_string(date_str, "year"), to_year)
+
+    def test_confusable_dates(self):
+        test_dmy_data = [
+            # date_str,           to_day       to_month       to_year
+            ("1.12.1782", "1782-12-01", "1782-12", "1782"),
+            ("03.04.1782", "1782-04-03", "1782-04", "1782"),
+            ("8.09.1782", "1782-09-08", "1782-09", "1782"),
+        ]
+
+        test_mdy_data = [
+            # date_str,           to_day       to_month       to_year
+            ("1.12.1782", "1782-01-12", "1782-01", "1782"),
+            ("03.04.1782", "1782-03-04", "1782-03", "1782"),
+            ("8.09.1782", "1782-08-09", "1782-08", "1782"),
+        ]
+
+        for date_str, to_day, to_month, to_year in test_dmy_data:
+            self.assertEqual(parse_date_string(date_str, "day", "DMY"), to_day)
+            self.assertEqual(parse_date_string(date_str, "month", "DMY"), to_month)
+            self.assertEqual(parse_date_string(date_str, "year", "DMY"), to_year)
+
+        for date_str, to_day, to_month, to_year in test_mdy_data:
+            self.assertEqual(parse_date_string(date_str, "day", "MDY"), to_day)
+            self.assertEqual(parse_date_string(date_str, "month", "MDY"), to_month)
+            self.assertEqual(parse_date_string(date_str, "year", "MDY"), to_year)
