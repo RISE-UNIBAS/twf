@@ -30,8 +30,7 @@ from twf.views.dictionaries.views_dictionaries import TWFDictionaryOverviewView,
     TWFDictionaryDictionaryEntryView, \
     TWFDictionaryNormDataView, TWFDictionaryCreateView, skip_entry, TWFDictionaryDictionariesView
 from twf.views.export.views_export import TWFExportDocumentsView, TWFExportCollectionsView, TWFExportProjectView, \
-    TWFExportOverviewView, TWFExportTagsView, TWFExportDictionariesView, TWFExportDictionaryView, \
-    TWFImportDictionaryView
+    TWFExportOverviewView, TWFExportTagsView, TWFExportDictionariesView, TWFImportDictionaryView
 from twf.views.metadata.views_metadata import TWFMetadataReviewDocumentsView, \
     TWFMetadataLoadDataView, TWFMetadataExtractTagsView, TWFMetadataReviewPagesView, TWFMetadataOverviewView, \
     TWFMetadataLoadSheetsDataView
@@ -163,7 +162,6 @@ urlpatterns = [
     path('export/tags/', TWFExportTagsView.as_view(), name='export_tags'),
 
     path('export/dictionaries/', TWFExportDictionariesView.as_view(), name='export_dictionaries'),
-    path('export/dictionaries/<int:pk>/', TWFExportDictionaryView.as_view(), name='export_dictionary'),
     path('import/dictionaries/', TWFImportDictionaryView.as_view(), name='import_dictionaries'),
 
 

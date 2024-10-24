@@ -4,6 +4,21 @@
 {% block content %}
      <div class="border rounded bg-light mt-0 p-3">
         <h1 class="display-6">Export Dictionaries</h1>
-        {% include 'twf/base/niy_notice.html' %}
-     </div>
+        <hr/>
+     
+         {% for dictionary in project.selected_dictionaries.all %}
+            <div class="card mt-2">
+                <div class="card-body">
+                    <h5 class="card-title">{{ dictionary.label }}</h5>
+                    <p class="card-text">{{ dictionary.description }}</p>
+                    <form method="post">
+                        {% csrf_token %}
+                        <input type="submit" class="btn btn-dark" value="Export as JSON" name="export_json">
+                        <input type="submit" class="btn btn-dark" value="Export as CSV" name="export_csv">
+                        <input type="hidden" name="dictionary_id" value="{{ dictionary.pk }}">
+                    </form>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
 {% endblock %}

@@ -8,8 +8,9 @@ from django.views.generic import FormView
 
 from twf.forms.dictionaries.dictionary_forms import DictionaryImportForm
 from twf.forms.export_forms import ExportConfigForm
-from twf.models import Dictionary
 from twf.export_utils import create_data, flatten_dict_keys
+from twf.utils.export_utils import get_dictionary_json_data, get_dictionary_csv_data, get_tags_json_data, \
+    get_tags_csv_data
 from twf.views.views_base import TWFView
 
 
@@ -137,69 +138,27 @@ class TWFExportDictionariesView(TWFExportView):
     template_name = "twf/export/export_dictionaries.html"
     page_title = 'Export Dictionaries'
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        return context
-
-
-class TWFExportDictionaryView(TWFExportView):
-    """Export a dictionary."""
-    template_name = 'twf/export/export_dictionary.html'
-    page_title = 'Export Dictionary'
-
     def post(self, request, *args, **kwargs):
         """Handle the POST request."""
+        pk = request.POST.get('dictionary_id', 0)
         if "export_json" in request.POST:
-            json_data = self.get_json_data()
+            json_data = get_dictionary_json_data(pk)
             json_str = json.dumps(json_data, indent=4)
+            filename = f'dictionary_{pk}.json'
             response = HttpResponse(json_str, content_type='application/json')
-            response['Content-Disposition'] = 'attachment; filename="data.json"'
+            response['Content-Disposition'] = f'attachment; filename="{filename}"'
         elif "export_csv" in request.POST:
-            csv_data = self.get_csv_data()
+            csv_data = get_dictionary_csv_data(pk)
+            filename = f'dictionary_{pk}.csv'
             response = HttpResponse(csv_data, content_type='text/csv')
-            response['Content-Disposition'] = 'attachment; filename="data.csv"'
+            response['Content-Disposition'] = f'attachment; filename="{filename}"'
         else:
-            response = redirect('twf:dictionary', pk=self.kwargs.get('pk'))
+            response = redirect('twf:export_dictionaries')
 
         return response
 
-    def get_json_data(self):
-        """Get the JSON data for the dictionary."""
-        dictionary = Dictionary.objects.get(pk=self.kwargs.get('pk'))
-
-        json_data = {
-            "name": dictionary.label,
-            "type": dictionary.type,
-            "metadata": {},
-            "entries": []
-        }
-
-        entries = dictionary.entries.all()
-        for entry in entries:
-            json_data["entries"].append(
-                {
-                    "label": entry.label,
-                    "variations": list(entry.variations.all().values_list('variation', flat=True))
-                }
-            )
-        return json_data
-
-    def get_csv_data(self):
-        csv_data = 'entry;variations\n'
-        dictionary = Dictionary.objects.get(pk=self.kwargs.get('pk'))
-        entries = dictionary.entries.all()
-        for entry in entries:
-            csv_data += f'{entry.label};'
-            variations = entry.variations.all()
-            for variation in variations:
-                csv_data += f'{variation.variation},'
-            csv_data += '\n'
-        return csv_data
-
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['page_title'] = self.page_title
-        context['dictionary'] = Dictionary.objects.get(pk=self.kwargs.get('pk')) if self.kwargs.get('pk') else None
         return context
 
 
@@ -208,6 +167,25 @@ class TWFExportTagsView(TWFExportView):
 
     template_name = "twf/export/export_tags.html"
     page_title = 'Export Tags'
+
+    def post(self, request, *args, **kwargs):
+        """Handle the POST request."""
+        pk = self.get_project().id
+        if "export_json" in request.POST:
+            json_data = get_tags_json_data(pk)
+            json_str = json.dumps(json_data, indent=4)
+            filename = f'tags_{pk}.json'
+            response = HttpResponse(json_str, content_type='application/json')
+            response['Content-Disposition'] = f'attachment; filename="{filename}"'
+        elif "export_csv" in request.POST:
+            csv_data = get_tags_csv_data(pk)
+            filename = f'tags_{pk}.csv'
+            response = HttpResponse(csv_data, content_type='text/csv')
+            response['Content-Disposition'] = f'attachment; filename="{filename}"'
+        else:
+            response = redirect('twf:export_tags')
+
+        return response
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

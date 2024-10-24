@@ -6,7 +6,6 @@
     <div class="border rounded bg-light mt-0 p-3">
         <h1 class="display-6">
             Dictionary: {{ dictionary.label }}
-            <a href="{% url 'twf:export_dictionary' dictionary.pk %}" class="mt-2 btn btn-dark float-end">Export</a>
             <a href="{% url 'twf:dictionaries_edit' dictionary.pk %}" class="mt-2 me-2 btn btn-dark float-end">Edit</a>
         </h1>
         <hr/>
