@@ -136,3 +136,27 @@ nav > ul.pagination {
     object-fit: contain;
     z-index: 9999;  /* Ensure the image appears on top */
 }
+
+.inline-form {
+    width: 100%;
+}
+
+/* Each form group aligns inline and has flexible width */
+.inline-form .form-group {
+    display: flex;
+    align-items: center;
+    flex-grow: 1;
+    margin-right: 10px;
+}
+
+.inline-form .form-group label {
+    margin-right: 5px;
+    white-space: nowrap;  /* Prevent label from wrapping */
+}
+
+/* Adjust checkbox and submit button sizing */
+.inline-form .checkbox-group,
+.inline-form .submit-group {
+    flex-grow: 0;
+    margin-right: 10px;
+}
