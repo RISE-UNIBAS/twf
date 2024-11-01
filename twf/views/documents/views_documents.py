@@ -1,6 +1,7 @@
 """Views for the project documents."""
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.db.models import Count, Avg
 from django.urls import reverse, reverse_lazy
 from django.views.generic import FormView
 from django_filters.views import FilterView
@@ -15,7 +16,7 @@ from twf.views.views_base import TWFView
 
 class TWFDocumentView(LoginRequiredMixin, TWFView):
     """Base view for all project views."""
-    template_name = 'twf/project/overview.html'
+    template_name = None
 
     def get_sub_navigation(self):
         """Get the sub navigation."""
@@ -46,9 +47,11 @@ class TWFDocumentView(LoginRequiredMixin, TWFView):
         return sub_nav
 
     def get_navigation_index(self):
+        """Get the navigation index."""
         return 2
 
     def get_context_data(self, **kwargs):
+        """Get the context data for the view."""
         context = super().get_context_data(**kwargs)
         return context
 
@@ -60,7 +63,35 @@ class TWFDocumentsOverviewView(TWFDocumentView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        
+
+        project = self.get_project()
+        documents = project.documents.all()
+
+        # Total number of documents
+        total_documents = documents.count()
+
+        # Average number of pages per document
+        avg_pages_per_document = documents.annotate(num_pages=Count('pages')).aggregate(Avg('num_pages'))[
+                                     'num_pages__avg'] or 0
+
+        # Number and percentage of ignored documents
+        ignored_documents_count = documents.filter(is_parked=True).count()
+        ignored_documents_percentage = (ignored_documents_count / total_documents * 100) if total_documents > 0 else 0
+
+        # Gather metadata keys if metadata is available
+        metadata_keys = set()
+        for document in documents:
+            if isinstance(document.metadata, dict):
+                metadata_keys.update(document.metadata.keys())
+
+        context.update({
+            'total_documents': total_documents,
+            'avg_pages_per_document': avg_pages_per_document,
+            'ignored_documents_count': ignored_documents_count,
+            'ignored_documents_percentage': ignored_documents_percentage,
+            'metadata_keys': sorted(metadata_keys),
+        })
+
         return context
 
 
