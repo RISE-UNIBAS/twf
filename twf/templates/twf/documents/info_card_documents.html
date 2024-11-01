@@ -12,7 +12,7 @@
 {% endblock %}
 
 {% block number_1 %}
-    {{ project.documents.count }}
+    {{ total_documents }}
 {% endblock %}
 
 {% block number_1_label %}
@@ -20,17 +20,17 @@
 {% endblock %}
 
 {% block number_2 %}
-    0
+    {{ avg_pages_per_document|floatformat:2 }}
 {% endblock %}
 
 {% block number_2_label %}
-    
+    Average number of pages
 {% endblock %}
 
 {% block number_3 %}
-    0
+    {{ ignored_documents_count }} ({{ ignored_documents_percentage|floatformat:2 }}%)
 {% endblock %}
 
 {% block number_3_label %}
-    
+    Ignored Documents
 {% endblock %}

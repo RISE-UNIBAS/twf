@@ -3,7 +3,28 @@
 {% block content %}
      <div class="border rounded bg-light mt-0 p-3">
          {% include 'twf/documents/info_card_documents.html' %}
-     </div>
-    
-    
+            
+     <<div class="row">
+
+        <!-- Metadata Keys Card -->
+        <div class="col-12 mb-3">
+            <div class="card border-secondary">
+                <div class="card-header bg-secondary text-white">
+                    <h5 class="mb-0">Present Metadata Keys in Document Metadata</h5>
+                </div>
+                <div class="card-body">
+                    {% if metadata_keys %}
+                        <ul>
+                            {% for key in metadata_keys %}
+                                <li>{{ key }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p>No metadata keys available.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}
