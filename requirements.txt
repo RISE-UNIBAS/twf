@@ -86,3 +86,4 @@ imagesize~=1.4.1
 snowballstemmer~=2.2.0
 tokenizers~=0.20.0
 edtf~=5.0.0
+redis~=5.0.8
