@@ -170,6 +170,8 @@ class Project(TimeStampedModel):
         A dictionary of export configurations for documents.
     page_export_configuration : JSONField
         A dictionary of export configurations for pages.
+    date_normalization_configuration : JSONField
+        A dictionary of date normalization configurations.
     """
 
     STATUS_CHOICES = (
@@ -326,6 +328,11 @@ class Project(TimeStampedModel):
                                                     help_text='A dictionary of export configurations for pages.')
     """A dictionary of export configurations for pages."""
 
+    date_normalization_configuration = models.JSONField(default=dict, blank=True,
+                                                        verbose_name='Date Normalization Configuration',
+                                                        help_text='A dictionary of date normalization configurations.')
+    """A dictionary of date normalization configurations."""
+
     def get_valid_cols(self):
         """Return the valid columns for metadata."""
         if self.metadata_google_valid_columns:
@@ -465,7 +472,33 @@ def page_directory_path(instance, filename):
 
 
 class Page(TimeStampedModel):
-    """A page of a document."""
+    """
+    Page Model
+    ----------
+
+    Pages are used to store information about the pages in a document. Each page belongs to a specific document and
+    can have multiple tags. The Page model extends the TimeStampedModel, which provides self-updating 'created' and
+    'modified' fields.
+
+    Attributes
+    ~~~~~~~~~~
+    document : ForeignKey
+        The document this page belongs to.
+    metadata : JSONField
+        Metadata for the page.
+    xml_file : FileField
+        The XML file of the page.
+    tk_page_id : CharField
+        The Transkribus page ID.
+    tk_page_number : IntegerField
+        The page number in the Transkribus document.
+    parsed_data : JSONField
+        The parsed data of the page.
+    num_tags : IntegerField
+        The number of tags on the page.
+    is_ignored : BooleanField
+        Whether the page is ignored.
+    """
 
     document = models.ForeignKey(Document, related_name='pages', on_delete=models.CASCADE)
     """The document this page belongs to."""
@@ -536,7 +569,19 @@ class Page(TimeStampedModel):
 
 
 class Dictionary(TimeStampedModel):
-    """A dictionary."""
+    """
+    Dictionary Model
+    ----------------
+    Dictionaries are used to store dictionaries in the app. Each dictionary can have multiple entries. The Dictionary
+    model extends the TimeStampedModel, which provides self-updating 'created' and 'modified' fields.
+
+    Attributes
+    ~~~~~~~~~~
+    label : CharField
+        The label of the dictionary. This should be unique and descriptive.
+    type : CharField
+        The type of the dictionary.
+    """
 
     label = models.CharField(max_length=100, unique=True,
                              help_text='The label of the dictionary. This should be unique and descriptive.')
@@ -556,7 +601,24 @@ class Dictionary(TimeStampedModel):
 
 
 class DictionaryEntry(TimeStampedModel):
-    """An entry in a dictionary."""
+    """
+    DictionaryEntry Model
+    ---------------------
+    DictionaryEntries are used to store entries in a dictionary. Each entry belongs to a specific dictionary and can
+    have additional information about the entry. The DictionaryEntry model extends the TimeStampedModel, which provides
+    self-updating 'created' and 'modified' fields.
+
+    Attributes
+    ~~~~~~~~~~
+    dictionary : ForeignKey
+        The dictionary this entry belongs to.
+    label : CharField
+        The label of the entry.
+    authorization_data : JSONField
+        Authorization data for the entry.
+    notes : TextField
+        Notes for the entry.
+    """
 
     dictionary = models.ForeignKey(Dictionary, related_name='entries', on_delete=models.CASCADE)
     """The dictionary this entry belongs to."""
@@ -588,7 +650,31 @@ class DictionaryEntry(TimeStampedModel):
 
 
 class PageTag(TimeStampedModel):
-    """A tag on a page."""
+    """
+    PageTag Model
+    -------------
+
+    PageTags are used to store tags on pages. Each PageTag belongs to a specific page and can have additional
+    information about the tag. The PageTag model extends the TimeStampedModel, which provides self-updating 'created'
+    and 'modified' fields.
+
+    Attributes
+    ~~~~~~~~~~
+    page : ForeignKey
+        The page this tag belongs to.
+    variation : CharField
+        The text of the tag.
+    variation_type : CharField
+        The type of the tag.
+    dictionary_entry : ForeignKey
+        The dictionary entry this tag is assigned to.
+    additional_information : JSONField
+        Additional information about the tag.
+    date_variation_entry : ForeignKey
+        The date variation entry.
+    is_parked : BooleanField
+        Whether the tag is parked.
+    """
 
     page = models.ForeignKey(Page, related_name='tags', on_delete=models.CASCADE)
     """The page this tag belongs to."""
@@ -720,7 +806,25 @@ class Variation(TimeStampedModel):
 
 
 class DateVariation(TimeStampedModel):
-    """A variation of a dictionary entry."""
+    """
+    DateVariation Model
+    -------------------
+
+    DateVariations are used to store different variations of dates. This model is used to store variations of dates
+    and to link them to the dictionary entries. The DateVariation model is linked to the DictionaryEntry model via a
+    ForeignKey, which means that each date variation belongs to a specific dictionary entry.
+
+    Attributes
+    ~~~~~~~~~~
+    entry : ForeignKey
+        The dictionary entry this date variation belongs to.
+    variation : CharField
+        The text of the variation.
+    normalized_variation : JSONField
+        The normalized version of the variation.
+    edt_of_normalized_variation : CharField
+        The EDTF of the normalized variation.
+    """
 
     variation = models.CharField(max_length=255)
     """The text of the variation."""
@@ -774,7 +878,29 @@ class Collection(TimeStampedModel):
 
 
 class CollectionItem(TimeStampedModel):
-    """An item in a collection."""
+    """
+    CollectionItem Model
+    --------------------
+
+    CollectionItems are used to store items in a collection. Each CollectionItem belongs to a specific collection
+    and can have additional information about the item. The CollectionItem model extends the TimeStampedModel, which
+    provides self-updating 'created' and 'modified' fields.
+
+    Attributes
+    ~~~~~~~~~~
+    collection : ForeignKey
+        The collection this item belongs to.
+    document : ForeignKey
+        The document this item belongs to.
+    document_configuration : JSONField
+        The configuration of the document in the collection.
+    title : CharField
+        The title of the item.
+    status : CharField
+        The status of the item.
+    review_notes : TextField
+        Notes from the review of the item.
+    """
 
     STATUS_CHOICES = (
         ('open', 'Open'),

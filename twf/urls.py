@@ -38,7 +38,7 @@ from twf.views.project.views_project import select_project, \
     TWFProjectSettingsView, TWFProjectQueryView, TWFProjectOverviewView, TWFProjectTaskMonitorView
 from twf.views.project.views_project_ai import TWFProjectAIQueryView
 from twf.views.tags.views_tags import TWFTagsView, TWFProjectTagsView, TWFProjectTagsOpenView, \
-    TWFProjectTagsParkedView, TWFProjectTagsResolvedView, TWFProjectTagsIgnoredView, TWFTagsDatesView, \
+    TWFProjectTagsParkedView, TWFProjectTagsResolvedView, TWFProjectTagsIgnoredView, TWFTagsDatesGroupView, \
     TWFTagsGroupView, TWFTagsOverviewView, TWFTagsExtractView
 
 urlpatterns = [
@@ -100,11 +100,13 @@ urlpatterns = [
          name='tags_all'),
     path('tags/settings/', TWFTagsView.as_view(template_name='twf/tags/settings.html'), name='tags_settings'),
     path('tags/group/', TWFTagsGroupView.as_view(), name='tags_group'),
-    path('tags/dates/', TWFTagsDatesView.as_view(), name='tags_dates'),
+    path('tags/dates/', TWFTagsDatesGroupView.as_view(), name='tags_dates'),
+    # Tag views
     path('tags/view/parked/', TWFProjectTagsParkedView.as_view(), name='tags_view_parked'),
     path('tags/view/open/', TWFProjectTagsOpenView.as_view(), name='tags_view_open'),
     path('tags/view/resolved/', TWFProjectTagsResolvedView.as_view(), name='tags_view_resolved'),
     path('tags/view/ignored/', TWFProjectTagsIgnoredView.as_view(), name='tags_view_ignored'),
+    # Park and unpark tags
     path('tags/park/<int:pk>/', park_tag, name='tags_park'),
     path('tags/unpark/<int:pk>/', unpark_tag, name='tags_unpark'),
     path('tags/ungroup/<int:pk>/', ungroup_tag, name='tags_ungroup'),
