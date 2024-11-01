@@ -1,5 +1,9 @@
 """Filter classes for the twf app."""
 import django_filters
+from crispy_forms.helper import FormHelper
+from crispy_forms.layout import Layout, Row, Field, Submit
+from django.forms import CheckboxInput
+
 from .models import Document, DictionaryEntry, PageTag
 
 
@@ -42,16 +46,35 @@ class TagFilter(django_filters.FilterSet):
 
 
 class DocumentFilter(django_filters.FilterSet):
-    """Filter for the documents taBLE."""
+    """Filter for the documents table."""
+
+    is_parked = django_filters.BooleanFilter(
+        label="Ignored",
+        widget=CheckboxInput()
+    )
 
     class Meta:
-        """Meta class for the document filter."""
         model = Document
         fields = {
             'document_id': ['icontains'],
-            'title': ['icontains'],  # assuming you have a title field you want to filter
+            'title': ['icontains'],
+            'is_parked': ['exact'],
         }
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.form.helper = FormHelper()
+        self.form.helper.form_method = 'get'
+        self.form.helper.form_class = 'inline-form d-flex align-items-center'
+
+        self.form.helper.layout = Layout(
+            Row(
+                Field('document_id__icontains', css_class='form-control', wrapper_class='col-4'),
+                Field('title__icontains', css_class='form-control', wrapper_class='col-4'),
+                Field('is_parked', wrapper_class='col-2'),
+                Submit('submit', 'Filter', css_class='btn btn-primary col-2'),
+            )
+        )
 
 class DictionaryEntryFilter(django_filters.FilterSet):
     """Filter for the dictionary entry table."""

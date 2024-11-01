@@ -462,6 +462,9 @@ class Document(TimeStampedModel):
 
     def __str__(self):
         """Return the string representation of the Document."""
+        if self.title:
+            return self.title
+
         return f"Document for {self.project.title}"
 
 
@@ -927,3 +930,50 @@ class CollectionItem(TimeStampedModel):
     def __str__(self):
         """Return the string representation of the CollectionItem."""
         return f"{self.collection.title}: {self.title}"
+
+
+class Prompt(TimeStampedModel):
+    """
+    Prompt Model
+    ------------
+
+    Prompts are used to store prompts for AI API requests. Each prompt can have additional information about the prompt.
+    The Prompt model extends the TimeStampedModel, which provides self-updating 'created' and 'modified' fields.
+
+    Attributes
+    ~~~~~~~~~~
+    project : ForeignKey
+        The project this prompt belongs to.
+    system_role : CharField
+        The title of the prompt.
+    prompt : TextField
+        The prompt text.
+    document_context : ManyToManyField
+        The documents to include in the context
+    page_context : ManyToManyField
+        The pages to include in the context
+    collection_context : ManyToManyField
+        The collection items to include in the context
+    """
+
+    project = models.ForeignKey(Project, related_name='prompts', on_delete=models.CASCADE)
+    """The project this prompt belongs to."""
+
+    system_role = models.CharField(max_length=100)
+    """The title of the prompt."""
+
+    prompt = models.TextField()
+    """The prompt text."""
+
+    document_context = models.ManyToManyField(Document, related_name='prompts', blank=True)
+    """The documents to include in the context"""
+
+    page_context = models.ManyToManyField(Page, related_name='prompts', blank=True)
+    """The pages to include in the context"""
+
+    collection_context = models.ManyToManyField(CollectionItem, related_name='prompts', blank=True)
+    """The collection items to include in the context"""
+
+    def __str__(self):
+        """Return the string representation of the Prompt."""
+        return self.prompt[:50]
