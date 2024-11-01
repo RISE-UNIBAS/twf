@@ -5,18 +5,20 @@ from io import StringIO
 import pandas as pd
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.db.models import Count
+from django.db.models import Count, Avg
 from django.http import HttpResponse
 from django.shortcuts import redirect
-from django.urls import reverse
+from django.urls import reverse, reverse_lazy
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import never_cache
+from django.views.generic import FormView
 from django_filters.views import FilterView
 from django_tables2 import SingleTableMixin
 
 from twf.filters import TagFilter
+from twf.forms.tags_forms import DateNormalizationForm
 from twf.models import PageTag, DateVariation, Dictionary, DictionaryEntry, Variation
-from twf.tables.tables_tags import TagTable, TagDateTable
+from twf.tables.tables_tags import TagTable
 from twf.views.views_base import TWFView
 
 
@@ -62,6 +64,7 @@ class TWFTagsView(LoginRequiredMixin, TWFView):
         return sub_nav
 
     def get_navigation_index(self):
+        """Get the navigation index."""
         return 3
 
     def get_tag_types(self):
@@ -96,6 +99,7 @@ class TWFTagsView(LoginRequiredMixin, TWFView):
             date_types = project.ignored_tag_types["dates"]
         except KeyError:
             date_types = []
+
         return date_types
 
     def get_context_data(self, **kwargs):
@@ -153,19 +157,8 @@ class TWFTagsOverviewView(TWFTagsView):
 
         for entry in entry_counts:
             dtype = entry['dictionary_entry__dictionary__type']
-            if len(top_entries_per_type[dtype]) < 20 :
+            if len(top_entries_per_type[dtype]) < 20:
                 top_entries_per_type[dtype].append(entry)
-
-        # Counting each variation_type in PageTags within a specific project
-        variation_type_counts = PageTag.objects.filter(
-            page__document__project=project
-        ).values('variation_type').annotate(
-            count=Count('variation_type')
-        ).order_by('-count')
-
-        # Calculate percentages
-        for variation in variation_type_counts:
-            variation['percentage'] = (variation['count'] / total_pagetags * 100) if total_pagetags > 0 else 0
 
         # Counting each variation_type in PageTags within a specific project
         variation_type_edit_counts = PageTag.objects.filter(
@@ -174,38 +167,64 @@ class TWFTagsOverviewView(TWFTagsView):
             count=Count('variation_type')
         ).order_by('-count')
 
-        for variation in variation_type_edit_counts:
-            if variation['variation_type'] in self.get_date_types():
-                variation['grouped'] = PageTag.objects.filter(page__document__project=project,
-                                                              variation_type=variation['variation_type'],
-                                                              date_variation_entry__isnull=False).count()
+        total_tag_types = variation_type_edit_counts.count()  # Total number of tag types
+        total_tags = total_pagetags  # Total number of tags
 
-                variation['unresolved'] = PageTag.objects.filter(page__document__project=project,
-                                                                 variation_type=variation['variation_type'],
-                                                                 date_variation_entry__isnull=True,
-                                                                 is_parked=False).count()
+        # Calculate percentages and other stats for each variation type
+        grouped_percentages = []  # List to store grouped percentages for calculating average
+
+        for variation in variation_type_edit_counts:
+            variation['percentage'] = (variation['count'] / total_pagetags * 100) if total_pagetags > 0 else 0
+
+            if variation['variation_type'] in self.get_date_types():
+                variation['grouped'] = PageTag.objects.filter(
+                    page__document__project=project,
+                    variation_type=variation['variation_type'],
+                    date_variation_entry__isnull=False
+                ).count()
+
+                variation['unresolved'] = PageTag.objects.filter(
+                    page__document__project=project,
+                    variation_type=variation['variation_type'],
+                    date_variation_entry__isnull=True,
+                    is_parked=False
+                ).count()
             else:
-                variation['grouped'] = PageTag.objects.filter(page__document__project=project,
-                                                              variation_type=variation['variation_type'],
-                                                              dictionary_entry__isnull=False).count()
-                variation['unresolved'] = PageTag.objects.filter(page__document__project=project,
-                                                                 variation_type=variation['variation_type'],
-                                                                 dictionary_entry__isnull=True,
-                                                                 is_parked=False).count()
+                variation['grouped'] = PageTag.objects.filter(
+                    page__document__project=project,
+                    variation_type=variation['variation_type'],
+                    dictionary_entry__isnull=False
+                ).count()
+
+                variation['unresolved'] = PageTag.objects.filter(
+                    page__document__project=project,
+                    variation_type=variation['variation_type'],
+                    dictionary_entry__isnull=True,
+                    is_parked=False
+                ).count()
 
             variation['grouped_percentage'] = (variation['grouped'] / variation['count'] * 100) if variation[
                                                                                                        'count'] > 0 else 0
-            variation['parked'] = PageTag.objects.filter(page__document__project=project,
-                                                         variation_type=variation['variation_type'],
-                                                         is_parked=True).count()
+            grouped_percentages.append(variation['grouped_percentage'])  # Collect grouped percentage for averaging
+            variation['parked'] = PageTag.objects.filter(
+                page__document__project=project,
+                variation_type=variation['variation_type'],
+                is_parked=True
+            ).count()
             variation['parked_percentage'] = (variation['parked'] / variation['count'] * 100) if variation[
                                                                                                      'count'] > 0 else 0
+            variation['unresolved_percentage'] = (variation['unresolved'] / variation['count'] * 100) if variation[
+                                                                                                             'count'] > 0 else 0
 
+        # Calculate average grouped percentage
+        average_grouped_percentage = sum(grouped_percentages) / len(grouped_percentages) if grouped_percentages else 0
 
         context['stats'] = {
             'most_used_entries_per_type': dict(top_entries_per_type),
-            'variation_type_counts': variation_type_counts,
-            'variation_type_edit_counts': variation_type_edit_counts
+            'variation_type_edit_counts': variation_type_edit_counts,
+            'total_tag_types': total_tag_types,
+            'total_tags': total_tags,
+            'average_grouped_percentage': average_grouped_percentage
         }
 
         return context
@@ -410,8 +429,8 @@ class TWFProjectTagsOpenView(TWFProjectTagsView):
         project = self.get_project()
         excluded = self.get_excluded_types()
         queryset = self.model.objects.filter(page__document__project=project,
-                                         dictionary_entry=None,
-                                         is_parked=False).exclude(variation_type__in=excluded)
+                                             dictionary_entry=None,
+                                             is_parked=False).exclude(variation_type__in=excluded)
         self.filterset = self.filterset_class(self.request.GET, queryset=queryset,
                                               project=project,
                                               excluded=excluded)
@@ -477,36 +496,61 @@ class TWFProjectTagsIgnoredView(TWFProjectTagsView):
         return self.filterset.qs
 
 
-class TWFTagsDatesView(TWFProjectTagsView):
+class TWFTagsDatesGroupView(FormView, TWFTagsView):
     """View for the date tags."""
     template_name = 'twf/tags/dates.html'
     page_title = 'Date Tags'
-    table_class = TagDateTable
-    filterset = None
+    form_class = DateNormalizationForm
 
-    def get_queryset(self):
-        project = self.get_project()
-        date_types = self.get_date_types()
-        queryset = self.model.objects.filter(page__document__project=project,
-                                         variation_type__in=date_types,
-                                         date_variation_entry__isnull=True)
-        self.filterset = self.filterset_class(self.request.GET, queryset=queryset)
-        return self.filterset.qs
+    def form_valid(self, form):
+        """Handle the form submission."""
+        print("Form is valid")
+        tag_id = form.cleaned_data['date_tag']
+        tag = PageTag.objects.get(pk=tag_id)
+        date_variation = DateVariation(
+            variation=tag.variation,
+            edtf_of_normalized_variation=form.cleaned_data['resulting_date'])
+        date_variation.save(current_user=self.request.user)
+        tag.date_variation_entry = date_variation
+        tag.save(current_user=self.request.user)
+        messages.success(self.request, 'Date normalized successfully.')
+        return redirect('twf:tags_dates')
 
-    def post(self, request, *args, **kwargs):
+    def get(self, request, *args, **kwargs):
+        """Override the get method to handle no more tags scenario."""
+        # Check for the next available date tag
+        next_date = PageTag.objects.filter(
+            page__document__project=self.get_project(),
+            variation_type__in=self.get_date_types(),
+            is_parked=False,
+            date_variation_entry__isnull=True
+        ).first()
 
-        if self.request.POST.get('save_date', None):
-            tag_id = self.request.POST.get('tag_id', None)
-            tag = PageTag.objects.get(pk=tag_id)
-            tag_edtf = self.request.POST.get('tag_edtf', None)
+        if next_date is None:
+            messages.info(request, "No more date tags are available for normalization.")
+            return redirect(reverse_lazy('twf:tags_overview'))
 
-            d_var = DateVariation(
-                variation=tag.variation,
-                normalized_variation=tag.additional_information,
-                edtf_of_normalized_variation=tag_edtf
-            )
-            d_var.save(current_user=self.request.user)
-            tag.date_variation_entry = d_var
-            tag.save(current_user=self.request.user)
-
+        # If `next_date` exists, proceed with the normal flow
         return super().get(request, *args, **kwargs)
+
+    def get_form_kwargs(self):
+        """Get the form kwargs."""
+        kwargs = super().get_form_kwargs()
+
+        next_date = PageTag.objects.filter(page__document__project=self.get_project(),
+                                           variation_type__in=self.get_date_types(),
+                                           is_parked=False,
+                                           date_variation_entry__isnull=True).first()
+
+        kwargs['project'] = self.get_project()
+        kwargs['date_tag'] = next_date
+        return kwargs
+
+    def get_context_data(self, **kwargs):
+        """Get the context data."""
+        context = super().get_context_data(**kwargs)
+        context['has_next_tag'] = PageTag.objects.filter(page__document__project=self.get_project(),
+                                                         variation_type__in=self.get_date_types(),
+                                                         is_parked=False,
+                                                         date_variation_entry__isnull=True).exists()
+        return context

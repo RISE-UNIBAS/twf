@@ -2,43 +2,24 @@
 {% load nav_tags %}
 
 {% block content %}
-     <div class="border rounded bg-light mt-0 p-3">
-         {% include 'twf/tags/info_card_tags.html' %}
+    <div class="border rounded bg-light mt-0 p-3">
+        {% include 'twf/tags/info_card_tags.html' %}
         
         <h1 class="display-6">Tag Grouping Status</h1>
-        
+    
         <div class="table-responsive"> <!-- Responsive table wrapper -->
-            <table class="table table-bordered table-striped table-hover">
-                <thead>
+            <table class="table table-borderless align-middle">
+                <thead class="table-light">
                     <tr>
                         <th>Variation Type</th>
-                        <th>Count</th>
+                        <th class="text-end">Total Count</th>
                         <th>Percentage</th>
-                    </tr>
-                </thead>
-                <tbody>
-                {% for variation in stats.variation_type_counts %}
-                    <tr>
-                        <td>{{ variation.variation_type }}</td>
-                        <td>{{ variation.count }}</td>
-                        <td>{{ variation.percentage|floatformat:2 }}%</td>
-                    </tr>
-                {% endfor %}
-                </tbody>
-            </table>
-        </div>
-        
-        <div class="table-responsive"> <!-- Responsive table wrapper -->
-            <table class="table table-bordered table-striped table-hover">
-                <thead>
-                    <tr>
-                        <th>Variation Type</th>
-                        <th>Total</th>
-                        <th>Grouped</th>
-                        <th>%</th>
-                        <th>Parked</th>
-                        <th>%</th>
-                        <th>Unresolved</th>
+                        <th class="text-end">Grouped</th>
+                        <th>Grouped %</th>
+                        <th class="text-end">Parked</th>
+                        <th>Parked %</th>
+                        <th class="text-end">Unresolved</th>
+                        <th>Unresolved %</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -46,16 +27,55 @@
                     <tr>
                         <td>{{ variation.variation_type }}</td>
                         <td class="text-end">{{ variation.count }}</td>
+                        <!-- Pie chart for the "Percentage" column -->
+                        <td class="d-flex align-items-center">
+                            <svg width="24" height="24" viewBox="0 0 36 36" class="me-2">
+                                <circle cx="18" cy="18" r="16" fill="none" stroke="#e9ecef" stroke-width="4"></circle>
+                                <circle cx="18" cy="18" r="16" fill="none" stroke="blue" stroke-width="4"
+                                        stroke-dasharray="{{ variation.percentage }} 100"
+                                        transform="rotate(-90 18 18)">
+                                </circle>
+                            </svg>
+                            {{ variation.percentage|floatformat:2 }}%
+                        </td>
+                        <!-- Progress bars for the remaining percentages -->
                         <td class="text-end">{{ variation.grouped }}</td>
-                        <td class="text-end">{{ variation.grouped_percentage|floatformat:2 }}</td>
+                        <td>
+                            <div class="progress" style="height: 20px;">
+                                <div class="progress-bar bg-success" role="progressbar" 
+                                     style="width: {{ variation.grouped_percentage }}%;" 
+                                     aria-valuenow="{{ variation.grouped_percentage }}" 
+                                     aria-valuemin="0" aria-valuemax="100">
+                                    {{ variation.grouped_percentage|floatformat:2 }}%
+                                </div>
+                            </div>
+                        </td>
                         <td class="text-end">{{ variation.parked }}</td>
-                        <td class="text-end">{{ variation.parked_percentage|floatformat:2 }}</td>
+                        <td>
+                            <div class="progress" style="height: 20px;">
+                                <div class="progress-bar bg-warning" role="progressbar" 
+                                     style="width: {{ variation.parked_percentage }}%;" 
+                                     aria-valuenow="{{ variation.parked_percentage }}" 
+                                     aria-valuemin="0" aria-valuemax="100">
+                                    {{ variation.parked_percentage|floatformat:2 }}%
+                                </div>
+                            </div>
+                        </td>
                         <td class="text-end">{{ variation.unresolved }}</td>
+                        <td>
+                            <div class="progress" style="height: 20px;">
+                                <div class="progress-bar bg-danger" role="progressbar" 
+                                     style="width: {{ variation.unresolved_percentage }}%;" 
+                                     aria-valuenow="{{ variation.unresolved_percentage }}" 
+                                     aria-valuemin="0" aria-valuemax="100">
+                                    {{ variation.unresolved_percentage|floatformat:2 }}%
+                                </div>
+                            </div>
+                        </td>
                     </tr>
                 {% endfor %}
                 </tbody>
             </table>
         </div>
-     
-     </div>
+    </div>
 {% endblock %}

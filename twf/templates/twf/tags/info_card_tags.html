@@ -12,7 +12,7 @@
 {% endblock %}
 
 {% block number_1 %}
-    {{ stats.variation_type_counts|length }}
+    {{ stats.total_tag_types }}
 {% endblock %}
 
 {% block number_1_label %}
@@ -20,17 +20,17 @@
 {% endblock %}
 
 {% block number_2 %}
-    {{ project.batches.count }}
+    {{ stats.total_tags }}
 {% endblock %}
 
 {% block number_2_label %}
-    Batches
+    Total Tags
 {% endblock %}
 
 {% block number_3 %}
-    {{ project.users.count }}
+    {{ stats.average_grouped_percentage|floatformat:2 }} %
 {% endblock %}
 
 {% block number_3_label %}
-    Users
+    Grouped
 {% endblock %}
