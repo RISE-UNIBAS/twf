@@ -11,25 +11,25 @@
 {% endblock %}
 
 {% block number_1 %}
-    
+    {{ dict_stats.total_dictionaries }}
 {% endblock %}
 
 {% block number_1_label %}
-    
-{% endblock %}
-
-{% block number_2 %}
-   {{ project.selected_dictionaries.count }}
-{% endblock %}
-
-{% block number_2_label %}
     Dictionaries
 {% endblock %}
 
+{% block number_2 %}
+   {{ dict_stats.mostly_referenced_category }}
+{% endblock %}
+
+{% block number_2_label %}
+    Mostly Referenced Category
+{% endblock %}
+
 {% block number_3 %}
-    
+    {{ dict_stats.mostly_referenced_entry.dictionary_entry__label }}
 {% endblock %}
 
 {% block number_3_label %}
-    
+    Mostly Referenced Entry
 {% endblock %}

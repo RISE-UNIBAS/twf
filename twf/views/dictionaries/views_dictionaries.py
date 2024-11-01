@@ -56,6 +56,7 @@ class TWFDictionaryView(LoginRequiredMixin, TWFView):
         return sub_nav
 
     def get_navigation_index(self):
+        """Get the navigation index."""
         return 5
 
     def get_dictionaries(self):

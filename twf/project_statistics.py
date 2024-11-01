@@ -46,11 +46,11 @@ def get_tag_statistics(project):
 
 
 def get_dictionary_statistics(project):
-    # Example: total number of dictionaries
+    # Total number of dictionaries
     total_dictionaries = Dictionary.objects.count()
 
+    # Top entries per dictionary type
     top_entries_per_type = defaultdict(list)
-
     entry_counts = PageTag.objects.filter(
         page__document__project=project
     ).values(
@@ -61,14 +61,36 @@ def get_dictionary_statistics(project):
         count=Count('id')
     ).order_by('dictionary_entry__dictionary__type', '-count')
 
+    # Find the mostly referenced dictionary entry and category
+    mostly_referenced_entry = None
+    mostly_referenced_category = None
+    highest_entry_count = 0
+    highest_category_count = 0
+    category_counts = defaultdict(int)
+
     for entry in entry_counts:
         dtype = entry['dictionary_entry__dictionary__type']
+
+        # Add entry to top entries per type (up to 20 per type)
         if len(top_entries_per_type[dtype]) < 20:
             top_entries_per_type[dtype].append(entry)
 
+        # Track the mostly referenced dictionary entry
+        if entry['count'] > highest_entry_count:
+            highest_entry_count = entry['count']
+            mostly_referenced_entry = entry
+
+        # Track the mostly referenced category
+        category_counts[dtype] += entry['count']
+        if category_counts[dtype] > highest_category_count:
+            highest_category_count = category_counts[dtype]
+            mostly_referenced_category = dtype
+
     return {
         'total_dictionaries': total_dictionaries,
-        'top_entries_per_type': dict(top_entries_per_type)
+        'top_entries_per_type': dict(top_entries_per_type),
+        'mostly_referenced_entry': mostly_referenced_entry,
+        'mostly_referenced_category': mostly_referenced_category
     }
 
 

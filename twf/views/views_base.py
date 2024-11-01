@@ -62,7 +62,7 @@ class TWFView(TemplateView, ABC):
             {'url': reverse('twf:documents_overview'), 'value': 'Documents'},
             {'url': reverse('twf:tags_overview'), 'value': 'Tags'},
             {'url': reverse('twf:metadata_overview'), 'value': 'Metadata'},
-            {'url': reverse('twf:dictionaries'), 'value': 'Dictionaries'},
+            {'url': reverse('twf:dictionaries_overview'), 'value': 'Dictionaries'},
             {'url': reverse('twf:collections'), 'value': 'Collections'},
             {'url': reverse('twf:export_overview'), 'value': 'Import/Export'},
         ]
