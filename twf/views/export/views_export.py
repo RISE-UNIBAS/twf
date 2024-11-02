@@ -98,14 +98,14 @@ class TWFExportDocumentsView(FormView, TWFExportView):
         return kwargs
 
     def form_valid(self, form):
-        form.save()
+        """form.save()
 
         if 'export' in form.cleaned_data:
             project = self.get_project()
             # Start the export process using Celery
             # task = export_data_task.delay(project.id, export_type, export_format, schema)
             # Return the task ID for progress tracking (assuming this view is called via AJAX)
-            return JsonResponse({'status': 'success', 'task_id': 0})
+            return JsonResponse({'status': 'success', 'task_id': 0})"""
         return super().form_valid(form)
 
 
