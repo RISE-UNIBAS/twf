@@ -4,6 +4,7 @@ from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db import connection
 from django.db.models import Count, Avg, Q
+from django.http import HttpResponseRedirect
 from django.shortcuts import redirect, render
 from django.urls import reverse, reverse_lazy
 from django.views.generic import FormView
@@ -129,14 +130,16 @@ class TWFProjectCredentialsSettingsView(FormView, TWFProjectView):
         return kwargs
 
     def form_valid(self, form):
-        # Save the form
+        # Save the form and show a success message
         self.object = form.save(commit=False)
         self.object.save(current_user=self.request.user)
-
-        # Add a success message
         messages.success(self.request, 'Project Credential settings have been updated successfully.')
-        # Redirect to the success URL
-        return super().form_valid(form)
+
+        # Retrieve the active tab from form data and include it in the success URL
+        active_tab = form.cleaned_data.get('active_tab', 'transkribus')
+        success_url = f"{self.success_url}?tab={active_tab}"
+
+        return HttpResponseRedirect(success_url)
 
 
 class TWFProjectTaskSettingsView(FormView, TWFProjectView):
@@ -152,14 +155,16 @@ class TWFProjectTaskSettingsView(FormView, TWFProjectView):
         return kwargs
 
     def form_valid(self, form):
-        # Save the form
+        # Save the form and show a success message
         self.object = form.save(commit=False)
         self.object.save(current_user=self.request.user)
+        messages.success(self.request, 'Project Credential settings have been updated successfully.')
 
-        # Add a success message
-        messages.success(self.request, 'Project Task settings have been updated successfully.')
-        # Redirect to the success URL
-        return super().form_valid(form)
+        # Retrieve the active tab from form data and include it in the success URL
+        active_tab = form.cleaned_data.get('active_tab', 'transkribus')
+        success_url = f"{self.success_url}?tab={active_tab}"
+
+        return HttpResponseRedirect(success_url)
 
 
 class TWFProjectExportSettingsView(FormView, TWFProjectView):
