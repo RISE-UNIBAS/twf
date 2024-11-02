@@ -9,7 +9,8 @@ from django.urls import reverse, reverse_lazy
 from django.views.generic import FormView
 
 from twf.forms.dynamic_forms import DynamicForm
-from twf.forms.project_forms import ProjectForm, QueryDatabaseForm, GeneralSettingsForm, CredentialsForm
+from twf.forms.project_forms import ProjectForm, QueryDatabaseForm, GeneralSettingsForm, CredentialsForm, \
+    TaskSettingsForm, ExportSettingsForm
 from twf.models import Project, Document, Page, PageTag
 from twf.project_statistics import get_document_statistics
 from twf.views.views_base import TWFView
@@ -36,6 +37,7 @@ class TWFProjectView(LoginRequiredMixin, TWFView):
                     {'url': reverse('twf:project_settings_general'), 'value': 'General Settings'},
                     {'url': reverse('twf:project_settings_credentials'), 'value': 'Credential Settings'},
                     {'url': reverse('twf:project_settings_tasks'), 'value': 'Task Settings'},
+                    {'url': reverse('twf:project_settings_export'), 'value': 'Export Settings'},
                 ]
             },
             {
@@ -132,7 +134,53 @@ class TWFProjectCredentialsSettingsView(FormView, TWFProjectView):
         self.object.save(current_user=self.request.user)
 
         # Add a success message
-        messages.success(self.request, 'Project settings have been updated successfully.')
+        messages.success(self.request, 'Project Credential settings have been updated successfully.')
+        # Redirect to the success URL
+        return super().form_valid(form)
+
+
+class TWFProjectTaskSettingsView(FormView, TWFProjectView):
+    """View for the project task settings."""
+    template_name = 'twf/project/settings.html'
+    page_title = 'Tasks Project Settings'
+    form_class = TaskSettingsForm
+    success_url = reverse_lazy('twf:project_settings_tasks')
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['instance'] = self.get_project()
+        return kwargs
+
+    def form_valid(self, form):
+        # Save the form
+        self.object = form.save(commit=False)
+        self.object.save(current_user=self.request.user)
+
+        # Add a success message
+        messages.success(self.request, 'Project Task settings have been updated successfully.')
+        # Redirect to the success URL
+        return super().form_valid(form)
+
+
+class TWFProjectExportSettingsView(FormView, TWFProjectView):
+    """View for the project task settings."""
+    template_name = 'twf/project/settings.html'
+    page_title = 'Export Project Settings'
+    form_class = ExportSettingsForm
+    success_url = reverse_lazy('twf:project_settings_tasks')
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['instance'] = self.get_project()
+        return kwargs
+
+    def form_valid(self, form):
+        # Save the form
+        self.object = form.save(commit=False)
+        self.object.save(current_user=self.request.user)
+
+        # Add a success message
+        messages.success(self.request, 'Project Task settings have been updated successfully.')
         # Redirect to the success URL
         return super().form_valid(form)
 

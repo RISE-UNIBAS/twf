@@ -7,7 +7,7 @@ from django.http import JsonResponse, HttpResponse
 from django.views.generic import FormView
 
 from twf.forms.dictionaries.dictionary_forms import DictionaryImportForm
-from twf.forms.export_forms import ExportConfigForm
+from twf.forms.project_forms import ExportSettingsForm
 from twf.export_utils import create_data, flatten_dict_keys
 from twf.utils.export_utils import get_dictionary_json_data, get_dictionary_csv_data, get_tags_json_data, \
     get_tags_csv_data
@@ -72,7 +72,7 @@ class TWFExportDocumentsView(FormView, TWFExportView):
     """View for exporting documents."""
     template_name = "twf/export/export_documents.html"
     page_title = 'Export Data'
-    form_class = ExportConfigForm
+    form_class = ExportSettingsForm
     success_url = reverse_lazy('twf:export_documents')
 
     def get_context_data(self, **kwargs):
@@ -118,7 +118,7 @@ class TWFExportCollectionsView(FormView, TWFExportView):
     """View for exporting collections."""
     template_name = "twf/export/export_collections.html"
     page_title = 'Export Collections'
-    form_class = ExportConfigForm
+    form_class = ExportSettingsForm
     success_url = reverse_lazy('twf:export_collections')
 
     def form_valid(self, form):

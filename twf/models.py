@@ -153,32 +153,6 @@ class Project(TimeStampedModel):
                                            help_text='The last downloaded export file.')
     """The last downloaded export file."""
 
-    metadata_google_sheet_id = models.CharField(max_length=100, blank=True, null=True,
-                                                verbose_name='Google Sheet ID',
-                                                help_text='The ID of the Google Sheet containing metadata')
-    """The ID of the Google Sheet containing metadata."""
-
-    metadata_google_sheet_range = models.CharField(max_length=100, blank=True, null=True,
-                                                   verbose_name='Google Sheet Data Range',
-                                                   help_text='The range of the Google Sheet containing metadata')
-    """The range of the Google Sheet containing metadata."""
-
-    metadata_google_doc_id_column = models.CharField(max_length=50, blank=True, null=True,
-                                                     verbose_name='Google Sheet Document ID Column Name',
-                                                     help_text='The name of the column containing the document IDs')
-    """The name of the column containing the document IDs."""
-
-    metadata_google_title_column = models.CharField(max_length=50, blank=True, null=True,
-                                                    verbose_name='Google Sheet Title Column Name',
-                                                    help_text='The name of the column containing the document titles')
-    """The name of the column containing the document titles."""
-
-    metadata_google_valid_columns = models.CharField(max_length=512, blank=True, null=True,
-                                                     verbose_name='Google Sheet Valid Columns',
-                                                     help_text='A coma-separated list of valid column names '
-                                                               'for metadata. Leave blank for all columns.')
-    """A coma-separated list of valid column names for metadata. Leave blank for all columns."""
-
     description = models.TextField(blank=True, default='',
                                    verbose_name='Project Description',
                                    help_text='The description of the project. Should be brief. '
@@ -228,16 +202,6 @@ class Project(TimeStampedModel):
                                             help_text='A dictionary of metadata fields for pages.')
     """A dictionary of metadata fields for pages."""
 
-    document_export_configuration = models.JSONField(default=dict, blank=True,
-                                                     verbose_name='Document Export Configuration',
-                                                     help_text='A dictionary of export configurations for documents.')
-    """A dictionary of export configurations for documents."""
-
-    page_export_configuration = models.JSONField(default=dict, blank=True,
-                                                    verbose_name='Page Export Configuration',
-                                                    help_text='A dictionary of export configurations for pages.')
-    """A dictionary of export configurations for pages."""
-
     date_normalization_configuration = models.JSONField(default=dict, blank=True,
                                                         verbose_name='Date Normalization Configuration',
                                                         help_text='A dictionary of date normalization configurations.')
@@ -259,11 +223,13 @@ class Project(TimeStampedModel):
         """Return the credentials for a service."""
         return self.conf_credentials.get(service, {})
 
-    def get_valid_cols(self):
-        """Return the valid columns for metadata."""
-        if self.metadata_google_valid_columns:
-            return self.metadata_google_valid_columns.split(',')
-        return []
+    def get_export_configuration(self, service):
+        """Return the export configuration for a service."""
+        return self.conf_export.get(service, {})
+
+    def get_task_configuration(self, service):
+        """Return the task configuration for a service."""
+        return self.conf_tasks.get(service, {})
 
     def get_transkribus_url(self):
         """Return the URL to the Transkribus collection."""

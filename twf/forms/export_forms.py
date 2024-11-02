@@ -6,41 +6,6 @@ from django import forms
 from twf.models import Project
 
 
-class ExportConfigForm(forms.ModelForm):
-    """Form for configuring export settings."""
-
-    class Meta:
-        model = Project
-        fields = ['document_export_configuration', 'page_export_configuration']
-        widgets = {
-            'document_export_configuration': forms.Textarea(attrs={'rows': 5, 'cols': 40}),
-            'page_export_configuration': forms.Textarea(attrs={'rows': 5, 'cols': 40}),
-        }
-        labels = {
-            'document_export_configuration': 'Document Export Configuration',
-            'page_export_configuration': 'Page Export Configuration',
-        }
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.helper = FormHelper()
-        self.helper.form_method = 'post'
-        self.helper.form_class = 'form form-control'
-
-        self.helper.layout = Layout(
-            Row(
-                Column('document_export_configuration', css_class='form-group col-6 mb-3'),
-                Column('page_export_configuration', css_class='form-group col-6 mb-3'),
-                css_class='row form-row'
-            ),
-            Div(
-                Submit('test', 'Test', css_class='btn btn-dark me-2'),
-                Submit('export', 'Export', css_class='btn btn-dark'),
-                css_class='text-end pt-3'
-            )
-        )
-
-
 class ExportDataForm(forms.Form):
     """Form for exporting data."""
 

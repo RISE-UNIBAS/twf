@@ -70,12 +70,22 @@ class CredentialsForm(forms.ModelForm):
     """Form for creating and updating credentials."""
 
     openai_api_key = forms.CharField(required=False, widget=TextInput(attrs={'placeholder': 'OpenAI API Key'}))
+    openai_default_model = forms.CharField(required=False,
+                                           widget=TextInput(attrs={'placeholder': 'OpenAI Default Model'}))
+
     genai_api_key = forms.CharField(required=False, widget=TextInput(attrs={'placeholder': 'GenAI API Key'}))
+    genai_default_model = forms.CharField(required=False,
+                                          widget=TextInput(attrs={'placeholder': 'GenAI Default Model'}))
+
     anthropic_api_key = forms.CharField(required=False, widget=TextInput(attrs={'placeholder': 'Anthropic API Key'}))
+    anthropic_default_model = forms.CharField(required=False,
+                                              widget=TextInput(attrs={'placeholder': 'Anthropic Default Model'}))
+
     transkribus_username = forms.CharField(required=False,
                                            widget=TextInput(attrs={'placeholder': 'Transkribus Username'}))
     transkribus_password = forms.CharField(required=False,
                                            widget=forms.PasswordInput(attrs={'placeholder': 'Transkribus Password'}))
+
     geonames_username = forms.CharField(required=False, widget=TextInput(attrs={'placeholder': 'Geonames Username'}))
 
     class Meta:
@@ -88,10 +98,17 @@ class CredentialsForm(forms.ModelForm):
         # Populate the fields from `conf_credentials` JSON if data exists
         conf_credentials = self.instance.conf_credentials or {}
         self.fields['openai_api_key'].initial = conf_credentials.get('openai', {}).get('api_key', '')
+        self.fields['openai_default_model'].initial = conf_credentials.get('openai', {}).get('default_model', '')
+
         self.fields['genai_api_key'].initial = conf_credentials.get('genai', {}).get('api_key', '')
+        self.fields['genai_default_model'].initial = conf_credentials.get('genai', {}).get('default_model', '')
+
         self.fields['anthropic_api_key'].initial = conf_credentials.get('anthropic', {}).get('api_key', '')
+        self.fields['anthropic_default_model'].initial = conf_credentials.get('anthropic', {}).get('default_model', '')
+
         self.fields['transkribus_username'].initial = conf_credentials.get('transkribus', {}).get('username', '')
         self.fields['transkribus_password'].initial = conf_credentials.get('transkribus', {}).get('password', '')
+
         self.fields['geonames_username'].initial = conf_credentials.get('geonames', {}).get('username', '')
 
         self.helper = FormHelper()
@@ -109,16 +126,19 @@ class CredentialsForm(forms.ModelForm):
                 Tab(
                     'OpenAI',
                     Row(Column('openai_api_key', css_class='col-12')),
+                    Row(Column('openai_default_model', css_class='col-12')),
                     css_id='openai'
                 ),
                 Tab(
                     'GenAI',
                     Row(Column('genai_api_key', css_class='col-12')),
+                    Row(Column('genai_default_model', css_class='col-12')),
                     css_id='genai'
                 ),
                 Tab(
                     'Anthropic',
                     Row(Column('anthropic_api_key', css_class='col-12')),
+                    Row(Column('anthropic_default_model', css_class='col-12')),
                     css_id='anthropic'
                 ),
                 Tab(
@@ -146,30 +166,141 @@ class CredentialsForm(forms.ModelForm):
         return cleaned_data
 
 
+class TaskSettingsForm(forms.ModelForm):
+    """Form for creating and updating task settings."""
+
+    # Define the fields for the form: Google Sheets Connection
+    google_sheet_id = forms.CharField(required=False, widget=TextInput(attrs={'placeholder': 'Google Sheet ID'}),
+                                      help_text='Copy the part as indicated:'
+                                                'https://docs.google.com/spreadsheets/d/<b>GOOGLE_SHEET_ID</b>/edit')
+    google_sheet_range = forms.CharField(required=False, widget=TextInput(attrs={'placeholder': 'Google Sheet Range'}),
+                                         )
+    google_sheet_valid_columns = forms.CharField(required=False,
+                                                 widget=TextInput(attrs={'placeholder': 'Google Sheet Valid Columns'}))
+    google_sheet_document_id_column = forms.CharField(required=False,
+                                                      widget=TextInput(
+                                                          attrs={
+                                                              'placeholder': 'Google Sheet Document ID Column'}))
+    google_sheet_document_title_column = forms.CharField(required=False,
+                                                         widget=TextInput(
+                                                             attrs={
+                                                                 'placeholder': 'Google Sheet Document Title Column'}))
+
+    # Define the fields for the form: Metadata Review Settings
+    page_metadata_review = forms.CharField(required=False, widget=TextInput(attrs={'placeholder': 'Page Metadata Review'}))
+    document_metadata_review = forms.CharField(required=False, widget=TextInput(attrs={'placeholder': 'Document Metadata Review'}))
+
+    class Meta:
+        model = Project
+        fields = ['conf_tasks']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.helper = FormHelper()
+        self.helper.form_method = 'post'
+        self.helper.form_class = 'form form-control'
+
+        # Populate the fields from `conf_tasks` JSON if data exists
+        conf_tasks = self.instance.conf_tasks or {}
+        self.fields['google_sheet_id'].initial = conf_tasks.get('google_sheet', {}).get('sheet_id', '')
+        self.fields['google_sheet_range'].initial = conf_tasks.get('google_sheet', {}).get('range', '')
+        self.fields['google_sheet_valid_columns'].initial = conf_tasks.get('google_sheet', {}).get('valid_columns', '')
+        self.fields['google_sheet_document_id_column'].initial = conf_tasks.get('google_sheet', {}).get('document_id_column', '')
+        self.fields['google_sheet_document_title_column'].initial = conf_tasks.get('google_sheet', {}).get('document_title_column', '')
+
+        self.fields['page_metadata_review'].initial = conf_tasks.get('metadata_review', {}).get('page_metadata_review', '')
+        self.fields['document_metadata_review'].initial = conf_tasks.get('metadata_review', {}).get('document_metadata_review', '')
+
+        self.helper.layout = Layout(
+            TabHolder(
+                Tab(
+                    'Google Sheets Connection',
+                    Row(
+                        Column('google_sheet_id', css_class='col-12'),
+                        ),
+                    Row(
+                        Column('google_sheet_range', css_class='col-6'),
+                        Column('google_sheet_valid_columns', css_class='col-6'),
+                        ),
+                    Row(
+                        Column('google_sheet_document_id_column', css_class='col-6'),
+                        Column('google_sheet_document_title_column', css_class='col-6'),
+                    ), css_id='google_sheets'
+                ),
+                Tab(
+                    'Metadata Review Settings',
+                    Row(
+                        Column('page_metadata_review', css_class='col-6'),
+                        Column('document_metadata_review', css_class='col-6'),
+                    ), css_id='metadata_review'
+                ),
+                Tab(
+                    'Tag Type Settings',
+                    Row(
+                    ), css_id='tag_types'
+                ),
+            ),
+            Div(
+                Submit('submit', 'Save Settings', css_class='btn btn-dark'),
+                css_class='text-end pt-3'
+            )
+        )
+
+
+class ExportSettingsForm(forms.ModelForm):
+    """Form for creating and updating task settings."""
+
+    # Define the fields for the form: Google Sheets Connection
+    document_export_configuration = forms.CharField(required=False, widget=forms.Textarea(attrs={'rows': 5}))
+    page_export_configuration = forms.CharField(required=False, widget=forms.Textarea(attrs={'rows': 5}))
+
+    class Meta:
+        model = Project
+        fields = ['conf_export']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.helper = FormHelper()
+        self.helper.form_method = 'post'
+        self.helper.form_class = 'form form-control'
+
+        # Populate the fields from `conf_export` JSON if data exists
+        conf_export = self.instance.conf_export or {}
+        self.fields['document_export_configuration'].initial = conf_export.get('document_export_configuration', '')
+        self.fields['page_export_configuration'].initial = conf_export.get('page_export_configuration', '')
+
+        self.helper.layout = Layout(
+            TabHolder(
+                Tab(
+                    'Export Settings',
+                    Row(
+                        Column('document_export_configuration', css_class='col-6'),
+                        Column('page_export_configuration', css_class='col-6'),
+                    ), css_id='export_settings'
+                ),
+            ),
+            Div(
+                Submit('submit', 'Save Settings', css_class='btn btn-dark'),
+                css_class='text-end pt-3'
+            )
+        )
+
+
 class ProjectForm(forms.ModelForm):
     """Form for creating and updating projects."""
     class Meta:
         model = Project
-        fields = ['title', 'description', 'collection_id', 'transkribus_job_id', 'job_download_url',
-                  'metadata_google_sheet_id', 'metadata_google_sheet_range', 'metadata_google_doc_id_column',
-                  'metadata_google_title_column', 'metadata_google_valid_columns',
+        fields = ['collection_id', 'transkribus_job_id', 'job_download_url',
                   'owner', 'members', 'selected_dictionaries',
                   'tag_type_translator', 'ignored_tag_types',
-                  'document_metadata_fields', 'page_metadata_fields',
-                  'document_export_configuration', 'page_export_configuration']
+                  'document_metadata_fields', 'page_metadata_fields']
         widgets = {
-            'description': forms.Textarea(attrs={'rows': 5}),
-            'owner': Select2Widget(attrs={'style': 'width: 100%;'}),
-            'members': Select2MultipleWidget(attrs={'style': 'width: 100%;'}),
-            'metadata_google_valid_columns': forms.Textarea(attrs={'rows': 5}),
             'tag_type_translator': forms.Textarea(attrs={'rows': 3}),
             'ignored_tag_types': forms.Textarea(attrs={'rows': 3}),
-             # 'transkribus_password': PasswordInputRetain(),
-            'selected_dictionaries': Select2MultipleWidget(attrs={'style': 'width: 100%;'}),
             'document_metadata_fields': forms.Textarea(attrs={'rows': 3}),
             'field_metadata_fields': forms.Textarea(attrs={'rows': 3}),
-            'document_export_configuration': forms.Textarea(attrs={'rows': 3}),
-            'page_export_configuration': forms.Textarea(attrs={'rows': 3}),
+
+
         }
 
     def __init__(self, *args, **kwargs):
@@ -210,29 +341,6 @@ class ProjectForm(forms.ModelForm):
             Row(
                 Div(
                     HTML(
-                        '<strong>2.) Google Sheets Connection</strong>'
-                    ),
-                    css_class='col-12 mb-3'
-                ),
-                css_class='row form-row'
-            ),
-            Row(
-                Column('metadata_google_sheet_id', css_class='form-group col-6 mb-3'),
-                Column('metadata_google_sheet_range', css_class='form-group col-6 mb-3'),
-                css_class='row form-row'
-            ),
-            Row(
-                Column(
-                    Row(
-                        Column('metadata_google_doc_id_column', css_class='form-group col-12 mb-3'),
-                        Column('metadata_google_title_column', css_class='form-group col-12 mb-3'),
-                        css_class='row form-ow'), css_class='form-group col-4 mb-3'),
-                Column('metadata_google_valid_columns', css_class='form-group col-8 mb-3'),
-                css_class='row form-row'
-            ),
-            Row(
-                Div(
-                    HTML(
                         '<strong>3.) Tag Settings</strong>'
                     ),
                     css_class='col-12 mb-3'
@@ -245,58 +353,9 @@ class ProjectForm(forms.ModelForm):
                 css_class='row form-row'
             ),
             Row(
-                Div(
-                    HTML(
-                        '<strong>4.) Dictionary Settings</strong>'
-                    ),
-                    css_class='col-12 mb-3'
-                ),
-                css_class='row form-row'
-            ),
-            Row(
-                Column('selected_dictionaries', css_class='form-group col-12 mb-3'),
-                css_class='row form-row'
-            ),
-            Row(
-                Div(
-                    HTML(
-                        '<strong>5.) Authentication data</strong>'
-                    ),
-                    css_class='col-12 mb-3'
-                ),
-                css_class='row form-row'
-            ),
-            Row(
-                Div(
-                    HTML(
-                        '<strong>6.) Metadata Settings</strong>'
-                    ),
-                    css_class='col-12 mb-3'
-                ),
-                css_class='row form-row'
-            ),
-            Row(
                 Column('document_metadata_fields', css_class='form-group col-6 mb-3'),
                 Column('page_metadata_fields', css_class='form-group col-6 mb-3'),
                 css_class='row form-row'
-            ),
-            Row(
-                Div(
-                    HTML(
-                        '<strong>7.) Export Configuration</strong>'
-                    ),
-                    css_class='col-12 mb-3'
-                ),
-                css_class='row form-row'
-            ),
-            Row(
-                Column('document_export_configuration', css_class='form-group col-6 mb-3'),
-                Column('page_export_configuration', css_class='form-group col-6 mb-3'),
-                css_class='row form-row'
-            ),
-            Div(
-                Submit('submit', 'Save Settings', css_class='btn btn-dark'),
-                css_class='text-end pt-3'
             ),
         )
 

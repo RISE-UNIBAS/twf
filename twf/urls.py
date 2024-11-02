@@ -34,9 +34,9 @@ from twf.views.export.views_export import TWFExportDocumentsView, TWFExportColle
 from twf.views.metadata.views_metadata import TWFMetadataReviewDocumentsView, \
     TWFMetadataLoadDataView, TWFMetadataExtractTagsView, TWFMetadataReviewPagesView, TWFMetadataOverviewView, \
     TWFMetadataLoadSheetsDataView
-from twf.views.project.views_project import select_project, \
-    TWFProjectSettingsView, TWFProjectQueryView, TWFProjectOverviewView, TWFProjectTaskMonitorView, \
-    TWFProjectGeneralSettingsView, TWFProjectCredentialsSettingsView, TWFProjectPromptsView
+from twf.views.project.views_project import select_project, TWFProjectQueryView, TWFProjectOverviewView, \
+    TWFProjectTaskMonitorView, TWFProjectGeneralSettingsView, TWFProjectCredentialsSettingsView, \
+    TWFProjectPromptsView, TWFProjectTaskSettingsView, TWFProjectExportSettingsView
 from twf.views.project.views_project_ai import TWFProjectAIQueryView
 from twf.views.tags.views_tags import TWFTagsView, TWFProjectTagsView, TWFProjectTagsOpenView, \
     TWFProjectTagsParkedView, TWFProjectTagsResolvedView, TWFProjectTagsIgnoredView, TWFTagsDatesGroupView, \
@@ -78,7 +78,8 @@ urlpatterns = [
 
     path('project/settings/general/', TWFProjectGeneralSettingsView.as_view(), name='project_settings_general'),
     path('project/settings/credentials/', TWFProjectCredentialsSettingsView.as_view(), name='project_settings_credentials'),
-    path('project/settings/tasks/', TWFProjectSettingsView.as_view(), name='project_settings_tasks'), # TODO
+    path('project/settings/tasks/', TWFProjectTaskSettingsView.as_view(), name='project_settings_tasks'),
+    path('project/settings/export/', TWFProjectExportSettingsView.as_view(), name='project_settings_export'),
 
     # Project options
     path('project/query/', TWFProjectQueryView.as_view(), name='project_query'),

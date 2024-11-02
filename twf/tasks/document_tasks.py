@@ -66,7 +66,7 @@ def search_openai_for_docs(self, project_id, user_id, prompt, role_description):
         # Perform OpenAI search for each document
         context = get_text_from_document(document)
         prompt = prompt + "\n\n" + "Context:\n" + context
-        response, elapsed_time = client.prompt(model="gpt-4-turbo",
+        response, elapsed_time = client.prompt(model=openai_credentials.default_model,
                                                prompt=prompt)
         response_dict = response.to_dict()
         document.metadata['openai_response'] = response_dict
@@ -103,7 +103,7 @@ def search_gemini_for_docs(self, project_id, user_id, prompt, role_description):
 
         context = get_text_from_document(document)
         prompt = prompt + "\n\n" + "Context:\n" + context
-        response, elapsed_time = client.prompt(model="gemini-1.5-flash",
+        response, elapsed_time = client.prompt(model=genai_credentials.default_model,
                                                prompt=prompt)
         document.metadata['gemini_response'] = response
         document.save(current_user=user)
@@ -143,7 +143,7 @@ def search_claude_for_docs(self, project_id, user_id, prompt, role_description):
         context = get_text_from_document(document)
 
         prompt = prompt + "\n\n" + "Context:\n" + context
-        response, elapsed_time = client.prompt(model="claude-3-5-sonnet-20240620",
+        response, elapsed_time = client.prompt(model=anthropic_credentials.default_model,
                                                prompt=prompt)
         document.metadata['claude_response'] = response.to_dict()
         document.save(current_user=user)
