@@ -129,7 +129,7 @@ def create_document_data(document, return_warnings=False):
     data = {**document.metadata}
 
     all_warnings = []
-    config = document.project.document_export_configuration
+    config = document.project.get_export_configuration('document_export_configuration')
 
     if return_warnings:
         doc_export, warnings = create_data_from_config(data, config, document, True)
@@ -154,7 +154,7 @@ def create_document_data(document, return_warnings=False):
 def create_page_data(page, return_warnings=False):
     """ Create a dictionary from a page object."""
     data = {**page.parsed_data, **page.metadata}
-    config = page.document.project.page_export_configuration
+    config = page.document.project.get_export_configuration('page_export_configuration')
     return create_data_from_config(data, config, page, return_warnings)
 
 
