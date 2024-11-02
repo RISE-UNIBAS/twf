@@ -21,6 +21,7 @@ def ask_chatgpt_task(self, project_id, selection_type, role_description, prompt)
 
     try:
         project = Project.objects.get(id=project_id)
+        openai_credentials = project.get_credentials('openai')
 
         # Gather all the documents/items to ask about
         documents = project.documents.filter(project=project)[:5]
@@ -28,7 +29,7 @@ def ask_chatgpt_task(self, project_id, selection_type, role_description, prompt)
 
         # Ensure API key and role description are being passed correctly
         client = AiApiClient(api='openai',
-                             api_key=project.openai_api_key,
+                             api_key=openai_credentials.api_key,
                              gpt_role_description=role_description)
 
         prompt_text = f"Fasse zusammen, was du über die folgendes Dokumente weißt:\n{prompt}"

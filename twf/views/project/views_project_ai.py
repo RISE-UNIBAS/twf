@@ -26,6 +26,7 @@ class TWFProjectAIQueryView(FormView, TWFProjectView):
     def form_valid(self, form):
         # Save the form
         project = self.get_project()
+        openai_credentials = project.get_credentials('openai')
         question = form.cleaned_data['question']
         gpt_role_description = "A Swiss History professor"
         model = "gpt-4-turbo"
@@ -38,7 +39,7 @@ class TWFProjectAIQueryView(FormView, TWFProjectView):
                         context += element['text'] + "\n"
 
         client = AiApiClient(api='openai',
-                             api_key=project.openai_api_key,
+                             api_key=openai_credentials.api_key,
                              gpt_role_description=gpt_role_description)
         prompt = question + "\n\n" + "Context:\n" + context
         response, elapsed_time = client.prompt(model=model,

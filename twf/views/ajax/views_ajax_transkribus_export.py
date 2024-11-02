@@ -13,8 +13,9 @@ def unpack_request(request):
     """ Unpacks the request and returns the session_id and project. """
     project_id = request.session.get('project_id')
     project = Project.objects.get(pk=project_id)
-    username = project.transkribus_username
-    password = project.transkribus_password
+    transkribus_credentials = project.get_credentials('transkribus')
+    username = transkribus_credentials.username
+    password = transkribus_credentials.password
 
     session_id = get_session_id(username, password)
     return session_id, project

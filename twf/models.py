@@ -274,35 +274,6 @@ class Project(TimeStampedModel):
                                                    'which are special (e.g. dates).')
     """A list of tag types to ignore."""
 
-    transkribus_username = models.CharField(max_length=100, blank=True, null=True,
-                                            verbose_name='Transkribus Username',
-                                            help_text='The username for the Transkribus API.')
-    """The username for the Transkribus API."""
-
-    transkribus_password = models.CharField(max_length=100, blank=True, null=True,
-                                            verbose_name='Transkribus Password',
-                                            help_text='The password for the Transkribus API.')
-    """The password for the Transkribus API."""
-
-    geonames_username = models.CharField(max_length=100, blank=True, null=True,
-                                         verbose_name='Geonames Username',
-                                         help_text='The username for the Geonames API.')
-    """The username for the Geonames API."""
-
-    openai_api_key = models.CharField(max_length=255, blank=True, null=True,
-                                      verbose_name='Open AI API Key',
-                                      help_text='The API key for the Open AI API.')
-    """The API key for the Open AI API."""
-
-    gemini_api_key = models.CharField(max_length=255, blank=True, null=True,
-                                      verbose_name='Gemini API Key',
-                                      help_text='The API key for the Gemini API.')
-    """The API key for the Gemini API."""
-
-    claude_api_key = models.CharField(max_length=255, blank=True, null=True,
-                                      verbose_name='Claude API Key',
-                                      help_text='The API key for the Claude API.')
-
     selected_dictionaries = models.ManyToManyField('Dictionary', related_name='selected_projects',
                                                    blank=True, verbose_name='Selected Dictionaries',
                                                    help_text='The dictionaries selected for this project.')
@@ -332,6 +303,22 @@ class Project(TimeStampedModel):
                                                         verbose_name='Date Normalization Configuration',
                                                         help_text='A dictionary of date normalization configurations.')
     """A dictionary of date normalization configurations."""
+
+    conf_credentials = models.JSONField(default=dict, blank=True,
+                                        verbose_name='Credentials Configurations',
+                                        help_text='A dictionary of credential configurations.')
+
+    conf_export = models.JSONField(default=dict, blank=True,
+                                   verbose_name='Export Configurations',
+                                   help_text='A dictionary of export configurations.')
+
+    conf_tasks = models.JSONField(default=dict, blank=True,
+                                  verbose_name='Task Configurations',
+                                  help_text='A dictionary of task configurations.')
+
+    def get_credentials(self, service):
+        """Return the credentials for a service."""
+        return self.conf_credentials.get(service, {})
 
     def get_valid_cols(self):
         """Return the valid columns for metadata."""

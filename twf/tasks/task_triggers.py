@@ -44,10 +44,11 @@ def start_gnd_batch(request):
 def start_geonames_batch(request):
     """Start the GND requests as a Celery task."""
     project = TWFView.s_get_project(request)
+    geonames_credentials = project.get_credentials('geonames')
     dictionary_id = request.GET.get('dictionary_id')
     user_id = request.user.id
 
-    geonames_username = project.geonames_username
+    geonames_username = geonames_credentials.username
     country_restriction = request.GET.get('only_search_in')
     similarity_threshold = request.GET.get('similarity_threshold')
 

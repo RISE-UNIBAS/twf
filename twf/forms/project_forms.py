@@ -29,8 +29,6 @@ class ProjectForm(forms.ModelForm):
                   'metadata_google_title_column', 'metadata_google_valid_columns',
                   'owner', 'members', 'selected_dictionaries',
                   'tag_type_translator', 'ignored_tag_types',
-                  'transkribus_username', 'transkribus_password',
-                  'geonames_username', 'openai_api_key', 'gemini_api_key', 'claude_api_key',
                   'document_metadata_fields', 'page_metadata_fields',
                   'document_export_configuration', 'page_export_configuration']
         widgets = {
@@ -40,7 +38,7 @@ class ProjectForm(forms.ModelForm):
             'metadata_google_valid_columns': forms.Textarea(attrs={'rows': 5}),
             'tag_type_translator': forms.Textarea(attrs={'rows': 3}),
             'ignored_tag_types': forms.Textarea(attrs={'rows': 3}),
-            'transkribus_password': PasswordInputRetain(),
+             # 'transkribus_password': PasswordInputRetain(),
             'selected_dictionaries': Select2MultipleWidget(attrs={'style': 'width: 100%;'}),
             'document_metadata_fields': forms.Textarea(attrs={'rows': 3}),
             'field_metadata_fields': forms.Textarea(attrs={'rows': 3}),
@@ -140,21 +138,6 @@ class ProjectForm(forms.ModelForm):
                     ),
                     css_class='col-12 mb-3'
                 ),
-                css_class='row form-row'
-            ),
-            Row(
-                Column('transkribus_username', css_class='form-group col-6 mb-3'),
-                Column('transkribus_password', css_class='form-group col-6 mb-3'),
-                css_class='row form-row'
-            ),
-            Row(
-                Column('geonames_username', css_class='form-group col-6 mb-3'),
-                Column('openai_api_key', css_class='form-group col-6 mb-3'),
-                css_class='row form-row'
-            ),
-            Row(
-                Column('gemini_api_key', css_class='form-group col-6 mb-3'),
-                Column('claude_api_key', css_class='form-group col-6 mb-3'),
                 css_class='row form-row'
             ),
             Row(

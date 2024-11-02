@@ -49,12 +49,13 @@ def search_openai_for_docs(self, project_id, user_id, prompt, role_description):
     :param role_description: Role description for the AI model"""
 
     project = Project.objects.get(id=project_id)
+    openai_credentials = project.get_credentials('openai')
     task, percentage_complete = start_task(self, project, user_id, text="Starting OpenAI Search...",
                                            title="Project Documents OpenAI Search")
 
     project, user, number_of_documents = get_project_and_user(project_id, user_id)
     client = AiApiClient(api='openai',
-                         api_key=project.openai_api_key,
+                         api_key=openai_credentials.api_key,
                          gpt_role_description=role_description)
 
     processed_documents = 0
@@ -86,12 +87,13 @@ def search_gemini_for_docs(self, project_id, user_id, prompt, role_description):
     :param prompt: Prompt text
     :param role_description: Role description for the AI model"""
     project = Project.objects.get(id=project_id)
+    genai_credentials = project.get_credentials('genai')
     task, percentage_complete = start_task(self, project, user_id, text="Starting Gemini Search...",
                                            title="Project Documents Gemini Search")
 
     project, user, number_of_documents = get_project_and_user(self, task, project_id, user_id)
     client = AiApiClient(api='genai',
-                         api_key=project.gemini_api_key,
+                         api_key=genai_credentials.api_key,
                          gpt_role_description=role_description)
 
     processed_documents = 0
@@ -123,12 +125,13 @@ def search_claude_for_docs(self, project_id, user_id, prompt, role_description):
     :param role_description: Role description for the AI model"""
 
     project = Project.objects.get(id=project_id)
+    anthropic_credentials = project.get_credentials('anthropic')
     task, percentage_complete = start_task(self, project, user_id, text="Starting Claude Search...",
                                            title="Project Documents Claude Search")
 
     project, user, number_of_documents = get_project_and_user(self, task, project_id, user_id)
     client = AiApiClient(api='anthropic',
-                         api_key=project.claude_api_key,
+                         api_key=anthropic_credentials.api_key,
                          gpt_role_description=role_description)
 
     processed_documents = 0
