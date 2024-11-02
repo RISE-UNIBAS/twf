@@ -94,7 +94,7 @@ class TWFProjectPromptsView(TWFProjectView):
 
 class TWFProjectGeneralSettingsView(FormView, TWFProjectView):
     """View for the general project settings."""
-    template_name = 'twf/project/settings.html'
+    template_name = 'twf/project/settings/settings_general.html'
     page_title = 'General Project Settings'
     form_class = GeneralSettingsForm
     success_url = reverse_lazy('twf:project_settings_general')
@@ -118,7 +118,7 @@ class TWFProjectGeneralSettingsView(FormView, TWFProjectView):
 
 class TWFProjectCredentialsSettingsView(FormView, TWFProjectView):
     """View for the general project settings."""
-    template_name = 'twf/project/settings.html'
+    template_name = 'twf/project/settings/settings_credentials.html'
     page_title = 'Credentials Project Settings'
     form_class = CredentialsForm
     success_url = reverse_lazy('twf:project_settings_credentials')
@@ -141,7 +141,7 @@ class TWFProjectCredentialsSettingsView(FormView, TWFProjectView):
 
 class TWFProjectTaskSettingsView(FormView, TWFProjectView):
     """View for the project task settings."""
-    template_name = 'twf/project/settings.html'
+    template_name = 'twf/project/settings/settings_tasks.html'
     page_title = 'Tasks Project Settings'
     form_class = TaskSettingsForm
     success_url = reverse_lazy('twf:project_settings_tasks')
@@ -164,7 +164,7 @@ class TWFProjectTaskSettingsView(FormView, TWFProjectView):
 
 class TWFProjectExportSettingsView(FormView, TWFProjectView):
     """View for the project task settings."""
-    template_name = 'twf/project/settings.html'
+    template_name = 'twf/project/settings/settings_export.html'
     page_title = 'Export Project Settings'
     form_class = ExportSettingsForm
     success_url = reverse_lazy('twf:project_settings_tasks')

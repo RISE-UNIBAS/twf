@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 class TWFProjectAIQueryView(FormView, TWFProjectView):
     """View for querying the AI model."""
 
-    template_name = 'twf/project/ai_query.html'
+    template_name = 'twf/project/questions/ai_query.html'
     page_title = 'AI Query'
     form_class = AIQueryDatabaseForm
     results = None

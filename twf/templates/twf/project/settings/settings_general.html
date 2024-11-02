@@ -1,0 +1,20 @@
+{% extends 'twf/base/base.html' %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+     <div class="border rounded bg-light mt-0 p-3">
+        <h1 class="display-6">General Settings</h1>
+        <p class="lead">Change the general settings of the project.</p>
+        {% crispy form %}
+     </div>
+{% endblock %}
+
+{% block script %}
+<script>
+    $(document).ready(function() {
+        // Initialize Select2 on the specified fields
+        $('#id_owner').select2();
+        $('#id_members').select2();
+    });
+</script>
+{% endblock %}
