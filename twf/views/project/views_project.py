@@ -9,7 +9,7 @@ from django.urls import reverse, reverse_lazy
 from django.views.generic import FormView
 
 from twf.forms.dynamic_forms import DynamicForm
-from twf.forms.project_forms import ProjectForm, QueryDatabaseForm
+from twf.forms.project_forms import ProjectForm, QueryDatabaseForm, GeneralSettingsForm, CredentialsForm
 from twf.models import Project, Document, Page, PageTag
 from twf.project_statistics import get_document_statistics
 from twf.views.views_base import TWFView
@@ -27,7 +27,15 @@ class TWFProjectView(LoginRequiredMixin, TWFView):
                 'options': [
                     {'url': reverse('twf:project_overview'), 'value': 'Overview'},
                     {'url': reverse('twf:project_task_monitor'), 'value': 'Task Monitor'},
-                    {'url': reverse('twf:project_settings'), 'value': 'Project Settings'},
+                    {'url': reverse('twf:project_prompts'), 'value': 'Saved Prompts'},
+                ]
+            },
+            {
+                'name': 'Settings',
+                'options': [
+                    {'url': reverse('twf:project_settings_general'), 'value': 'General Settings'},
+                    {'url': reverse('twf:project_settings_credentials'), 'value': 'Credential Settings'},
+                    {'url': reverse('twf:project_settings_tasks'), 'value': 'Task Settings'},
                 ]
             },
             {
@@ -69,6 +77,64 @@ class TWFProjectTaskMonitorView(TWFProjectView):
         context = super().get_context_data(**kwargs)
         context['tasks'] = self.get_project().tasks.all()
         return context
+
+
+class TWFProjectPromptsView(TWFProjectView):
+    """View for the project task monitor."""
+    template_name = 'twf/project/prompts.html'
+    page_title = 'Prompts'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['prompts'] = self.get_project().prompts.all()
+        return context
+
+
+class TWFProjectGeneralSettingsView(FormView, TWFProjectView):
+    """View for the general project settings."""
+    template_name = 'twf/project/settings.html'
+    page_title = 'General Project Settings'
+    form_class = GeneralSettingsForm
+    success_url = reverse_lazy('twf:project_settings_general')
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['instance'] = self.get_project()
+        return kwargs
+
+    def form_valid(self, form):
+        # Save the form
+        self.object = form.save(commit=False)
+        self.object.save(current_user=self.request.user)
+        form.save_m2m()
+
+        # Add a success message
+        messages.success(self.request, 'Project settings have been updated successfully.')
+        # Redirect to the success URL
+        return super().form_valid(form)
+
+
+class TWFProjectCredentialsSettingsView(FormView, TWFProjectView):
+    """View for the general project settings."""
+    template_name = 'twf/project/settings.html'
+    page_title = 'Credentials Project Settings'
+    form_class = CredentialsForm
+    success_url = reverse_lazy('twf:project_settings_credentials')
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['instance'] = self.get_project()
+        return kwargs
+
+    def form_valid(self, form):
+        # Save the form
+        self.object = form.save(commit=False)
+        self.object.save(current_user=self.request.user)
+
+        # Add a success message
+        messages.success(self.request, 'Project settings have been updated successfully.')
+        # Redirect to the success URL
+        return super().form_valid(form)
 
 
 class TWFProjectSettingsView(FormView, TWFProjectView):

@@ -1,7 +1,9 @@
+from crispy_forms.bootstrap import TabHolder, Tab
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Submit, Layout, Row, Column, Div, HTML
 from django import forms
 from django.db.models import Subquery
+from django.forms import TextInput
 from django.urls import reverse
 from django_select2.forms import Select2MultipleWidget, Select2Widget
 
@@ -18,6 +20,130 @@ class PasswordInputRetain(forms.PasswordInput):
             attrs = attrs or {}
             attrs['value'] = value
         return super().render(name, value, attrs, renderer)
+
+
+class GeneralSettingsForm(forms.ModelForm):
+    """Form for creating and updating general settings."""
+
+    class Meta:
+        model = Project
+        fields = ['title', 'description', 'owner', 'members', 'selected_dictionaries']
+        widgets = {
+            'description': forms.Textarea(attrs={'rows': 5}),
+            'owner': Select2Widget(attrs={'style': 'width: 100%;'}),
+            'members': Select2MultipleWidget(attrs={'style': 'width: 100%;'}),
+            'selected_dictionaries': Select2MultipleWidget(attrs={'style': 'width: 100%;'}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.helper = FormHelper()
+        self.helper.form_method = 'post'
+        self.helper.form_class = 'form form-control'
+
+        self.helper.layout = Layout(
+            Row(
+                Column('title', css_class='form-group col-12 mb-3'),
+                css_class='row form-row'
+            ),
+            Row(
+                Column(
+                    Row(
+                        Column('owner', css_class='form-group col-12 mb-3'),
+                        Column('members', css_class='form-group col-12 mb-3'),
+                        css_class='row form-ow'), css_class='form-group col-4 mb-3'),
+                Column('description', css_class='form-group col-8 mb-3'),
+                css_class='row form-row'
+            ),
+            Row(
+                Column('selected_dictionaries', css_class='form-group col-12 mb-3'),
+                css_class='row form-row'
+            ),
+            Div(
+                Submit('submit', 'Save Settings', css_class='btn btn-dark'),
+                css_class='text-end pt-3'
+            )
+        )
+
+
+class CredentialsForm(forms.ModelForm):
+    """Form for creating and updating credentials."""
+
+    openai_api_key = forms.CharField(required=False, widget=TextInput(attrs={'placeholder': 'OpenAI API Key'}))
+    genai_api_key = forms.CharField(required=False, widget=TextInput(attrs={'placeholder': 'GenAI API Key'}))
+    anthropic_api_key = forms.CharField(required=False, widget=TextInput(attrs={'placeholder': 'Anthropic API Key'}))
+    transkribus_username = forms.CharField(required=False,
+                                           widget=TextInput(attrs={'placeholder': 'Transkribus Username'}))
+    transkribus_password = forms.CharField(required=False,
+                                           widget=forms.PasswordInput(attrs={'placeholder': 'Transkribus Password'}))
+    geonames_username = forms.CharField(required=False, widget=TextInput(attrs={'placeholder': 'Geonames Username'}))
+
+    class Meta:
+        model = Project
+        fields = ['conf_credentials']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        # Populate the fields from `conf_credentials` JSON if data exists
+        conf_credentials = self.instance.conf_credentials or {}
+        self.fields['openai_api_key'].initial = conf_credentials.get('openai', {}).get('api_key', '')
+        self.fields['genai_api_key'].initial = conf_credentials.get('genai', {}).get('api_key', '')
+        self.fields['anthropic_api_key'].initial = conf_credentials.get('anthropic', {}).get('api_key', '')
+        self.fields['transkribus_username'].initial = conf_credentials.get('transkribus', {}).get('username', '')
+        self.fields['transkribus_password'].initial = conf_credentials.get('transkribus', {}).get('password', '')
+        self.fields['geonames_username'].initial = conf_credentials.get('geonames', {}).get('username', '')
+
+        self.helper = FormHelper()
+        self.helper.form_method = 'post'
+        self.helper.form_class = 'form form-control'
+        self.helper.layout = Layout(
+            TabHolder(
+                Tab(
+                    'Transkribus',
+                    Row(
+                        Column('transkribus_username', css_class='col-6'),
+                        Column('transkribus_password', css_class='col-6')
+                    ), css_id='transkribus'
+                ),
+                Tab(
+                    'OpenAI',
+                    Row(Column('openai_api_key', css_class='col-12')),
+                    css_id='openai'
+                ),
+                Tab(
+                    'GenAI',
+                    Row(Column('genai_api_key', css_class='col-12')),
+                    css_id='genai'
+                ),
+                Tab(
+                    'Anthropic',
+                    Row(Column('anthropic_api_key', css_class='col-12')),
+                    css_id='anthropic'
+                ),
+                Tab(
+                    'Geonames',
+                    Row(Column('geonames_username', css_class='col-12')),
+                    css_id='geonames'
+                )
+            ),
+            Submit('submit', 'Save Settings', css_class='btn btn-dark')
+        )
+
+    def clean(self):
+        """Clean and save credential data back into the JSONField `conf_credentials`."""
+        cleaned_data = super().clean()
+        self.instance.conf_credentials = {
+            'openai': {'api_key': cleaned_data.get('openai_api_key')},
+            'genai': {'api_key': cleaned_data.get('genai_api_key')},
+            'anthropic': {'api_key': cleaned_data.get('anthropic_api_key')},
+            'transkribus': {
+                'username': cleaned_data.get('transkribus_username'),
+                'password': cleaned_data.get('transkribus_password')
+            },
+            'geonames': {'username': cleaned_data.get('geonames_username')}
+        }
+        return cleaned_data
 
 
 class ProjectForm(forms.ModelForm):

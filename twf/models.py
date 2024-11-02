@@ -111,67 +111,6 @@ class Project(TimeStampedModel):
     are related to a specific task or topic. Projects can have multiple members, each with different roles and
     permissions. The Project model extends the TimeStampedModel, which provides self-updating 'created' and 'modified'
     fields.
-
-    Attributes
-    ~~~~~~~~~~
-    title : CharField
-        The title of the project. This is descriptive and should be unique.
-    collection_id : CharField
-        The Transkribus collection ID. This is needed to export data from Transkribus.
-    transkribus_job_id : CharField
-        The Transkribus job ID of the last requested export.
-    job_download_url : URLField
-        The download URL of the last requested export.
-    downloaded_at : DateTimeField
-        The time the last export was downloaded.
-    downloaded_zip_file : FileField
-        The last downloaded export file.
-    metadata_google_sheet_id : CharField
-        The ID of the Google Sheet containing metadata.
-    metadata_google_sheet_range : CharField
-        The range of the Google Sheet containing metadata.
-    metadata_google_doc_id_column : CharField
-        The name of the column containing the document IDs.
-    metadata_google_title_column : CharField
-        The name of the column containing the document titles.
-    metadata_google_valid_columns : CharField
-        A coma-separated list of valid column names for metadata. Leave blank for all columns.
-    description : TextField
-        The description of the project.
-    status : CharField
-        The status of the project.
-    owner : ForeignKey
-        The owner of the project.
-    members : ManyToManyField
-        The members of the project.
-    tag_type_translator : JSONField
-        A dictionary to translate tag types into dictionary types if they are not equal.
-    ignored_tag_types : JSONField
-        A list of tag types to ignore.
-    transkribus_username : CharField
-        The username for the Transk
-    transkribus_password : CharField
-        The password for the Transkribus API.
-    geonames_username : CharField
-        The username for the Geonames API.
-    openai_api_key : CharField
-        The API key for the Open AI API.
-    gemini_api_key : CharField
-        The API key for the Gemini API.
-    claude_api_key : CharField
-        The API key for the Claude API.
-    selected_dictionaries : ManyToManyField
-        The dictionaries selected for this project.
-    document_metadata_fields : JSONField
-        A dictionary of metadata fields for documents.
-    page_metadata_fields : JSONField
-        A dictionary of metadata fields for pages.
-    document_export_configuration : JSONField
-        A dictionary of export configurations for documents.
-    page_export_configuration : JSONField
-        A dictionary of export configurations for pages.
-    date_normalization_configuration : JSONField
-        A dictionary of date normalization configurations.
     """
 
     STATUS_CHOICES = (
