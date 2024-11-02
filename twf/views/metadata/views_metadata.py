@@ -236,14 +236,14 @@ class TWFMetadataReviewPagesView(FormView, TWFMetadataView):
             metadata = next_page.metadata
 
         kwargs = super().get_form_kwargs()
-        kwargs['json_config'] = self.get_project().page_metadata_fields
+        kwargs['json_config'] = self.get_project().get_task_configuration('metadata_review').get('page_metadata_review', {})
         kwargs['json_data'] = metadata
         return kwargs
 
     def form_valid(self, form):
         # Save the metadata
         form.is_valid()
-        config = self.get_project().page_metadata_fields
+        config = self.get_project().get_task_configuration('metadata_review').get('page_metadata_review', {})
         print("BLA", form.cleaned_data)
         next_page = self.get_next_page()
         next_page.save(current_user=self.request.user)
@@ -315,7 +315,7 @@ class TWFMetadataReviewDocumentsView(FormView, TWFMetadataView):
             metadata = next_page.metadata
 
         kwargs = super().get_form_kwargs()
-        kwargs['json_config'] = self.get_project().document_metadata_fields
+        kwargs['json_config'] = self.get_project().get_task_configuration('metadata_review').get('document_metadata_review', {})
         kwargs['json_data'] = metadata
         return kwargs
 

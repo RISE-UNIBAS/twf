@@ -11,7 +11,9 @@ def validate_page_field(request):
     field_value = request.POST.get('field_value')
 
     project = TWFView.s_get_project(request)
-    is_valid = DynamicForm.validation_logic(field_value, project.page_metadata_fields[field_name])
+    configuration = project.get_task_configuration('metadata_review')
+    configuration = configuration.get('page_metadata_review', {})
+    is_valid = DynamicForm.validation_logic(field_value, configuration[field_name])
     return JsonResponse({'is_valid': is_valid})
 
 
@@ -21,5 +23,7 @@ def validate_document_field(request):
     field_value = request.POST.get('field_value')
 
     project = TWFView.s_get_project(request)
-    is_valid = DynamicForm.validation_logic(field_value, project.document_metadata_fields[field_name])
+    configuration = project.get_task_configuration('metadata_review')
+    configuration = configuration.get('document_metadata_review', {})
+    is_valid = DynamicForm.validation_logic(field_value, configuration[field_name])
     return JsonResponse({'is_valid': is_valid})

@@ -190,6 +190,16 @@ class TaskSettingsForm(forms.ModelForm):
     page_metadata_review = forms.CharField(required=False, widget=TextInput(attrs={'placeholder': 'Page Metadata Review'}))
     document_metadata_review = forms.CharField(required=False, widget=TextInput(attrs={'placeholder': 'Document Metadata Review'}))
 
+    # Define the fields for the form: Date normalization settings
+    date_input_format = forms.CharField(required=False, widget=TextInput(attrs={'placeholder': 'Date Input Format'}))
+    resolve_to_date = forms.CharField(required=False, widget=TextInput(attrs={'placeholder': 'Resolve to Precision'}))
+
+    # Define the fields for the form: Tag Type Settings
+    tag_type_translator = forms.CharField(required=False, widget=forms.Textarea(attrs={'rows': 3}),
+                                            help_text='Enter a JSON object to map tag types to a common format')
+    ignored_tag_types = forms.CharField(required=False, widget=forms.Textarea(attrs={'rows': 3}),
+                                        help_text='Enter a JSON array of tag types to ignore')
+
     class Meta:
         model = Project
         fields = ['conf_tasks']
@@ -211,8 +221,21 @@ class TaskSettingsForm(forms.ModelForm):
         self.fields['page_metadata_review'].initial = conf_tasks.get('metadata_review', {}).get('page_metadata_review', '')
         self.fields['document_metadata_review'].initial = conf_tasks.get('metadata_review', {}).get('document_metadata_review', '')
 
+        self.fields['date_input_format'].initial = conf_tasks.get('date_normalization', {}).get('date_input_format', '')
+        self.fields['resolve_to_date'].initial = conf_tasks.get('date_normalization', {}).get('resolve_to_date', '')
+
+        self.fields['tag_type_translator'].initial = conf_tasks.get('tag_types', {}).get('tag_type_translator', '')
+        self.fields['ignored_tag_types'].initial = conf_tasks.get('tag_types', {}).get('ignored_tag_types', '')
+
         self.helper.layout = Layout(
             TabHolder(
+                Tab(
+                    'Date Normalization Settings',
+                    Row(
+                        Column('date_input_format', css_class='col-6'),
+                        Column('resolve_to_date', css_class='col-6'),
+                    ), css_id='date_normalization'
+                ),
                 Tab(
                     'Google Sheets Connection',
                     Row(
@@ -237,6 +260,8 @@ class TaskSettingsForm(forms.ModelForm):
                 Tab(
                     'Tag Type Settings',
                     Row(
+                        Column('tag_type_translator', css_class='col-6'),
+                        Column('ignored_tag_types', css_class='col-6'),
                     ), css_id='tag_types'
                 ),
             ),
@@ -284,82 +309,6 @@ class ExportSettingsForm(forms.ModelForm):
                 css_class='text-end pt-3'
             )
         )
-
-
-class ProjectForm(forms.ModelForm):
-    """Form for creating and updating projects."""
-    class Meta:
-        model = Project
-        fields = ['collection_id', 'transkribus_job_id', 'job_download_url',
-                  'owner', 'members', 'selected_dictionaries',
-                  'tag_type_translator', 'ignored_tag_types',
-                  'document_metadata_fields', 'page_metadata_fields']
-        widgets = {
-            'tag_type_translator': forms.Textarea(attrs={'rows': 3}),
-            'ignored_tag_types': forms.Textarea(attrs={'rows': 3}),
-            'document_metadata_fields': forms.Textarea(attrs={'rows': 3}),
-            'field_metadata_fields': forms.Textarea(attrs={'rows': 3}),
-
-
-        }
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        helper = FormHelper()
-        helper.form_method = 'post'
-        helper.form_class = 'form form-control'
-
-        layout = helper.layout = Layout(
-            Row(
-                Div(
-                    HTML(
-                        '<strong>1.) General settings</strong>'
-                    ),
-                    css_class='col-12 mb-3'
-                ),
-                css_class='row form-row'
-            ),
-            Row(
-                    Column('title', css_class='form-group col-4 mb-3'),
-                    Column('collection_id', css_class='form-group col-4 mb-3'),
-                    Column('transkribus_job_id', css_class='form-group col-4 mb-3'),
-                    css_class='row form-row'
-                ),
-            Row(
-                Column('job_download_url', css_class='form-group offset-4 col-8 mb-3'),
-                css_class='row form-row'
-            ),
-            Row(
-                Column(
-                    Row(
-                        Column('owner', css_class='form-group col-12 mb-3'),
-                        Column('members', css_class='form-group col-12 mb-3'),
-                        css_class='row form-ow'), css_class='form-group col-4 mb-3'),
-                Column('description', css_class='form-group col-8 mb-3'),
-                css_class='row form-row'
-            ),
-            Row(
-                Div(
-                    HTML(
-                        '<strong>3.) Tag Settings</strong>'
-                    ),
-                    css_class='col-12 mb-3'
-                ),
-                css_class='row form-row'
-            ),
-            Row(
-                Column('tag_type_translator', css_class='form-group col-6 mb-3'),
-                Column('ignored_tag_types', css_class='form-group col-6 mb-3'),
-                css_class='row form-row'
-            ),
-            Row(
-                Column('document_metadata_fields', css_class='form-group col-6 mb-3'),
-                Column('page_metadata_fields', css_class='form-group col-6 mb-3'),
-                css_class='row form-row'
-            ),
-        )
-
-        self.helper = helper
 
 
 class AIQueryDatabaseForm(forms.Form):

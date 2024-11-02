@@ -175,37 +175,10 @@ class Project(TimeStampedModel):
                                                'in the user management section.')
     """The members of the project."""
 
-    tag_type_translator = models.JSONField(default=dict, blank=True,
-                                           verbose_name='Tag Type Translator',
-                                           help_text='A dictionary to translate tag types into dictionary types '
-                                                     'if they are not equal.')
-    """A dictionary to translate tag types."""
-
-    ignored_tag_types = models.JSONField(default=dict, blank=True,
-                                         verbose_name='Special Tag Types',
-                                         help_text='A list of tag types to ignore and a list of tag types'
-                                                   'which are special (e.g. dates).')
-    """A list of tag types to ignore."""
-
     selected_dictionaries = models.ManyToManyField('Dictionary', related_name='selected_projects',
                                                    blank=True, verbose_name='Selected Dictionaries',
                                                    help_text='The dictionaries selected for this project.')
     """The dictionaries selected for this project."""
-
-    document_metadata_fields = models.JSONField(default=dict, blank=True,
-                                                verbose_name='Document Metadata Fields',
-                                                help_text='A dictionary of metadata fields for documents.')
-    """A dictionary of metadata fields for documents."""
-
-    page_metadata_fields = models.JSONField(default=dict, blank=True,
-                                            verbose_name='Page Metadata Fields',
-                                            help_text='A dictionary of metadata fields for pages.')
-    """A dictionary of metadata fields for pages."""
-
-    date_normalization_configuration = models.JSONField(default=dict, blank=True,
-                                                        verbose_name='Date Normalization Configuration',
-                                                        help_text='A dictionary of date normalization configurations.')
-    """A dictionary of date normalization configurations."""
 
     conf_credentials = models.JSONField(default=dict, blank=True,
                                         verbose_name='Credentials Configurations',
@@ -618,10 +591,11 @@ class PageTag(TimeStampedModel):
 
     def assign_tag(self, user):
         """Assign the tag to a dictionary entry."""
+        tag_type_translator = self.page.document.project.get_task_configuration('tag_types').get('tag_type_translator', {})
         try:
             dictionary_type = self.variation_type
-            if self.page.document.project.tag_type_translator.get(dictionary_type):
-                dictionary_type = self.page.document.project.tag_type_translator[dictionary_type]
+            if tag_type_translator.get(dictionary_type):
+                dictionary_type = tag_type_translator[dictionary_type]
             try:
                 entry = Variation.objects.get(
                     variation=self.variation,
@@ -642,9 +616,10 @@ class PageTag(TimeStampedModel):
 
     def get_closest_variations(self):
         """Return the 5 closest variations to the tag."""
+        tag_type_translator = self.page.document.project.get_task_configuration('tag_types').get('tag_type_translator', {})
         dict_type = self.variation_type
-        if self.page.document.project.tag_type_translator.get(dict_type):
-            dict_type = self.page.document.project.tag_type_translator[dict_type]
+        if tag_type_translator.get(dict_type):
+            dict_type = tag_type_translator[dict_type]
 
         variations = Variation.objects.filter(
             entry__dictionary__in=self.page.document.project.selected_dictionaries.all(),

@@ -87,7 +87,7 @@ class TWFTagsView(LoginRequiredMixin, TWFView):
         """Get the excluded tag types."""
         project = self.get_project()
         try:
-            excluded = project.ignored_tag_types["ignored"]
+            excluded = project.get_task_configuration('task_types').get('ignored_tag_types', [])
         except KeyError:
             excluded = []
         return excluded
@@ -96,7 +96,7 @@ class TWFTagsView(LoginRequiredMixin, TWFView):
         """Get the date tag types."""
         project = self.get_project()
         try:
-            date_types = project.ignored_tag_types["dates"]
+            date_types = project.get_task_configuration('task_types').get('ignored_tag_types', []) # TODO Change
         except KeyError:
             date_types = []
 
@@ -318,8 +318,9 @@ class TWFTagsGroupView(TWFTagsView):
         tag_types = self.get_tag_types()
         selected_type = self.request.GET.get('tag_type', tag_types[0])
         dict_type = selected_type
-        if selected_type in self.get_project().tag_type_translator:
-            dict_type = self.get_project().tag_type_translator[selected_type]
+        tag_type_translator = self.get_project().get_task_configuration('tag_types').get('tag_type_translator', '')
+        if selected_type in tag_type_translator:
+            dict_type = tag_type_translator[selected_type]
         unassigned_tag = self.get_next_unassigned_tag(selected_type)
 
         context['tag_types'] = tag_types
