@@ -2,7 +2,7 @@
 from collections import defaultdict
 
 from django.db.models import Avg, Count
-from .models import Document, Page, PageTag, Dictionary, Collection
+from twf.models import Document, Page, PageTag, Dictionary, Collection
 
 
 def get_document_statistics(project):

@@ -12,8 +12,8 @@ from django.views.generic import FormView
 from twf.forms.dynamic_forms import DynamicForm
 from twf.forms.project_forms import QueryDatabaseForm, GeneralSettingsForm, CredentialsForm, \
     TaskSettingsForm, ExportSettingsForm
-from twf.models import Project, Document, Page, PageTag
-from twf.project_statistics import get_document_statistics
+from twf.models import Document, Page, PageTag
+from twf.utils.project_statistics import get_document_statistics
 from twf.views.views_base import TWFView
 
 

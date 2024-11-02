@@ -13,7 +13,7 @@ from twf.forms.dictionaries.batch_forms import GeonamesBatchForm
 from twf.forms.dictionaries.dictionary_forms import DictionaryForm, DictionaryEntryForm
 from twf.forms.enrich_forms import EnrichEntryManualForm, EnrichEntryForm
 from twf.models import Dictionary, DictionaryEntry, Variation, PageTag
-from twf.project_statistics import get_dictionary_statistics
+from twf.utils.project_statistics import get_dictionary_statistics
 from twf.tables.tables_dictionary import DictionaryTable, DictionaryEntryTable, DictionaryEntryVariationTable
 from twf.views.views_base import TWFView
 

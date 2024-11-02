@@ -59,3 +59,4 @@ def get_tags_csv_data(project_id):
     for tag in tags:
         csv_data += f'{tag.variation}\n'
     return csv_data
+

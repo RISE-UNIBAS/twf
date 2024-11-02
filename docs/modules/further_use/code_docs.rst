@@ -9,4 +9,6 @@ This is the source code documentation for the TWF project.
 
    source_doc/models.rst
    source_doc/views.rst
+   source_doc/forms.rst
+   source_doc/utils.rst
 

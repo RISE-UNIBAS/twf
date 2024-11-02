@@ -6,7 +6,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 
 from twf.models import Project
-from twf.transkribus_collector import get_session_id, start_export, get_export_status
+from twf.utils.transkribus_collector import get_session_id, start_export, get_export_status
 
 
 def unpack_request(request):

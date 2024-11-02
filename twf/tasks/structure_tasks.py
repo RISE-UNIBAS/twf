@@ -9,7 +9,7 @@ from django.utils import timezone
 from simple_alto_parser import PageFileParser
 
 from twf.models import Project, User, Document, Page
-from twf.page_file_meta_data_reader import extract_transkribus_file_metadata
+from twf.utils.page_file_meta_data_reader import extract_transkribus_file_metadata
 from twf.tasks.task_base import start_task, update_task_percentage, end_task, fail_task
 from twf.utils.file_utils import delete_all_in_folder
 
