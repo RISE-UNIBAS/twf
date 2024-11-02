@@ -69,6 +69,8 @@ class GeneralSettingsForm(forms.ModelForm):
 class CredentialsForm(forms.ModelForm):
     """Form for creating and updating credentials."""
 
+    active_tab = forms.CharField(widget=forms.HiddenInput(), required=False)
+
     openai_api_key = forms.CharField(required=False, widget=TextInput(attrs={'placeholder': 'OpenAI API Key'}))
     openai_default_model = forms.CharField(required=False,
                                            widget=TextInput(attrs={'placeholder': 'OpenAI Default Model'}))
@@ -84,13 +86,13 @@ class CredentialsForm(forms.ModelForm):
     transkribus_username = forms.CharField(required=False,
                                            widget=TextInput(attrs={'placeholder': 'Transkribus Username'}))
     transkribus_password = forms.CharField(required=False,
-                                           widget=forms.PasswordInput(attrs={'placeholder': 'Transkribus Password'}))
+                                           widget=PasswordInputRetain(attrs={'placeholder': 'Transkribus Password'}))
 
     geonames_username = forms.CharField(required=False, widget=TextInput(attrs={'placeholder': 'Geonames Username'}))
 
     class Meta:
         model = Project
-        fields = ['conf_credentials']
+        fields = ['conf_credentials', 'active_tab']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -147,16 +149,23 @@ class CredentialsForm(forms.ModelForm):
                     css_id='geonames'
                 )
             ),
-            Submit('submit', 'Save Settings', css_class='btn btn-dark')
+            Div(
+                Submit('submit', 'Save Settings', css_class='btn btn-dark'),
+                css_class='text-end pt-3'
+            ),
+            'active_tab'
         )
 
     def clean(self):
         """Clean and save credential data back into the JSONField `conf_credentials`."""
         cleaned_data = super().clean()
         self.instance.conf_credentials = {
-            'openai': {'api_key': cleaned_data.get('openai_api_key')},
-            'genai': {'api_key': cleaned_data.get('genai_api_key')},
-            'anthropic': {'api_key': cleaned_data.get('anthropic_api_key')},
+            'openai': {'api_key': cleaned_data.get('openai_api_key'),
+                       'default_model': cleaned_data.get('openai_default_model')},
+            'genai': {'api_key': cleaned_data.get('genai_api_key'),
+                      'default_model': cleaned_data.get('genai_default_model')},
+            'anthropic': {'api_key': cleaned_data.get('anthropic_api_key'),
+                          'default_model': cleaned_data.get('anthropic_default_model')},
             'transkribus': {
                 'username': cleaned_data.get('transkribus_username'),
                 'password': cleaned_data.get('transkribus_password')
@@ -168,6 +177,8 @@ class CredentialsForm(forms.ModelForm):
 
 class TaskSettingsForm(forms.ModelForm):
     """Form for creating and updating task settings."""
+
+    active_tab = forms.CharField(widget=forms.HiddenInput(), required=False)
 
     # Define the fields for the form: Google Sheets Connection
     google_sheet_id = forms.CharField(required=False, widget=TextInput(attrs={'placeholder': 'Google Sheet ID'}),
@@ -268,8 +279,35 @@ class TaskSettingsForm(forms.ModelForm):
             Div(
                 Submit('submit', 'Save Settings', css_class='btn btn-dark'),
                 css_class='text-end pt-3'
-            )
+            ),
+            'active_tab'
         )
+
+    def clean(self):
+        """Clean and save task data back into the JSONField `conf_tasks`."""
+        cleaned_data = super().clean()
+        self.instance.conf_tasks = {
+            'google_sheet': {
+                'sheet_id': cleaned_data.get('google_sheet_id'),
+                'range': cleaned_data.get('google_sheet_range'),
+                'valid_columns': cleaned_data.get('google_sheet_valid_columns'),
+                'document_id_column': cleaned_data.get('google_sheet_document_id_column'),
+                'document_title_column': cleaned_data.get('google_sheet_document_title_column')
+            },
+            'metadata_review': {
+                'page_metadata_review': cleaned_data.get('page_metadata_review'),
+                'document_metadata_review': cleaned_data.get('document_metadata_review')
+            },
+            'date_normalization': {
+                'date_input_format': cleaned_data.get('date_input_format'),
+                'resolve_to_date': cleaned_data.get('resolve_to_date')
+            },
+            'tag_types': {
+                'tag_type_translator': cleaned_data.get('tag_type_translator'),
+                'ignored_tag_types': cleaned_data.get('ignored_tag_types')
+            }
+        }
+        return cleaned_data
 
 
 class ExportSettingsForm(forms.ModelForm):
@@ -309,6 +347,15 @@ class ExportSettingsForm(forms.ModelForm):
                 css_class='text-end pt-3'
             )
         )
+
+    def clean(self):
+        """Clean and save export data back into the JSONField `conf_export`."""
+        cleaned_data = super().clean()
+        self.instance.conf_export = {
+            'document_export_configuration': cleaned_data.get('document_export_configuration'),
+            'page_export_configuration': cleaned_data.get('page_export_configuration')
+        }
+        return cleaned_data
 
 
 class AIQueryDatabaseForm(forms.Form):
