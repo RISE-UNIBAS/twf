@@ -172,7 +172,7 @@ class TWFProjectExportSettingsView(FormView, TWFProjectView):
     template_name = 'twf/project/settings/settings_export.html'
     page_title = 'Export Project Settings'
     form_class = ExportSettingsForm
-    success_url = reverse_lazy('twf:project_settings_tasks')
+    success_url = reverse_lazy('twf:project_settings_export')
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
