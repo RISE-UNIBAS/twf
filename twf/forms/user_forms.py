@@ -1,6 +1,7 @@
 """Forms for the twf app."""
 from django import forms
 from django.contrib.auth.forms import AuthenticationForm, PasswordChangeForm
+from django.contrib.auth.models import User
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Submit, Column, Row, Div
 
@@ -59,6 +60,36 @@ class UserManagementForm(forms.Form):
             ),
             Div(
                 Submit('submit', 'Save Settings', css_class='btn btn-dark'),
+                css_class='text-end pt-3'
+            )
+        )
+
+
+class UserProfileForm(forms.ModelForm):
+    class Meta:
+        model = User
+        fields = ['username', 'first_name', 'last_name', 'email']
+
+    orcid = forms.CharField(max_length=19, required=False)
+    affiliation = forms.CharField(max_length=255, required=False)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.fields['orcid'].initial = self.instance.profile.orc_id
+        self.fields['affiliation'].initial = self.instance.profile.affiliation
+
+        self.helper = FormHelper()
+        self.helper.form_method = 'post'
+        self.helper.layout = Layout(
+            'username',
+            'first_name',
+            'last_name',
+            'email',
+            'orcid',
+            'affiliation',
+            Div(
+                Submit('submit', 'Save Changes', css_class='btn btn-dark'),
                 css_class='text-end pt-3'
             )
         )
