@@ -10,3 +10,4 @@ Utilities modules for the project.
    utils/export.rst
    utils/files.rst
    utils/transkribus.rst
+   utils/statistics.rst
