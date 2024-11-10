@@ -6,12 +6,7 @@ from twf.models import Document, Page, PageTag, Dictionary, Collection
 
 
 def get_document_statistics(project):
-    """Get statistics for documents.
-    Args:
-        project: Project
-    Returns:
-        dict: Dictionary with statistics for documents.
-    """
+    """Get statistics for documents."""
     total_documents = project.documents.count()
     total_pages = Page.objects.filter(document__project=project).count()
     average_pages_per_document = Page.objects.filter(document__project=project).values('document').annotate(count=Count('id')).aggregate(Avg('count'))
@@ -33,12 +28,7 @@ def get_document_statistics(project):
 
 
 def get_tag_statistics(project):
-    """Get statistics for tags.
-    Args:
-        project: Project
-    Returns:
-        dict: Dictionary with statistics for tags.
-    """
+    """Get statistics for tags."""
     total_tags = PageTag.objects.filter(page__document__project=project).count()
     return {
         'total_tags': total_tags
