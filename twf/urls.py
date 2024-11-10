@@ -18,7 +18,7 @@ from twf.views.documents.views_documents import TWFDocumentsOverviewView, TWFDoc
 from twf.views.documents.views_documents_ai import TWFDocumentOpenAIBatchView, \
     TWFDocumentGeminiBatchView, TWFDocumentClaudeBatchView
 from twf.views.home.views_home import TWFHomeView, TWFHomeLoginView, TWFHomePasswordChangeView, TWFHomeUserOverView, \
-    TWFHomeUserManagementView, TWFSelectProjectView
+    TWFHomeUserManagementView, TWFSelectProjectView, TWFHomeUserProfileView
 from twf.views.project.views_project_setup import TWFProjectSetupView
 from twf.views.ajax.views_ajax_download import ajax_transkribus_download_export, download_progress_view
 from twf.views.collections.views_collection import RemovePartView, SplitCollectionItemView, \
@@ -50,6 +50,7 @@ urlpatterns = [
     path('login/', TWFHomeLoginView.as_view(), name='login'),
     path('logout/confirm/',
          TWFHomeView.as_view(page_title='Logout', template_name='twf/home/users/logout.html'), name='user_logout'),
+    path('user/profile/', TWFHomeUserProfileView.as_view(), name='user_profile'),
     path('user/change/password/', TWFHomePasswordChangeView.as_view(), name='user_change_password'),
     path('user/overview/', TWFHomeUserOverView.as_view(), name='user_overview'),
     path('user/management/', TWFHomeUserManagementView.as_view(), name='user_management'),

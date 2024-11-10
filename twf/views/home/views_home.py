@@ -1,11 +1,14 @@
+from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import Group
 from django.contrib.auth.views import LoginView, PasswordChangeView
 from django.urls import reverse, reverse_lazy
 from django.utils.timezone import now, timedelta
-from twf.forms.user_forms import LoginForm, ChangePasswordForm
+from django.views.generic import FormView
+
+from twf.forms.user_forms import LoginForm, ChangePasswordForm, UserProfileForm
 from twf.models import Project, Document, Page, Dictionary, DictionaryEntry, PageTag, Variation, DateVariation, \
-    TWF_GROUPS
+    TWF_GROUPS, UserProfile
 from twf.views.views_base import TWFView
 
 
@@ -44,6 +47,26 @@ class TWFHomeView(TWFView):
 
         return sub_nav
 
+    def get_user_options(self):
+        """Get the user options."""
+        user = self.request.user
+
+        if user.is_authenticated:
+            nav = [
+                {'url': reverse('twf:user_overview'), 'value': 'Overview'},
+                {'url': reverse('twf:user_profile'), 'value': 'User Profile'},
+                {'url': reverse('twf:user_change_password'), 'value': 'Change Password'},
+                {'url': reverse('twf:user_management'), 'value': 'User Management'},
+                {'url': reverse('twf:user_logout'), 'value': 'Logout'},
+            ]
+            if user.is_superuser or user.is_staff:
+                nav.append({'url': reverse('admin:index'), 'value': 'Admin'})
+            return nav
+
+        return [
+            {'url': reverse('twf:login'), 'value': 'Login'},
+        ]
+
     def get_navigation_index(self):
         return 0
 
@@ -71,6 +94,41 @@ class TWFHomePasswordChangeView(TWFHomeView, PasswordChangeView):
     page_title = 'Change Password'
     form_class = ChangePasswordForm
     success_url = reverse_lazy('twf:home')
+
+
+class TWFHomeUserProfileView(LoginRequiredMixin, FormView, TWFHomeView):
+    """View to display the user profile."""
+    template_name = 'twf/home/users/profile.html'
+    page_title = 'User Profile'
+    form_class = UserProfileForm
+    success_url = reverse_lazy('twf:user_profile')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        return context
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        user = self.request.user
+        if not hasattr(user, 'profile'):
+            UserProfile.objects.create(user=user)  # Ensures profile existence
+
+        kwargs['instance'] = user
+        return kwargs
+
+    def form_valid(self, form):
+        user = self.request.user
+        user.first_name = form.cleaned_data['first_name']
+        user.last_name = form.cleaned_data['last_name']
+        user.email = form.cleaned_data['email']
+
+        user.profile.orc_id = form.cleaned_data['orcid']
+        user.profile.affiliation = form.cleaned_data['affiliation']
+        user.profile.save()
+
+        user.save()
+        messages.success(self.request, 'User profile updated successfully.')
+        return super().form_valid(form)
 
 
 class TWFHomeUserOverView(LoginRequiredMixin, TWFHomeView):

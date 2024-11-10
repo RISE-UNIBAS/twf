@@ -68,25 +68,6 @@ class TWFView(TemplateView, ABC):
         ]
         return nav
 
-    def get_user_options(self):
-        """Get the user options."""
-        user = self.request.user
-
-        if user.is_authenticated:
-            nav = [
-                {'url': reverse('twf:user_overview'), 'value': 'Overview'},
-                {'url': reverse('twf:user_change_password'), 'value': 'Change Password'},
-                {'url': reverse('twf:user_management'), 'value': 'User Management'},
-                {'url': reverse('twf:user_logout'), 'value': 'Logout'},
-            ]
-            if user.is_superuser or user.is_staff:
-                nav.append({'url': reverse('admin:index'), 'value': 'Admin'})
-            return nav
-
-        return [
-            {'url': reverse('twf:login'), 'value': 'Login'},
-        ]
-
     @abstractmethod
     def get_sub_navigation(self):
         """Get the sub navigation."""

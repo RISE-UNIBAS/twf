@@ -6,6 +6,8 @@ indirectly on the Project model. Most models extend the TimeStampedModel class, 
 'created' and 'modified' fields. This means, every time an object is created or modified, the 'created_at' and
 'modified_at' fields are updated automatically, but the user who created or modified the object must be provided.
 """
+import json
+
 from django.conf import settings
 from django.db import models
 from django.contrib.auth import get_user_model
@@ -88,6 +90,12 @@ class UserProfile(models.Model):
 
     clearance_level = models.IntegerField(default=0)  # You can define levels as constants
     """The clearance level of the user."""
+
+    orc_id = models.CharField(max_length=255, blank=True, null=True)
+    """The ORCID of the user."""
+
+    affiliation = models.CharField(max_length=255, blank=True, null=True)
+    """The affiliation of the user."""
 
     def get_projects(self):
         """Return the projects the user is a member of."""
@@ -196,9 +204,18 @@ class Project(TimeStampedModel):
         """Return the credentials for a service."""
         return self.conf_credentials.get(service, {})
 
-    def get_export_configuration(self, service):
+    def get_export_configuration(self, service, return_json=True):
         """Return the export configuration for a service."""
-        return self.conf_export.get(service, {})
+        if return_json:
+            value = self.conf_export.get(service, None)
+            if value:
+                try:
+                    return json.loads(value)
+                except json.JSONDecodeError:
+                    return {}
+            return {}
+        return self.conf_export.get(service, '')
+
 
     def get_task_configuration(self, service):
         """Return the task configuration for a service."""
