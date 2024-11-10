@@ -314,6 +314,7 @@ class ExportSettingsForm(forms.ModelForm):
     """Form for creating and updating task settings."""
 
     # Define the fields for the form: Google Sheets Connection
+    project_export_configuration = forms.CharField(required=False, widget=forms.Textarea(attrs={'rows': 5}))
     document_export_configuration = forms.CharField(required=False, widget=forms.Textarea(attrs={'rows': 5}))
     page_export_configuration = forms.CharField(required=False, widget=forms.Textarea(attrs={'rows': 5}))
 
@@ -329,17 +330,57 @@ class ExportSettingsForm(forms.ModelForm):
 
         # Populate the fields from `conf_export` JSON if data exists
         conf_export = self.instance.conf_export or {}
+        self.fields['project_export_configuration'].initial = conf_export.get('project_export_configuration', '')
         self.fields['document_export_configuration'].initial = conf_export.get('document_export_configuration', '')
         self.fields['page_export_configuration'].initial = conf_export.get('page_export_configuration', '')
+
+        help_text_html = ('Enter a JSON object to configure the export settings. '
+                          'For each output field, you can specify the source field '
+                          'from the document or page metadata.<br/>Example: <br/>'
+                          '<code>{</code><br/>'
+                          '<code>&nbsp;&nbsp;"id": {"value": "<b>{</b>metadata_key<b>}</b>"}</code><br/>'
+                          '<code>&nbsp;&nbsp;"project": {"value": "Static project title"}</code><br/>'
+                          '<code>&nbsp;&nbsp;"tags": {"value": ""}</code><br/>'
+                          '<code>}</code><br/>')
+        static_keys_html = ("<ul>"
+                            "  <li>tag_list</li>"
+                            "  <li>used_dicts</li>"
+                            "  <li>data_curators</li>"
+                            "  <li>date.today</li>"
+                            "  <li>time.now</li>"
+                            "</ul>")
 
         self.helper.layout = Layout(
             TabHolder(
                 Tab(
-                    'Export Settings',
+                    'Project Export Settings',
                     Row(
-                        Column('document_export_configuration', css_class='col-6'),
-                        Column('page_export_configuration', css_class='col-6'),
-                    ), css_id='export_settings'
+                        Column('project_export_configuration', css_class='col-12'),
+                    ), css_id='project_export_settings'
+                ),
+                Tab(
+                    'Document Export Settings',
+                    Row(
+                        Column('document_export_configuration', css_class='col-12'),
+                    ), css_id='document_export_settings'
+                ),
+                Tab(
+                    'Page Export Settings',
+                    Row(
+                        Column('page_export_configuration', css_class='col-12'),
+                    ), css_id='page_export_settings'
+                ),
+                Tab(
+                    'Help',
+                    Row(
+                        Column(HTML(help_text_html), css_class='col-12'),
+                    ), css_id='export_settings_help'
+                ),
+                Tab(
+                    'Additional Data Fields',
+                    Row(
+                        Column(HTML(static_keys_html), css_class='col-12'),
+                    ), css_id='export_static_keys'
                 ),
             ),
             Div(
@@ -352,6 +393,7 @@ class ExportSettingsForm(forms.ModelForm):
         """Clean and save export data back into the JSONField `conf_export`."""
         cleaned_data = super().clean()
         self.instance.conf_export = {
+            'project_export_configuration': cleaned_data.get('project_export_configuration'),
             'document_export_configuration': cleaned_data.get('document_export_configuration'),
             'page_export_configuration': cleaned_data.get('page_export_configuration')
         }

@@ -98,14 +98,15 @@ class TWFExportDocumentsView(FormView, TWFExportView):
         return kwargs
 
     def form_valid(self, form):
-        """form.save()
+        print("Forms Saved")
+        form.save()
 
         if 'export' in form.cleaned_data:
             project = self.get_project()
             # Start the export process using Celery
             # task = export_data_task.delay(project.id, export_type, export_format, schema)
             # Return the task ID for progress tracking (assuming this view is called via AJAX)
-            return JsonResponse({'status': 'success', 'task_id': 0})"""
+            print('Exporting data...')
         return super().form_valid(form)
 
 
@@ -147,9 +148,25 @@ class TWFExportDictionariesView(TWFExportView):
             filename = f'dictionary_{pk}.json'
             response = HttpResponse(json_str, content_type='application/json')
             response['Content-Disposition'] = f'attachment; filename="{filename}"'
+        elif "export_json_w_uses" in request.POST:
+            json_data = get_dictionary_json_data(pk, include_uses=True)
+            json_str = json.dumps(json_data, indent=4)
+            filename = f'dictionary_{pk}_with_uses.json'
+            response = HttpResponse(json_str, content_type='application/json')
+            response['Content-Disposition'] = f'attachment; filename="{filename}"'
+        elif "export_simple_csv" in request.POST:
+            csv_data = get_dictionary_csv_data(pk, include_metadata=False, include_uses=False)
+            filename = f'dictionary_simple_{pk}.csv'
+            response = HttpResponse(csv_data, content_type='text/csv')
+            response['Content-Disposition'] = f'attachment; filename="{filename}"'
         elif "export_csv" in request.POST:
-            csv_data = get_dictionary_csv_data(pk)
+            csv_data = get_dictionary_csv_data(pk, include_metadata=True, include_uses=False)
             filename = f'dictionary_{pk}.csv'
+            response = HttpResponse(csv_data, content_type='text/csv')
+            response['Content-Disposition'] = f'attachment; filename="{filename}"'
+        elif "export_csv_w_uses" in request.POST:
+            csv_data = get_dictionary_csv_data(pk, include_metadata=True, include_uses=True)
+            filename = f'dictionary_{pk}_with_uses.csv'
             response = HttpResponse(csv_data, content_type='text/csv')
             response['Content-Disposition'] = f'attachment; filename="{filename}"'
         else:

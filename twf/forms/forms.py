@@ -3,8 +3,6 @@ from django import forms
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Submit, Field, Row, Column, HTML, Div, Button
 
-from twf.models import Project
-
 
 class BasicTaskForm(forms.Form):
     """Basic form for a task."""

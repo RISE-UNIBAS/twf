@@ -3,8 +3,6 @@ from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Submit, Column, Div, Row
 from django import forms
 
-from twf.models import Project
-
 
 class ExportDataForm(forms.Form):
     """Form for exporting data."""
