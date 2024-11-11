@@ -1,0 +1,103 @@
+<!-- static_keys.html -->
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Key</th>
+            <th>Description</th>
+            <th colspan="5">Applicable</th>
+            <th>Options</th>
+        </tr>
+        <tr>
+            <th></th>
+            <th></th>
+            <th class="text-center small">Project</th>
+            <th class="text-center small">Document</th>
+            <th class="text-center small">Page</th>
+            <th class="text-center small">Collection</th>
+            <th class="text-center small">Collection Item</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td><code>tag_list</code></td>
+            <td>A list of tags used in the object.</td>
+            <td class="text-center text-success"><i class="fa fa-check"></i></td>
+            <td class="text-center text-success"><i class="fa fa-check"></i></td>
+            <td class="text-center text-success"><i class="fa fa-check"></i></td>
+            <td class="text-center text-danger"><i class="fa fa-times"></i></td>
+            <td class="text-center text-danger"><i class="fa fa-times"></i></td>
+            <td>
+                <ul>
+                    <li><code>style</code>: <span class="badge bg-light text-dark">flat</span> or <span class="badge bg-light text-dark">nested</span> <span class="badge bg-dark small">D</span></li>
+                    <li><code>properties</code>: <span class="badge bg-light text-dark">label</span></li>
+                </ul>
+            </td>
+        </tr>
+        <tr>
+            <td><code>used_dicts</code></td>
+            <td>A list of dictionaries used by the object.</td>
+            <td class="text-center text-success"><i class="fa fa-check"></i></td>
+            <td class="text-center text-success"><i class="fa fa-check"></i></td>
+            <td class="text-center text-danger"><i class="fa fa-times"></i></td>
+            <td class="text-center text-success"><i class="fa fa-check"></i></td>
+            <td class="text-center text-danger"><i class="fa fa-times"></i></td>
+            <td>
+                <ul>
+                    <li><code>style</code>: <span class="badge bg-light text-dark">flat</span></li>
+                    <li><code>properties</code>: <span class="badge bg-light text-dark">id</span>, <span class="badge bg-light text-dark">reference</span></li>
+                </ul>
+            </td>
+        </tr>
+        <tr>
+            <td><code>data_curators</code></td>
+            <td>A list of users which have worked on the object.</td>
+            <td class="text-center text-success"><i class="fa fa-check"></i></td>
+            <td class="text-center text-success"><i class="fa fa-check"></i></td>
+            <td class="text-center text-danger"><i class="fa fa-times"></i></td>
+            <td class="text-center text-success"><i class="fa fa-check"></i></td>
+            <td class="text-center text-success"><i class="fa fa-check"></i></td>
+            <td>
+                <ul>
+                    <li><code>style</code>: <span class="badge bg-light text-dark">flat</span> or <span class="badge bg-light text-dark">nested</span> <span class="badge bg-dark small">D</span></li>
+                    <li><code>properties</code>: 
+                        <span class="badge bg-light text-dark">name</span><span class="badge bg-dark small">D</span>, 
+                        <span class="badge bg-light text-dark">orcid</span><span class="badge bg-dark small">D</span>,
+                        <span class="badge bg-light text-dark">affiliation</span>,
+                        <span class="badge bg-light text-dark">username</span>,
+                        <span class="badge bg-light text-dark">email</span>,
+                        <span class="badge bg-light text-dark">role</span>
+                    </li>
+                </ul>
+            </td>
+        </tr>
+        <tr>
+            <td><code>date.today</code></td>
+            <td>Description for date.today</td>
+            <td class="text-center text-success"><i class="fa fa-check"></i></td>
+            <td class="text-center text-success"><i class="fa fa-check"></i></td>
+            <td class="text-center text-success"><i class="fa fa-check"></i></td>
+            <td class="text-center text-success"><i class="fa fa-check"></i></td>
+            <td class="text-center text-success"><i class="fa fa-check"></i></td>
+            <td>
+                <ul>
+                    <li><code>format</code>: <span class="badge bg-light text-dark">YYYY-MM-DD</span></li>
+                </ul>
+            </td>
+        </tr>
+        <tr>
+            <td><code>time.now</code></td>
+            <td>Description for time.now</td>
+            <td class="text-center text-danger"><i class="fa fa-times"></i></td>
+            <td class="text-center text-success"><i class="fa fa-check"></i></td>
+            <td class="text-center text-success"><i class="fa fa-check"></i></td>
+            <td class="text-center text-success"><i class="fa fa-check"></i></td>
+            <td class="text-center text-danger"><i class="fa fa-times"></i></td>
+            <td>
+                <ul>
+                    <li><code>format</code>: <span class="badge bg-light text-dark">HH:MM:SS</span></li>
+                </ul>
+            </td>
+        </tr>
+    </tbody>
+</table>

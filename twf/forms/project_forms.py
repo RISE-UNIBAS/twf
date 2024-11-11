@@ -1,9 +1,11 @@
+"""Forms for creating and updating project settings."""
 from crispy_forms.bootstrap import TabHolder, Tab
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Submit, Layout, Row, Column, Div, HTML
 from django import forms
 from django.db.models import Subquery
 from django.forms import TextInput
+from django.template.loader import render_to_string
 from django.urls import reverse
 from django_select2.forms import Select2MultipleWidget, Select2Widget
 
@@ -342,22 +344,11 @@ class ExportSettingsForm(forms.ModelForm):
                           '<code>&nbsp;&nbsp;"project": {"value": "Static project title"}</code><br/>'
                           '<code>&nbsp;&nbsp;"tags": {"value": ""}</code><br/>'
                           '<code>}</code><br/>')
-        static_keys_html = ("<ul>"
-                            "  <li>tag_list</li>"
-                            "  <li>used_dicts</li>"
-                            "  <li>data_curators</li>"
-                            "  <li>date.today</li>"
-                            "  <li>time.now</li>"
-                            "</ul>")
+
+        static_keys_html = render_to_string('twf/forms/static_keys_tab.html')
 
         self.helper.layout = Layout(
             TabHolder(
-                Tab(
-                    'Project Export Settings',
-                    Row(
-                        Column('project_export_configuration', css_class='col-12'),
-                    ), css_id='project_export_settings'
-                ),
                 Tab(
                     'Document Export Settings',
                     Row(
@@ -369,6 +360,12 @@ class ExportSettingsForm(forms.ModelForm):
                     Row(
                         Column('page_export_configuration', css_class='col-12'),
                     ), css_id='page_export_settings'
+                ),
+                Tab(
+                    'Project Export Settings',
+                    Row(
+                        Column('project_export_configuration', css_class='col-12'),
+                    ), css_id='project_export_settings'
                 ),
                 Tab(
                     'Help',

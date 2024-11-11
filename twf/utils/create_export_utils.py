@@ -11,7 +11,7 @@ SPECIAL_KEY_CONFIG = {
                  },
     'data_curators': {'style': 'nested',    # 'nested' or 'flat'
                       'used_for': ['document'],  # 'document', 'page', 'project'
-                      'values': ['name', 'orcid']}, # List of values to include: 'name', 'orcid', 'affiliation', 'username', 'email', 'role'
+                      'properties': ['name', 'orcid']}, # List of values to include: 'name', 'orcid', 'affiliation', 'username', 'email', 'role'
 
     }
 
@@ -73,6 +73,7 @@ def get_special_value(special_key, metadata, db_object, mapping):
 
 
 def get_data_curators(object_type, db_object, mapping):
+    """ Get data curators for a document or page object."""
     config = SPECIAL_KEY_CONFIG.get('data_curators', {})
     data_curators = []
     if object_type == 'document':
@@ -92,7 +93,7 @@ def get_data_curators(object_type, db_object, mapping):
     data_curator_data = []
     for data_curator in data_curators:
         data = {}
-        for key in config['values']:
+        for key in config['properties']:
             value = get_nested_value(data_curator, key, "")
             if key == 'name':
                 value = f"{data_curator.first_name} {data_curator.last_name}"
