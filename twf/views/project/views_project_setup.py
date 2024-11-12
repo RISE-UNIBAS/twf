@@ -8,4 +8,10 @@ class TWFProjectSetupView(TWFProjectView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+
+        transkribus_creds = self.get_project().get_credentials('transkribus')
+        if transkribus_creds:
+            context['transkribus_username'] = transkribus_creds['username']
+            context['transkribus_password'] = transkribus_creds['password']
+
         return context

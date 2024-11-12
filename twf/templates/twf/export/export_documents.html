@@ -11,9 +11,20 @@
          <div class="row">
             <div class="col-md-6">
                 
+                {% for group in doc_key_list %}
+                    <div class="bordered-box">
+                        <span class="box-label">{{ group.group }}</span>
+                        <ul>
+                            {% for key, value in group.data.items %}
+                                <li>{{ key }}, {{ value }} </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                {% endfor %}
                 
                 <p>Document data keys:</p>
-                <p class="small">    
+                <p class="small">
+                    {{ doc_key_list|pretty_json }}
                     {{ available_doc_data|pretty_json }}
                 </p>
                 

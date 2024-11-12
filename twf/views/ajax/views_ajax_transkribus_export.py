@@ -14,8 +14,8 @@ def unpack_request(request):
     project_id = request.session.get('project_id')
     project = Project.objects.get(pk=project_id)
     transkribus_credentials = project.get_credentials('transkribus')
-    username = transkribus_credentials.username
-    password = transkribus_credentials.password
+    username = transkribus_credentials['username']
+    password = transkribus_credentials['password']
 
     session_id = get_session_id(username, password)
     return session_id, project

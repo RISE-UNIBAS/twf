@@ -160,3 +160,21 @@ nav > ul.pagination {
     flex-grow: 0;
     margin-right: 10px;
 }
+
+
+/* Bordered box */
+.bordered-box {
+    position: relative;          /* Allows positioning of the label */
+    border: 1px solid #333;      /* Define the border */
+    padding: 20px;               /* Inner padding for content */
+    margin-top: 10px;
+}
+
+.box-label {
+    position: absolute;
+    top: -10px;                  /* Move label above the border */
+    left: 20px;                  /* Position the label horizontally */
+    background-color: #fff;      /* Background to cover border underneath */
+    padding: 0 5px;              /* Small padding on sides */
+    font-weight: bold;           /* Optional: make label bold */
+}

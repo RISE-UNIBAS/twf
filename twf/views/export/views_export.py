@@ -85,6 +85,10 @@ class TWFExportDocumentsView(FormView, TWFExportView):
         
         transformed_metadata, warnings = create_data(sample_document, return_warnings=True)
         context['json_data'] = transformed_metadata
+        doc_key_list = []
+        for key in sample_document.metadata:
+            doc_key_list.append({"group": key, "data": sample_document.metadata[key]})
+        context['doc_key_list'] = doc_key_list
         context['available_doc_data'] = flatten_dict_keys(sample_document.metadata)
         context['available_page_data'] = (flatten_dict_keys(sample_document.pages.first().parsed_data) +
                                           flatten_dict_keys(sample_document.pages.first().metadata))

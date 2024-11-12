@@ -9,7 +9,7 @@
             Your Transkribus collection id is <strong>{{ project.collection_id }}</strong>
         </p>
         
-        {% if not project.transkribus_username or not project.transkribus_password %}
+        {% if not transkribus_username or not transkribus_password %}
             <div class="alert alert-warning" role="alert">
                 <h4 class="alert-heading">Set up authentication data</h4>
                 <p>
@@ -71,8 +71,8 @@
             let tk_job_id = '{{ project.transkribus_job_id }}';
             let has_job_id = !isNaN(Number(tk_job_id));
             
-            let tk_username = '{{ project.transkribus_username }}';
-            let tk_password = '{{ project.transkribus_password }}';
+            let tk_username = '{{ transkribus_username }}';
+            let tk_password = '{{ transkribus_password }}';
             let has_auth_data = tk_username !== '' && tk_username !== 'None' && tk_password !== '' && tk_password !== 'None';
             
             let tk_download_url = '{{ project.downloaded_zip_file }}';
