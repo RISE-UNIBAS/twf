@@ -45,7 +45,9 @@ class TWFProjectView(LoginRequiredMixin, TWFView):
                 'name': 'Setup Project',
                 'options': [
                     {'url': reverse('twf:project_tk_export'), 'value': 'Request Transkribus Export'},
+                    {'url': reverse('twf:project_test_export'), 'value': 'Test Export'},
                     {'url': reverse('twf:project_tk_structure'), 'value': 'Extract Transkribus Export'},
+                    {'url': reverse('twf:project_copy'), 'value': 'Create Copy of Project'},
                 ]
             },
             {
@@ -260,6 +262,16 @@ class TWFProjectOverviewView(TWFProjectView):
             'pagetags_with_dictionaryentry': pagetags_with_dictionaryentry,
             'percentage_with_dictionaryentry': percentage_with_dictionaryentry
         }
+        return context
+
+
+class TWFProjectCopyView(TWFProjectView):
+    """View for copying a project."""
+    template_name = 'twf/project/copy.html'
+    page_title = 'Copy Project'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
         return context
 
 

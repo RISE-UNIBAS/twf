@@ -35,6 +35,21 @@ def start_export(session_id, collection_id):
     return None
 
 
+def start_test_export(session_id, collection_id):
+    """Start an export job for a test document."""
+
+    api_url = "https://transkribus.eu/TrpServer/rest/"
+    export_url = f"{api_url}collections/{collection_id}/export"
+    params = {
+        'format': 'PAGE',
+    }
+    response = requests.post(export_url, json=params, cookies={"JSESSIONID": session_id}, timeout=10)
+
+    if response.status_code == 200:
+        return response.text
+    return None
+
+
 def get_export_status(session_id, job_id):
     """Get the status of an export job."""
 

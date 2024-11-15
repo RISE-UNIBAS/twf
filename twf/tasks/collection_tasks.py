@@ -1,3 +1,4 @@
+""" Celery tasks for creating collections """
 from celery import shared_task
 
 from twf.tasks.task_base import start_task, end_task

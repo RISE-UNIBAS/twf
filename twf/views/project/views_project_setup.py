@@ -15,3 +15,13 @@ class TWFProjectSetupView(TWFProjectView):
             context['transkribus_password'] = transkribus_creds['password']
 
         return context
+
+
+class TWFProjectExportTestView(TWFProjectView):
+    """View for testing the export."""
+    template_name = 'twf/project/test_export.html'
+    page_title = 'Test Export'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        return context

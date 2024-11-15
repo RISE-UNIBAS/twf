@@ -75,3 +75,21 @@ def ajax_transkribus_request_export_status(request):
         project.save(current_user=request.user)
 
     return JsonResponse({'status': 'success', 'data': status}, status=200)
+
+
+@require_http_methods(["POST"])
+@csrf_exempt
+def ajax_transkribus_request_test_pages(request):
+    """ Handles the request to start an export job for testing purposes. """
+
+    session_id, project = unpack_request(request)
+    if session_id is None:
+        return JsonResponse({'status': 'error', 'message': 'Invalid credentials'}, status=401)
+    if project is None:
+        return JsonResponse({'status': 'error', 'message': 'Invalid project ID'}, status=404)
+
+    test_job_id = start_test_export(session_id, project.collection_id)
+    if test_job_id is None:
+        return JsonResponse({'status': 'error', 'message': 'Failed to start export'}, status=500)
+
+    return JsonResponse({'status': 'success', 'job_id': test_job_id}, status=200)

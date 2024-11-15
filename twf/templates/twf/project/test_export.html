@@ -1,0 +1,64 @@
+{% extends 'twf/base/base.html' %}
+{% load static %}
+
+{% block content %}
+    <div class="border rounded bg-light mt-0 p-3">
+        <h1 class="display-6">Test Transkribus Export</h1>
+        <p class="lead">Request a single page from your collection and review parsing results.</p>
+        
+        <div class="row">
+            <div class="col-4">
+                <input id="transkribusTestExport" type="button" role="button" class="btn btn-dark w-100 mb-3" 
+                       value="Request Test Page" onclick="start_test_export()">
+                <div class="col-12 border text-center">Current status:</div>
+                <div class="col-12 border text-center" id="requestJobStatus">Unknown</div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block script %}
+    <script>
+        async function start_test_export() {
+                    
+            // The URL to the Django view that will handle the POST request
+            let url = '/ajax/transkribus/export/request/';
+        
+            // Setup AJAX request
+            await $.ajax({
+                url: url,
+                type: 'POST',
+                data: {
+                    'project_id': project_id,
+                    'username': username,
+                    'password': password,
+                },
+                success: function(response) {
+                    // Handle success
+                    button.prop("value", "Export Requested");
+                    $("#transkribusExportStatus").prop("disabled", false);
+                    $("requestJobStatus").text("Whaaat");
+                },
+                error: function(xhr, errmsg, err) {
+                    // Handle error
+                    button.prop("value", "Error: " + xhr.responseJSON.message + " (Click to Retry)");
+                    button.prop("disabled", false);
+                }
+            });
+        }
+        
+        $(document).ready(function() {
+            let tk_username = '{{ transkribus_username }}';
+            let tk_password = '{{ transkribus_password }}';
+            let has_auth_data = tk_username !== '' && tk_username !== 'None' && tk_password !== '' && tk_password !== 'None';
+            
+            let startExportButton = $('#transkribusTestExport');
+            
+            if(!has_auth_data) {
+                startExportButton.prop('disabled', true);
+            }
+        });
+        
+        
+    </script>
+{% endblock %}

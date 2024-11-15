@@ -47,8 +47,7 @@ def start_geonames_batch(request):
     geonames_credentials = project.get_credentials('geonames')
     dictionary_id = request.GET.get('dictionary_id')
     user_id = request.user.id
-
-    geonames_username = geonames_credentials.username
+    geonames_username = geonames_credentials['username']
     country_restriction = request.GET.get('only_search_in')
     similarity_threshold = request.GET.get('similarity_threshold')
 
@@ -164,4 +163,14 @@ def start_sheet_metadata(request):
 
     # Trigger the task
     task = load_sheets_metadata.delay(project.id, user_id)
+    return JsonResponse({'status': 'success', 'task_id': task.id})
+
+
+def start_test_export_task(request):
+    """Start the test export task."""
+    project = TWFView.s_get_project(request)
+    user_id = request.user.id
+
+    # Trigger the task
+    task = extract_zip_export_task.delay(project.id, user_id)
     return JsonResponse({'status': 'success', 'task_id': task.id})

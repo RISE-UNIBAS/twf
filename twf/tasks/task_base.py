@@ -1,6 +1,6 @@
 """Task base functions. Functions to start, update, end, and fail tasks."""
 from django.utils import timezone
-from twf.models import Task
+from twf.models import Task, Dictionary, User
 
 
 def start_task(broker, project, user_id, title="Task Title",

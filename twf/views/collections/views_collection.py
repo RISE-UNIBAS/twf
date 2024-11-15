@@ -147,12 +147,12 @@ class SplitCollectionItemView(View):
         # Duplicate the base configuration for both new items
         new_item1 = CollectionItem(title=item.title + "(Part 1 of a split)",
                                    collection_id=item.collection_id,
-                                   document_configuration={"parts": first_half},
+                                   document_configuration={"annotations": first_half},
                                    document=item.document)
         new_item1.save(current_user=request.user)
-        new_item2 = CollectionItem(title=item.title + "(Part 1 of a split)",
+        new_item2 = CollectionItem(title=item.title + "(Part 2 of a split)",
                                    collection_id=item.collection_id,
-                                   document_configuration={"parts": second_half},
+                                   document_configuration={"annotations": second_half},
                                    document=item.document)
         new_item2.save(current_user=request.user)
 

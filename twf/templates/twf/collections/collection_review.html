@@ -4,6 +4,7 @@
 
 {% block content %}
     <div class="border rounded bg-light mt-0 p-3">
+        
         <form method="post" action="{% url 'twf:project_collections_item_update' item.id %}">
             {% csrf_token %}
             
@@ -35,7 +36,8 @@
                                 <button type="submit" class="btn btn-dark">&#9986; Split Item</button>
                             </form>
                         {% endif %}
-                    {% endfor %}
+                {% endfor %}
+            
             </ul>
             
             <div>

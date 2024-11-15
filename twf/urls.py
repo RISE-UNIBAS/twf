@@ -36,7 +36,7 @@ from twf.views.metadata.views_metadata import TWFMetadataReviewDocumentsView, \
     TWFMetadataLoadSheetsDataView
 from twf.views.project.views_project import select_project, TWFProjectQueryView, TWFProjectOverviewView, \
     TWFProjectTaskMonitorView, TWFProjectGeneralSettingsView, TWFProjectCredentialsSettingsView, \
-    TWFProjectPromptsView, TWFProjectTaskSettingsView, TWFProjectExportSettingsView
+    TWFProjectPromptsView, TWFProjectTaskSettingsView, TWFProjectExportSettingsView, TWFProjectCopyView
 from twf.views.project.views_project_ai import TWFProjectAIQueryView
 from twf.views.tags.views_tags import TWFTagsView, TWFProjectTagsView, TWFProjectTagsOpenView, \
     TWFProjectTagsParkedView, TWFProjectTagsResolvedView, TWFProjectTagsIgnoredView, TWFTagsDatesGroupView, \
@@ -70,21 +70,24 @@ urlpatterns = [
     path('project/setup/tk/structure/', TWFProjectSetupView.as_view(template_name='twf/project/setup_structure.html',
                                                                     page_title='Project TK Structure'),
          name='project_tk_structure'),
-    path('project/setup/sheets/metadata/', TWFProjectSetupView.as_view(template_name='twf/project/setup_metadata.html',
-                                                                       page_title='Project Sheets Metadata'),
-         name='project_sheets_metadata'),
+    path('project/setup/tk/test/', TWFProjectSetupView.as_view(template_name='twf/project/test_export.html',
+                                                                    page_title='Test Transkribus Export'),
+         name='project_test_export'),
+    path('project/setup/copy/', TWFProjectCopyView.as_view(), name='project_copy'),
 
     path('project/task/monitor/', TWFProjectTaskMonitorView.as_view(), name='project_task_monitor'),
     path('project/prompts/', TWFProjectPromptsView.as_view(), name='project_prompts'),
 
     path('project/settings/general/', TWFProjectGeneralSettingsView.as_view(), name='project_settings_general'),
-    path('project/settings/credentials/', TWFProjectCredentialsSettingsView.as_view(), name='project_settings_credentials'),
+    path('project/settings/credentials/', TWFProjectCredentialsSettingsView.as_view(),
+         name='project_settings_credentials'),
     path('project/settings/tasks/', TWFProjectTaskSettingsView.as_view(), name='project_settings_tasks'),
     path('project/settings/export/', TWFProjectExportSettingsView.as_view(), name='project_settings_export'),
 
     # Project options
     path('project/query/', TWFProjectQueryView.as_view(), name='project_query'),
     path('project/ai/query/', TWFProjectAIQueryView.as_view(), name='project_ai_query'),
+
 
     #############################
     # DOCUMENTS

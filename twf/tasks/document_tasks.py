@@ -8,6 +8,8 @@ from twf.tasks.task_base import start_task, update_task, end_task, fail_task
 
 def get_project_and_user(broker, task, project_id, user_id):
     """Get the project and user objects
+    :param broker: Celery broker
+    :param task: Celery task
     :param project_id: Project ID
     :param user_id: User ID
     :return: Project object, User object, number of documents"""
@@ -53,7 +55,7 @@ def search_openai_for_docs(self, project_id, user_id, prompt, role_description):
     task, percentage_complete = start_task(self, project, user_id, text="Starting OpenAI Search...",
                                            title="Project Documents OpenAI Search")
 
-    project, user, number_of_documents = get_project_and_user(project_id, user_id)
+    project, user, number_of_documents = get_project_and_user(self, task, project_id, user_id)
     client = AiApiClient(api='openai',
                          api_key=openai_credentials.api_key,
                          gpt_role_description=role_description)
