@@ -14,7 +14,7 @@ def create_page_tags(self, project_id, user_id):
     :param user_id: User ID"""
 
     project = Project.objects.get(pk=project_id)
-    task, percentage_complete = start_task(self, project_id, user_id, text="Starting Page Tag Extraction...",
+    task, percentage_complete = start_task(self, project, user_id, text="Starting Page Tag Extraction...",
                                            title="Page Tag Extraction")
 
     try:

@@ -20,7 +20,7 @@ def start_extraction(request):
     return JsonResponse({'status': 'success', 'task_id': task.id})
 
 
-def start_task_creation(request):
+def start_tags_creation(request):
     """Start the extraction process as a Celery task."""
     project = TWFView.s_get_project(request)
     user_id = request.user.id
