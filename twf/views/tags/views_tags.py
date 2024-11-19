@@ -316,12 +316,17 @@ class TWFTagsGroupView(TWFTagsView):
         """Get the context data."""
         context = super().get_context_data(**kwargs)
         tag_types = self.get_tag_types()
-        selected_type = self.request.GET.get('tag_type', tag_types[0])
-        dict_type = selected_type
-        tag_type_translator = self.get_project().get_task_configuration('tag_types').get('tag_type_translator', '')
-        if selected_type in tag_type_translator:
-            dict_type = tag_type_translator[selected_type]
-        unassigned_tag = self.get_next_unassigned_tag(selected_type)
+        selected_type = None
+        dict_type = None
+        unassigned_tag = None
+
+        if len(tag_types) > 0:
+            selected_type = self.request.GET.get('tag_type', tag_types[0])
+            dict_type = selected_type
+            tag_type_translator = self.get_project().get_task_configuration('tag_types').get('tag_type_translator', '')
+            if selected_type in tag_type_translator:
+                dict_type = tag_type_translator[selected_type]
+            unassigned_tag = self.get_next_unassigned_tag(selected_type)
 
         context['tag_types'] = tag_types
         context['selected_type'] = selected_type

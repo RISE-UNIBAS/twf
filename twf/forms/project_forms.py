@@ -200,17 +200,17 @@ class TaskSettingsForm(forms.ModelForm):
                                                                  'placeholder': 'Google Sheet Document Title Column'}))
 
     # Define the fields for the form: Metadata Review Settings
-    page_metadata_review = forms.CharField(required=False, widget=TextInput(attrs={'placeholder': 'Page Metadata Review'}))
-    document_metadata_review = forms.CharField(required=False, widget=TextInput(attrs={'placeholder': 'Document Metadata Review'}))
+    page_metadata_review = forms.CharField(required=False, widget=forms.Textarea(attrs={'rows': 5}))
+    document_metadata_review = forms.CharField(required=False, widget=forms.Textarea(attrs={'rows': 5}))
 
     # Define the fields for the form: Date normalization settings
     date_input_format = forms.CharField(required=False, widget=TextInput(attrs={'placeholder': 'Date Input Format'}))
     resolve_to_date = forms.CharField(required=False, widget=TextInput(attrs={'placeholder': 'Resolve to Precision'}))
 
     # Define the fields for the form: Tag Type Settings
-    tag_type_translator = forms.CharField(required=False, widget=forms.Textarea(attrs={'rows': 3}),
+    tag_type_translator = forms.CharField(required=False, widget=forms.Textarea(attrs={'rows': 5}),
                                             help_text='Enter a JSON object to map tag types to a common format')
-    ignored_tag_types = forms.CharField(required=False, widget=forms.Textarea(attrs={'rows': 3}),
+    ignored_tag_types = forms.CharField(required=False, widget=forms.Textarea(attrs={'rows': 5}),
                                         help_text='Enter a JSON array of tag types to ignore')
 
     class Meta:

@@ -217,8 +217,16 @@ class Project(TimeStampedModel):
         return self.conf_export.get(service, '')
 
 
-    def get_task_configuration(self, service):
+    def get_task_configuration(self, service, return_json=True):
         """Return the task configuration for a service."""
+        if return_json:
+            value = self.conf_tasks.get(service, None)
+            if value:
+                try:
+                    return json.loads(value)
+                except json.JSONDecodeError:
+                    return {}
+            return {}
         return self.conf_tasks.get(service, {})
 
     def get_transkribus_url(self):

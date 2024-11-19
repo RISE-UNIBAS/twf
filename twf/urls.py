@@ -63,15 +63,16 @@ urlpatterns = [
     #############################
     # PROJECT
     path('project/overview/', TWFProjectOverviewView.as_view(), name='project_overview'),
-    path('project/setup/', TWFProjectSetupView.as_view(page_title='Project Setup'), name='project_setup'),
+    path('project/setup/', TWFProjectSetupView.as_view(template_name='twf/project/setup/setup.html',
+                                                       page_title='Project Setup'), name='project_setup'),
     path('project/setup/tk/export/',
-         TWFProjectSetupView.as_view(template_name='twf/project/setup_export.html', page_title='Project TK Export'),
+         TWFProjectSetupView.as_view(template_name='twf/project/setup/setup_export.html', page_title='Project TK Export'),
          name='project_tk_export'),
-    path('project/setup/tk/structure/', TWFProjectSetupView.as_view(template_name='twf/project/setup_structure.html',
+    path('project/setup/tk/structure/', TWFProjectSetupView.as_view(template_name='twf/project/setup/setup_structure.html',
                                                                     page_title='Project TK Structure'),
          name='project_tk_structure'),
-    path('project/setup/tk/test/', TWFProjectSetupView.as_view(template_name='twf/project/test_export.html',
-                                                                    page_title='Test Transkribus Export'),
+    path('project/setup/tk/test/', TWFProjectSetupView.as_view(template_name='twf/project/setup/test_export.html',
+                                                               page_title='Test Transkribus Export'),
          name='project_test_export'),
     path('project/setup/copy/', TWFProjectCopyView.as_view(), name='project_copy'),
 

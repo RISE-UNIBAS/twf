@@ -194,7 +194,7 @@ class TWFProjectExportSettingsView(FormView, TWFProjectView):
 
 class TWFProjectQueryView(FormView, TWFProjectView):
     """View for querying the database."""
-    template_name = 'twf/project/query.html'
+    template_name = 'twf/project/query/query.html'
     page_title = 'SQL Query'
     form_class = QueryDatabaseForm
     results = None
@@ -267,7 +267,7 @@ class TWFProjectOverviewView(TWFProjectView):
 
 class TWFProjectCopyView(TWFProjectView):
     """View for copying a project."""
-    template_name = 'twf/project/copy.html'
+    template_name = 'twf/project/setup/copy.html'
     page_title = 'Copy Project'
 
     def get_context_data(self, **kwargs):
