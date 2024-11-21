@@ -1,0 +1,12 @@
+{% load twf_filters %}
+<form class="inline-form d-flex align-items-center" method="get">
+    {% for field in filter.form.visible_fields %}
+        <div class="form-group me-3">
+            {{ field.label_tag }}
+            {{ field|add_class:"form-control" }}
+        </div>
+    {% endfor %}
+    <div class="submit-group">
+        <button type="submit" class="btn btn-dark">Filter</button>
+    </div>
+</form>

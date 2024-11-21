@@ -1,0 +1,7 @@
+{% load nav_tags %}
+{% for anno in record.document_configuration.annotations %}
+    <div>
+        <p><img src="{{ anno.url }}" alt="Annotation Image"></p>
+        <p>{{ anno.text|nl2br }} ({{ anno.type }})</p>
+    </div>
+{% endfor %}

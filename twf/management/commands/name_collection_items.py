@@ -40,12 +40,19 @@ class Command(BaseCommand):
                     continue
 
                 # Get the text and truncate it to 100 characters without cutting off words
-                full_text = annotations[0]['text']
+                full_text = ""
+                for anno in annotations:
+                    if anno["type"] == "lyrics" or anno["type"] == "heading":
+                        full_text = anno["text"]
+                        break
                 full_text = full_text.replace("\n", " ").replace(" ¶", " ").strip()
                 if full_text.startswith("1.") or full_text.startswith("I."):
                     full_text = full_text[3:].strip()
                 if full_text.startswith("1"):
-                    full_text = full_text[3:].strip()
+                    full_text = full_text[1:].strip()
+                if full_text.startswith("(1.)"):
+                    full_text = full_text[4:].strip()
+
                 full_text = full_text.replace("  ", " ")
 
                 truncated_title = self._truncate_text(full_text, 100)

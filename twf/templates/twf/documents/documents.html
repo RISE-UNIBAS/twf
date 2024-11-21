@@ -1,29 +1,14 @@
 {% extends 'twf/base/base.html' %}
 {% load crispy_forms_tags %}
 {% load render_table from django_tables2 %}
+{% load twf_filters %}
 
 {% block content %}
     <div class="border rounded bg-light mt-0 p-3">
 <div class="container mt-4">
     <h1 class="display-6">{{ page_title }}</h1>
     
-    <form class="inline-form d-flex align-items-center" method="get">
-        <div class="form-group">
-            {{ filter.form.document_id__icontains.label_tag }}
-            {{ filter.form.document_id__icontains }}
-        </div>
-        <div class="form-group">
-            {{ filter.form.title__icontains.label_tag }}
-            {{ filter.form.title__icontains }}
-        </div>
-        <div class="checkbox-group form-group">
-            {{ filter.form.is_parked.label_tag }}
-            {{ filter.form.is_parked }}
-        </div>
-        <div class="submit-group">
-            <button type="submit" class="btn btn-primary">Filter</button>
-        </div>
-    </form>
+    {% twf_filter filter %}
     
     <!-- Document Table -->
     <div class="table-responsive">

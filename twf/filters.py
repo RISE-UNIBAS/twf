@@ -4,7 +4,7 @@ from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Row, Field, Submit
 from django.forms import CheckboxInput
 
-from .models import Document, DictionaryEntry, PageTag
+from .models import Document, DictionaryEntry, PageTag, CollectionItem
 
 
 class TagFilter(django_filters.FilterSet):
@@ -61,20 +61,6 @@ class DocumentFilter(django_filters.FilterSet):
             'is_parked': ['exact'],
         }
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.form.helper = FormHelper()
-        self.form.helper.form_method = 'get'
-        self.form.helper.form_class = 'inline-form d-flex align-items-center'
-
-        self.form.helper.layout = Layout(
-            Row(
-                Field('document_id__icontains', css_class='form-control', wrapper_class='col-4'),
-                Field('title__icontains', css_class='form-control', wrapper_class='col-4'),
-                Field('is_parked', wrapper_class='col-2'),
-                Submit('submit', 'Filter', css_class='btn btn-primary col-2'),
-            )
-        )
 
 class DictionaryEntryFilter(django_filters.FilterSet):
     """Filter for the dictionary entry table."""
@@ -85,3 +71,16 @@ class DictionaryEntryFilter(django_filters.FilterSet):
         fields = {
             'label': ['icontains'],
         }
+
+
+
+class CollectionItemFilter(django_filters.FilterSet):
+    document_id = django_filters.CharFilter(field_name="document__document_id", lookup_expr="icontains",
+                                            label="Document ID")
+    title = django_filters.CharFilter(lookup_expr='icontains', label="Item Title")
+    document_title = django_filters.CharFilter(field_name="document__title", lookup_expr="icontains",
+                                               label="Document Title")
+
+    class Meta:
+        model = CollectionItem
+        fields = ["document_id", "title", "document_title"]

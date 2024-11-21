@@ -178,3 +178,64 @@ nav > ul.pagination {
     padding: 0 5px;              /* Small padding on sides */
     font-weight: bold;           /* Optional: make label bold */
 }
+
+/* Custom Table */
+.annotations-row {
+    background-color: #f9f9f9;
+    font-size: 0.9rem;
+}
+
+/* Annotations Container */
+.annotations-container {
+    max-width: 100%;
+    overflow-x: auto;
+    white-space: nowrap;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    box-sizing: border-box; /* Ensures padding does not break max-width */
+}
+
+/* Annotation Items */
+.annotation-item {
+    display: inline-block;
+    margin-right: 20px;
+    text-align: center;
+    vertical-align: top;
+    font-size: 0.8rem; /* Smaller font for annotations */
+}
+
+/* Annotation Image */
+.annotation-item img {
+    max-width: 100px;
+    max-height: 100px;
+    display: block;
+    margin: 0 auto 5px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+/* Text in Annotation Items */
+.annotation-item p {
+    margin: 0;
+    font-size: 0.8rem; /* Adjust font size for annotation text */
+}
+
+.annotation-item small {
+    font-size: 0.7rem; /* Even smaller for secondary info like type */
+}
+
+/* Ensure the table respects screen width */
+.table {
+    width: 100%;
+    table-layout: fixed; /* Prevent table columns from resizing */
+}
+
+
+tr[data-bs-toggle="collapse"] {
+    cursor: pointer;
+}
+
+tr[data-bs-toggle="collapse"]:hover {
+    background-color: #f1f1f1;
+}

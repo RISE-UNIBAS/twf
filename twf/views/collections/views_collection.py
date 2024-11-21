@@ -5,9 +5,13 @@ from django.shortcuts import redirect
 from django.urls import reverse_lazy, reverse
 from django.views import View
 from django.views.generic import FormView
+from django_filters.views import FilterMixin, FilterView
+from django_tables2 import SingleTableView, SingleTableMixin
 
+from twf.filters import CollectionItemFilter
 from twf.forms.project_forms import CollectionForm, CollectionAddDocumentForm
 from twf.models import CollectionItem, Collection
+from twf.tables.tables_collection import CollectionItemTable
 from twf.views.views_base import TWFView
 
 
@@ -72,17 +76,33 @@ class TWFProjectCollectionsCreateView(FormView, TWFCollectionsView):
         return context
 
 
-class TWFProjectCollectionsDetailView(TWFCollectionsView):
+class TWFProjectCollectionsDetailView(SingleTableView, FilterView, TWFCollectionsView):
     """ View for the collection detail page. """
-    template_name = 'twf/collections/collection_view.html'
-    page_title = 'Collection'
+    template_name = "twf/collections/collection_view.html"
+    page_title = 'View Collection'
+    table_class = CollectionItemTable
+    filterset_class = CollectionItemFilter
+    paginate_by = 10
+    model = CollectionItem
+
+    def get_queryset(self):
+        queryset = CollectionItem.objects.filter(collection_id=self.kwargs.get("pk"))
+        self.filterset = self.filterset_class(self.request.GET, queryset=queryset)
+        self.object_list = self.filterset.qs
+        return self.object_list
+
+    def get(self, request, *args, **kwargs):
+        """Get the view."""
+        self.object_list = self.get_queryset()
+        return super().get(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        collection = Collection.objects.get(pk=self.kwargs.get('pk'))
-        context['collection'] = collection
-        context['items'] = collection.items.all()
+        context['page_title'] = self.page_title
+        context['filter'] = self.get_filterset(self.filterset_class)
         return context
+
+
 
 
 class TWFProjectCollectionsAddDocumentView(FormView, TWFCollectionsView):
