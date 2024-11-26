@@ -1,10 +1,32 @@
 {% extends 'twf/base/base.html' %}
+{% load twf_filters %}
 
 {% block content %}
      <div class="border rounded bg-light mt-0 p-3">
         <h1 class="display-6">Monitor Tasks</h1>
         <p class="lead">All tasks from your project are listed here.</p>
          
+       <form method="get" class="mb-4">
+            <div class="row g-3 align-items-end">
+                <div class="col-md-3">
+                    {{ filter_form.started_by.label_tag }}
+                    {{ filter_form.started_by|add_class:"form-control" }}
+                </div>
+                <div class="col-md-2">
+                    {{ filter_form.status.label_tag }}
+                    {{ filter_form.status|add_class:"form-select" }}
+                </div>
+                <div class="col-md-3">
+                    {{ filter_form.date_range.label_tag }}
+                    {{ filter_form.date_range|add_class:"form-select" }}
+                </div>
+                <div class="col-md-auto ms-auto">
+                    <button type="submit" class="btn btn-dark">Filter</button>
+                </div>
+            </div>
+        </form>
+
+     
         {% for task in tasks %}
             <div class="card mb-3" id="task-card-{{ task.id }}">
                 <div class="card-body">
@@ -43,7 +65,7 @@
                         </div>
                         <button class="btn btn-danger btn-sm" onclick="removeTask({{ task.id }})">Cancel Task</button>
                     {% else %}
-                       <a class="btn btn-dark btn-sm" href="{% url 'twf:celery_task_remove' task.id %}">Remove Task</a>
+                       <a class="btn btn-outline-danger btn-sm" href="{% url 'twf:celery_task_remove' task.id %}">Remove Task</a>
                     {% endif %}
                 </div>
         

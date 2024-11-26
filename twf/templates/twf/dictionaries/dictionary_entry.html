@@ -5,26 +5,11 @@
     <div class="border rounded bg-light mt-0 p-3">
         <h1 class="display-6">
             View "{{ entry.label }}"
-            <a href="{% url 'twf:' %}" class="mt-2 btn btn-outline-dark float-end">Go Back</a>
+           
         </h1>
         <hr/>
         <p class="lead">Text. </p>
         {% render_table table %}
         
     </div>
-    
-    {% for var in entry.variations.all %}
-        <span class="badge bg-light text-dark">{{ var.variation }}</span>
-    {% endfor %}
-
-
-    {% for doc in entry.get_documents.all %}
-        <div class="row">
-            <div class="col-12">
-                <a href="{% url 'twf:view_document' doc.id %}">{{ doc.title }}</a>
-            </div>
-        </div>
-    {% endfor %}
-
-    
 {% endblock %}

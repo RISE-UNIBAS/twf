@@ -28,7 +28,8 @@ from twf.views.views_command import park_tag, unpark_tag, ungroup_tag
 from twf.views.dictionaries.views_dictionaries import TWFDictionaryOverviewView, TWFDictionaryDictionaryView, \
     delete_variation, TWFDictionaryDictionaryEditView, TWFDictionaryDictionaryEntryEditView, \
     TWFDictionaryDictionaryEntryView, \
-    TWFDictionaryNormDataView, TWFDictionaryCreateView, skip_entry, TWFDictionaryDictionariesView
+    TWFDictionaryNormDataView, TWFDictionaryCreateView, skip_entry, TWFDictionaryDictionariesView, TWFDictionaryAddView, \
+    TWFDictionaryMergeEntriesView
 from twf.views.export.views_export import TWFExportDocumentsView, TWFExportCollectionsView, TWFExportProjectView, \
     TWFExportOverviewView, TWFExportTagsView, TWFExportDictionariesView, TWFImportDictionaryView
 from twf.views.metadata.views_metadata import TWFMetadataReviewDocumentsView, \
@@ -40,7 +41,7 @@ from twf.views.project.views_project import select_project, TWFProjectQueryView,
 from twf.views.project.views_project_ai import TWFProjectAIQueryView
 from twf.views.tags.views_tags import TWFTagsView, TWFProjectTagsView, TWFProjectTagsOpenView, \
     TWFProjectTagsParkedView, TWFProjectTagsResolvedView, TWFProjectTagsIgnoredView, TWFTagsDatesGroupView, \
-    TWFTagsGroupView, TWFTagsOverviewView, TWFTagsExtractView
+    TWFTagsGroupView, TWFTagsOverviewView, TWFTagsExtractView, TWFTagsSettingsView
 
 urlpatterns = [
     #############################
@@ -109,7 +110,7 @@ urlpatterns = [
     path('tags/all/', TWFProjectTagsView.as_view(template_name='twf/tags/all_tags.html',
                                                  page_title='All Tags'),
          name='tags_all'),
-    path('tags/settings/', TWFTagsView.as_view(template_name='twf/tags/settings.html'), name='tags_settings'),
+    path('tags/settings/', TWFTagsSettingsView.as_view(), name='tags_settings'),
     path('tags/group/', TWFTagsGroupView.as_view(), name='tags_group'),
     path('tags/dates/', TWFTagsDatesGroupView.as_view(), name='tags_dates'),
     # Tag views
@@ -126,6 +127,7 @@ urlpatterns = [
     # DICTIONARIES
     path('dictionaries/overview', TWFDictionaryOverviewView.as_view(), name='dictionaries_overview'),
     path('dictionaries/', TWFDictionaryDictionariesView.as_view(), name='dictionaries'),
+    path('dictionaries/add/', TWFDictionaryAddView.as_view(), name='dictionaries_add'),
     path('dictionaries/create/', TWFDictionaryCreateView.as_view(), name='dictionary_create'),
     path('dictionaries/<int:pk>/', TWFDictionaryDictionaryView.as_view(), name='dictionaries_view'),
     path('dictionaries/<int:pk>/edit/', TWFDictionaryDictionaryEditView.as_view(), name='dictionaries_edit'),
@@ -135,6 +137,7 @@ urlpatterns = [
     path('dictionaries/entry/<int:pk>/edit/',
          TWFDictionaryDictionaryEntryEditView.as_view(), name='dictionaries_entry_edit'),
     path('dictionaries/normalization/wizard/', TWFDictionaryNormDataView.as_view(), name='dictionaries_normalization'),
+    path('dictionaries/merge/entries/', TWFDictionaryMergeEntriesView.as_view(), name='dictionaries_entry_merging'),
     path('dictionaries/variations/delete/<int:pk>/', delete_variation, name='dictionaries_delete_variation'),
 
     path('dictionaries/batch/gnd/', TWFDictionaryGNDBatchView.as_view(), name='dictionaries_batch_gnd'),

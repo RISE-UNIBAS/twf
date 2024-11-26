@@ -42,8 +42,10 @@ class DateNormalizationForm(forms.Form):
         if not project or not date_tag:
             raise ValueError("Project and date_tag are required.")
 
-        resolve_to = project.date_normalization_configuration.get('resolve_to', 'day')
-        input_date_format = project.date_normalization_configuration.get('input_date_format', 'DMY')
+        conf = project.get_task_configuration("date_normalization")
+
+        resolve_to = conf.get('resolve_to', 'day')
+        input_date_format = conf.get('input_date_format', 'DMY')
         normalized_date = parse_date_string(date_tag.variation, resolve_to=resolve_to, date_format=input_date_format)
 
         self.fields['input_date_format'].initial = input_date_format

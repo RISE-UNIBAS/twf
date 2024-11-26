@@ -12,6 +12,7 @@ from twf.models import Project, User, Document, Page
 from twf.utils.page_file_meta_data_reader import extract_transkribus_file_metadata
 from twf.tasks.task_base import start_task, update_task_percentage, end_task, fail_task
 from twf.utils.file_utils import delete_all_in_folder
+from twf.views.documents.views_project_documents import delete_document
 
 
 @shared_task(bind=True)
@@ -136,8 +137,10 @@ def extract_zip_export_task(self, project_id, user_id):
                     print("ERROR")  # TODO: Handle error
 
         # Delete all documents that were not in the export
+        deleted_documents = 0
         for doc_id in all_existing_documents:
             Document.objects.filter(project=project, document_id=doc_id).delete()
+            deleted_documents += 1
 
         percentage_complete = 66
         task, percentage_complete = update_task_percentage(self, task, f'Processed {processed_documents} documents...',
@@ -174,9 +177,13 @@ def extract_zip_export_task(self, project_id, user_id):
                                                                percentage_complete + percentage_of_parsing/3)
 
         end_task(self, task, 'Transkribus Export Extraction Completed.',
-                 description=f'Transkribus Export Extraction for project "{project.title}". '
-                             f'Extracted {total_files} files, created {created_documents} documents, '
-                             f'processed and parsed {processed_pages} pages.')
+                 description=f'Transkribus Export Extraction for project "{project.title}".',
+                 meta={
+                     "total_files": total_files,
+                     "processed_documents": processed_documents,
+                     "created_documents": created_documents,
+                     "deleted_documents": deleted_documents
+                 })
 
         return {'status': 'completed'}
 

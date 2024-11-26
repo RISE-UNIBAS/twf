@@ -53,32 +53,42 @@ def update_task_percentage(broker, task, text, percentage_complete):
     return task, percentage_complete
 
 
-def end_task(broker, task, text, description=None):
+def end_task(broker, task, text, description=None, meta=None):
     """End the task. Update the Task object and update the state of the Celery broker.
     :param broker: Celery broker
     :param task: Task object
     :param text: Task text
-    :param description: Task description"""
+    :param description: Task description
+    :param meta: Task metadata"""
 
     task.status = 'SUCCESS'
     task.text = text
     if description:
         task.description = description
     task.end_time = timezone.now()
+    if meta:
+        task.meta = meta
+    else:
+        task.meta = {}
     task.save()
     broker.update_state(state='SUCCESS', meta={'current': 100, 'total': 100, 'text': text})
 
 
-def fail_task(broker, task, text):
+def fail_task(broker, task, text, meta=None):
     """Fail the task. Update the Task object and update the state of the Celery broker.
     :param broker: Celery broker
     :param task: Task object
     :param text: Task text
-    :return: Task object"""
+    :return: Task object
+    :param meta: Task metadata"""
 
     task.status = 'FAILURE'
     task.text = text
     task.end_time = timezone.now()
+    if meta:
+        task.meta = meta
+    else:
+        task.meta = {}
     task.save()
     broker.update_state(state='FAILURE', meta={'current': 100, 'total': 100, 'text': text})
     return task

@@ -3,6 +3,15 @@
 {% block content %}
      <div class="border rounded bg-light mt-0 p-3">
         <h1 class="display-6">Tags Settings</h1>
-        No settings implemented.
+        <p class="lead">You applied the following settings to your tag workflows.</p>
+        <p>
+            These are normal tag types: {{ tag_types }}
+        </p>
+         <p>
+            These tag types are excluded and will be ignored: {{ excluded_types }}
+        </p>
+         <p>
+            These tag types are treated as dates: {{ date_types }}
+        </p>
      </div>
 {% endblock %}

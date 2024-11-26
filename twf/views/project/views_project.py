@@ -1,3 +1,4 @@
+from datetime import timedelta
 from statistics import median
 
 from django.contrib import messages
@@ -7,11 +8,12 @@ from django.db.models import Count, Avg, Q
 from django.http import HttpResponseRedirect
 from django.shortcuts import redirect, render
 from django.urls import reverse, reverse_lazy
+from django.utils.timezone import now
 from django.views.generic import FormView
 
 from twf.forms.dynamic_forms import DynamicForm
 from twf.forms.project_forms import QueryDatabaseForm, GeneralSettingsForm, CredentialsForm, \
-    TaskSettingsForm, ExportSettingsForm
+    TaskSettingsForm, ExportSettingsForm, TaskFilterForm, PromptFilterForm
 from twf.models import Document, Page, PageTag
 from twf.utils.project_statistics import get_document_statistics
 from twf.views.views_base import TWFView
@@ -80,19 +82,62 @@ class TWFProjectTaskMonitorView(TWFProjectView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['tasks'] = self.get_project().tasks.all()
+        tasks = self.get_project().tasks.all()
+
+        # Handle filtering
+        filter_form = TaskFilterForm(self.request.GET or None)
+        if filter_form.is_valid():
+            if filter_form.cleaned_data['started_by']:
+                tasks = tasks.filter(user=filter_form.cleaned_data['started_by'])
+            if filter_form.cleaned_data['status']:
+                tasks = tasks.filter(status=filter_form.cleaned_data['status'])
+
+            # Date range filter
+            date_range = filter_form.cleaned_data['date_range']
+            if date_range == "last_week":
+                tasks = tasks.filter(start_time__gte=now() - timedelta(days=7))
+            elif date_range == "last_month":
+                tasks = tasks.filter(start_time__gte=now() - timedelta(days=30))
+            elif date_range == "last_year":
+                tasks = tasks.filter(start_time__gte=now() - timedelta(days=365))
+
+        context['tasks'] = tasks
+        context['filter_form'] = filter_form
         return context
 
 
+
 class TWFProjectPromptsView(TWFProjectView):
-    """View for the project task monitor."""
+    """View for the project prompts."""
     template_name = 'twf/project/prompts.html'
     page_title = 'Prompts'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['prompts'] = self.get_project().prompts.all()
+        prompts = self.get_project().prompts.all()
+
+        # Handle filtering
+        filter_form = PromptFilterForm(self.request.GET or None)
+        if filter_form.is_valid():
+            if filter_form.cleaned_data['system_role']:
+                prompts = prompts.filter(system_role__icontains=filter_form.cleaned_data['system_role'])
+            if filter_form.cleaned_data['has_document_context'] == "yes":
+                prompts = prompts.filter(document_context__isnull=False)
+            elif filter_form.cleaned_data['has_document_context'] == "no":
+                prompts = prompts.filter(document_context__isnull=True)
+            if filter_form.cleaned_data['has_page_context'] == "yes":
+                prompts = prompts.filter(page_context__isnull=False)
+            elif filter_form.cleaned_data['has_page_context'] == "no":
+                prompts = prompts.filter(page_context__isnull=True)
+            if filter_form.cleaned_data['has_collection_context'] == "yes":
+                prompts = prompts.filter(collection_context__isnull=False)
+            elif filter_form.cleaned_data['has_collection_context'] == "no":
+                prompts = prompts.filter(collection_context__isnull=True)
+
+        context['prompts'] = prompts
+        context['filter_form'] = filter_form
         return context
+
 
 
 class TWFProjectGeneralSettingsView(FormView, TWFProjectView):

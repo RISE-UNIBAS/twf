@@ -12,7 +12,6 @@ from django.conf import settings
 from django.db import models
 from django.contrib.auth import get_user_model
 from django.utils import timezone
-from fuzzywuzzy import process
 
 from twf.templatetags.tk_tags import tk_iiif_url, tk_bounding_box
 
@@ -218,10 +217,19 @@ class Project(TimeStampedModel):
 
 
     def get_task_configuration(self, service, return_json=True):
-        """Return the task configuration for a service."""
+        """Return the task configuration for a service.
+        Available services
+        ------------------
+        - google_sheet: The Google Sheet configuration.
+        - metadata_review: The metadata review configuration.
+        - date_normalization: The date normalization configuration.
+        - tag_types: The tag types configuration.
+        """
         if return_json:
             value = self.conf_tasks.get(service, None)
             if value:
+                if isinstance(value, dict):
+                    return value
                 try:
                     return json.loads(value)
                 except json.JSONDecodeError:
@@ -286,6 +294,7 @@ class Task(models.Model):
     title = models.CharField(max_length=255, blank=True, default='')
     description = models.TextField(blank=True, default='')
     text = models.TextField(blank=True, default='')
+    meta = models.JSONField(default=dict, blank=True)
 
     def __str__(self):
         return f"Task - {self.task_id} ({self.status})"
@@ -614,56 +623,6 @@ class PageTag(TimeStampedModel):
         return (f"https://app.transkribus.org/collection/{self.page.document.project.collection_id}/doc/"
                 f"{self.page.document.document_id}/detail/{self.page.tk_page_number}?view=combined")
 
-    def assign_tag(self, user):
-        """Assign the tag to a dictionary entry."""
-        tag_type_translator = self.page.document.project.get_task_configuration('tag_types').get('tag_type_translator', {})
-        try:
-            dictionary_type = self.variation_type
-            if tag_type_translator.get(dictionary_type):
-                dictionary_type = tag_type_translator[dictionary_type]
-            try:
-                entry = Variation.objects.get(
-                    variation=self.variation,
-                    entry__dictionary__in=self.page.document.project.selected_dictionaries.all(),
-                    entry__dictionary__type=dictionary_type)
-            except Variation.MultipleObjectsReturned:
-                # TODO: Handle multiple objects returned
-                entry = Variation.objects.filter(
-                    variation=self.variation,
-                    entry__dictionary__in=self.page.document.project.selected_dictionaries.all(),
-                    entry__dictionary__type=dictionary_type).first()
-
-            self.dictionary_entry = entry.entry
-            self.save(current_user=user)
-            return True
-        except Variation.DoesNotExist:
-            return False
-
-    def get_closest_variations(self):
-        """Return the 5 closest variations to the tag."""
-        tag_type_translator = self.page.document.project.get_task_configuration('tag_types').get('tag_type_translator', {})
-        dict_type = self.variation_type
-        if tag_type_translator.get(dict_type):
-            dict_type = tag_type_translator[dict_type]
-
-        variations = Variation.objects.filter(
-            entry__dictionary__in=self.page.document.project.selected_dictionaries.all(),
-            entry__dictionary__type=dict_type)
-        variations_list = [variation.variation for variation in variations]
-
-        # Using fuzzywuzzy to find the top 5 closest matches
-        top_matches = process.extract(self.variation, variations_list, limit=5)
-
-        # Retrieve the matched Variation objects
-        closest_variations = []
-        for match in top_matches:
-            variation_text, score = match
-            matched_variation = variations.filter(variation=variation_text).first()
-            if matched_variation:
-                closest_variations.append((matched_variation, score))
-
-        return closest_variations
-
     def __str__(self):
         """Return the string representation of the PageTag."""
         return f"{self.variation_type}: {self.variation} ({self.page.document.project.title})"
@@ -761,7 +720,7 @@ class Collection(TimeStampedModel):
     project = models.ForeignKey(Project, related_name='collections', on_delete=models.CASCADE)
     """The project this collection belongs to."""
 
-    title = models.CharField(max_length=100)
+    title = models.CharField(max_length=255)
     """The title of the collection. This is descriptive and should be unique within the project."""
 
     description = models.TextField(blank=True, default='')
@@ -771,6 +730,9 @@ class Collection(TimeStampedModel):
         """Return the string representation of the Collection."""
         return self.title
 
+    class Meta:
+        """Meta options for the Collection model."""
+        ordering = ['title']
 
 class CollectionItem(TimeStampedModel):
     """
@@ -812,7 +774,7 @@ class CollectionItem(TimeStampedModel):
     document_configuration = models.JSONField(default=dict, blank=True)
     """The configuration of the document in the collection."""
 
-    title = models.CharField(max_length=100)
+    title = models.CharField(max_length=255)
     """The title of the item."""
 
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='open')

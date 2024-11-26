@@ -1,9 +1,10 @@
 # pylint: disable=too-few-public-methods
 """This module contains the tables for displaying documents and dictionary entries."""
 import django_tables2 as tables
+from django.urls import reverse
 from django.utils.safestring import mark_safe
 
-from twf.models import DictionaryEntry, Dictionary, Variation
+from twf.models import DictionaryEntry, Dictionary, Variation, PageTag, Document
 
 
 class DictionaryTable(tables.Table):
@@ -66,8 +67,36 @@ class DictionaryEntryTable(tables.Table):
 class DictionaryEntryVariationTable(tables.Table):
     """Table for displaying dictionary entries."""
 
-    options = tables.TemplateColumn(template_name='twf/tables/dictionary_entry_variation_table_options.html',
-                                    verbose_name="Options", orderable=False, attrs={"td": {"width": "10%"}})
+    information = tables.Column(accessor="id", verbose_name="Options", orderable=False, attrs={"td": {"width": "10%"}})
+
+    def __init__(self, *args, **kwargs):
+        self.project = kwargs.pop("project", None)
+        super().__init__(*args, **kwargs)
+
+    from django.urls import reverse
+
+    def render_information(self, value, record):
+        """Renders the information column with the number of entries and the number of variations."""
+        variation_usage_count = PageTag.objects.filter(
+            page__document__project=self.project, variation=record.variation
+        ).count()
+
+        documents = (
+            Document.objects.filter(
+                project=self.project, pages__tags__variation=record.variation
+            )
+            .distinct()
+        )
+
+        # Generate document links using reverse()
+        document_links = " | ".join(
+            f'<a href="{reverse("twf:view_document", args=[doc.pk])}">{doc.title or doc.document_id}</a>'
+            for doc in documents
+        )
+
+        return mark_safe(
+            f"Usages: {variation_usage_count} <br/> Documents: {document_links}"
+        )
 
     class Meta:
         """Meta class for the DictionaryEntryTable."""

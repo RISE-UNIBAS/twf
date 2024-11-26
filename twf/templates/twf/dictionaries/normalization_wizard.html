@@ -3,6 +3,8 @@
 {% block content %}
     <div class="border rounded bg-light mt-0 p-3">
         <h1 class="display-6">Enhance at a Glance</h1>
+        <p class="lead">Enrich the dictionary entries with metadata. </p>
+    
         {% include 'twf/dictionaries/dict_types.html' %}
 
         {%  if next_unenriched_entry %}
@@ -43,7 +45,7 @@
                     {% include 'twf/dictionaries/norm_wizard/tab_geonames.html' %}
                     {% include 'twf/dictionaries/norm_wizard/tab_gnd.html' %}
                     {% include 'twf/dictionaries/norm_wizard/tab_wikidata.html' %}
-                    {% include 'twf/dictionaries/norm_wizard/tab_openai.html' %}
+                    {# include 'twf/dictionaries/norm_wizard/tab_openai.html' #}
                 </div>
                 <!-- Tabs content -->
             </div>

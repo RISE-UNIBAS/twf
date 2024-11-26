@@ -57,7 +57,7 @@
                                 <span class="badge bg-dark mt-2">New</span>
                             </div>
                             <div class="col-3">
-                                <input type="text" name="new_entry_label" class="form-control"/>
+                                <input type="text" name="new_entry_label" class="form-control" value="{{ tag.variation }}"/>
                             </div>
                             <div class="col-5 small mt-2">
                                 Create entry and add: "<i>{{ tag.variation }}</i>"
@@ -73,9 +73,9 @@
                                 <span class="badge bg-dark mt-2">Add</span>
                             </div>
                             <div class="col-3">
-                                <select name="selected_entry" class="form-control" aria-label="Selected Entry">
+                               <select name="selected_entry" class="form-control select2" aria-label="Selected Entry">
                                     <option value="">Select Entry</option>
-                                    {% for option in variations %}
+                                    {% for option in dict_entries %}
                                         <option value="{{ option.id }}">{{ option }}</option>
                                     {% endfor %}
                                 </select>
@@ -119,4 +119,16 @@
         
      
      </div>
+{% endblock %}
+
+{% block script %}
+    <script>
+        $(document).ready(function() {
+            $('.select2').select2({
+                width: '100%',
+                placeholder: "Select an entry",
+                allowClear: true
+            });
+        });
+    </script>
 {% endblock %}

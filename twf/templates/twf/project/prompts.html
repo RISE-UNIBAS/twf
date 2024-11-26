@@ -1,7 +1,51 @@
 {% extends 'twf/base/base.html' %}
+{% load twf_filters %}
 
 {% block content %}
     <div class="border rounded bg-light mt-0 p-3">
-    
+        <h1 class="display-6">Monitor Prompts</h1>
+        <p class="lead">All prompts from your project are listed here.</p>
+
+        <!-- Filter Form -->
+        <form method="get" class="mb-4">
+            <div class="row g-3 align-items-end">
+                <div class="col-md-4">
+                    {{ filter_form.system_role.label_tag }}
+                    {{ filter_form.system_role|add_class:"form-control" }}
+                </div>
+                <div class="col-md-2">
+                    {{ filter_form.has_document_context.label_tag }}
+                    {{ filter_form.has_document_context|add_class:"form-select" }}
+                </div>
+                <div class="col-md-2">
+                    {{ filter_form.has_page_context.label_tag }}
+                    {{ filter_form.has_page_context|add_class:"form-select" }}
+                </div>
+                <div class="col-md-2">
+                    {{ filter_form.has_collection_context.label_tag }}
+                    {{ filter_form.has_collection_context|add_class:"form-select" }}
+                </div>
+                <div class="col-md-auto ms-auto">
+                    <button type="submit" class="btn btn-dark">Filter</button>
+                </div>
+            </div>
+        </form>
+
+        <!-- Prompt List -->
+        <div>
+            {% for prompt in prompts %}
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ prompt.system_role }}</h5>
+                        <p class="card-text">{{ prompt.prompt }}</p>
+                        <p>
+                            <strong>Document Context:</strong> {{ prompt.document_context.count }}<br>
+                            <strong>Page Context:</strong> {{ prompt.page_context.count }}<br>
+                            <strong>Collection Context:</strong> {{ prompt.collection_context.count }}
+                        </p>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
     </div>
 {% endblock %}

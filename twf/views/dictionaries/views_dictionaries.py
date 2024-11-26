@@ -30,8 +30,8 @@ class TWFDictionaryView(LoginRequiredMixin, TWFView):
                 'options': [
                     {'url': reverse('twf:dictionaries_overview'), 'value': 'Overview'},
                     {'url': reverse('twf:dictionaries'), 'value': 'Dictionaries'},
+                    {'url': reverse('twf:dictionaries_add'), 'value': 'Add Dictionaries'},
                     {"url": reverse('twf:dictionary_create'), "value": "Create New Dictionary"},
-                    {'url': reverse('twf:dictionaries_normalization'), 'value': 'Norm Data Wizard'},
                 ]
             },
             {
@@ -50,6 +50,13 @@ class TWFDictionaryView(LoginRequiredMixin, TWFView):
                     {'url': reverse('twf:dictionaries_request_wikidata'), 'value': 'Wikidata'},
                     {'url': reverse('twf:dictionaries_request_geonames'), 'value': 'Geonames'},
                     {'url': reverse('twf:dictionaries_request_openai'), 'value': 'Open AI'},
+                ]
+            },
+            {
+                'name': 'Manual Workflows',
+                'options': [
+                    {'url': reverse('twf:dictionaries_normalization'), 'value': 'Manual Assignment'},
+                    {'url': reverse('twf:dictionaries_entry_merging'), 'value': 'Merge Entries'},
                 ]
             }
         ]
@@ -99,6 +106,23 @@ class TWFDictionaryDictionariesView(SingleTableView, TWFDictionaryView):
     def get_queryset(self):
         project = self.get_project()
         return project.selected_dictionaries.all()
+
+    def get(self, request, *args, **kwargs):
+        self.object_list = self.get_queryset()
+        context = self.get_context_data()
+        return self.render_to_response(context)
+
+
+class TWFDictionaryAddView(SingleTableView, TWFDictionaryView):
+    """View for the dictionary overview."""
+    template_name = 'twf/dictionaries/dictionaries_add.html'
+    page_title = 'Add Dictionaries'
+    table_class = DictionaryTable
+    paginate_by = 10
+    model = Dictionary
+
+    def get_queryset(self):
+        return Dictionary.objects.all()
 
     def get(self, request, *args, **kwargs):
         self.object_list = self.get_queryset()
@@ -176,6 +200,9 @@ class TWFDictionaryDictionaryEntryView(SingleTableView, TWFDictionaryView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        table = self.table_class(self.object_list, project=self.get_project())
+        context['table'] = table
+
         context['page_title'] = self.page_title
         context['entry'] = DictionaryEntry.objects.get(pk=self.kwargs.get('pk'))
         return context
@@ -238,7 +265,7 @@ class TWFDictionaryNormDataView(TWFDictionaryView):
         context['form_geonames'] = EnrichEntryForm(search_term=label, form_name='geonames')
         context['form_gnd'] = EnrichEntryForm(search_term=label, form_name='gnd')
         context['form_wikidata'] = EnrichEntryForm(search_term=label, form_name='wikidata')
-        context['form_openai'] = GeonamesBatchForm()
+        # context['form_openai'] = GeonamesBatchForm()
 
         return context
 
@@ -246,6 +273,68 @@ class TWFDictionaryNormDataView(TWFDictionaryView):
         dictionary = self.get_project().selected_dictionaries.get(type=selected_dict)
         entry = dictionary.entries.filter(authorization_data={}).order_by('modified_at').first()
         return entry
+
+
+class TWFDictionaryMergeEntriesView(TWFDictionaryView):
+    """Normalization Data Wizard."""
+    template_name = 'twf/dictionaries/merge_entries.html'
+    page_title = 'Merge Dictionary Entries'
+
+    def post(self, request, *args, **kwargs):
+        """Handle the POST request to merge entries."""
+        remaining_entry_id = request.POST.get('remaining_entry')
+        merge_entry_id = request.POST.get('merge_entry')
+
+        if not remaining_entry_id or not merge_entry_id:
+            messages.error(request, "Both entries must be selected.")
+            return redirect(self.request.path)
+
+        if remaining_entry_id == merge_entry_id:
+            messages.error(request, "You cannot merge an entry into itself.")
+            return redirect(self.request.path)
+
+        try:
+            remaining_entry = DictionaryEntry.objects.get(pk=remaining_entry_id)
+            merge_entry = DictionaryEntry.objects.get(pk=merge_entry_id)
+        except DictionaryEntry.DoesNotExist:
+            messages.error(request, "One of the selected entries does not exist.")
+            return redirect(self.request.path)
+
+        # Update all PageTags pointing to the entry to merge
+        PageTag.objects.filter(dictionary_entry=merge_entry).update(dictionary_entry=remaining_entry)
+
+        # Optionally, merge other fields like notes or authorization data
+        remaining_entry.notes += f"\nMerged Notes:\n{merge_entry.notes}"
+        for key, value in merge_entry.authorization_data.items():
+            if key not in remaining_entry.authorization_data:
+                remaining_entry.authorization_data[key] = value
+
+        remaining_entry.save()
+        merge_entry.delete()  # Delete the merged entry
+
+        messages.success(request, f"Successfully merged entry '{merge_entry}' into '{remaining_entry}'.")
+        return redirect(self.request.path)
+
+    def get_context_data(self, **kwargs):
+        """Get the context data."""
+        context = super().get_context_data(**kwargs)
+        project = self.get_project()
+
+        # Get all dictionaries in the project
+        dictionaries = project.selected_dictionaries.all()
+
+        # Fetch all entries from these dictionaries
+        entries = DictionaryEntry.objects.filter(dictionary__in=dictionaries).select_related('dictionary').order_by(
+            'dictionary__label', 'label')
+
+        # Add formatted entries for display
+        formatted_entries = [
+            {'id': entry.id, 'label': f"{entry.dictionary.label} - {entry.label}"}
+            for entry in entries
+        ]
+
+        context['entries'] = formatted_entries
+        return context
 
 
 class TWFDictionaryDictionaryEntryEditView(FormView, TWFDictionaryView):

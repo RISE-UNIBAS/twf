@@ -5,7 +5,7 @@ from io import StringIO
 import pandas as pd
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.db.models import Count, Avg
+from django.db.models import Count
 from django.http import HttpResponse
 from django.shortcuts import redirect
 from django.urls import reverse, reverse_lazy
@@ -19,6 +19,8 @@ from twf.filters import TagFilter
 from twf.forms.tags_forms import DateNormalizationForm
 from twf.models import PageTag, DateVariation, Dictionary, DictionaryEntry, Variation
 from twf.tables.tables_tags import TagTable
+from twf.utils.tags_utils import get_date_types, get_all_tag_types, get_translated_tag_type, get_excluded_types, \
+    get_closest_variations
 from twf.views.views_base import TWFView
 
 
@@ -66,41 +68,6 @@ class TWFTagsView(LoginRequiredMixin, TWFView):
     def get_navigation_index(self):
         """Get the navigation index."""
         return 3
-
-    def get_tag_types(self):
-        """Get the distinct tag types."""
-        project = self.get_project()
-        distinct_variation_types = (
-            PageTag.objects.filter(page__document__project=project)
-            .exclude(variation_type__in=self.get_excluded_types())
-            .exclude(variation_type__in=self.get_date_types())
-            .values('variation_type')
-            .annotate(count=Count('variation_type'))
-            .order_by('variation_type')
-        )
-
-        # Extracting the distinct variation types from the queryset
-        distinct_variation_types_list = [item['variation_type'] for item in distinct_variation_types]
-        return distinct_variation_types_list
-
-    def get_excluded_types(self):
-        """Get the excluded tag types."""
-        project = self.get_project()
-        try:
-            excluded = project.get_task_configuration('task_types').get('ignored_tag_types', [])
-        except KeyError:
-            excluded = []
-        return excluded
-
-    def get_date_types(self):
-        """Get the date tag types."""
-        project = self.get_project()
-        try:
-            date_types = project.get_task_configuration('task_types').get('ignored_tag_types', []) # TODO Change
-        except KeyError:
-            date_types = []
-
-        return date_types
 
     def get_context_data(self, **kwargs):
         """Get the context data."""
@@ -176,7 +143,7 @@ class TWFTagsOverviewView(TWFTagsView):
         for variation in variation_type_edit_counts:
             variation['percentage'] = (variation['count'] / total_pagetags * 100) if total_pagetags > 0 else 0
 
-            if variation['variation_type'] in self.get_date_types():
+            if variation['variation_type'] in get_date_types(project):
                 variation['grouped'] = PageTag.objects.filter(
                     page__document__project=project,
                     variation_type=variation['variation_type'],
@@ -230,6 +197,21 @@ class TWFTagsOverviewView(TWFTagsView):
         return context
 
 
+class TWFTagsSettingsView(TWFTagsView):
+    template_name = 'twf/tags/settings.html'
+    page_title = 'Tag Settings'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        project = self.get_project()
+        task_configurations = project.get_task_configuration("tag_types")
+        context['task_configurations'] = task_configurations
+        context['tag_types'] = get_all_tag_types(project)
+        context['excluded_types'] = get_excluded_types(project)
+        context['date_types'] = get_date_types(project)
+        return context
+
+
 class TWFTagsGroupView(TWFTagsView):
     """View for the tag grouping wizard."""
     template_name = 'twf/tags/grouping.html'
@@ -237,8 +219,6 @@ class TWFTagsGroupView(TWFTagsView):
 
     def post(self, request, *args, **kwargs):
         """Handle the post request."""
-
-        project = self.get_project()
 
         # Create a new dictionary entry
         if 'create_new' in request.POST:
@@ -315,17 +295,15 @@ class TWFTagsGroupView(TWFTagsView):
     def get_context_data(self, **kwargs):
         """Get the context data."""
         context = super().get_context_data(**kwargs)
-        tag_types = self.get_tag_types()
+        project = self.get_project()
+        tag_types = get_all_tag_types(project)
         selected_type = None
         dict_type = None
         unassigned_tag = None
 
         if len(tag_types) > 0:
             selected_type = self.request.GET.get('tag_type', tag_types[0])
-            dict_type = selected_type
-            tag_type_translator = self.get_project().get_task_configuration('tag_types').get('tag_type_translator', '')
-            if selected_type in tag_type_translator:
-                dict_type = tag_type_translator[selected_type]
+            dict_type = get_translated_tag_type(project, selected_type)
             unassigned_tag = self.get_next_unassigned_tag(selected_type)
 
         context['tag_types'] = tag_types
@@ -333,12 +311,14 @@ class TWFTagsGroupView(TWFTagsView):
         context['selected_dict_type'] = dict_type
         context['tag'] = unassigned_tag
         if unassigned_tag:
-            context['closest'] = unassigned_tag.get_closest_variations()
+            context['closest'] = get_closest_variations(unassigned_tag)
         try:
-            context['dictionary'] = self.get_project().selected_dictionaries.get(type=dict_type)
+            dictionary = self.get_project().selected_dictionaries.get(type=dict_type)
+            context['dictionary'] = dictionary
+            context['dict_entries'] = DictionaryEntry.objects.filter(dictionary=dictionary).order_by('label')
         except Dictionary.DoesNotExist:
             context['dictionary'] = None
-
+            context['dict_entries'] = []
         return context
 
 
@@ -392,14 +372,14 @@ class TWFProjectTagsView(SingleTableMixin, FilterView, TWFTagsView):
     def get_filterset(self, filterset_class):
         """Get the filterset."""
         project = self.get_project()
-        excluded = self.get_excluded_types()
+        excluded = get_excluded_types(project)
         return filterset_class(self.request.GET, queryset=self.get_queryset(),
                                project=project, excluded=excluded)
 
     def get_queryset(self):
         """Get the queryset."""
         project = self.get_project()
-        excluded_types = self.get_excluded_types()
+        excluded_types = get_excluded_types(project)
 
         base_queryset = PageTag.objects.filter(
             page__document__project=project
@@ -433,7 +413,7 @@ class TWFProjectTagsOpenView(TWFProjectTagsView):
 
     def get_queryset(self):
         project = self.get_project()
-        excluded = self.get_excluded_types()
+        excluded = get_excluded_types(project)
         queryset = self.model.objects.filter(page__document__project=project,
                                              dictionary_entry=None,
                                              is_parked=False).exclude(variation_type__in=excluded)
@@ -451,7 +431,7 @@ class TWFProjectTagsParkedView(TWFProjectTagsView):
 
     def get_queryset(self):
         project = self.get_project()
-        excluded = self.get_excluded_types()
+        excluded = get_excluded_types(project)
         queryset = self.model.objects.filter(page__document__project=project,
                                          dictionary_entry=None,
                                          is_parked=True).exclude(variation_type__in=excluded)
@@ -469,13 +449,13 @@ class TWFProjectTagsResolvedView(TWFProjectTagsView):
 
     def get_queryset(self):
         project = self.get_project()
-        excluded = self.get_excluded_types()
+        excluded = get_excluded_types(project)
         queryset1 = self.model.objects.filter(page__document__project=project,
                                               dictionary_entry__isnull=False,
                                               is_parked=False).exclude(variation_type__in=excluded)
         queryset2 = self.model.objects.filter(page__document__project=project,
                                               date_variation_entry__isnull=False,
-                                              variation_type__in=self.get_date_types(),
+                                              variation_type__in=get_date_types(project),
                                               is_parked=False).exclude(variation_type__in=excluded)
         queryset = queryset1 | queryset2
         self.filterset = self.filterset_class(self.request.GET, queryset=queryset,
@@ -493,7 +473,7 @@ class TWFProjectTagsIgnoredView(TWFProjectTagsView):
     def get_queryset(self):
         """Get the queryset."""
         project = self.get_project()
-        excluded = self.get_excluded_types()
+        excluded = get_excluded_types(project)
         queryset = self.model.objects.filter(page__document__project=project,
                                              variation_type__in=excluded)
         self.filterset = self.filterset_class(self.request.GET, queryset=queryset,
@@ -525,9 +505,10 @@ class TWFTagsDatesGroupView(FormView, TWFTagsView):
     def get(self, request, *args, **kwargs):
         """Override the get method to handle no more tags scenario."""
         # Check for the next available date tag
+        project = self.get_project()
         next_date = PageTag.objects.filter(
-            page__document__project=self.get_project(),
-            variation_type__in=self.get_date_types(),
+            page__document__project=project,
+            variation_type__in=get_date_types(project),
             is_parked=False,
             date_variation_entry__isnull=True
         ).first()
@@ -543,8 +524,9 @@ class TWFTagsDatesGroupView(FormView, TWFTagsView):
         """Get the form kwargs."""
         kwargs = super().get_form_kwargs()
 
-        next_date = PageTag.objects.filter(page__document__project=self.get_project(),
-                                           variation_type__in=self.get_date_types(),
+        project = self.get_project()
+        next_date = PageTag.objects.filter(page__document__project=project,
+                                           variation_type__in=get_date_types(project),
                                            is_parked=False,
                                            date_variation_entry__isnull=True).first()
 
@@ -555,8 +537,9 @@ class TWFTagsDatesGroupView(FormView, TWFTagsView):
     def get_context_data(self, **kwargs):
         """Get the context data."""
         context = super().get_context_data(**kwargs)
-        context['has_next_tag'] = PageTag.objects.filter(page__document__project=self.get_project(),
-                                                         variation_type__in=self.get_date_types(),
+        project = self.get_project()
+        context['has_next_tag'] = PageTag.objects.filter(page__document__project=project,
+                                                         variation_type__in=get_date_types(project),
                                                          is_parked=False,
                                                          date_variation_entry__isnull=True).exists()
         return context
