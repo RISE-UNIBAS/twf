@@ -31,21 +31,21 @@ def load_sheets_metadata(self, project_id, user_id):
     sheets_configuration = project.get_task_configuration('google_sheet')
     auth_json = 'transkribusWorkflow/google_key.json'
     table_data = GoogleSheetsClient.get_data_from_spreadsheet(auth_json,
-                                                              sheets_configuration.sheet_id,
-                                                              sheets_configuration.range)
+                                                              sheets_configuration["sheet_id"],
+                                                              sheets_configuration["range"])
     title_row = table_data[0]
     table_data = table_data[1:]
     processed_table_lines = 0
     total_table_lines = len(table_data)
-    doc_id_column_index = title_row.index(sheets_configuration.document_id_column)
+    doc_id_column_index = title_row.index(sheets_configuration["document_id_column"])
 
     valid_cols = []
-    valid_cols_str = sheets_configuration.valid_columns
+    valid_cols_str = sheets_configuration["valid_columns"]
     if valid_cols_str:
         valid_cols = valid_cols_str.split(',')
 
     for table_line in table_data:
-        special_cols = [sheets_configuration.document_title_column,]
+        special_cols = [sheets_configuration["document_title_column"],]
         cols_to_check = project.valid_cols + special_cols
         doc_id = int(table_line[doc_id_column_index])
         try:
@@ -55,7 +55,7 @@ def load_sheets_metadata(self, project_id, user_id):
                 try:
                     index = title_row.index(column)
                     value = table_line[index]
-                    if column == sheets_configuration.document_title_column:
+                    if column == sheets_configuration["document_title_column"]:
                         doc.title = value
                     else:
                         doc.metadata['google_sheets'][column] = value
