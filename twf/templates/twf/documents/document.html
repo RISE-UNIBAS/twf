@@ -23,7 +23,21 @@
                                 </tr>
                                 <tr>
                                     <td>Tags in the document</td>                                
-                                    <td> </td>
+                                    <td>
+                                        {% for page in document.pages.all %}
+                                            {% for tag in page.tags.all %}
+                                                {% if tag.dictionary_entry %}
+                                                    <span class="badge bg-success">{{ tag.variation }}: {{ tag.dictionary_entry }}</span>
+                                                {% else %}
+                                                    <span class="badge bg-danger">{{ tag.variation }}</span>
+                                                {% endif %}
+                                            {% endfor %}
+                                        {% endfor %}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Open in Transkribus</td>                                
+                                    <td> <a href="{{ document.get_transkribus_url }}" target="_blank">{{ document.get_transkribus_url }}</a></td>
                                 </tr>
                             </table>
                         </div>

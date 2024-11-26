@@ -300,19 +300,31 @@ class TWFDictionaryMergeEntriesView(TWFDictionaryView):
             messages.error(request, "One of the selected entries does not exist.")
             return redirect(self.request.path)
 
-        # Update all PageTags pointing to the entry to merge
+        # Step 1: Transfer PageTags
         PageTag.objects.filter(dictionary_entry=merge_entry).update(dictionary_entry=remaining_entry)
 
-        # Optionally, merge other fields like notes or authorization data
+        # Step 2: Transfer Variations
+        merge_variations = merge_entry.variations.all()
+        for variation in merge_variations:
+            # Reassign the variation to the remaining entry
+            variation.entry = remaining_entry
+            variation.save()
+
+        # Step 3: Merge notes and authorization data
         remaining_entry.notes += f"\nMerged Notes:\n{merge_entry.notes}"
         for key, value in merge_entry.authorization_data.items():
             if key not in remaining_entry.authorization_data:
                 remaining_entry.authorization_data[key] = value
 
         remaining_entry.save()
-        merge_entry.delete()  # Delete the merged entry
 
-        messages.success(request, f"Successfully merged entry '{merge_entry}' into '{remaining_entry}'.")
+        # Step 4: Delete the merged entry
+        merge_entry.delete()
+
+        messages.success(
+            request,
+            f"Successfully merged entry '{merge_entry.label}' into '{remaining_entry.label}'."
+        )
         return redirect(self.request.path)
 
     def get_context_data(self, **kwargs):
@@ -357,12 +369,30 @@ class TWFDictionaryDictionaryEntryEditView(FormView, TWFDictionaryView):
         return context
 
     def form_valid(self, form):
-        # Save the form
-        form.instance.save(current_user=self.request.user)
-        # Add a success message
-        messages.success(self.request, 'Dictionary Entry settings have been updated successfully.')
-        # Redirect to the success URL
-        return super().form_valid(form)
+        # Check if the delete button was pressed
+        if 'delete_entry' in self.request.POST:
+            # Delete the entry
+            entry = form.instance
+            entry.delete()
+
+            # Add a success message
+            messages.success(self.request, 'Dictionary Entry has been deleted successfully.')
+
+            # Redirect to the success URL
+            return redirect(self.success_url)
+
+        # If the save button was pressed, save the form
+        if 'save_entry' in self.request.POST:
+            form.instance.save(current_user=self.request.user)
+
+            # Add a success message
+            messages.success(self.request, 'Dictionary Entry settings have been updated successfully.')
+
+            # Redirect to the success URL
+            return super().form_valid(form)
+
+        # If neither button matches, fallback to the default behavior
+        return super().form_invalid(form)
 
 
 def delete_variation(request, pk):

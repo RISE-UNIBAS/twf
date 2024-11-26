@@ -56,7 +56,8 @@ class DictionaryEntryForm(forms.ModelForm):
                 Column('authorization_data', css_class='form-group col-md-12 mb-0'),
             ),
             Div(
-                Submit('submit', 'Save Dictionary Entry', css_class='btn btn-dark'),
+                Submit('delete_entry', 'Delete Dictionary Entry', css_class='btn btn-danger'),
+                Submit('save_entry', 'Save Dictionary Entry', css_class='btn btn-dark'),
                 css_class='text-end pt-3'
             )
         )

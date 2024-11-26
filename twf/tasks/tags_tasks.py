@@ -4,6 +4,7 @@ from django.utils import timezone
 
 from twf.models import Project, Page, PageTag, User
 from twf.tasks.task_base import start_task, update_task, end_task, fail_task
+from twf.utils.tags_utils import assign_tag
 
 
 @shared_task(bind=True)
@@ -22,10 +23,12 @@ def create_page_tags(self, project_id, user_id):
         extracting_user = User.objects.get(pk=user_id)
         pages = Page.objects.filter(document__project=project).order_by('document__document_id', 'tk_page_number')
 
-        total_pages = len(pages)
+        total_pages = pages.count()
         processed_pages = 0
         assigned_tags = 0
         total_tags = 0
+        task, percentage_complete = update_task(self, task, f'Extracting {total_pages} pages...',
+                                                processed_pages, total_pages)
 
         for page in pages:
             PageTag.objects.filter(page=page).delete()
@@ -43,7 +46,7 @@ def create_page_tags(self, project_id, user_id):
                         del tag["text"]
                         tag = PageTag(page=page, variation=text, variation_type=tag["type"],
                                       additional_information=tag)
-                        is_assigned = tag.assign_tag(extracting_user)
+                        is_assigned = assign_tag(tag, extracting_user)
                         if is_assigned:
                             assigned_tags += 1
                         total_tags += 1

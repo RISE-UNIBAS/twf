@@ -78,11 +78,9 @@ def get_closest_variations(page_tag):
 
 def assign_tag(page_tag, user):
     """Assign the tag to a dictionary entry."""
-    tag_type_translator = page_tag.page.document.project.get_task_configuration('tag_types').get('tag_type_translator', {})
     try:
         dictionary_type = page_tag.variation_type
-        if tag_type_translator.get(dictionary_type):
-            dictionary_type = tag_type_translator[dictionary_type]
+        dictionary_type = get_translated_tag_type(page_tag.page.document.project, dictionary_type)
         try:
             entry = Variation.objects.get(
                 variation=page_tag.variation,
