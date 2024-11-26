@@ -17,6 +17,7 @@ Contents:
    modules/introduction/who-is-twf-for.rst
    modules/introduction/example-applications.rst
 
+
 .. toctree::
    :maxdepth: 2
    :caption: Core Parts:
@@ -28,6 +29,18 @@ Contents:
    modules/parts/dictionaries.rst
    modules/parts/collections.rst
    modules/parts/export.rst
+
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Core Parts:
+
+    modules/workflows/project.rst
+    modules/workflows/documents.rst
+    modules/workflows/tags.rst
+    modules/workflows/metadata.rst
+    modules/workflows/dictionaries.rst
+
 
 .. toctree::
    :maxdepth: 2
