@@ -46,7 +46,7 @@ def load_sheets_metadata(self, project_id, user_id):
 
     for table_line in table_data:
         special_cols = [sheets_configuration["document_title_column"],]
-        cols_to_check = project.valid_cols + special_cols
+        cols_to_check = valid_cols + special_cols
         doc_id = int(table_line[doc_id_column_index])
         try:
             doc = Document.objects.get(document_id=doc_id)
