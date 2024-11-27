@@ -33,13 +33,13 @@ Contents:
 
 .. toctree::
    :maxdepth: 2
-   :caption: Core Parts:
+   :caption: Workflows:
 
-    modules/workflows/project.rst
-    modules/workflows/documents.rst
-    modules/workflows/tags.rst
-    modules/workflows/metadata.rst
-    modules/workflows/dictionaries.rst
+   modules/workflows/project.rst
+   modules/workflows/documents.rst
+   modules/workflows/tags.rst
+   modules/workflows/metadata.rst
+   modules/workflows/dictionaries.rst
 
 
 .. toctree::
