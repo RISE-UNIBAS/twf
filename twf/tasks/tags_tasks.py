@@ -1,4 +1,5 @@
 """This module contains the Celery tasks for extracting tags from the parsed data of the pages."""
+import copy
 from celery import shared_task
 from django.utils import timezone
 
@@ -43,9 +44,10 @@ def create_page_tags(self, project_id, user_id):
                         print("NO TEXT?", tag)  # TODO Fix me
                     else:
                         text = tag["text"].strip()
-                        del tag["text"]
+                        copy_of_tag = copy.deepcopy(tag)
+                        copy_of_tag.pop("text")
                         tag = PageTag(page=page, variation=text, variation_type=tag["type"],
-                                      additional_information=tag)
+                                      additional_information=copy_of_tag)
                         is_assigned = assign_tag(tag, extracting_user)
                         if is_assigned:
                             assigned_tags += 1

@@ -1,7 +1,6 @@
 """Tests for the twf app."""
 from django.test import TestCase
 
-from twf.clients.simple_ai_clients import AiApiClient
 from twf.models import Document, Project, User
 
 

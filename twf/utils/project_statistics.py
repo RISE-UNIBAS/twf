@@ -7,9 +7,11 @@ from twf.models import Document, Page, PageTag, Dictionary, Collection
 
 def get_document_statistics(project):
     """Get statistics for documents."""
+
     total_documents = project.documents.count()
     total_pages = Page.objects.filter(document__project=project).count()
-    average_pages_per_document = Page.objects.filter(document__project=project).values('document').annotate(count=Count('id')).aggregate(Avg('count'))
+    average_pages_per_document = (Page.objects.filter(document__project=project).values('document').
+                                  annotate(count=Count('id')).aggregate(Avg('count')))
     ignored_pages = Page.objects.filter(document__project=project, is_ignored=True).count()
     largest_document = (Document.objects.annotate(num_pages=Count('pages'))
                         .filter(project=project).order_by('-num_pages').first())
@@ -29,6 +31,7 @@ def get_document_statistics(project):
 
 def get_tag_statistics(project):
     """Get statistics for tags."""
+
     total_tags = PageTag.objects.filter(page__document__project=project).count()
     return {
         'total_tags': total_tags
@@ -36,6 +39,8 @@ def get_tag_statistics(project):
 
 
 def get_dictionary_statistics(project):
+    """Get statistics for dictionaries."""
+
     # Total number of dictionaries
     total_dictionaries = Dictionary.objects.count()
 
@@ -85,6 +90,7 @@ def get_dictionary_statistics(project):
 
 
 def get_collection_statistics():
+    """Get statistics for collections in a project."""
     # Example: total number of collections
     total_collections = Collection.objects.count()
     return {
@@ -93,11 +99,13 @@ def get_collection_statistics():
 
 
 def get_import_export_statistics():
+    """Get statistics for import/export operations."""
     # Here you can add stats for import/export operations if tracked
     pass
 
 
 def gather_statistics():
+    """Gather statistics for a project."""
     return {
         'documents': get_document_statistics(),
         'tags': get_tag_statistics(),

@@ -2,7 +2,7 @@
 from celery import shared_task
 
 from twf.clients.simple_ai_clients import AiApiClient
-from twf.models import Dictionary, User, Project
+from twf.models import User, Project
 from twf.tasks.task_base import start_task, update_task, end_task, fail_task
 
 

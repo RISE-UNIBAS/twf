@@ -1,3 +1,4 @@
+"""Views for the metadata section of the TWF application."""
 import json
 
 from django.contrib import messages
@@ -17,6 +18,7 @@ class TWFMetadataView(LoginRequiredMixin, TWFView):
     page_title = 'Metadata Overview'
 
     def get_context_data(self, **kwargs):
+        """Get the context data."""
         context = super().get_context_data(**kwargs)
         return context
 
@@ -48,6 +50,7 @@ class TWFMetadataView(LoginRequiredMixin, TWFView):
         return sub_nav
 
     def get_navigation_index(self):
+        """Get the navigation index."""
         return 4
 
 
@@ -57,6 +60,7 @@ class TWFMetadataOverviewView(TWFMetadataView):
     page_title = 'Metadata Overview'
 
     def get_context_data(self, **kwargs):
+        """Get the context data."""
         context = super().get_context_data(**kwargs)
         project = self.get_project()
 
@@ -72,18 +76,19 @@ class TWFMetadataOverviewView(TWFMetadataView):
         context['page_count'] = pages_with_metadata_count
         context['page_total_count'] = pages.count()
 
-
         return context
 
 
 class TWFMetadataLoadDataView(FormView, TWFMetadataView):
     """View for loading metadata from a JSON file."""
+
     template_name = 'twf/metadata/load_data.html'
     page_title = 'Load Metadata'
     form_class = LoadMetadataForm
     success_url = reverse_lazy('twf:metadata_load_metadata')
 
     def form_valid(self, form):
+        """Process the form data."""
         form.is_valid()
 
         # Get the project
@@ -138,15 +143,14 @@ class TWFMetadataLoadDataView(FormView, TWFMetadataView):
 
 class TWFMetadataLoadSheetsDataView(FormView, TWFMetadataView):
     """View for loading metadata from Google Sheets."""
+
     template_name = 'twf/metadata/load_sheets_data.html'
     page_title = 'Load Google Sheets Metadata'
     form_class = LoadSheetsMetadataForm
     success_url = reverse_lazy('twf:metadata_load_metadata')
 
-    def form_valid(self, form):
-        super().form_valid(form)
-
     def get_form_kwargs(self):
+        """Get the form kwargs."""
         kwargs = super().get_form_kwargs()
         kwargs['project'] = self.get_project()
         return kwargs
@@ -154,6 +158,7 @@ class TWFMetadataLoadSheetsDataView(FormView, TWFMetadataView):
 
 class TWFMetadataExtractTagsView(FormView, TWFMetadataView):
     """View for extracting metadata values."""
+
     template_name = 'twf/metadata/extract.html'
     page_title = 'Extract Metadata Values'
     form_class = ExtractMetadataValuesForm
@@ -197,14 +202,17 @@ class TWFMetadataExtractTagsView(FormView, TWFMetadataView):
         return super().form_valid(form)
 
     def get_example_keys(self):
+        """Get example keys for the metadata."""
         return ['dbid', 'docid', 'title', 'author', 'date', 'language', 'genre', 'keywords', 'notes']
 
     def get_context_data(self, **kwargs):
+        """Get the context data."""
         context = super().get_context_data(**kwargs)
         context['found_key'] = self.get_example_keys()
         return context
 
     def get_form_kwargs(self):
+        """Get the form kwargs."""
         kwargs = super().get_form_kwargs()
         kwargs['project'] = self.get_project()
         return kwargs
@@ -212,35 +220,42 @@ class TWFMetadataExtractTagsView(FormView, TWFMetadataView):
 
 class TWFMetadataReviewPagesView(FormView, TWFMetadataView):
     """View for reviewing page metadata."""
+
     template_name = 'twf/metadata/review_page.html'
     page_title = 'Review Page Metadata'
     form_class = DynamicForm
     success_url = reverse_lazy('twf:metadata_review_pages')
 
     def get_next_page(self):
+        """Get the next page to review."""
         try:
-            next_page = Page.objects.filter(document__project=self.get_project()).exclude(metadata={}).order_by('modified_at').first()
+            next_page = (Page.objects.filter(document__project=self.get_project()).
+                         exclude(metadata={}).order_by('modified_at').first())
         except Page.DoesNotExist:
             next_page = None
         return next_page
 
     def get_context_data(self, **kwargs):
+        """Get the context data."""
         context = super().get_context_data(**kwargs)
         context['page'] = self.get_next_page()
         return context
 
     def get_form_kwargs(self):
+        """Get the form kwargs."""
         metadata = {}
         next_page = self.get_next_page()
         if next_page:
             metadata = next_page.metadata
 
         kwargs = super().get_form_kwargs()
-        kwargs['json_config'] = self.get_project().get_task_configuration('metadata_review').get('page_metadata_review', {})
+        kwargs['json_config'] = (self.get_project().get_task_configuration('metadata_review').
+                                 get('page_metadata_review', {}))
         kwargs['json_data'] = metadata
         return kwargs
 
     def form_valid(self, form):
+        """Process the form data."""
         # Save the metadata
         form.is_valid()
         config = self.get_project().get_task_configuration('metadata_review').get('page_metadata_review', {})
@@ -291,35 +306,42 @@ def set_nested_value(d, keys, value):
 
 class TWFMetadataReviewDocumentsView(FormView, TWFMetadataView):
     """View for reviewing document metadata."""
+
     template_name = 'twf/metadata/review_document.html'
     page_title = 'Review Document Metadata'
     form_class = DynamicForm
     success_url = reverse_lazy('twf:metadata_review_documents')
 
     def get_next_document(self):
+        """Get the next document to review."""
         try:
-            next_page = Document.objects.filter(project=self.get_project()).exclude(metadata={}).order_by('modified_at').first()
+            next_page = (Document.objects.filter(project=self.get_project()).
+                         exclude(metadata={}).order_by('modified_at').first())
         except Document.DoesNotExist:
             next_page = None
         return next_page
 
     def get_context_data(self, **kwargs):
+        """Get the context data."""
         context = super().get_context_data(**kwargs)
         context['document'] = self.get_next_document()
         return context
 
     def get_form_kwargs(self):
+        """Get the form kwargs."""
         metadata = {}
         next_page = self.get_next_document()
         if next_page:
             metadata = next_page.metadata
 
         kwargs = super().get_form_kwargs()
-        kwargs['json_config'] = self.get_project().get_task_configuration('metadata_review').get('document_metadata_review', {})
+        kwargs['json_config'] = (self.get_project().get_task_configuration('metadata_review').
+                                 get('document_metadata_review', {}))
         kwargs['json_data'] = metadata
         return kwargs
 
     def form_valid(self, form):
+        """Process the form data."""
         # Get the cleaned form data
         cleaned_data = form.cleaned_data
 

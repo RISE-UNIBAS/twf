@@ -227,15 +227,22 @@ class TaskSettingsForm(forms.ModelForm):
         conf_tasks = self.instance.conf_tasks or {}
         self.fields['google_sheet_id'].initial = conf_tasks.get('google_sheet', {}).get('sheet_id', '')
         self.fields['google_sheet_range'].initial = conf_tasks.get('google_sheet', {}).get('range', '')
-        self.fields['google_sheet_valid_columns'].initial = conf_tasks.get('google_sheet', {}).get('valid_columns', '')
-        self.fields['google_sheet_document_id_column'].initial = conf_tasks.get('google_sheet', {}).get('document_id_column', '')
-        self.fields['google_sheet_document_title_column'].initial = conf_tasks.get('google_sheet', {}).get('document_title_column', '')
+        self.fields['google_sheet_valid_columns'].initial = conf_tasks.get('google_sheet',
+                                                                           {}).get('valid_columns', '')
+        self.fields['google_sheet_document_id_column'].initial = conf_tasks.get('google_sheet',
+                                                                                {}).get('document_id_column', '')
+        self.fields['google_sheet_document_title_column'].initial = conf_tasks.get('google_sheet',
+                                                                                   {}).get('document_title_column', '')
 
-        self.fields['page_metadata_review'].initial = conf_tasks.get('metadata_review', {}).get('page_metadata_review', '')
-        self.fields['document_metadata_review'].initial = conf_tasks.get('metadata_review', {}).get('document_metadata_review', '')
+        self.fields['page_metadata_review'].initial = conf_tasks.get('metadata_review',
+                                                                     {}).get('page_metadata_review', '')
+        self.fields['document_metadata_review'].initial = conf_tasks.get('metadata_review',
+                                                                         {}).get('document_metadata_review', '')
 
-        self.fields['date_input_format'].initial = conf_tasks.get('date_normalization', {}).get('date_input_format', '')
-        self.fields['resolve_to_date'].initial = conf_tasks.get('date_normalization', {}).get('resolve_to_date', '')
+        self.fields['date_input_format'].initial = conf_tasks.get('date_normalization',
+                                                                  {}).get('date_input_format', '')
+        self.fields['resolve_to_date'].initial = conf_tasks.get('date_normalization',
+                                                                {}).get('resolve_to_date', '')
 
         self.fields['tag_type_translator'].initial = conf_tasks.get('tag_types', {}).get('tag_type_translator', '')
         self.fields['ignored_tag_types'].initial = conf_tasks.get('tag_types', {}).get('ignored_tag_types', '')
@@ -430,7 +437,8 @@ class AIQueryDatabaseForm(forms.Form):
                 css_class='row form-row'
             ),
             Div(
-                HTML(f'<a href="{reverse("twf:project_ai_query")}" class="btn btn-dark color-light me-2">Clear</a>'),
+                HTML(f'<a href="{reverse("twf:project_ai_query")}" class="btn btn-dark '
+                     f'color-light me-2">Clear</a>'),
                 Submit('submit', 'Ask Question', css_class='btn btn-dark'),
                 css_class='text-end pt-3'
             )
@@ -468,7 +476,8 @@ class QueryDatabaseForm(forms.Form):
                 css_class='row form-row'
             ),
             Div(
-                HTML(f'<a href="{reverse("twf:project_query")}" class="btn btn-dark color-light me-2">Clear</a>'),
+                HTML(f'<a href="{reverse("twf:project_query")}" class="btn btn-dark '
+                     f'color-light me-2">Clear</a>'),
                 Submit('submit', 'Execute Query', css_class='btn btn-dark'),
                 css_class='text-end pt-3'
             )
@@ -544,6 +553,8 @@ class CollectionAddDocumentForm(forms.Form):
 
 
 class TaskFilterForm(forms.Form):
+    """Form for filtering tasks."""
+
     started_by = forms.ModelChoiceField(
         queryset=User.objects.all(),
         required=False,
@@ -567,6 +578,8 @@ class TaskFilterForm(forms.Form):
 
 
 class PromptFilterForm(forms.Form):
+    """Form for filtering prompts."""
+
     system_role = forms.CharField(
         required=False,
         label="System Role",

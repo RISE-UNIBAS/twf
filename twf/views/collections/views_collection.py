@@ -5,8 +5,8 @@ from django.shortcuts import redirect
 from django.urls import reverse_lazy, reverse
 from django.views import View
 from django.views.generic import FormView
-from django_filters.views import FilterMixin, FilterView
-from django_tables2 import SingleTableView, SingleTableMixin
+from django_filters.views import FilterView
+from django_tables2 import SingleTableView
 
 from twf.filters import CollectionItemFilter
 from twf.forms.project_forms import CollectionForm, CollectionAddDocumentForm
@@ -17,15 +17,18 @@ from twf.views.views_base import TWFView
 
 class TWFCollectionsView(LoginRequiredMixin, TWFView):
     """ View for the project collections page. """
+
     template_name = 'twf/collections/collections.html'
     page_title = 'Project Collections'
 
     def get_context_data(self, **kwargs):
+        """Get the context data for the view."""
         context = super().get_context_data(**kwargs)
         context['collections'] = Collection.objects.filter(project_id=self.request.session.get('project_id'))
         return context
 
     def get_sub_navigation(self):
+        """Get the sub-navigation for the view."""
         sub_nav = [
             {
                 'name': 'Overview',
@@ -50,17 +53,20 @@ class TWFCollectionsView(LoginRequiredMixin, TWFView):
         return sub_nav
 
     def get_navigation_index(self):
+        """Get the index of the navigation item."""
         return 6
 
 
 class TWFProjectCollectionsCreateView(FormView, TWFCollectionsView):
     """ View for creating a new collection. """
+
     template_name = 'twf/collections/collections_create.html'
     page_title = 'Create New Collection'
     form_class = CollectionForm
     success_url = reverse_lazy('twf:collections')
 
     def form_valid(self, form):
+        """Save the form and redirect to the success URL."""
         # Save the form
         self.object = form.save(commit=False)
         self.object.project_id = self.request.session.get('project_id')
@@ -72,12 +78,14 @@ class TWFProjectCollectionsCreateView(FormView, TWFCollectionsView):
         return super().form_valid(form)
 
     def get_context_data(self, **kwargs):
+        """Get the context data for the view."""
         context = super().get_context_data(**kwargs)
         return context
 
 
 class TWFProjectCollectionsDetailView(SingleTableView, FilterView, TWFCollectionsView):
     """ View for the collection detail page. """
+
     template_name = "twf/collections/collection_view.html"
     page_title = 'View Collection'
     table_class = CollectionItemTable
@@ -86,6 +94,7 @@ class TWFProjectCollectionsDetailView(SingleTableView, FilterView, TWFCollection
     model = CollectionItem
 
     def get_queryset(self):
+        """Get the queryset for the view."""
         queryset = CollectionItem.objects.filter(collection_id=self.kwargs.get("pk"))
         self.filterset = self.filterset_class(self.request.GET, queryset=queryset)
         self.object_list = self.filterset.qs
@@ -97,22 +106,23 @@ class TWFProjectCollectionsDetailView(SingleTableView, FilterView, TWFCollection
         return super().get(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
+        """Get the context data for the view."""
         context = super().get_context_data(**kwargs)
         context['page_title'] = self.page_title
         context['filter'] = self.get_filterset(self.filterset_class)
         return context
 
 
-
-
 class TWFProjectCollectionsAddDocumentView(FormView, TWFCollectionsView):
     """ View for adding a document to a collection. """
+
     template_name = 'twf/collections/collections_add_doc.html'
     page_title = 'Add Document To Collection'
     form_class = CollectionAddDocumentForm
     success_url = reverse_lazy('twf:collections')
 
     def form_valid(self, form):
+        """Save the form and redirect to the success URL."""
         # Save the form
         doc = form.cleaned_data['document']
         collection = Collection.objects.get(pk=self.kwargs.get('pk'))
@@ -126,12 +136,14 @@ class TWFProjectCollectionsAddDocumentView(FormView, TWFCollectionsView):
         return super().form_valid(form)
 
     def get_form_kwargs(self):
+        """Get the form keyword arguments."""
         kwargs = super().get_form_kwargs()
         # Add your custom argument here
         kwargs['collection'] = Collection.objects.get(pk=self.kwargs.get('pk'))
         return kwargs
 
     def get_context_data(self, **kwargs):
+        """Get the context data for the view."""
         context = super().get_context_data(**kwargs)
         return context
 
@@ -157,6 +169,7 @@ class SplitCollectionItemView(View):
     """ View for splitting a collection item into two parts. """
 
     def post(self, request, pk, part_id):
+        """ Split the collection item into two parts. """
         item = CollectionItem.objects.get(pk=pk)
         parts = item.document_configuration["annotations"]
 

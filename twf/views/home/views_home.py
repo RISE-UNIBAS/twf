@@ -1,3 +1,4 @@
+"""Views for the home section of the TWF application."""
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import Group

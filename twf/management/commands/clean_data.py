@@ -1,5 +1,4 @@
-import json
-
+"""Management command to clean metadata from all pages in a project."""
 from django.contrib.auth.models import User
 from django.core.management import BaseCommand
 
@@ -7,7 +6,7 @@ from twf.models import Project, Page
 
 
 class Command(BaseCommand):
-    """Management command to import dictionaries from a CSV file."""
+    """Management command to clean metadata from all pages in a project."""
     help = 'Imports PAGE metadata from a CSV file'
 
     def add_arguments(self, parser):

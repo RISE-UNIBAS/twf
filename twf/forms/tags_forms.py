@@ -1,3 +1,4 @@
+"""Forms for tags."""
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Row, Column, HTML, Div, Submit, Field
 from django import forms

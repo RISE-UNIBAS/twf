@@ -27,6 +27,7 @@ class TimeStampedModel(models.Model):
     TimeStampedModel
     ----------------
     An abstract base class model that provides self-updating 'created' and 'modified' fields.
+    Most models in the app extend this class to provide these fields.
 
     Attributes
     ~~~~~~~~~~
@@ -274,6 +275,8 @@ class Task(models.Model):
         The description of the task.
     text : TextField
         The text of the task.
+    meta : JSONField
+        Additional metadata for the task.
     """
 
     TASK_STATUS_CHOICES = [
@@ -286,15 +289,34 @@ class Task(models.Model):
     ]
 
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name="tasks")
+    """The project this task belongs to."""
+
     user = models.ForeignKey(User, on_delete=models.RESTRICT, related_name="tasks")
+    """The user who created the task."""
+
     task_id = models.CharField(max_length=255, unique=True)
+    """The ID of the Celery task."""
+
     status = models.CharField(max_length=10, choices=TASK_STATUS_CHOICES, default='PENDING')
+    """The status of the task."""
+
     start_time = models.DateTimeField(default=timezone.now)
+    """The time the task was started."""
+
     end_time = models.DateTimeField(null=True, blank=True)
+    """The time the task was completed."""
+
     title = models.CharField(max_length=255, blank=True, default='')
+    """The title of the task."""
+
     description = models.TextField(blank=True, default='')
+    """The description of the task."""
+
     text = models.TextField(blank=True, default='')
+    """The text of the task."""
+
     meta = models.JSONField(default=dict, blank=True)
+    """Additional metadata for the task."""
 
     def __str__(self):
         return f"Task - {self.task_id} ({self.status})"

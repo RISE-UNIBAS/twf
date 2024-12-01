@@ -1,3 +1,4 @@
+"""Management command to normalize collection item configurations."""
 from django.core.management import BaseCommand
 from twf.models import CollectionItem
 

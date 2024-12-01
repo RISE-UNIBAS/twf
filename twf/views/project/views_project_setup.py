@@ -1,4 +1,4 @@
-
+"""Views for the project setup."""
 from twf.views.project.views_project import TWFProjectView
 
 

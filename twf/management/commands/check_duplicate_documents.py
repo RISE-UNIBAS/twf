@@ -1,10 +1,13 @@
+""" Management command to check for duplicate documents in a project. """
 from django.core.management.base import BaseCommand
 from twf.models import Document, CollectionItem
 from django.db.models import Count
 
 
 class Command(BaseCommand):
-    help = "Check for duplicate documents in a specific project and provide detailed information. Optionally delete duplicates."
+    """ Management command to check for duplicate documents in a project. """
+    help = ("Check for duplicate documents in a specific project and "
+            "provide detailed information. Optionally delete duplicates.")
 
     def add_arguments(self, parser):
         parser.add_argument(
@@ -19,6 +22,7 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **options):
+        """ Handle the management command. """
         project_id = options['project_id']
         delete_duplicates = options['delete']
 

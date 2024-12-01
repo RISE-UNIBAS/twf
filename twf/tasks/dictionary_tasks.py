@@ -154,6 +154,7 @@ def search_gnd_entry(self, project, dictionary_id, user_id):
 
 @shared_task(bind=True)
 def search_geonames_entry(self, project, dictionary_id, user_id):
+    """Search for a single entry in the Geonames API"""
     try:
         # Fetch the dictionary
         dictionary = Dictionary.objects.get(id=dictionary_id)
@@ -176,6 +177,7 @@ def search_geonames_entry(self, project, dictionary_id, user_id):
 
 @shared_task(bind=True)
 def search_wikidata_entry(self, project, dictionary_id, user_id):
+    """Search for a single entry in the Wikidata API"""
     try:
         # Fetch the dictionary
         dictionary = Dictionary.objects.get(id=dictionary_id)
@@ -198,6 +200,7 @@ def search_wikidata_entry(self, project, dictionary_id, user_id):
 
 @shared_task(bind=True)
 def search_openai_entry(self, project, dictionary_id, user_id):
+    """Search for a single entry in the Openai API"""
     try:
         # Fetch the dictionary
         dictionary = Dictionary.objects.get(id=dictionary_id)

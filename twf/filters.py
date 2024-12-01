@@ -1,9 +1,6 @@
 """Filter classes for the twf app."""
 import django_filters
-from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, Row, Field, Submit
 from django.forms import CheckboxInput
-
 from .models import Document, DictionaryEntry, PageTag, CollectionItem
 
 
@@ -54,6 +51,7 @@ class DocumentFilter(django_filters.FilterSet):
     )
 
     class Meta:
+        """Meta class for the document filter."""
         model = Document
         fields = {
             'document_id': ['icontains'],
@@ -75,6 +73,8 @@ class DictionaryEntryFilter(django_filters.FilterSet):
 
 
 class CollectionItemFilter(django_filters.FilterSet):
+    """Filter for the collection item table."""
+
     document_id = django_filters.CharFilter(field_name="document__document_id", lookup_expr="icontains",
                                             label="Document ID")
     title = django_filters.CharFilter(lookup_expr='icontains', label="Item Title")
@@ -82,5 +82,6 @@ class CollectionItemFilter(django_filters.FilterSet):
                                                label="Document Title")
 
     class Meta:
+        """Meta class for the collection item filter."""
         model = CollectionItem
         fields = ["document_id", "title", "document_title"]

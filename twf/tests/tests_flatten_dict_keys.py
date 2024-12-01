@@ -1,9 +1,11 @@
+""" Test cases for the flatten_dict_keys function in create_export_utils.py."""
 from django.test import TestCase
 
-from twf.export_utils import flatten_dict_keys
+from twf.utils.create_export_utils import flatten_dict_keys
 
 
 class FlattenDictKeysTest(TestCase):
+    """ Test case for the flatten_dict_keys function."""
 
     def setUp(self):
         # Example inputs for testing

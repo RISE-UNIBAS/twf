@@ -1,3 +1,4 @@
+"""Tests for the date_utils module."""
 from django.test import TestCase
 
 from twf.utils.date_utils import parse_date_string
@@ -5,7 +6,9 @@ from twf.utils.date_utils import parse_date_string
 
 class TestDateUtils(TestCase):
     """Test the tag_assigner function."""
+
     def test_date_parsing(self):
+        """Test the date parsing function."""
 
         test_data = [
             # date_str,           to_day       to_month       to_year
@@ -24,6 +27,8 @@ class TestDateUtils(TestCase):
             self.assertEqual(parse_date_string(date_str, "year"), to_year)
 
     def test_confusable_dates(self):
+        """Test the date parsing function with confusable dates."""
+
         test_dmy_data = [
             # date_str,           to_day       to_month       to_year
             ("1.12.1782", "1782-12-01", "1782-12", "1782"),

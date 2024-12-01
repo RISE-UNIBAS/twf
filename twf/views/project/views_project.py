@@ -1,3 +1,4 @@
+"""Views for the project section."""
 from datetime import timedelta
 from statistics import median
 
@@ -63,9 +64,11 @@ class TWFProjectView(LoginRequiredMixin, TWFView):
         return sub_nav
 
     def get_navigation_index(self):
+        """Get the index of the navigation."""
         return 1
 
     def get_context_data(self, **kwargs):
+        """Get the context data."""
         context = super().get_context_data(**kwargs)
         return context
 
@@ -77,10 +80,12 @@ class TWFProjectView(LoginRequiredMixin, TWFView):
 
 class TWFProjectTaskMonitorView(TWFProjectView):
     """View for the project task monitor."""
+
     template_name = 'twf/project/task_monitor.html'
     page_title = 'Task Monitor'
 
     def get_context_data(self, **kwargs):
+        """Get the context data."""
         context = super().get_context_data(**kwargs)
         tasks = self.get_project().tasks.all()
 
@@ -109,10 +114,13 @@ class TWFProjectTaskMonitorView(TWFProjectView):
 
 class TWFProjectPromptsView(TWFProjectView):
     """View for the project prompts."""
+
     template_name = 'twf/project/prompts.html'
     page_title = 'Prompts'
 
     def get_context_data(self, **kwargs):
+        """Get the context data."""
+
         context = super().get_context_data(**kwargs)
         prompts = self.get_project().prompts.all()
 
@@ -142,17 +150,20 @@ class TWFProjectPromptsView(TWFProjectView):
 
 class TWFProjectGeneralSettingsView(FormView, TWFProjectView):
     """View for the general project settings."""
+
     template_name = 'twf/project/settings/settings_general.html'
     page_title = 'General Project Settings'
     form_class = GeneralSettingsForm
     success_url = reverse_lazy('twf:project_settings_general')
 
     def get_form_kwargs(self):
+        """Get the form kwargs."""
         kwargs = super().get_form_kwargs()
         kwargs['instance'] = self.get_project()
         return kwargs
 
     def form_valid(self, form):
+        """Handle the form submission."""
         # Save the form
         self.object = form.save(commit=False)
         self.object.save(current_user=self.request.user)
@@ -166,17 +177,20 @@ class TWFProjectGeneralSettingsView(FormView, TWFProjectView):
 
 class TWFProjectCredentialsSettingsView(FormView, TWFProjectView):
     """View for the general project settings."""
+
     template_name = 'twf/project/settings/settings_credentials.html'
     page_title = 'Credentials Project Settings'
     form_class = CredentialsForm
     success_url = reverse_lazy('twf:project_settings_credentials')
 
     def get_form_kwargs(self):
+        """Get the form kwargs."""
         kwargs = super().get_form_kwargs()
         kwargs['instance'] = self.get_project()
         return kwargs
 
     def form_valid(self, form):
+        """Handle the form submission."""
         # Save the form and show a success message
         self.object = form.save(commit=False)
         self.object.save(current_user=self.request.user)
@@ -191,17 +205,20 @@ class TWFProjectCredentialsSettingsView(FormView, TWFProjectView):
 
 class TWFProjectTaskSettingsView(FormView, TWFProjectView):
     """View for the project task settings."""
+
     template_name = 'twf/project/settings/settings_tasks.html'
     page_title = 'Tasks Project Settings'
     form_class = TaskSettingsForm
     success_url = reverse_lazy('twf:project_settings_tasks')
 
     def get_form_kwargs(self):
+        """Get the form kwargs."""
         kwargs = super().get_form_kwargs()
         kwargs['instance'] = self.get_project()
         return kwargs
 
     def form_valid(self, form):
+        """Handle the form submission."""
         # Save the form and show a success message
         self.object = form.save(commit=False)
         self.object.save(current_user=self.request.user)
@@ -216,17 +233,20 @@ class TWFProjectTaskSettingsView(FormView, TWFProjectView):
 
 class TWFProjectExportSettingsView(FormView, TWFProjectView):
     """View for the project task settings."""
+
     template_name = 'twf/project/settings/settings_export.html'
     page_title = 'Export Project Settings'
     form_class = ExportSettingsForm
     success_url = reverse_lazy('twf:project_settings_export')
 
     def get_form_kwargs(self):
+        """Get the form kwargs."""
         kwargs = super().get_form_kwargs()
         kwargs['instance'] = self.get_project()
         return kwargs
 
     def form_valid(self, form):
+        """Handle the form submission."""
         # Save the form
         self.object = form.save(commit=False)
         self.object.save(current_user=self.request.user)
@@ -239,12 +259,14 @@ class TWFProjectExportSettingsView(FormView, TWFProjectView):
 
 class TWFProjectQueryView(FormView, TWFProjectView):
     """View for querying the database."""
+
     template_name = 'twf/project/query/query.html'
     page_title = 'SQL Query'
     form_class = QueryDatabaseForm
     results = None
 
     def form_valid(self, form):
+        """Handle the form submission."""
         sql_query = form.cleaned_data['query']
         print(sql_query)
 
@@ -265,6 +287,7 @@ class TWFProjectQueryView(FormView, TWFProjectView):
         return self.render_to_response(self.get_context_data(form=form))
 
     def get_context_data(self, **kwargs):
+        """Get the context data."""
         context = super().get_context_data(**kwargs)
         context['results'] = self.results
         return context
@@ -272,10 +295,12 @@ class TWFProjectQueryView(FormView, TWFProjectView):
 
 class TWFProjectOverviewView(TWFProjectView):
     """View for the project overview."""
+
     template_name = 'twf/project/overview.html'
     page_title = 'Project Overview'
 
     def get_context_data(self, **kwargs):
+        """Get the context data."""
         context = super().get_context_data(**kwargs)
 
         project = self.get_project()
@@ -312,67 +337,20 @@ class TWFProjectOverviewView(TWFProjectView):
 
 class TWFProjectCopyView(TWFProjectView):
     """View for copying a project."""
+
     template_name = 'twf/project/setup/copy.html'
     page_title = 'Copy Project'
 
     def get_context_data(self, **kwargs):
+        """Get the context data."""
         context = super().get_context_data(**kwargs)
         return context
 
 
 def select_project(request, pk):
+    """Select a project."""
     request.session['project_id'] = pk
     return redirect('twf:project_overview')
-
-
-"""def cut_collection_item(request, pk, anno_idx):
-    collection_item = CollectionItem.objects.get(pk=pk)
-    annotations = collection_item.document_configuration['annotations']
-
-    first_part = annotations[:anno_idx-1]
-    second_part = annotations[anno_idx:]
-
-    collection_item.document_configuration['annotations'] = first_part
-
-    collection_item_copy = copy.deepcopy(collection_item)
-    collection_item_copy.pk = None
-    collection_item_copy.document_configuration['annotations'] = second_part
-
-    collection_item_copy.save(current_user=request.user)
-    collection_item.save(current_user=request.user)
-
-    previous_url = request.META.get('HTTP_REFERER')
-    if previous_url:
-        return redirect(previous_url)
-    else:
-        return redirect('twf:project_collections')
-
-
-def mark_collection_item_as_done(request, pk):
-    collection_item = CollectionItem.objects.get(pk=pk)
-    collection_item.marked_as_done = True
-    collection_item.save(current_user=request.user)
-
-    previous_url = request.META.get('HTTP_REFERER')
-    if previous_url:
-        return redirect(previous_url)
-    else:
-        return redirect('twf:project_collections')
-
-
-def mark_collection_item_as_faulty(request, pk):
-    collection_item = CollectionItem.objects.get(pk=pk)
-    collection_item.marked_as_faulty = True
-    collection_item.save(current_user=request.user)
-
-    previous_url = request.META.get('HTTP_REFERER')
-    if previous_url:
-        return redirect(previous_url)
-    else:
-        return redirect('twf:project_collections')
-
-
-from django.shortcuts import render"""
 
 
 def dynamic_form_view(request, pk):

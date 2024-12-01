@@ -21,7 +21,8 @@ def get_dictionary_json_data(dictionary_id, include_uses=True):
                 "variations": list(entry.variations.all().values_list('variation', flat=True))
             }
         if include_uses:
-            entry_d["uses"] = list(Document.objects.filter(pages__tags__dictionary_entry=entry).distinct().values_list('document_id', flat=True))
+            entry_d["uses"] = list(Document.objects.filter(pages__tags__dictionary_entry=entry).
+                                   distinct().values_list('document_id', flat=True))
 
         json_data["entries"].append(entry_d)
     return json_data
@@ -56,7 +57,8 @@ def get_dictionary_csv_data(pk, include_metadata=True, include_uses=False):
 
         # Add uses
         if include_uses:
-            documents_list = Document.objects.filter(pages__tags__dictionary_entry=entry).distinct().values_list('document_id', flat=True)
+            documents_list = (Document.objects.filter(pages__tags__dictionary_entry=entry).distinct().
+                              values_list('document_id', flat=True))
             csv_line += f';{",".join(documents_list)};niy'
 
         csv_line += '\n'
@@ -78,7 +80,8 @@ def get_tags_json_data(project_id):
             {
                 "label": entry.variation,
                 "type": entry.variation_type,
-                "documents": list(Document.objects.filter(pages__tags=entry).distinct().values_list('document_id', flat=True))
+                "documents": list(Document.objects.filter(pages__tags=entry).distinct().
+                                  values_list('document_id', flat=True))
             }
         )
     return json_data

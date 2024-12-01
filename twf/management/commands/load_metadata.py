@@ -1,17 +1,23 @@
+"""Management command to load metadata from a JSON file."""
 import json
 from django.core.management.base import BaseCommand, CommandError
 from twf.models import Project, Document, Page
 
 class Command(BaseCommand):
+    """Management command to load metadata from a JSON file."""
+
     help = 'Load metadata from a JSON file and save it to the database'
 
     def add_arguments(self, parser):
         # Define the arguments that can be passed to the command
         parser.add_argument('project_id', type=int, help='The ID of the project to load metadata for')
-        parser.add_argument('data_target_type', choices=['document', 'page'], help='Specify whether the data is for documents or pages')
-        parser.add_argument('json_data_key', type=str, help='The key in the JSON data that matches the document or page')
+        parser.add_argument('data_target_type',
+                            choices=['document', 'page'], help='Specify whether the data is for documents or pages')
+        parser.add_argument('json_data_key', type=str,
+                            help='The key in the JSON data that matches the document or page')
         parser.add_argument('data_file', type=str, help='The path to the JSON file containing the data')
-        parser.add_argument('match_to_field', choices=['dbid', 'docid'], help='The field to match the JSON data with the database records')
+        parser.add_argument('match_to_field', choices=['dbid', 'docid'],
+                            help='The field to match the JSON data with the database records')
 
     def handle(self, *args, **options):
         project_id = options['project_id']
@@ -57,7 +63,8 @@ class Command(BaseCommand):
                         self.stdout.write(self.style.SUCCESS(f"Saved metadata for document {document}"))
 
                 except Document.DoesNotExist:
-                    self.stdout.write(self.style.ERROR(f"Document with {match_to_field} {id_value_of_item} does not exist."))
+                    self.stdout.write(self.style.ERROR(f"Document with {match_to_field} "
+                                                       f"{id_value_of_item} does not exist."))
 
             elif data_target_type == 'page':
                 try:
@@ -73,5 +80,6 @@ class Command(BaseCommand):
                         self.stdout.write(self.style.SUCCESS(f"Saved metadata for page {page}"))
 
                 except Page.DoesNotExist:
-                    self.stdout.write(self.style.ERROR(f"Page with {match_to_field} {id_value_of_item} does not exist."))
+                    self.stdout.write(self.style.ERROR(f"Page with {match_to_field} "
+                                                       f"{id_value_of_item} does not exist."))
 

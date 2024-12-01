@@ -1,3 +1,4 @@
+""" Celery tasks for duplicating a project and its related objects. """
 from celery import shared_task
 from django.db import transaction
 

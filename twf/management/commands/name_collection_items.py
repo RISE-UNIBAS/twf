@@ -1,10 +1,13 @@
-import json
+"""Management command to set collection item titles based on annotations."""
 from django.core.management.base import BaseCommand
 from twf.models import CollectionItem
 
 
 class Command(BaseCommand):
-    help = "Set collection item titles for a specific collection based on the first 100 characters of document_configuration['annotations'][0]"
+    """Management command to set collection item titles based on annotations."""
+
+    help = ("Set collection item titles for a specific collection based "
+            "on the first 100 characters of document_configuration['annotations'][0]")
 
     def add_arguments(self, parser):
         parser.add_argument(

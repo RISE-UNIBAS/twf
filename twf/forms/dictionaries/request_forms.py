@@ -36,59 +36,57 @@ class DictionaryRequestForm(forms.Form):
         )
 
     def get_button_label(self):
+        """Get the label for the submit button."""
         return 'Start Batch'
 
     def get_dynamic_fields(self):
+        """Get the dynamic fields for the form."""
         return []
 
 
 class GeonamesRequestForm(DictionaryRequestForm):
     """Form for batch processing Geonames data."""
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
     def get_button_label(self):
+        """Get the label for the submit button."""
         return 'Start Geonames Batch'
 
     def get_dynamic_fields(self):
+        """Get the dynamic fields for the form."""
         return []
 
 
 class GNDRequestForm(DictionaryRequestForm):
     """Form for batch processing Geonames data."""
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
     def get_button_label(self):
+        """Get the label for the submit button."""
         return 'Start GND Batch'
 
     def get_dynamic_fields(self):
+        """Get the dynamic fields for the form."""
         return []
 
 
 class WikidataRequestForm(DictionaryRequestForm):
     """Form for batch processing Geonames data."""
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
     def get_button_label(self):
+        """Get the label for the submit button."""
         return 'Start Wikidata Batch'
 
     def get_dynamic_fields(self):
+        """Get the dynamic fields for the form."""
         return []
 
 
 class OpenaiRequestForm(DictionaryRequestForm):
     """Form for batch processing Geonames data."""
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
     def get_button_label(self):
+        """Get the label for the submit button."""
         return 'Start OpenAI Batch'
 
     def get_dynamic_fields(self):
+        """Get the dynamic fields for the form."""
         return []

@@ -1,3 +1,4 @@
+"""This module contains utility functions for working with files and directories."""
 import os
 import shutil
 

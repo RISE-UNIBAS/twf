@@ -46,6 +46,10 @@ def export_data_task(self, project_id, export_type, export_format, schema):
 
 
 def filter_data_by_schema(data, schema_fields):
+    """Filter data based on the provided schema fields (attributes) of the model.
+    :param data: Data to filter
+    :param schema_fields: Fields to include in the filtered data
+    :return: Filtered data"""
     # This function filters the data based on the provided schema
     filtered_data = []
     for item in data:

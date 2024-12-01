@@ -1,3 +1,4 @@
+"""Management command to clean collections."""
 from django.contrib.auth.models import User
 from django.core.management import BaseCommand
 
@@ -5,8 +6,8 @@ from twf.models import Collection, Project
 
 
 class Command(BaseCommand):
-    """Management command to import dictionaries from a CSV file."""
-    help = 'Imports dictionaries from a CSV file'
+    """Management command to clean collections."""
+    help = 'Management command to clean collections.'
 
     def add_arguments(self, parser):
         """Add arguments to the command"""

@@ -41,8 +41,10 @@ class DocumentTable(tables.Table):
             html += '<div class="row">'
             html += self.get_col(page.tk_page_id, 3, ignored=page.is_ignored)
             html += self.get_col(page.tk_page_number, 3, ignored=page.is_ignored)
-            html += self.get_col(len(page.parsed_data.get("elements", [])) if page.parsed_data else 0, 3, ignored=page.is_ignored)
-            html += self.get_col(f"{page.tags.count()} / {page.tags.filter(dictionary_entry=None).count()}", 3, ignored=page.is_ignored)
+            html += self.get_col(len(page.parsed_data.get("elements", [])) if page.parsed_data else 0,
+                                 3, ignored=page.is_ignored)
+            html += self.get_col(f"{page.tags.count()} / {page.tags.filter(dictionary_entry=None).count()}",
+                                 3, ignored=page.is_ignored)
             html += '</div>'
         html += '</div>'
 

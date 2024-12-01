@@ -1,7 +1,10 @@
+"""Management command to display database settings."""
 from django.core.management.base import BaseCommand
 from django.conf import settings
 
 class Command(BaseCommand):
+    """Management command to display database settings."""
+
     help = 'Displays database settings'
 
     def handle(self, *args, **kwargs):
@@ -17,4 +20,3 @@ class Command(BaseCommand):
                     self.stdout.write(f"  {key}: {value}")
         else:
             self.stdout.write(self.style.ERROR("No database settings found!"))
-

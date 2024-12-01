@@ -20,7 +20,8 @@ class Command(BaseCommand):
         for dictionary in project.selected_dictionaries.all():
             # Flat list of all variations in the dictionary
 
-            all_variations_in_dictionary = Variation.objects.filter(entry__dictionary=dictionary).values_list('variation', flat=True)
+            all_variations_in_dictionary = (Variation.objects.
+                                            filter(entry__dictionary=dictionary).values_list('variation', flat=True))
             # Check if there ary duplicate variations
             # Count occurrences of each variation
             variation_counts = Counter(all_variations_in_dictionary)

@@ -66,7 +66,10 @@ class UserManagementForm(forms.Form):
 
 
 class UserProfileForm(forms.ModelForm):
+    """Form for editing the profile of a user."""
+
     class Meta:
+        """Meta class for the form."""
         model = User
         fields = ['username', 'first_name', 'last_name', 'email']
 
@@ -74,6 +77,7 @@ class UserProfileForm(forms.ModelForm):
     affiliation = forms.CharField(max_length=255, required=False)
 
     def __init__(self, *args, **kwargs):
+        """Initialize the form."""
         super().__init__(*args, **kwargs)
 
         self.fields['orcid'].initial = self.instance.profile.orc_id

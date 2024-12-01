@@ -28,8 +28,8 @@ from twf.views.views_command import park_tag, unpark_tag, ungroup_tag
 from twf.views.dictionaries.views_dictionaries import TWFDictionaryOverviewView, TWFDictionaryDictionaryView, \
     delete_variation, TWFDictionaryDictionaryEditView, TWFDictionaryDictionaryEntryEditView, \
     TWFDictionaryDictionaryEntryView, \
-    TWFDictionaryNormDataView, TWFDictionaryCreateView, skip_entry, TWFDictionaryDictionariesView, TWFDictionaryAddView, \
-    TWFDictionaryMergeEntriesView
+    TWFDictionaryNormDataView, TWFDictionaryCreateView, skip_entry, TWFDictionaryDictionariesView, \
+    TWFDictionaryAddView, TWFDictionaryMergeEntriesView
 from twf.views.export.views_export import TWFExportDocumentsView, TWFExportCollectionsView, TWFExportProjectView, \
     TWFExportOverviewView, TWFExportTagsView, TWFExportDictionariesView, TWFImportDictionaryView
 from twf.views.metadata.views_metadata import TWFMetadataReviewDocumentsView, \
@@ -39,7 +39,7 @@ from twf.views.project.views_project import select_project, TWFProjectQueryView,
     TWFProjectTaskMonitorView, TWFProjectGeneralSettingsView, TWFProjectCredentialsSettingsView, \
     TWFProjectPromptsView, TWFProjectTaskSettingsView, TWFProjectExportSettingsView, TWFProjectCopyView
 from twf.views.project.views_project_ai import TWFProjectAIQueryView
-from twf.views.tags.views_tags import TWFTagsView, TWFProjectTagsView, TWFProjectTagsOpenView, \
+from twf.views.tags.views_tags import TWFProjectTagsView, TWFProjectTagsOpenView, \
     TWFProjectTagsParkedView, TWFProjectTagsResolvedView, TWFProjectTagsIgnoredView, TWFTagsDatesGroupView, \
     TWFTagsGroupView, TWFTagsOverviewView, TWFTagsExtractView, TWFTagsSettingsView
 
@@ -67,11 +67,11 @@ urlpatterns = [
     path('project/setup/', TWFProjectSetupView.as_view(template_name='twf/project/setup/setup.html',
                                                        page_title='Project Setup'), name='project_setup'),
     path('project/setup/tk/export/',
-         TWFProjectSetupView.as_view(template_name='twf/project/setup/setup_export.html', page_title='Project TK Export'),
-         name='project_tk_export'),
-    path('project/setup/tk/structure/', TWFProjectSetupView.as_view(template_name='twf/project/setup/setup_structure.html',
-                                                                    page_title='Project TK Structure'),
-         name='project_tk_structure'),
+         TWFProjectSetupView.as_view(template_name='twf/project/setup/setup_export.html',
+                                     page_title='Project TK Export'), name='project_tk_export'),
+    path('project/setup/tk/structure/', TWFProjectSetupView.as_view(
+        template_name='twf/project/setup/setup_structure.html',
+        page_title='Project TK Structure'), name='project_tk_structure'),
     path('project/setup/tk/test/', TWFProjectSetupView.as_view(template_name='twf/project/setup/test_export.html',
                                                                page_title='Test Transkribus Export'),
          name='project_test_export'),
@@ -146,8 +146,10 @@ urlpatterns = [
     path('dictionaries/batch/openai/', TWFDictionaryOpenaiBatchView.as_view(), name='dictionaries_batch_openai'),
 
     path('dictionaries/request/gnd/', TWFDictionaryGNDRequestView.as_view(), name='dictionaries_request_gnd'),
-    path('dictionaries/request/geonames/', TWFDictionaryGeonamesRequestView.as_view(), name='dictionaries_request_geonames'),
-    path('dictionaries/request/wikidata/', TWFDictionaryWikidataRequestView.as_view(), name='dictionaries_request_wikidata'),
+    path('dictionaries/request/geonames/', TWFDictionaryGeonamesRequestView.as_view(),
+         name='dictionaries_request_geonames'),
+    path('dictionaries/request/wikidata/', TWFDictionaryWikidataRequestView.as_view(),
+         name='dictionaries_request_wikidata'),
     path('dictionaries/request/openai/', TWFDictionaryOpenaiRequestView.as_view(), name='dictionaries_request_openai'),
 
     #############################
@@ -225,7 +227,8 @@ urlpatterns = [
     path('metadata/overview/', TWFMetadataOverviewView.as_view(), name='metadata_overview'),
 
     path('metadata/load/metadata/', TWFMetadataLoadDataView.as_view(), name='metadata_load_metadata'),
-    path('metadata/load/sheets/metadata/', TWFMetadataLoadSheetsDataView.as_view(), name='metadata_load_sheets_metadata'),
+    path('metadata/load/sheets/metadata/', TWFMetadataLoadSheetsDataView.as_view(),
+         name='metadata_load_sheets_metadata'),
     path('metadata/extract/tags/', TWFMetadataExtractTagsView.as_view(), name='metadata_extract'),
 
     path('metadata/review/documents/', TWFMetadataReviewDocumentsView.as_view(), name='metadata_review_documents'),

@@ -1,7 +1,7 @@
+""" Utility functions to parse date strings. """
 import re
 import dateparser
 from datetime import datetime
-from edtf import parse_edtf
 
 YEAR = "year"
 MONTH = "month"
@@ -54,6 +54,7 @@ def parse_year_only(date_string, resolve_to):
 
 
 def parse_month_year(date_string, resolve_to):
+    """ Parse the date string if it contains a month and a year. """
     regex = r"^([\w\.éèû]*) (\d{4})$"
     match = re.match(regex, date_string)
     if match:

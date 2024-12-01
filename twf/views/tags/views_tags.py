@@ -170,18 +170,18 @@ class TWFTagsOverviewView(TWFTagsView):
                     is_parked=False
                 ).count()
 
-            variation['grouped_percentage'] = (variation['grouped'] / variation['count'] * 100) if variation[
-                                                                                                       'count'] > 0 else 0
+            variation['grouped_percentage'] = (variation['grouped'] / variation['count'] * 100) \
+                if variation['count'] > 0 else 0
             grouped_percentages.append(variation['grouped_percentage'])  # Collect grouped percentage for averaging
             variation['parked'] = PageTag.objects.filter(
                 page__document__project=project,
                 variation_type=variation['variation_type'],
                 is_parked=True
             ).count()
-            variation['parked_percentage'] = (variation['parked'] / variation['count'] * 100) if variation[
-                                                                                                     'count'] > 0 else 0
-            variation['unresolved_percentage'] = (variation['unresolved'] / variation['count'] * 100) if variation[
-                                                                                                             'count'] > 0 else 0
+            variation['parked_percentage'] = (variation['parked'] / variation['count'] * 100) \
+                if variation['count'] > 0 else 0
+            variation['unresolved_percentage'] = (variation['unresolved'] / variation['count'] * 100) \
+                if variation['count'] > 0 else 0
 
         # Calculate average grouped percentage
         average_grouped_percentage = sum(grouped_percentages) / len(grouped_percentages) if grouped_percentages else 0
@@ -198,6 +198,7 @@ class TWFTagsOverviewView(TWFTagsView):
 
 
 class TWFTagsSettingsView(TWFTagsView):
+    """View for the tag settings."""
     template_name = 'twf/tags/settings.html'
     page_title = 'Tag Settings'
 
@@ -236,7 +237,8 @@ class TWFTagsGroupView(TWFTagsView):
                 tag_to_assign.save(current_user=self.request.user)
 
                 number_of_tags = self.save_other_tags(tag_to_assign, new_entry, self.request.user)
-                messages.success(request, f'Created "{new_entry_label}" and assigned {number_of_tags+1} tags to it.')
+                messages.success(request, f'Created "{new_entry_label}" and assigned '
+                                          f'{number_of_tags+1} tags to it.')
             else:
                 messages.error(request, 'Please provide a label for the new entry.')
 
@@ -270,7 +272,8 @@ class TWFTagsGroupView(TWFTagsView):
 
             number_of_tags =  self.save_other_tags(tag, entry, user)
 
-            messages.success(self.request, f'Variation added to entry {entry.label} (and {number_of_tags} other tags).')
+            messages.success(self.request, f'Variation added to entry {entry.label} '
+                                           f'(and {number_of_tags} other tags).')
         except DictionaryEntry.DoesNotExist:
             messages.error(self.request, 'Entry does not exist: ' + entry_id)
 

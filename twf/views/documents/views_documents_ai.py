@@ -1,3 +1,4 @@
+"""Views for AI document processing."""
 import logging
 
 from django.urls import reverse_lazy

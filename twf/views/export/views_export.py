@@ -1,3 +1,4 @@
+"""Views for exporting data from the TWF."""
 import json
 
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -60,22 +61,26 @@ class TWFExportView(LoginRequiredMixin, TWFView):
 
 class TWFExportOverviewView(TWFExportView):
     """View for the export overview."""
+
     template_name = "twf/export/export_overview.html"
     page_title = 'Export Overview'
 
     def get_context_data(self, **kwargs):
+        """Get the context data for the view."""
         context = super().get_context_data(**kwargs)
         return context
 
 
 class TWFExportDocumentsView(FormView, TWFExportView):
     """View for exporting documents."""
+
     template_name = "twf/export/export_documents.html"
     page_title = 'Export Data'
     form_class = ExportSettingsForm
     success_url = reverse_lazy('twf:export_documents')
 
     def get_context_data(self, **kwargs):
+        """Get the context data for the view."""
         context = super().get_context_data(**kwargs)
         project = self.get_project()
 
@@ -209,6 +214,7 @@ class TWFExportTagsView(TWFExportView):
         return response
 
     def get_context_data(self, **kwargs):
+        """Get the context data for the view."""
         context = super().get_context_data(**kwargs)
         return context
 
@@ -220,6 +226,7 @@ class TWFExportProjectView(TWFExportView):
     page_title = 'Export Project'
 
     def get_context_data(self, **kwargs):
+        """Get the context data for the view."""
         context = super().get_context_data(**kwargs)
         return context
 
@@ -234,6 +241,3 @@ class TWFImportDictionaryView(FormView, TWFExportView):
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
         return kwargs
-
-    def form_valid(self, form):
-        return super().form_valid(form)

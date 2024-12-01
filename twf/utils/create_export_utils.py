@@ -11,7 +11,8 @@ SPECIAL_KEY_CONFIG = {
                  },
     'data_curators': {'style': 'nested',    # 'nested' or 'flat'
                       'used_for': ['document'],  # 'document', 'page', 'project'
-                      'properties': ['name', 'orcid']}, # List of values to include: 'name', 'orcid', 'affiliation', 'username', 'email', 'role'
+                      'properties': ['name', 'orcid']}, # List of values to include: 'name',
+                                                        # 'orcid', 'affiliation', 'username', 'email', 'role'
 
     }
 
@@ -45,6 +46,7 @@ def get_nested_value(data, key, default=None):
 
 
 def get_special_value(special_key, metadata, db_object, mapping):
+    """ Get a special value for a document or page object."""
     object_type = None
     if isinstance(db_object, Project):
         object_type = 'project'
@@ -110,11 +112,13 @@ def get_data_curators(object_type, db_object, mapping):
 
 
 def get_used_dicts(object_type, db_object, mapping):
+    """ Get a list of dictionaries used for a document or page object."""
     config = SPECIAL_KEY_CONFIG.get('used_dicts', {})
     return {}
 
 
 def get_tag_list(object_type, db_object, mapping):
+    """ Get a list of tags for a document or page object."""
     config = SPECIAL_KEY_CONFIG.get('tag_list', {})
     return {}
 

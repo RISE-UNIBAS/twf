@@ -9,7 +9,6 @@ from twf.tasks.metadata_tasks import load_sheets_metadata
 from twf.tasks.tags_tasks import create_page_tags
 from twf.views.views_base import TWFView
 
-
 def start_extraction(request):
     """Start the extraction process as a Celery task."""
     project = TWFView.s_get_project(request)

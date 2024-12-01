@@ -1,5 +1,6 @@
+"""Forms for creating and updating documents."""
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Submit, Layout, Row, Column, Div, HTML
+from crispy_forms.layout import Submit, Layout, Row, Column, Div
 from django import forms
 
 from twf.forms.forms import BasicTaskForm
@@ -42,6 +43,7 @@ class DocumentForm(forms.ModelForm):
 
 
 class BatchOpenAIForm(BasicTaskForm):
+    """Form for running a batch of documents through OpenAI."""
 
     role_description = forms.CharField(max_length=200, widget=forms.TextInput(attrs={
         'placeholder': 'Describe the role here...'
@@ -51,19 +53,20 @@ class BatchOpenAIForm(BasicTaskForm):
         'placeholder': 'Enter your prompt here...'
     }), label="Prompt")
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
     def get_button_label(self):
+        """Get the label for the submit button."""
         return 'Run Project Batch'
 
     def get_test_button_label(self):
+        """Get the label for the test button."""
         return 'Test One Document'
 
     def has_test_button(self):
+        """Check if the form has a test button."""
         return True
 
     def get_dynamic_fields(self):
+        """Get the dynamic fields for the form."""
         return [
             Row(
                 Column('role_description', css_class='form-group'),
@@ -74,4 +77,3 @@ class BatchOpenAIForm(BasicTaskForm):
                 css_class='row form-row'
             ),
         ]
-

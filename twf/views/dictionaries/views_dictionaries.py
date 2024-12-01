@@ -9,7 +9,6 @@ from django_filters.views import FilterView
 from django_tables2 import SingleTableView
 
 from twf.filters import DictionaryEntryFilter
-from twf.forms.dictionaries.batch_forms import GeonamesBatchForm
 from twf.forms.dictionaries.dictionary_forms import DictionaryForm, DictionaryEntryForm
 from twf.forms.enrich_forms import EnrichEntryManualForm, EnrichEntryForm
 from twf.models import Dictionary, DictionaryEntry, Variation, PageTag
@@ -84,10 +83,12 @@ class TWFDictionaryView(LoginRequiredMixin, TWFView):
 
 class TWFDictionaryOverviewView(TWFDictionaryView):
     """View for the dictionary overview."""
+
     template_name = 'twf/dictionaries/overview.html'
     page_title = 'Dictionaries Overview'
 
     def get_context_data(self, **kwargs):
+        """Get the context data."""
         context = super().get_context_data(**kwargs)
         project = self.get_project()
         context['dict_stats'] = get_dictionary_statistics(project)
@@ -104,10 +105,12 @@ class TWFDictionaryDictionariesView(SingleTableView, TWFDictionaryView):
     model = Dictionary
 
     def get_queryset(self):
+        """Get the queryset."""
         project = self.get_project()
         return project.selected_dictionaries.all()
 
     def get(self, request, *args, **kwargs):
+        """Handle the GET request."""
         self.object_list = self.get_queryset()
         context = self.get_context_data()
         return self.render_to_response(context)
@@ -115,6 +118,7 @@ class TWFDictionaryDictionariesView(SingleTableView, TWFDictionaryView):
 
 class TWFDictionaryAddView(SingleTableView, TWFDictionaryView):
     """View for the dictionary overview."""
+
     template_name = 'twf/dictionaries/dictionaries_add.html'
     page_title = 'Add Dictionaries'
     table_class = DictionaryTable
@@ -122,9 +126,11 @@ class TWFDictionaryAddView(SingleTableView, TWFDictionaryView):
     model = Dictionary
 
     def get_queryset(self):
+        """Get the queryset."""
         return Dictionary.objects.all()
 
     def get(self, request, *args, **kwargs):
+        """Handle the GET request."""
         self.object_list = self.get_queryset()
         context = self.get_context_data()
         return self.render_to_response(context)
@@ -132,11 +138,13 @@ class TWFDictionaryAddView(SingleTableView, TWFDictionaryView):
 
 class TWFDictionaryCreateView(FormView, TWFDictionaryView):
     """Create a new dictionary."""
+
     template_name = 'twf/dictionaries/create.html'
     form_class = DictionaryForm
     success_url = reverse_lazy('twf:dictionaries')
 
     def form_valid(self, form):
+        """Handle the form submission."""
         # Save the form
         form.instance.save(current_user=self.request.user)
         project = self.get_project()
@@ -150,6 +158,7 @@ class TWFDictionaryCreateView(FormView, TWFDictionaryView):
         return super().form_valid(form)
 
     def get_context_data(self, **kwargs):
+        """Get the context data."""
         context = super().get_context_data(**kwargs)
         context['page_title'] = 'Create New Dictionary'
         return context
@@ -158,6 +167,7 @@ class TWFDictionaryCreateView(FormView, TWFDictionaryView):
 class TWFDictionaryDictionaryView(SingleTableView, FilterView, TWFDictionaryView):
     """View for the dictionary entries. Provides a table of dictionary entries of a single dictionary.
     The table is filterable and sortable."""
+
     template_name = 'twf/dictionaries/dictionary.html'
     page_title = 'View Dictionary'
     table_class = DictionaryEntryTable
@@ -166,17 +176,20 @@ class TWFDictionaryDictionaryView(SingleTableView, FilterView, TWFDictionaryView
     model = DictionaryEntry
 
     def get_queryset(self):
+        """Get the queryset."""
         queryset = DictionaryEntry.objects.filter(dictionary_id=self.kwargs.get('pk'))
         self.filterset = self.filterset_class(self.request.GET,
                                               queryset=queryset)
         return self.filterset.qs
 
     def get(self, request, *args, **kwargs):
+        """Handle the GET request."""
         self.object_list = self.get_queryset()
         context = self.get_context_data()
         return self.render_to_response(context)
 
     def get_context_data(self, **kwargs):
+        """Get the context data."""
         context = super().get_context_data(**kwargs)
         context['page_title'] = self.page_title
         context['dictionary'] = Dictionary.objects.get(pk=self.kwargs.get('pk'))
@@ -186,19 +199,23 @@ class TWFDictionaryDictionaryView(SingleTableView, FilterView, TWFDictionaryView
 
 class TWFDictionaryDictionaryEntryView(SingleTableView, TWFDictionaryView):
     """View for a single dictionary entry."""
+
     template_name = 'twf/dictionaries/dictionary_entry.html'
     page_title = 'View Dictionary Entry'
     table_class = DictionaryEntryVariationTable
 
     def get_queryset(self):
+        """Get the queryset."""
         return Variation.objects.filter(entry_id=self.kwargs.get('pk'))
 
     def get(self, request, *args, **kwargs):
+        """Handle the GET request."""
         self.object_list = self.get_queryset()
         context = self.get_context_data()
         return self.render_to_response(context)
 
     def get_context_data(self, **kwargs):
+        """Get the context data."""
         context = super().get_context_data(**kwargs)
         table = self.table_class(self.object_list, project=self.get_project())
         context['table'] = table
@@ -210,24 +227,28 @@ class TWFDictionaryDictionaryEntryView(SingleTableView, TWFDictionaryView):
 
 class TWFDictionaryDictionaryEditView(FormView, TWFDictionaryView):
     """Edit a dictionary."""
+
     template_name = 'twf/dictionaries/dictionary_edit.html'
     page_title = 'Edit Dictionary'
     form_class = DictionaryForm
     success_url = reverse_lazy('twf:dictionaries')
 
     def get_context_data(self, **kwargs):
+        """Get the context data."""
         context = super().get_context_data(**kwargs)
         context['page_title'] = self.page_title
         context['dictionary'] = Dictionary.objects.get(pk=self.kwargs.get('pk')) if self.kwargs.get('pk') else None
         return context
 
     def get_form_kwargs(self):
+        """Get the form kwargs."""
         kwargs = super().get_form_kwargs()
         if self.kwargs.get('pk'):
             kwargs['instance'] = Dictionary.objects.get(pk=self.kwargs.get('pk'))
         return kwargs
 
     def form_valid(self, form):
+        """Handle the form submission."""
         # Save the form
         form.instance.save(current_user=self.request.user)
         # Add a success message
@@ -238,10 +259,12 @@ class TWFDictionaryDictionaryEditView(FormView, TWFDictionaryView):
 
 class TWFDictionaryNormDataView(TWFDictionaryView):
     """Normalization Data Wizard."""
+
     template_name = 'twf/dictionaries/normalization_wizard.html'
     page_title = 'Normalization Data Wizard'
 
     def post(self, request, *args, **kwargs):
+        """Handle the POST request."""
         if "submit_geonames" in request.POST:
             print('submit_geonames')
         elif "submit_gnd" in request.POST:
@@ -254,6 +277,7 @@ class TWFDictionaryNormDataView(TWFDictionaryView):
         return redirect('twf:dictionaries_normalization')
 
     def get_context_data(self, **kwargs):
+        """Get the context data."""
         context = super().get_context_data(**kwargs)
         context['page_title'] = self.page_title
         dictionaries = self.get_dictionaries()
@@ -270,6 +294,7 @@ class TWFDictionaryNormDataView(TWFDictionaryView):
         return context
 
     def get_next_unenriched_entry(self, selected_dict):
+        """Get the next unenriched entry."""
         dictionary = self.get_project().selected_dictionaries.get(type=selected_dict)
         entry = dictionary.entries.filter(authorization_data={}).order_by('modified_at').first()
         return entry
@@ -277,6 +302,7 @@ class TWFDictionaryNormDataView(TWFDictionaryView):
 
 class TWFDictionaryMergeEntriesView(TWFDictionaryView):
     """Normalization Data Wizard."""
+
     template_name = 'twf/dictionaries/merge_entries.html'
     page_title = 'Merge Dictionary Entries'
 
@@ -357,18 +383,21 @@ class TWFDictionaryDictionaryEntryEditView(FormView, TWFDictionaryView):
     success_url = reverse_lazy('twf:dictionaries')
 
     def get_form_kwargs(self):
+        """Get the form kwargs."""
         kwargs = super().get_form_kwargs()
         if self.kwargs.get('pk'):
             kwargs['instance'] = DictionaryEntry.objects.get(pk=self.kwargs.get('pk'))
         return kwargs
 
     def get_context_data(self, **kwargs):
+        """Get the context data."""
         context = super().get_context_data(**kwargs)
         context['page_title'] = self.page_title
         context['entry'] = DictionaryEntry.objects.get(pk=self.kwargs.get('pk')) if self.kwargs.get('pk') else None
         return context
 
     def form_valid(self, form):
+        """Handle the form submission."""
         # Check if the delete button was pressed
         if 'delete_entry' in self.request.POST:
             # Delete the entry

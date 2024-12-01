@@ -1,12 +1,12 @@
+"""Utility functions for tags."""
 import json
-
 from django.db.models import Count
 from fuzzywuzzy import process
-
 from twf.models import PageTag, Variation
 
 
 def get_translated_tag_type(project, tag_type):
+    """Translate the tag type based on the project configuration."""
     task_configurations = project.get_task_configuration("tag_types")
     if "tag_type_translator" not in task_configurations:
         return tag_type
@@ -54,6 +54,7 @@ def get_date_types(project):
 
 def get_closest_variations(page_tag):
     """Return the 5 closest variations to the tag."""
+
     dict_type = page_tag.variation_type
     dict_type = get_translated_tag_type(page_tag.page.document.project, dict_type)
 
@@ -78,6 +79,7 @@ def get_closest_variations(page_tag):
 
 def assign_tag(page_tag, user):
     """Assign the tag to a dictionary entry."""
+
     try:
         dictionary_type = page_tag.variation_type
         dictionary_type = get_translated_tag_type(page_tag.page.document.project, dictionary_type)
