@@ -1,8 +1,151 @@
 Transkribus workflow
 ====================
-![pylint score](https://mperlet.github.io/pybadge/badges/9.10.svg)
+![pylint score](https://mperlet.github.io/pybadge/badges/9.12.svg)
 
-# Task Overview
+# Table of Contents
+1. [Navigation (Parts of the App)](#twf-navigation)
+2. [Next Tasks](#next-tasks)
+
+# TWF Navigation
+
+## 1. Home
+1. **Home** (Main dashboard or entry point)
+2. **About** (Information about the app or organization)
+
+### User Options
+3. **Overview**
+4. **User Profile**
+5. **Change Password**
+6. **User Management**
+7. **Logout**
+8. **Admin**
+
+---
+
+## 2. Project
+1. **Overview** (Project details or summary)
+2. **Task Monitor** (Monitor ongoing tasks)
+3. **Saved Prompts** (Manage or view saved prompts)
+
+### Settings
+4. **General Settings** (Configure general project settings)
+5. **Credential Settings** (Manage project-specific credentials)
+6. **Task Settings** (Configure task-specific settings)
+7. **Export Settings** (Settings for exporting data)
+
+### Setup Project
+8. **Request Transkribus Export** (Initiate a Transkribus export)
+9. **Test Export** (Run test exports)
+10. **Extract Transkribus Export** (Extract data from Transkribus)
+11. **Create Copy of Project** (Duplicate a project)
+
+### Ask Questions
+12. **Query** (Perform manual queries)
+13. **Ask ChatGPT** (AI-based assistance for project tasks)
+
+---
+
+## 3. Documents
+### Your Documents
+1. **Overview** (General summary or statistics)
+2. **Browse Documents** (View and manage documents)
+
+### Document Batch
+3. **ChatGPT** (Batch processing using ChatGPT)
+4. **Gemini** (Batch processing using Gemini)
+5. **Claude** (Batch processing using Claude)
+
+### Create Documents
+6. **Manual Document Creation** (Add documents manually)
+
+---
+
+## 4. Tags
+### Data
+1. **Overview** (Summary or statistics for tags)
+2. **All Tags** (View and manage tags)
+3. **Settings** (Configure tag-related settings)
+
+### Tag Extraction
+4. **Extract Tags** (Extract tags from data)
+
+### Tag Workflows
+5. **Grouping Wizard** (Organize tags into groups)
+6. **Date Normalization** (Normalize date-related tags)
+
+### Tag Views
+7. **Open Tags** (Pending or in-progress tags)
+8. **Parked Tags** (Tags on hold)
+9. **Resolved Tags** (Completed tags)
+10. **Ignored Tags** (Excluded tags)
+
+---
+
+## 5. Metadata
+### Metadata Overview
+1. **Overview** (Summary and statistics for metadata)
+
+### Load Metadata
+2. **Load JSON Metadata** (Import metadata from JSON files)
+3. **Load Google Sheets Metadata** (Import metadata from Google Sheets)
+
+### Metadata Workflows
+4. **Extract Controlled Values** (Extract controlled vocabulary values)
+5. **Review Document Metadata** (Analyze/edit document metadata)
+6. **Review Page Metadata** (Analyze/edit page metadata)
+
+---
+
+## 6. Dictionaries
+### Dictionaries Options
+1. **Overview** (General summary or statistics)
+2. **Dictionaries** (View/manage dictionaries)
+3. **Add Dictionaries** (Import dictionaries)
+4. **Create New Dictionary** (Create a dictionary from scratch)
+
+### Automated Workflows
+5. **GND** (Automated dictionary enrichment with GND data)
+6. **Wikidata** (Automated workflows with Wikidata)
+7. **Geonames** (Automated workflows with Geonames)
+8. **Open AI** (AI-based workflows)
+
+### Supervised Workflows
+9. **GND** (Supervised workflows with GND)
+10. **Wikidata** (Supervised workflows with Wikidata)
+11. **Geonames** (Supervised workflows with Geonames)
+12. **Open AI** (Supervised AI workflows)
+
+### Manual Workflows
+13. **Manual Assignment** (Manually assign dictionary entries)
+14. **Merge Entries** (Merge duplicate or related entries)
+
+---
+
+## 7. Collections
+1. **Overview** (Summary or statistics for collections)
+2. **Create New Collection** (Add a new collection)
+3. **Your Collections** (View/manage collections)
+
+---
+
+## 8. Import/Export
+### Overview
+1. **Export Overview** (Summary/statistics for exports)
+
+### Import Data
+2. **Import Dictionaries** (Import dictionaries)
+
+### Export Data
+3. **Export Documents** (Export document data)
+4. **Export Collections** (Export collection data)
+5. **Export Dictionaries** (Export dictionary data)
+6. **Export Tags** (Export tag data)
+
+### Export Project
+7. **Export Project** (Export the entire project)
+
+
+# Next Tasks
 
 | ID   | Section       | Task Description                                                                             | Priority       |
 |------|---------------|-----------------------------------------------------------------------------------------------|----------------|
