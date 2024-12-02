@@ -51,6 +51,7 @@ class TWFProjectView(LoginRequiredMixin, TWFView):
                     {'url': reverse('twf:project_test_export'), 'value': 'Test Export'},
                     {'url': reverse('twf:project_tk_structure'), 'value': 'Extract Transkribus Export'},
                     {'url': reverse('twf:project_copy'), 'value': 'Create Copy of Project'},
+                    {'url': reverse('twf:project_reset'), 'value': 'Reset Functions'},
                 ]
             },
             {
@@ -340,6 +341,51 @@ class TWFProjectCopyView(TWFProjectView):
 
     template_name = 'twf/project/setup/copy.html'
     page_title = 'Copy Project'
+
+    def get_context_data(self, **kwargs):
+        """Get the context data."""
+        context = super().get_context_data(**kwargs)
+        return context
+
+
+class TWFProjectResetView(TWFProjectView):
+    """View for copying a project."""
+
+    template_name = 'twf/project/setup/reset.html'
+    page_title = 'Reset Project'
+
+    def post(self, request, *args, **kwargs):
+        """Handle the post request."""
+        action = request.POST.get('action', None)
+
+        if action == "unpark_all_tags":
+            parked_tags = PageTag.objects.filter(page__document__project=self.get_project(), is_parked=True)
+            num_tags = parked_tags.count()
+            parked_tags.update(is_parked=False)
+            messages.success(request, f"{num_tags} parked tags have been un-parked.")
+        elif action == "remove_all_prompts":
+            all_prompts = self.get_project().prompts.all()
+            num_prompts = all_prompts.count()
+            all_prompts.delete()
+            messages.success(request, f"{num_prompts} prompts have been removed.")
+        elif action == "remove_all_tasks":
+            all_tasks = self.get_project().tasks.all()
+            num_tasks = all_tasks.count()
+            all_tasks.delete()
+            messages.success(request, f"{num_tasks} tasks have been removed.")
+        elif action == "remove_all_dictionaries":
+            all_dictionaries = self.get_project().selected_dictionaries.all()
+            num_dictionaries = all_dictionaries.count()
+            self.get_project().selected_dictionaries.clear()
+            messages.success(request, f"{num_dictionaries} dictionaries have been removed.")
+        elif action == "remove_documents":
+            pass
+        elif action == "remove_all_tags":
+            pass
+        elif action == "remove_all_collections":
+            pass
+
+        return redirect('twf:project_reset')
 
     def get_context_data(self, **kwargs):
         """Get the context data."""

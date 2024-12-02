@@ -50,7 +50,8 @@ class DictionaryBatchForm(forms.Form):
                 css_class='row form-row'
             ),
             Div(
-                Button('startBatch', self.get_button_label(), css_class='btn btn-dark'),
+                Button('startBatch', self.get_button_label(), css_class='btn btn-dark show-confirm-modal',
+                              data_message=self.get_button_data_message()),
                 css_class='text-end pt-3'
             )
         )
@@ -58,6 +59,10 @@ class DictionaryBatchForm(forms.Form):
     def get_button_label(self):
         """Get the label for the submit button."""
         return 'Start Batch'
+
+    def get_button_data_message(self):
+        """Get the data message for the submit button."""
+        return 'Are you sure you want to start the batch process?'
 
     def get_dynamic_fields(self):
         """Get the dynamic fields for the form."""
@@ -82,6 +87,10 @@ class GeonamesBatchForm(DictionaryBatchForm):
         """Get the label for the submit button."""
         return 'Start Geonames Batch'
 
+    def get_button_data_message(self):
+        """Get the data message for the submit button."""
+        return 'Are you sure you want to start the Geonames batch process?'
+
     def get_dynamic_fields(self):
         """Get the dynamic fields for the form."""
         fields = []
@@ -98,6 +107,10 @@ class GNDBatchForm(DictionaryBatchForm):
 
     def get_button_label(self):
         return 'Start GND Batch'
+
+    def get_button_data_message(self):
+        """Get the data message for the submit button."""
+        return 'Are you sure you want to start the GND batch process?'
 
     def get_dynamic_fields(self):
         return []
@@ -116,6 +129,10 @@ class WikidataBatchForm(DictionaryBatchForm):
         """Get the label for the submit button."""
         return 'Start Wikidata Batch'
 
+    def get_button_data_message(self):
+        """Get the data message for the submit button."""
+        return 'Are you sure you want to start the Wikidata batch process?'
+
     def get_dynamic_fields(self):
         """Get the dynamic fields for the form."""
         fields = []
@@ -133,6 +150,10 @@ class OpenaiBatchForm(DictionaryBatchForm):
     def get_button_label(self):
         """Get the label for the submit button."""
         return 'Start OpenAI Batch'
+
+    def get_button_data_message(self):
+        """Get the data message for the submit button."""
+        return 'Are you sure you want to start the OpenAI batch process?'
 
     def get_dynamic_fields(self):
         """Get the dynamic fields for the form."""

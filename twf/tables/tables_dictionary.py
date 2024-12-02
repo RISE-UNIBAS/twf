@@ -33,6 +33,14 @@ class DictionaryTable(tables.Table):
         return mark_safe(f"Entries: {record.entries.count()}")
 
 
+class DictionaryAddTable(DictionaryTable):
+    """Table for displaying dictionaries to add to a project."""
+
+    options = tables.TemplateColumn(template_name='twf/tables/dictionary_table_add_options.html',
+                                    verbose_name="Options", orderable=False, attrs={"td": {"width": "15%"}})
+
+
+
 class DictionaryEntryTable(tables.Table):
     """Table for displaying dictionary entries."""
     variations = tables.Column(verbose_name="Variations", orderable=False)

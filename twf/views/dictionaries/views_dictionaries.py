@@ -12,8 +12,10 @@ from twf.filters import DictionaryEntryFilter
 from twf.forms.dictionaries.dictionary_forms import DictionaryForm, DictionaryEntryForm
 from twf.forms.enrich_forms import EnrichEntryManualForm, EnrichEntryForm
 from twf.models import Dictionary, DictionaryEntry, Variation, PageTag
+from twf.tasks.instant_tasks import save_instant_task_add_dictionary
 from twf.utils.project_statistics import get_dictionary_statistics
-from twf.tables.tables_dictionary import DictionaryTable, DictionaryEntryTable, DictionaryEntryVariationTable
+from twf.tables.tables_dictionary import DictionaryTable, DictionaryEntryTable, DictionaryEntryVariationTable, \
+    DictionaryAddTable
 from twf.views.views_base import TWFView
 
 
@@ -121,13 +123,14 @@ class TWFDictionaryAddView(SingleTableView, TWFDictionaryView):
 
     template_name = 'twf/dictionaries/dictionaries_add.html'
     page_title = 'Add Dictionaries'
-    table_class = DictionaryTable
+    table_class = DictionaryAddTable
     paginate_by = 10
     model = Dictionary
 
     def get_queryset(self):
         """Get the queryset."""
-        return Dictionary.objects.all()
+        selected_dictionaries = self.get_project().selected_dictionaries.all()
+        return Dictionary.objects.all().exclude(pk__in=[d.pk for d in selected_dictionaries])
 
     def get(self, request, *args, **kwargs):
         """Handle the GET request."""
@@ -471,3 +474,40 @@ def skip_entry(request, pk):
         return HttpResponseRedirect(referer)
 
     return redirect('twf:dictionaries_normalization')
+
+def add_dictionary_to_project(request, pk):
+    """Add a dictionary to the project."""
+    dictionary = get_object_or_404(Dictionary, pk=pk)
+    project = TWFView.s_get_project(request)
+    project.selected_dictionaries.add(dictionary)
+    project.save(current_user=request.user)
+
+    save_instant_task_add_dictionary(project,
+                                     request.user,
+                                     f"Added dictionary {dictionary.label} to project")
+
+    messages.success(request, f'Dictionary {dictionary.label} has been added to your project.')
+
+    # Get the HTTP referer URL
+    referer = request.META.get('HTTP_REFERER')
+    if referer:
+        return HttpResponseRedirect(referer)
+
+    return redirect('twf:dictionaries_add')
+
+
+def remove_dictionary_from_project(request, pk):
+    """Remove a dictionary from the project."""
+    dictionary = get_object_or_404(Dictionary, pk=pk)
+    project = TWFView.s_get_project(request)
+    project.selected_dictionaries.remove(dictionary)
+    project.save(current_user=request.user)
+
+    messages.success(request, f'Dictionary {dictionary.label} has been removed from your project.')
+
+    # Get the HTTP referer URL
+    referer = request.META.get('HTTP_REFERER')
+    if referer:
+        return HttpResponseRedirect(referer)
+
+    return redirect('twf:dictionaries')

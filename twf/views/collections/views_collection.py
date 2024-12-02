@@ -72,6 +72,22 @@ class TWFProjectCollectionsCreateView(FormView, TWFCollectionsView):
         self.object.project_id = self.request.session.get('project_id')
         self.object.save(current_user=self.request.user)
 
+        all_documents = self.get_project().documents.all()
+        for doc in all_documents:
+            item = CollectionItem(document=doc, collection=self.object, document_configuration={'annotations': []})
+            item.title = f'Song in {doc.document_id}'
+            for page in doc.get_active_pages():
+                annotations = page.get_annotations()
+                anno_types = []
+                for annotation in annotations:
+                    if "type" not in annotation:
+                        print(f"Skipping annotation without type: {annotation}")
+                        continue
+                    anno_types.append(annotation['type'])
+                    if annotation['type'] in ['lyrics', 'music', 'heading']:
+                        item.document_configuration['annotations'].append(annotation)
+            item.save(current_user=self.request.user)
+
         # Add a success message
         messages.success(self.request, 'Collection has been created successfully.')
         # Redirect to the success URL

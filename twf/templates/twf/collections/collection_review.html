@@ -4,57 +4,60 @@
 
 {% block content %}
     <div class="border rounded bg-light mt-0 p-3">
-        
-        <form method="post" action="{% url 'twf:project_collections_item_update' item.id %}">
-            {% csrf_token %}
-            
-            <h1 class="display-6">Review Collection Item</h1>
-            <p class="lead">Item: {% if item.title %}{{ item.title }}{% else %}<i>no name</i>{% endif %}</p>
-        
-            <input type="text" class="form-control" value="{{ item.title }}" name="item_title">
-    
-            <h3>Item Parts</h3>
-            <ul>
-                {% for anno in item.document_configuration.annotations %}
-                        <div>
-                            <table>
-                                <tr>
-                                    <td><img src="{{ anno.url }}"></td>
-                                    <td class="small">{{ anno.text|nl2br }}</td>
-                                    <td>
-                                        <form method="POST" action="{% url 'twf:project_collections_item_remove_part' item.id forloop.counter %}">
-                                            {% csrf_token %}
-                                            <button type="submit" class="btn btn-danger">Delete {{ anno.type }}</button>
-                                        </form>
-                                    </td>
-                                </tr>
-                            </table>
-                        </div>
-                        {%  if not forloop.last %}
-                            <form method="POST" action="{% url 'twf:project_collections_item_split' item.id forloop.counter %}">
-                                {% csrf_token %}
-                                <button type="submit" class="btn btn-dark">&#9986; Split Item</button>
-                            </form>
-                        {% endif %}
-                {% endfor %}
-            
-            </ul>
-            
-            <div>
-                <textarea placeholder="Notes on Collection Item" name="notes" class="form-control">{% if item.notes %}{{ item.notes }}{% endif %}</textarea>
-            </div>
-            
-            <div class="mt-4">
-                <input type="hidden" name="item_status" id="item_status" value="">
-                <script>
-                    function setStatus(status) {
-                        document.getElementById('item_status').value = status;
-                    }
-                </script>
+        {% if item %}
+            <form method="post" action="{% url 'twf:project_collections_item_update' item.id %}">
+                {% csrf_token %}
                 
-                <button type="submit" class="btn btn-success" onclick="setStatus('reviewed')">Save and Mark as Reviewed</button>
-                <button type="submit" class="btn btn-danger" onclick="setStatus('faulty')">Save and Mark as Faulty</button>
-            </div>
-        </form>
+                <h1 class="display-6">Review Collection Item</h1>
+                <p class="lead">Item: {% if item.title %}{{ item.title }}{% else %}<i>no name</i>{% endif %}</p>
+            
+                <input type="text" class="form-control" value="{{ item.title }}" name="item_title">
+        
+                <h3>Item Parts</h3>
+                <ul>
+                    {% for anno in item.document_configuration.annotations %}
+                            <div>
+                                <table>
+                                    <tr>
+                                        <td><img src="{{ anno.url }}"></td>
+                                        <td class="small">{{ anno.text|nl2br }}</td>
+                                        <td>
+                                            <form method="POST" action="{% url 'twf:project_collections_item_remove_part' item.id forloop.counter %}">
+                                                {% csrf_token %}
+                                                <button type="submit" class="btn btn-danger">Delete {{ anno.type }}</button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                            {%  if not forloop.last %}
+                                <form method="POST" action="{% url 'twf:project_collections_item_split' item.id forloop.counter %}">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-dark">&#9986; Split Item</button>
+                                </form>
+                            {% endif %}
+                    {% endfor %}
+                
+                </ul>
+                
+                <div>
+                    <textarea placeholder="Notes on Collection Item" name="notes" class="form-control">{% if item.notes %}{{ item.notes }}{% endif %}</textarea>
+                </div>
+                
+                <div class="mt-4">
+                    <input type="hidden" name="item_status" id="item_status" value="">
+                    <script>
+                        function setStatus(status) {
+                            document.getElementById('item_status').value = status;
+                        }
+                    </script>
+                    
+                    <button type="submit" class="btn btn-success" onclick="setStatus('reviewed')">Save and Mark as Reviewed</button>
+                    <button type="submit" class="btn btn-danger" onclick="setStatus('faulty')">Save and Mark as Faulty</button>
+                </div>
+            </form>
+        {% else %}
+            <p>No open items found.</p>
+        {% endif %}
     </div>
 {% endblock %}

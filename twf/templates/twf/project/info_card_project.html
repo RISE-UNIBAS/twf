@@ -7,7 +7,9 @@
 {% block info_text %}
      This section allows you to manage your project's core settings, configure setup options, 
      and handle project-specific batches and tasks.<br/>
-     <u>Description:</u> <i>{% if project.description %}{{ project.description }}{% else %}&lt;no description&gt;{% endif %}</i><br/><br/>
+     <u>Description:</u> <i>{% if project.description %}{{ project.description }}{% else %}&lt;no description&gt;{% endif %}</i><br/>
+     <u>Transkribus Collection ID:</u> {{ project.collection_id }}<br/><br/>
+    
     <strong>{{ project.title }}</strong> was created by user <strong>{{ project.owner }}</strong> on <strong>{{ project.created_at }}</strong>
      {%  if project.members.count > 0 %}
         and the members are:

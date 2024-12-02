@@ -29,7 +29,7 @@ from twf.views.dictionaries.views_dictionaries import TWFDictionaryOverviewView,
     delete_variation, TWFDictionaryDictionaryEditView, TWFDictionaryDictionaryEntryEditView, \
     TWFDictionaryDictionaryEntryView, \
     TWFDictionaryNormDataView, TWFDictionaryCreateView, skip_entry, TWFDictionaryDictionariesView, \
-    TWFDictionaryAddView, TWFDictionaryMergeEntriesView
+    TWFDictionaryAddView, TWFDictionaryMergeEntriesView, add_dictionary_to_project, remove_dictionary_from_project
 from twf.views.export.views_export import TWFExportDocumentsView, TWFExportCollectionsView, TWFExportProjectView, \
     TWFExportOverviewView, TWFExportTagsView, TWFExportDictionariesView, TWFImportDictionaryView
 from twf.views.metadata.views_metadata import TWFMetadataReviewDocumentsView, \
@@ -37,7 +37,8 @@ from twf.views.metadata.views_metadata import TWFMetadataReviewDocumentsView, \
     TWFMetadataLoadSheetsDataView
 from twf.views.project.views_project import select_project, TWFProjectQueryView, TWFProjectOverviewView, \
     TWFProjectTaskMonitorView, TWFProjectGeneralSettingsView, TWFProjectCredentialsSettingsView, \
-    TWFProjectPromptsView, TWFProjectTaskSettingsView, TWFProjectExportSettingsView, TWFProjectCopyView
+    TWFProjectPromptsView, TWFProjectTaskSettingsView, TWFProjectExportSettingsView, TWFProjectCopyView, \
+    TWFProjectResetView
 from twf.views.project.views_project_ai import TWFProjectAIQueryView
 from twf.views.tags.views_tags import TWFProjectTagsView, TWFProjectTagsOpenView, \
     TWFProjectTagsParkedView, TWFProjectTagsResolvedView, TWFProjectTagsIgnoredView, TWFTagsDatesGroupView, \
@@ -76,6 +77,7 @@ urlpatterns = [
                                                                page_title='Test Transkribus Export'),
          name='project_test_export'),
     path('project/setup/copy/', TWFProjectCopyView.as_view(), name='project_copy'),
+    path('project/setup/reset/', TWFProjectResetView.as_view(), name='project_reset'),
 
     path('project/task/monitor/', TWFProjectTaskMonitorView.as_view(), name='project_task_monitor'),
     path('project/prompts/', TWFProjectPromptsView.as_view(), name='project_prompts'),
@@ -128,6 +130,8 @@ urlpatterns = [
     path('dictionaries/overview', TWFDictionaryOverviewView.as_view(), name='dictionaries_overview'),
     path('dictionaries/', TWFDictionaryDictionariesView.as_view(), name='dictionaries'),
     path('dictionaries/add/', TWFDictionaryAddView.as_view(), name='dictionaries_add'),
+    path('dictionaries/add/<int:pk>/', add_dictionary_to_project, name='dictionaries_add_to_project'),
+    path('dictionaries/remove/<int:pk>/', remove_dictionary_from_project, name='dictionaries_remove_from_project'),
     path('dictionaries/create/', TWFDictionaryCreateView.as_view(), name='dictionary_create'),
     path('dictionaries/<int:pk>/', TWFDictionaryDictionaryView.as_view(), name='dictionaries_view'),
     path('dictionaries/<int:pk>/edit/', TWFDictionaryDictionaryEditView.as_view(), name='dictionaries_edit'),
