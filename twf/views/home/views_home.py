@@ -32,7 +32,7 @@ class TWFHomeView(TWFView):
             }
         ]
         if self.request.user.is_authenticated:
-            user_projects = self.request.user.profile.get_projects()
+            user_projects = self.request.user.profile.get_projects().order_by('title')
             proj_nav = []
             for proj in user_projects:
                 proj_nav.append({'url': reverse('twf:project_select', args=[proj.id]),
