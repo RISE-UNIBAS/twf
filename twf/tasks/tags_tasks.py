@@ -72,12 +72,12 @@ def create_page_tags(self, project_id, user_id):
 
     except Project.DoesNotExist as e:
         error_message = f'Project {project_id} does not exist.'
-        fail_task(self, task, error_message)
+        fail_task(self, task, error_message, e)
         raise ValueError(error_message) from e
     except User.DoesNotExist as e:
         error_message = f'User {user_id} does not exist.'
-        fail_task(self, task, error_message)
+        fail_task(self, task, error_message, e)
         raise ValueError(error_message) from e
     except Exception as e:
-        fail_task(self, task, str(e))
+        fail_task(self, task, str(e), e)
         raise ValueError(str(e)) from e

@@ -25,7 +25,7 @@ def load_sheets_metadata(self, project_id, user_id):
     try:
         user = User.objects.get(pk=user_id)
     except User.DoesNotExist as e:
-        fail_task(self, task, f'User with ID {user_id} not found.')
+        fail_task(self, task, f'User with ID {user_id} not found.', e)
         raise ValueError(f'User with ID {user_id} not found.') from e
 
     sheets_configuration = project.get_task_configuration('google_sheet')

@@ -10,8 +10,19 @@
      * @param {object} data - Additional data to send with the start request.
      */
     function startTask(startUrl, progressUrlBase, progressBarId, logTextareaId, data) {
+        const queryString = new URLSearchParams(data).toString();
+
         // Clear the log before starting
         $(logTextareaId).text('');
+
+        // Reset the progress bar
+        const progressBar = $(progressBarId);
+        progressBar.css('width', '0%');
+        progressBar.removeClass('bg-success bg-danger'); // Remove any existing colors
+        progressBar.addClass('bg-dark');
+
+        console.log('Task URL:', startUrl);
+        console.log('Task Data:', data);
 
         // Send AJAX request to start the task
         $.ajax({
@@ -23,7 +34,7 @@
                 pollTaskProgress(taskId, progressUrlBase, progressBarId, logTextareaId);
             },
             error: function(error) {
-                console.error("Error starting task:", error);
+                console.error("Error starting task:", error.responseText);
                 $(logTextareaId).append('Error starting task.\n');
             }
         });
@@ -43,6 +54,7 @@
         fetch(url)
             .then(response => response.json())
             .then(data => {
+                console.log('Task Progress Data:', data); // Debug the full response
                 const progressBar = $(progressBarId);
                 const status = data.status.toUpperCase();
 
@@ -58,11 +70,14 @@
                     }, 800); // Adjust the polling interval if needed
                 } else if (status === 'SUCCESS') {
                     progressBar.css('width', '100%');
+                    progressBar.removeClass('bg-dark'); // Remove the dark color
+                    progressBar.addClass('bg-success'); // Change the progress bar color to red
                     progressBar.text('Completed');
                     $(logTextareaId).append('Task completed\n' + data.result.text + '\n');
                     scrollToBottom(logTextareaId);
                 } else if (status === 'FAILURE') {
                     progressBar.css('width', '100%');
+                    progressBar.removeClass('bg-dark'); // Remove the dark color
                     progressBar.addClass('bg-danger'); // Change the progress bar color to red
                     progressBar.text('Failed');
                     $(logTextareaId).append('Error: ' + data.error + '\n');

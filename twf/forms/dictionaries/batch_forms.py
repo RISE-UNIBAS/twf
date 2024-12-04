@@ -9,12 +9,20 @@ class DictionaryBatchForm(forms.Form):
     """ Base form for batches of dictionaries. """
 
     project = None
+    task_data = {}
     dictionary = forms.ChoiceField(label='Dictionary', required=True,
                                    widget=Select2Widget(attrs={'style': 'width: 100%;'}))
     progress_details = forms.CharField(label='Progress', required=False)
 
     def __init__(self, *args, **kwargs):
         self.project = kwargs.pop('project', None)
+
+        self.task_data['data-start-url'] = kwargs.pop('data-start-url', None)
+        self.task_data['data-message'] = kwargs.pop('data-message', 'Are you sure you want to start the task?')
+        self.task_data['data-progress-url-base'] = kwargs.pop('data-progress-url-base', None)
+        self.task_data['data-progress-bar-id'] = kwargs.pop('data-progress-bar-id', None)
+        self.task_data['data-log-textarea-id'] = kwargs.pop('data-log-textarea-id', None)
+
         super().__init__(*args, **kwargs)
 
         if self.project is None:
@@ -38,6 +46,18 @@ class DictionaryBatchForm(forms.Form):
         self.helper = FormHelper()
         self.helper.form_method = 'post'
 
+        button_kwargs = {
+            'css_class': 'btn btn-dark show-confirm-modal',
+            'data_message': self.task_data.get('data-message'),
+            'data_start_url': self.task_data.get('data-start-url'),
+            'data_progress_url_base': self.task_data.get('data-progress-url-base'),
+            'data_progress_bar_id': self.task_data.get('data-progress-bar-id'),
+            'data_log_textarea_id': self.task_data.get('data-log-textarea-id'),
+        }
+
+        # Filter out None or empty values
+        filtered_kwargs = {key: value for key, value in button_kwargs.items() if value}
+
         self.helper.layout = Layout(
             Row(
                 Column('dictionary', css_class='form-group col-12 mb-0'),
@@ -50,8 +70,7 @@ class DictionaryBatchForm(forms.Form):
                 css_class='row form-row'
             ),
             Div(
-                Button('startBatch', self.get_button_label(), css_class='btn btn-dark show-confirm-modal',
-                              data_message=self.get_button_data_message()),
+                Button('startBatch', self.get_button_label(), **filtered_kwargs),
                 css_class='text-end pt-3'
             )
         )
@@ -59,10 +78,6 @@ class DictionaryBatchForm(forms.Form):
     def get_button_label(self):
         """Get the label for the submit button."""
         return 'Start Batch'
-
-    def get_button_data_message(self):
-        """Get the data message for the submit button."""
-        return 'Are you sure you want to start the batch process?'
 
     def get_dynamic_fields(self):
         """Get the dynamic fields for the form."""
@@ -87,10 +102,6 @@ class GeonamesBatchForm(DictionaryBatchForm):
         """Get the label for the submit button."""
         return 'Start Geonames Batch'
 
-    def get_button_data_message(self):
-        """Get the data message for the submit button."""
-        return 'Are you sure you want to start the Geonames batch process?'
-
     def get_dynamic_fields(self):
         """Get the dynamic fields for the form."""
         fields = []
@@ -105,15 +116,23 @@ class GeonamesBatchForm(DictionaryBatchForm):
 class GNDBatchForm(DictionaryBatchForm):
     """Form for batch processing Geonames data."""
 
+    earliest_birth_year = forms.IntegerField(label='Earliest Birth Year', required=False)
+    latest_birth_year = forms.IntegerField(label='Latest Birth Year', required=False)
+    show_empty = forms.BooleanField(label='Include results without birth dates/years', required=False)
+
     def get_button_label(self):
         return 'Start GND Batch'
 
-    def get_button_data_message(self):
-        """Get the data message for the submit button."""
-        return 'Are you sure you want to start the GND batch process?'
-
     def get_dynamic_fields(self):
-        return []
+        """Get the dynamic fields for the form."""
+        fields = []
+        fields.append(Row(
+            Column('earliest_birth_year', css_class='form-group col-4 mb-0'),
+            Column('latest_birth_year', css_class='form-group col-4 mb-0'),
+            Column('show_empty', css_class='form-group col-4 mb-0'),
+            css_class='row form-row'
+        ))
+        return fields
 
 
 class WikidataBatchForm(DictionaryBatchForm):
@@ -129,10 +148,6 @@ class WikidataBatchForm(DictionaryBatchForm):
         """Get the label for the submit button."""
         return 'Start Wikidata Batch'
 
-    def get_button_data_message(self):
-        """Get the data message for the submit button."""
-        return 'Are you sure you want to start the Wikidata batch process?'
-
     def get_dynamic_fields(self):
         """Get the dynamic fields for the form."""
         fields = []
@@ -147,14 +162,19 @@ class WikidataBatchForm(DictionaryBatchForm):
 class OpenaiBatchForm(DictionaryBatchForm):
     """Form for batch processing Geonames data."""
 
+    prompt = forms.CharField(label='Prompt', required=True, widget=forms.Textarea,
+                             help_text='The prompt for the OpenAI API. '
+                                       'Use the token {label} to insert the entry label.')
+
     def get_button_label(self):
         """Get the label for the submit button."""
         return 'Start OpenAI Batch'
 
-    def get_button_data_message(self):
-        """Get the data message for the submit button."""
-        return 'Are you sure you want to start the OpenAI batch process?'
-
     def get_dynamic_fields(self):
         """Get the dynamic fields for the form."""
-        return []
+        fields = []
+        fields.append(Row(
+            Column('prompt', css_class='form-group col-12 mb-0'),
+            css_class='row form-row'
+        ))
+        return fields

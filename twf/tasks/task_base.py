@@ -1,4 +1,6 @@
 """Task base functions. Functions to start, update, end, and fail tasks."""
+import traceback
+
 from django.utils import timezone
 from twf.models import Task
 
@@ -75,36 +77,25 @@ def end_task(broker, task, text, description=None, meta=None):
 
 
 def fail_task(broker, task, text, exception, meta=None):
-    """Fail the task and update the task state.
-    :param broker: Celery broker
-    :param task: Task object from TWG
-    :param text: Task text
-    :param exception: Exception
-    :param meta: Task metadata"""
-
+    """Fail the task and update the task state."""
     task.status = 'FAILURE'
     task.text = text
     task.end_time = timezone.now()
-    if meta:
-        task.meta = meta
-    else:
-        task.meta = {}
-    task.save()
+    if meta is None:
+        meta = {}
 
-    # Include exception details in meta
-    failure_meta = {
+    # Add exception details to metadata
+    meta.update({
         'current': 100,
         'total': 100,
-        'text': text
-    }
-    if exception:
-        failure_meta['exception'] = {
-            'exc_type': type(exception).__name__,
-            'message': str(exception),
-            'args': exception.args
-        }
+        'text': text,
+        'exc_type': type(exception).__name__,
+        'message': str(exception),
+        'traceback': "".join(traceback.format_exception(type(exception), exception, exception.__traceback__)),
+    })
 
-    # Update state with failure meta
-    broker.update_state(state='FAILURE', meta=failure_meta)
+    # Save task state and update broker
+    task.meta = meta
+    task.save()
+    broker.update_state(state='FAILURE', meta=meta)
     return task
-

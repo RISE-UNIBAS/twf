@@ -11,35 +11,3 @@
          {% crispy form %}
      </div>
 {% endblock %}
-
-{% block script %}
-    <script src="{% static 'twf/js/celery_task_monitor.js' %}"></script>
-    <script>
-        $(document).ready(function() {
-            $('#button-id-startbatch').click(function() {
-                
-                const dictionaryId = $('#id_dictionary').val();
-                const entity_type = $('#id_entity_type').val();
-                const language = $('#id_language').val();
-                
-                if(dictionaryId === '') {
-                    alert('Please select a dictionary.');
-                    return;
-                }
-                
-                const startUrl = '/celery/dictionaries/batch/wikidata/'; // Task start URL
-                const progressUrlBase = '/celery/status/'; // Base URL for polling progress
-                const progressBarId = '#taskProgressBar'; // ID of the progress bar element
-                const logTextareaId = '#id_progress_details'; // ID of the textarea to display logs
-                const data = {
-                    dictionary_id: dictionaryId,
-                    entity_type: entity_type,
-                    language: language,
-                };
-                
-                // Start the task
-                startTask(startUrl, progressUrlBase, progressBarId, logTextareaId, data);
-            });
-        });
-    </script>
-{% endblock %}

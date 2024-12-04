@@ -22,7 +22,15 @@
             <div class="col-12">
                 <div class="mb-3">
                     <label for="extractZip" class="form-label">Extract files from zip and create database objects</label>
-                    <input id="extractZip" type="button"  role="button" class="form-control btn btn-dark" value="Extract Downloaded Data">
+                    
+                    <input 
+                            id="extractZip" 
+                            type="button"  
+                            role="button" 
+                            class="form-control btn btn-dark show-confirm-modal" 
+                            value="Extract Downloaded Data"
+                            data-message="Are you sure you want to extract the downloaded data? This may take a while.">
+                    
                     <div id="transkribusDownloadHelp" class="form-text text-danger">
                         Depending on the number of your documents, this can take a long time.
                     </div>
@@ -48,16 +56,47 @@
 {% block script %}
     <script src="{% static 'twf/js/celery_task_monitor.js' %}"></script>
     <script>
-        $(document).ready(function() {
-            $('#extractZip').click(function() {
-                const startUrl = '/celery/transkribus/extract/'; // Task start URL
-                const progressUrlBase = '/celery/status/'; // Base URL for polling progress
-                const progressBarId = '#extractProgressBar'; // ID of the progress bar element
-                const logTextareaId = '#extractionLog'; // ID of the textarea to display logs
-                
-                // Start the task
-                startTask(startUrl, progressUrlBase, progressBarId, logTextareaId);
-            });
+        $(document).ready(function () {
+          // Initialize the modal
+          const normalModal = new bootstrap.Modal($('#confirmModal')[0]);
+          const normalConfirmButton = $('#confirmActionButton');
+        
+          let taskData = null; // Data to pass to the task
+          let startTaskFunction = null; // Function to execute on confirmation
+        
+          // Attach click event to buttons with 'show-confirm-modal' class
+          $('.show-confirm-modal').on('click', function (event) {
+            event.preventDefault(); // Prevent default behavior
+        
+            // Set modal message dynamically
+            const message = $(this).data('message');
+            $('#confirmModal .modal-body').text(message);
+        
+            // Store the task function for confirmation
+            startTaskFunction = () => {
+              const startUrl = '/celery/transkribus/extract/'; // Task start URL
+              const progressUrlBase = '/celery/status/'; // Base URL for polling progress
+              const progressBarId = '#extractProgressBar'; // ID of the progress bar element
+              const logTextareaId = '#extractionLog'; // ID of the textarea to display logs
+        
+              // Start the task
+              startTask(startUrl, progressUrlBase, progressBarId, logTextareaId);
+            };
+        
+            // Show the modal
+            normalModal.show();
+          });
+        
+          // Handle confirmation
+          normalConfirmButton.on('click', function () {
+            if (startTaskFunction) {
+              startTaskFunction(); // Execute the stored function
+            }
+        
+            // Hide the modal
+            normalModal.hide();
+          });
+          
         });
     </script>
 {% endblock %}

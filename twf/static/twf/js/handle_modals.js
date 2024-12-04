@@ -1,64 +1,49 @@
 $(document).ready(function () {
-  // Initialize modals
   const normalModal = new bootstrap.Modal($('#confirmModal')[0]);
-  const dangerModal = new bootstrap.Modal($('#confirmDangerModal')[0]);
-
   const normalConfirmButton = $('#confirmActionButton');
-  const dangerConfirmButton = $('#confirmDangerActionButton');
 
-  let formElement = null;
-  let selectedButton = null;
+  let taskFunction = null; // Function to execute on confirmation
 
-  // Attach click event to buttons
-  $('.show-confirm-modal, .show-confirm-danger-modal').on('click', function (event) {
-    event.preventDefault(); // Prevent default form submission
-
-    // Store the form and button elements
-    formElement = $(this).closest('form');
-    selectedButton = $(this);
+  $('.show-confirm-modal').on('click', function (event) {
+    event.preventDefault(); // Prevent default button behavior
 
     // Set modal message dynamically
-    const message = selectedButton.data('message');
-    if ($(this).hasClass('show-confirm-danger-modal')) {
-      $('#confirmDangerModal .modal-body').text(message);
-      dangerModal.show();
-    } else {
-      $('#confirmModal .modal-body').text(message);
-      normalModal.show();
-    }
+    const message = $(this).data('message') || 'Are you sure you want to proceed?';
+    $('#confirmModal .modal-body').text(message);
+
+    // Prepare the action based on button's data attributes
+    const button = $(this);
+    const startUrl = button.data('start-url');
+    const progressUrlBase = button.data('progress-url-base');
+    const progressBarId = button.data('progress-bar-id');
+    const logTextareaId = button.data('log-textarea-id');
+
+    // Serialize form data
+    const form = button.closest('form');
+    const formData = form.serialize(); // Collect all form fields
+
+    // Define the task function
+    taskFunction = () => {
+      if (startUrl) {
+        startTask(
+          startUrl,
+          progressUrlBase,
+          progressBarId,
+          logTextareaId,
+          formData // Include serialized form data
+        );
+      }
+    };
+
+    // Show the modal
+    normalModal.show();
   });
 
-  // Confirm actions for normal modal
+  // Execute the task when Confirm is clicked
   normalConfirmButton.on('click', function () {
-    if (formElement && selectedButton) {
-      // Trigger form submission with the selected button
-      $('<input>')
-        .attr({
-          type: 'hidden',
-          name: selectedButton.attr('name'),
-          value: selectedButton.val(),
-        })
-        .appendTo(formElement);
-
-      formElement.submit();
+    if (taskFunction) {
+      taskFunction(); // Execute the task function
     }
     normalModal.hide();
-  });
-
-  // Confirm actions for danger modal
-  dangerConfirmButton.on('click', function () {
-    if (formElement && selectedButton) {
-      // Trigger form submission with the selected button
-      $('<input>')
-        .attr({
-          type: 'hidden',
-          name: selectedButton.attr('name'),
-          value: selectedButton.val(),
-        })
-        .appendTo(formElement);
-
-      formElement.submit();
-    }
-    dangerModal.hide();
   });
 });

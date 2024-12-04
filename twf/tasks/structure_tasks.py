@@ -177,7 +177,7 @@ def finalize_task(task, project, copied_files):
 def handle_task_failure(self, task, error_message, exc):
     """Handle task failure by updating its status."""
     if task:
-        fail_task(self, task, f"Task failed: {str(exc)}", exception=exc)
+        fail_task(self, task, error_message, exc)
 
 
 def update_task_percentage(task, text, percentage):
@@ -211,12 +211,12 @@ def legacy_extract_zip_export_task(self, project_id, user_id):
         # Check if the zip file exists in the file system
         if not zip_file:
             error_message = "No zip file found in the project."
-            fail_task(self, task, error_message)
+            fail_task(self, task, error_message, Exception(error_message))
             raise ValueError(error_message)
 
         if not os.path.exists(zip_file.path):
             error_message = "The zip file does not exist in the file system."
-            fail_task(self, task, error_message)
+            fail_task(self, task, error_message, Exception(error_message))
             raise ValueError(error_message)
 
         fs = FileSystemStorage()
@@ -376,11 +376,11 @@ def legacy_extract_zip_export_task(self, project_id, user_id):
 
     except User.DoesNotExist as e:
         error_message = f"User with id {user_id} does not exist."
-        fail_task(self, task, error_message)
+        fail_task(self, task, error_message, e)
         raise ValueError(error_message) from e
     except ValueError as e:
-        fail_task(self, task, str(e))
+        fail_task(self, task, str(e), e)
         raise ValueError(str(e)) from e
     except Exception as e:
-        fail_task(self, task, str(e))
+        fail_task(self, task, str(e), e)
         raise ValueError(str(e)) from e

@@ -9,6 +9,7 @@ from twf.tasks.metadata_tasks import load_sheets_metadata
 from twf.tasks.tags_tasks import create_page_tags
 from twf.views.views_base import TWFView
 
+
 def start_extraction(request):
     """Start the extraction process as a Celery task."""
     project = TWFView.s_get_project(request)
@@ -31,57 +32,91 @@ def start_tags_creation(request):
 
 def start_gnd_batch(request):
     """Start the GND requests as a Celery task."""
-    project = TWFView.s_get_project(request)
-    dictionary_id = request.GET.get('dictionary_id')
-    user_id = request.user.id
+    if request.method == "GET":  # Use GET to receive serialized form data
+        project = TWFView.s_get_project(request)
+        dictionary_id = request.GET.get('dictionary')
+        user_id = request.user.id
+        earliest_birth_year = request.GET.get('earliest_birth_year', None)
+        latest_birth_year = request.GET.get('latest_birth_year', None)
+        show_empty = request.GET.get('show_empty', False)
+        if show_empty == 'on':
+            show_empty = True
+        if earliest_birth_year != '':
+            earliest_birth_year = int(earliest_birth_year)
+        if latest_birth_year != '':
+            latest_birth_year = int(latest_birth_year)
 
-    # Trigger the task
-    task = search_gnd_entries.delay(project, dictionary_id, user_id)
-    return JsonResponse({'status': 'success', 'task_id': task.id})
+        print(f"earliest_birth_year: {earliest_birth_year}")
+        print(f"latest_birth_year: {latest_birth_year}")
+        print(f"show_empty: {show_empty}")
+
+        if not dictionary_id:
+            return JsonResponse({'status': 'error', 'message': 'Dictionary ID is required.'}, status=400)
+
+        # Trigger the task
+        task = search_gnd_entries.delay(project.id, dictionary_id, user_id,
+                                        earliest_birth_year, latest_birth_year, show_empty)
+
+        return JsonResponse({'status': 'success', 'task_id': task.id})
+    return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=405)
 
 
 def start_geonames_batch(request):
-    """Start the GND requests as a Celery task."""
-    project = TWFView.s_get_project(request)
-    geonames_credentials = project.get_credentials('geonames')
-    dictionary_id = request.GET.get('dictionary_id')
-    user_id = request.user.id
-    geonames_username = geonames_credentials['username']
-    country_restriction = request.GET.get('only_search_in')
-    similarity_threshold = request.GET.get('similarity_threshold')
+    """Start the GeoNames requests as a Celery task."""
+    if request.method == "GET":  # Use GET to receive serialized form data
+        project = TWFView.s_get_project(request)
+        geonames_credentials = project.get_credentials('geonames')
 
-    if geonames_username is None or geonames_username == '':
-        return JsonResponse({'status': 'error', 'message': 'No GeoNames username set'})
+        # Retrieve form data from POST request
+        dictionary_id = request.GET.get('dictionary')
+        user_id = request.user.id
+        geonames_username = geonames_credentials.get('username')
+        country_restriction = request.GET.get('only_search_in')
+        similarity_threshold = request.GET.get('similarity_threshold')
 
-    # Trigger the task
-    task = search_geonames_entries.delay(project.id, dictionary_id, user_id, geonames_username,
-                                         country_restriction, similarity_threshold)
-    return JsonResponse({'status': 'success', 'task_id': task.id})
+        # Validate GeoNames username
+        if not geonames_username:
+            return JsonResponse({'status': 'error', 'message': 'No GeoNames username set'})
+
+        # Trigger the task
+        task = search_geonames_entries.delay(
+            project.id, dictionary_id, user_id, geonames_username,
+            country_restriction, similarity_threshold
+        )
+        return JsonResponse({'status': 'success', 'task_id': task.id})
+
+    return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=405)
 
 
 def start_wikidata_batch(request):
     """Start the GND requests as a Celery task."""
-    project = TWFView.s_get_project(request)
-    dictionary_id = request.GET.get('dictionary_id')
-    user_id = request.user.id
+    if request.method == "GET":  # Use GET to receive serialized form data
+        project = TWFView.s_get_project(request)
+        dictionary_id = request.GET.get('dictionary')
+        user_id = request.user.id
 
-    entity_type = request.GET.get('entity_type')
-    language = request.GET.get('language')
+        entity_type = request.GET.get('entity_type')
+        language = request.GET.get('language')
 
-    # Trigger the task
-    task = search_wikidata_entries.delay(project, dictionary_id, user_id, entity_type, language)
-    return JsonResponse({'status': 'success', 'task_id': task.id})
+        # Trigger the task
+        task = search_wikidata_entries.delay(project.id, dictionary_id, user_id, entity_type, language)
+        return JsonResponse({'status': 'success', 'task_id': task.id})
+    return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=405)
 
 
 def start_openai_batch(request):
     """Start the GND requests as a Celery task."""
-    project = TWFView.s_get_project(request)
-    dictionary_id = request.GET.get('dictionary_id')
-    user_id = request.user.id
+    if request.method == "GET":  # Use GET to receive serialized form data
+        project = TWFView.s_get_project(request)
+        dictionary_id = request.GET.get('dictionary')
+        user_id = request.user.id
 
-    # Trigger the task
-    task = search_openai_entries.delay(project, dictionary_id, user_id)
-    return JsonResponse({'status': 'success', 'task_id': task.id})
+        prompt = request.GET.get('prompt')
+
+        # Trigger the task
+        task = search_openai_entries.delay(project.id, dictionary_id, user_id, prompt)
+        return JsonResponse({'status': 'success', 'task_id': task.id})
+    return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=405)
 
 
 def start_gnd_request(request):

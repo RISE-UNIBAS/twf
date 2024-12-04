@@ -16,6 +16,13 @@ class TWFDictionaryGeonamesBatchView(FormView, TWFDictionaryView):
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
         kwargs['project'] = self.get_project()
+
+        kwargs['data-start-url'] = reverse_lazy('twf:task_dictionaries_batch_geonames')
+        kwargs['data-message'] = "Are you sure you want to start the geonames task?"
+        kwargs['data-progress-url-base'] = "/celery/status/"
+        kwargs['data-progress-bar-id'] = "#taskProgressBar"
+        kwargs['data-log-textarea-id'] = "#id_progress_details"
+
         return kwargs
 
 
@@ -29,6 +36,13 @@ class TWFDictionaryGNDBatchView(FormView, TWFDictionaryView):
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
         kwargs['project'] = self.get_project()
+
+        kwargs['data-start-url'] = reverse_lazy('twf:task_dictionaries_batch_gnd')
+        kwargs['data-message'] = "Are you sure you want to start the gnd task?"
+        kwargs['data-progress-url-base'] = "/celery/status/"
+        kwargs['data-progress-bar-id'] = "#taskProgressBar"
+        kwargs['data-log-textarea-id'] = "#id_progress_details"
+
         return kwargs
 
 
@@ -42,6 +56,13 @@ class TWFDictionaryWikidataBatchView(FormView, TWFDictionaryView):
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
         kwargs['project'] = self.get_project()
+
+        kwargs['data-start-url'] = reverse_lazy('twf:task_dictionaries_batch_wikidata')
+        kwargs['data-message'] = "Are you sure you want to start the wikidata task?"
+        kwargs['data-progress-url-base'] = "/celery/status/"
+        kwargs['data-progress-bar-id'] = "#taskProgressBar"
+        kwargs['data-log-textarea-id'] = "#id_progress_details"
+
         return kwargs
 
 
@@ -55,4 +76,11 @@ class TWFDictionaryOpenaiBatchView(FormView, TWFDictionaryView):
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
         kwargs['project'] = self.get_project()
+
+        kwargs['data-start-url'] = reverse_lazy('twf:task_dictionaries_batch_openai')
+        kwargs['data-message'] = "Are you sure you want to start the openai task?"
+        kwargs['data-progress-url-base'] = "/celery/status/"
+        kwargs['data-progress-bar-id'] = "#taskProgressBar"
+        kwargs['data-log-textarea-id'] = "#id_progress_details"
+
         return kwargs

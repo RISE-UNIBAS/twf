@@ -19,13 +19,13 @@ def get_project_and_user(broker, task, project_id, user_id):
         number_of_documents = project.documents.count()
         return project, user, number_of_documents
     except Project.DoesNotExist as e:
-        fail_task(broker, task, f"Project not found: {project_id}")
+        fail_task(broker, task, f"Project not found: {project_id}", e)
         raise ValueError(str(e)) from e
     except User.DoesNotExist as e:
-        fail_task(broker, task, f"User not found: {user_id}")
+        fail_task(broker, task, f"User not found: {user_id}", e)
         raise ValueError(str(e)) from e
     except Exception as e:
-        fail_task(broker, task, str(e))
+        fail_task(broker, task, str(e), e)
         raise ValueError(str(e)) from e
 
 

@@ -201,7 +201,12 @@ class Project(TimeStampedModel):
                                   help_text='A dictionary of task configurations.')
 
     def get_credentials(self, service):
-        """Return the credentials for a service."""
+        """Return the credentials for a service.
+
+        Available services
+        ------------------
+
+        """
         return self.conf_credentials.get(service, {})
 
     def get_export_configuration(self, service, return_json=True):
