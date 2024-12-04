@@ -34,3 +34,16 @@ def save_instant_task_add_dictionary(project, user, text):
     title = "Add Dictionary"
     description = "Add a new dictionary to the project."
     save_instant_task(project, user, title, description, text)
+
+
+def start_related_task(project, user, title, description, text):
+    """Start an instant task."""
+    task = Task(project=project,
+                user=user,
+                status='STARTED',
+                title=title,
+                text=text,
+                description=description,
+                task_id=generated_task_id())
+    task.save()
+    return task

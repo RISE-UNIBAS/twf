@@ -2,7 +2,7 @@
 from django.contrib import admin
 from .models import (
     UserProfile, Project, Document, Page, Dictionary, DictionaryEntry,
-    Variation, PageTag, Collection, CollectionItem, DateVariation
+    Variation, PageTag, Collection, CollectionItem, DateVariation, Workflow
 )
 
 
@@ -23,6 +23,7 @@ class ProjectAdmin(admin.ModelAdmin):
 @admin.register(Document)
 class DocumentAdmin(admin.ModelAdmin):
     """Admin View for Document."""
+    list_display = ['project', 'title', 'document_id', 'metadata', 'status', 'is_parked', 'is_reserved']
     list_filter = ['project', 'created_at']
     search_fields = ['title', 'document_id']
 
@@ -72,6 +73,7 @@ class CollectionAdmin(admin.ModelAdmin):
 @admin.register(CollectionItem)
 class CollectionItemAdmin(admin.ModelAdmin):
     """Admin View for CollectionItem."""
+    list_display = ['collection', 'title', 'document', 'status', 'is_reserved']
     list_filter = ['collection', 'created_at']
     search_fields = ['title', 'document__title']
 
@@ -81,6 +83,14 @@ class DateVariationAdmin(admin.ModelAdmin):
     """Admin View for DateVariation."""
     list_filter = ['created_at']
     search_fields = ['variation']
+
+
+@admin.register(Workflow)
+class WorkflowAdmin(admin.ModelAdmin):
+    """Admin View for DateVariation."""
+    list_filter = ['created_at']
+    search_fields = ['user']
+
 
 # Register all models without custom admin classes
 # admin.site.register(UserProfile, UserProfileAdmin)

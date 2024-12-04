@@ -1,0 +1,64 @@
+{% extends 'twf/base/base.html' %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+    <div class="border rounded bg-light mt-0 p-3">
+        <div class="container mt-4">
+            <h1 class="display-6">Review Collections</h1>
+            {% if has_active_workflow %}
+                <p class="lead">You have an active workflow. You are working on 
+                    Collection Item <strong>{{ workflow.current_item_index|add:1 }} of {{ workflow.item_count }}</strong></p>
+                <div>
+                    {% if collection_item %}
+                        <p><strong>Collection Item ID:</strong> {{ collection_item.id }}</p>
+                        
+                        <form method="post">
+                            {% csrf_token %}
+                            <input type="hidden" name="document_id" value="{{ collection_item.id }}">
+                            <button data-bs-toggle="tooltip" data-bs-placement="bottom" title="Collection Item is marked as parked"
+                                    type="submit" class="btn btn-secondary" name="action" value="set_parked">Mark as Parked</button>
+                            <button data-bs-toggle="tooltip" data-bs-placement="bottom" title="Collection Item is marked as faulty"
+                                    type="submit" class="btn btn-warning" name="action" value="set_faulty">Mark as Faulty</button>
+                            <button data-bs-toggle="tooltip" data-bs-placement="bottom" title="Collection Item is marked as reviewed"
+                                    type="submit" class="btn btn-success" name="action" value="set_reviewed">Mark as Reviewed</button>
+                        </form>
+                    {% else %}
+                        <p>All Collection Items in this workflow have been reviewed.</p>
+                        {% for col in collections.all %}
+                            <button
+                              type="button"
+                              class="btn btn-dark show-confirm-modal"
+                              data-message="Do you really want to start a Review workflow?"
+                              data-redirect-url="{% url 'twf:start_review_collection_workflow' col.id %}">
+                              Start New Review Workflow for '{{ col.title }}'
+                            </button>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+            {% else %}
+                 <p>There is no active Review Collection Items Workflow for user {{ request.user }}.</p>
+                {% for col in collections.all %}
+                    <button
+                      type="button"
+                      class="btn btn-dark show-confirm-modal"
+                      data-message="Do you really want to start a Review workflow?"
+                      data-redirect-url="{% url 'twf:start_review_collection_workflow' col.id %}">
+                      Start Review Workflow for '{{ col.title }}'
+                    </button>
+                {% endfor %}
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}
+
+{% block script %}
+<script>
+    // Initialize all tooltips on the page
+    document.addEventListener('DOMContentLoaded', function () {
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl)
+        })
+    });
+</script>
+{% endblock %}

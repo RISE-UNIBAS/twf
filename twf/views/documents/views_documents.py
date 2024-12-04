@@ -2,6 +2,7 @@
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Count, Avg
+from django.shortcuts import redirect
 from django.urls import reverse, reverse_lazy
 from django.views.generic import FormView
 from django_filters.views import FilterView
@@ -9,7 +10,7 @@ from django_tables2 import SingleTableView
 
 from twf.filters import DocumentFilter
 from twf.forms.documents.document_forms import DocumentForm
-from twf.models import Document
+from twf.models import Document, Workflow
 from twf.tables.tables_document import DocumentTable
 from twf.views.views_base import TWFView
 
@@ -37,8 +38,9 @@ class TWFDocumentView(LoginRequiredMixin, TWFView):
                 ]
             },
             {
-                'name': 'Create Documents',
+                'name': 'Document Workflows',
                 'options': [
+                    {'url': reverse('twf:documents_review'), 'value': 'Review Documents'},
                     {'url': reverse('twf:documents_create'), 'value': 'Manual Document Creation'},
                 ]
             },
@@ -167,3 +169,64 @@ class TWFDocumentNameView(TWFDocumentView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         return context
+
+
+class TWFDocumentReviewView(TWFDocumentView):
+    """View for naming documents."""
+    template_name = 'twf/documents/review_documents.html'
+    page_title = 'Review Documents'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        # Fetch the current workflow
+        workflow = Workflow.objects.filter(project=self.get_project(), workflow_type="review_documents",
+                                           user=self.request.user, status='started').order_by('created_at').first()
+
+        if not workflow:
+            context['has_active_workflow'] = False
+            return context
+
+        context['has_active_workflow'] = True
+
+        # Fetch the next document
+        next_document = workflow.get_next_item()
+        context['workflow'] = workflow
+        context['document'] = next_document
+
+        return context
+
+    def post(self, request, *args, **kwargs):
+        workflow = Workflow.objects.filter(project=self.get_project(), workflow_type="review_documents",
+                                           user=self.request.user, status='started').order_by('created_at').first()
+
+        if not workflow:
+            messages.error(request, "No active workflow found.")
+            return redirect('twf:documents_review')  # Replace with the actual name of the review URL
+
+        document_id = request.POST.get('document_id')
+        action = request.POST.get('action')
+
+        if document_id and action:
+            document = Document.objects.filter(id=document_id).first()
+
+            if document:
+                # Mark the document based on user action
+                if action == 'set_reviewed':
+                    document.status = 'reviewed'
+                elif action == 'set_parked':
+                    document.is_parked = True
+                elif action == 'set_irrelevant':
+                    document.status = 'irrelevant'
+                elif action == 'set_needs_work':
+                    document.status = 'needs_tk_work'
+
+                document.save()
+
+                # Log the action in the workflow if needed
+                if workflow.has_more_items():
+                    workflow.advance()
+                else:
+                    workflow.finish()
+
+        return redirect('twf:documents_review')

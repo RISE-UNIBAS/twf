@@ -14,7 +14,7 @@ from twf.views.dictionaries.views_batches import TWFDictionaryGNDBatchView, TWFD
 from twf.views.dictionaries.views_requests import TWFDictionaryGNDRequestView, TWFDictionaryGeonamesRequestView, \
     TWFDictionaryWikidataRequestView, TWFDictionaryOpenaiRequestView
 from twf.views.documents.views_documents import TWFDocumentsOverviewView, TWFDocumentsBrowseView, \
-    TWFDocumentCreateView, TWFDocumentNameView, TWFDocumentDetailView
+    TWFDocumentCreateView, TWFDocumentNameView, TWFDocumentDetailView, TWFDocumentReviewView
 from twf.views.documents.views_documents_ai import TWFDocumentOpenAIBatchView, \
     TWFDocumentGeminiBatchView, TWFDocumentClaudeBatchView
 from twf.views.home.views_home import TWFHomeView, TWFHomeLoginView, TWFHomePasswordChangeView, TWFHomeUserOverView, \
@@ -23,7 +23,8 @@ from twf.views.project.views_project_setup import TWFProjectSetupView
 from twf.views.ajax.views_ajax_download import ajax_transkribus_download_export, download_progress_view
 from twf.views.collections.views_collection import RemovePartView, SplitCollectionItemView, \
     UpdateCollectionItemView, TWFCollectionsView, TWFProjectCollectionsCreateView, \
-    TWFProjectCollectionsDetailView, TWFProjectCollectionsReviewView, TWFProjectCollectionsAddDocumentView
+    TWFProjectCollectionsDetailView, TWFProjectCollectionsReviewView, TWFProjectCollectionsAddDocumentView, \
+    TWFCollectionsReviewView
 from twf.views.views_command import park_tag, unpark_tag, ungroup_tag
 from twf.views.dictionaries.views_dictionaries import TWFDictionaryOverviewView, TWFDictionaryDictionaryView, \
     delete_variation, TWFDictionaryDictionaryEditView, TWFDictionaryDictionaryEntryEditView, \
@@ -43,6 +44,8 @@ from twf.views.project.views_project_ai import TWFProjectAIQueryView
 from twf.views.tags.views_tags import TWFProjectTagsView, TWFProjectTagsOpenView, \
     TWFProjectTagsParkedView, TWFProjectTagsResolvedView, TWFProjectTagsIgnoredView, TWFTagsDatesGroupView, \
     TWFTagsGroupView, TWFTagsOverviewView, TWFTagsExtractView, TWFTagsSettingsView
+from twf.workflows.collection_workflows import start_review_collection_workflow
+from twf.workflows.document_workflows import start_review_document_workflow
 
 urlpatterns = [
     #############################
@@ -98,6 +101,7 @@ urlpatterns = [
     path('documents/', TWFDocumentsOverviewView.as_view(), name='documents_overview'),
     path('documents/browse/', TWFDocumentsBrowseView.as_view(), name='documents_browse'),
     path('documents/create/', TWFDocumentCreateView.as_view(), name='documents_create'),
+    path('documents/review/', TWFDocumentReviewView.as_view(), name='documents_review'),
     path('documents/name/', TWFDocumentNameView.as_view(), name='name_documents'),
     path('document/<int:pk>/', TWFDocumentDetailView.as_view(), name='view_document'),
 
@@ -159,19 +163,20 @@ urlpatterns = [
     #############################
     # COLLECTIONS
     path('collections/', TWFCollectionsView.as_view(), name='collections'),
-    path('project/collections/create/', TWFProjectCollectionsCreateView.as_view(), name='project_collections_create'),
-    path('project/collections/<int:pk>/', TWFProjectCollectionsDetailView.as_view(), name='collections_view'),
-    path('project/collections/review/<int:pk>/', TWFProjectCollectionsReviewView.as_view(),
+    path('collections/create/', TWFProjectCollectionsCreateView.as_view(), name='project_collections_create'),
+    path('collections/<int:pk>/', TWFProjectCollectionsDetailView.as_view(), name='collections_view'),
+    path('collections/review/', TWFCollectionsReviewView.as_view(), name='collections_review'),
+    path('collections/review/<int:pk>/', TWFProjectCollectionsReviewView.as_view(),
          name='project_collection_review'),
-    path('project/collections/item/<int:item_id>/remove_part/<int:part_id>/', RemovePartView.as_view(),
+    path('collections/item/<int:item_id>/remove_part/<int:part_id>/', RemovePartView.as_view(),
          name='project_collections_item_remove_part'),
-    path('project/collections/item/<int:pk>/split/<int:part_id>/', SplitCollectionItemView.as_view(),
+    path('collections/item/<int:pk>/split/<int:part_id>/', SplitCollectionItemView.as_view(),
          name='project_collections_item_split'),
 
-    path('collections/item/update/<int:pk>/', UpdateCollectionItemView.as_view(),
+    path('item/update/<int:pk>/', UpdateCollectionItemView.as_view(),
          name='project_collections_item_update'),
 
-    path('project/collections/<int:pk>/add/document', TWFProjectCollectionsAddDocumentView.as_view(),
+    path('collections/<int:pk>/add/document', TWFProjectCollectionsAddDocumentView.as_view(),
          name='project_collections_add_document'),
 
 
@@ -186,6 +191,11 @@ urlpatterns = [
     path('export/dictionaries/', TWFExportDictionariesView.as_view(), name='export_dictionaries'),
     path('import/dictionaries/', TWFImportDictionaryView.as_view(), name='import_dictionaries'),
 
+    #############################
+    # WORKFLOWS
+    path('workflows/documents/review/start/', start_review_document_workflow, name='start_review_document_workflow'),
+    path('workflows/collection/review/start/<int:collection_id>/', start_review_collection_workflow,
+         name='start_review_collection_workflow'),
 
     #############################
     # CELERY TASKS

@@ -10,7 +10,7 @@ from django_tables2 import SingleTableView
 
 from twf.filters import CollectionItemFilter
 from twf.forms.project_forms import CollectionForm, CollectionAddDocumentForm
-from twf.models import CollectionItem, Collection
+from twf.models import CollectionItem, Collection, Workflow
 from twf.tables.tables_collection import CollectionItemTable
 from twf.views.views_base import TWFView
 
@@ -40,6 +40,12 @@ class TWFCollectionsView(LoginRequiredMixin, TWFView):
             {
                 'name': 'Your collections',
                 'options': []
+            },
+            {
+                'name': 'Collection Workflows',
+                'options': [
+                    {"url": reverse('twf:collections_review'), "value": "Review Collections"},
+                ]
             }
         ]
 
@@ -253,3 +259,64 @@ class UpdateCollectionItemView(View):
         messages.success(request, 'The item has been updated successfully.')
 
         return redirect('twf:project_collection_review', pk=item.collection.pk)
+
+
+class TWFCollectionsReviewView(TWFCollectionsView):
+    """View for naming documents."""
+    template_name = 'twf/collections/review_collections.html'
+    page_title = 'Review Collections'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        # Fetch the current workflow
+        workflow = Workflow.objects.filter(project=self.get_project(), workflow_type="review_collection",
+                                           user=self.request.user, status='started').order_by('created_at').first()
+
+        context['collections'] = Collection.objects.filter(project=self.get_project())
+
+        if not workflow:
+            context['has_active_workflow'] = False
+            return context
+
+        context['has_active_workflow'] = True
+
+        # Fetch the next document
+        next_item = workflow.get_next_item()
+        context['workflow'] = workflow
+        context['collection_item'] = next_item
+
+        return context
+
+    def post(self, request, *args, **kwargs):
+        workflow = Workflow.objects.filter(project=self.get_project(), workflow_type="review_collection",
+                                           user=self.request.user, status='started').order_by('created_at').first()
+
+        if not workflow:
+            messages.error(request, "No active workflow found.")
+            return redirect('twf:collections_review')  #
+
+        collection_item_id = request.POST.get('document_id')
+        action = request.POST.get('action')
+
+        if collection_item_id and action:
+            collection_item = CollectionItem.objects.filter(id=collection_item_id).first()
+
+            if collection_item:
+                # Mark the document based on user action
+                if action == 'set_reviewed':
+                    collection_item.status = 'reviewed'
+                elif action == 'set_parked':
+                    collection_item.is_parked = True
+                elif action == 'set_faulty':
+                    collection_item.status = 'faulty'
+
+                collection_item.save(current_user=request.user)
+
+                # Log the action in the workflow if needed
+                if workflow.has_more_items():
+                    workflow.advance()
+                else:
+                    workflow.finish()
+
+        return redirect('twf:collections_review')

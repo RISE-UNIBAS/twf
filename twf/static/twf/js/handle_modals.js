@@ -3,6 +3,7 @@ $(document).ready(function () {
   const normalConfirmButton = $('#confirmActionButton');
 
   let taskFunction = null; // Function to execute on confirmation
+  let redirectUrl = null; // URL to redirect after confirmation
 
   $('.show-confirm-modal').on('click', function (event) {
     event.preventDefault(); // Prevent default button behavior
@@ -13,27 +14,23 @@ $(document).ready(function () {
 
     // Prepare the action based on button's data attributes
     const button = $(this);
-    const startUrl = button.data('start-url');
-    const progressUrlBase = button.data('progress-url-base');
-    const progressBarId = button.data('progress-bar-id');
-    const logTextareaId = button.data('log-textarea-id');
+    redirectUrl = button.data('redirect-url'); // Get redirect URL
 
-    // Serialize form data
-    const form = button.closest('form');
-    const formData = form.serialize(); // Collect all form fields
-
-    // Define the task function
-    taskFunction = () => {
-      if (startUrl) {
-        startTask(
-          startUrl,
-          progressUrlBase,
-          progressBarId,
-          logTextareaId,
-          formData // Include serialized form data
-        );
-      }
-    };
+    // If a form exists, prepare to handle it
+    const formSelector = button.data('form-selector');
+    if (formSelector) {
+      const form = $(formSelector);
+      taskFunction = () => {
+        if (form.length > 0) {
+          form.submit(); // Submit the form
+        }
+      };
+    } else if (redirectUrl) {
+      // If no form is specified but a redirect URL is present
+      taskFunction = () => {
+        window.location.href = redirectUrl; // Redirect to the specified URL
+      };
+    }
 
     // Show the modal
     normalModal.show();
@@ -42,7 +39,7 @@ $(document).ready(function () {
   // Execute the task when Confirm is clicked
   normalConfirmButton.on('click', function () {
     if (taskFunction) {
-      taskFunction(); // Execute the task function
+      taskFunction(); // Execute the task function (submit or redirect)
     }
     normalModal.hide();
   });

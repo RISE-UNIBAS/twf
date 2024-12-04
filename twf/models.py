@@ -353,6 +353,13 @@ class Document(TimeStampedModel):
         Workflow remarks for the document.
     """
 
+    STATUS_CHOICES = [
+        ('open', 'Open'),
+        ('needs_tk_work', 'Needs Correction on Transkribus'),
+        ('irrelevant', 'Is Irrelevant'),
+        ('reviewed', 'Reviewed'),
+    ]
+
     project = models.ForeignKey(Project, related_name='documents', on_delete=models.CASCADE)
     """The project this document belongs to."""
 
@@ -373,6 +380,11 @@ class Document(TimeStampedModel):
 
     workflow_remarks = models.TextField(blank=True, default='')
     """Workflow remarks for the document."""
+
+    is_reserved = models.BooleanField(default=False)
+    """Whether the document is reserved for a workflow."""
+
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='open')
 
     class Meta:
         """Meta options for the Document model."""
@@ -560,6 +572,9 @@ class DictionaryEntry(TimeStampedModel):
 
     notes = models.TextField(blank=True, default='')
     """Notes for the entry."""
+
+    is_reserved = models.BooleanField(default=False)
+    """Whether the entry is reserved for a workflow."""
 
     class Meta:
         """Meta options for the DictionaryEntry model."""
@@ -805,12 +820,21 @@ class CollectionItem(TimeStampedModel):
     """The title of the item."""
 
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='open')
+    """The status of the item."""
 
     review_notes = models.TextField(blank=True, default='')
+    """Notes from the review of the item."""
+
+    is_reserved = models.BooleanField(default=False)
+    """Whether the item is reserved for a workflow."""
 
     def __str__(self):
         """Return the string representation of the CollectionItem."""
         return f"{self.collection.title}: {self.title}"
+
+    class Meta:
+        """Meta options for the Collection model."""
+        ordering = ['title']
 
 
 class Prompt(TimeStampedModel):
@@ -858,3 +882,74 @@ class Prompt(TimeStampedModel):
     def __str__(self):
         """Return the string representation of the Prompt."""
         return self.prompt[:50]
+
+
+class Workflow(models.Model):
+    """Model to store workflow information."""
+    WORKFLOW_TYPE_CHOICES = [
+        ('review_documents', 'Review Documents'),
+        ('review_collection', 'Review Collection'),
+        ('supervised_dictionary', 'Supervised Dictionary Workflow'),
+    ]
+
+    project = models.ForeignKey('Project', on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="workflows")
+
+    workflow_type = models.CharField(max_length=50, choices=WORKFLOW_TYPE_CHOICES)
+    status = models.CharField(max_length=20, choices=[('started', 'Started'), ('ended', 'Ended')], default='started')
+    item_count = models.PositiveIntegerField()
+    current_item_index = models.PositiveIntegerField(default=0)
+
+    collection = models.ForeignKey('Collection', on_delete=models.SET_NULL, null=True, blank=True)
+    dictionary = models.ForeignKey('Dictionary', on_delete=models.SET_NULL, null=True, blank=True)
+    related_task = models.OneToOneField('Task', on_delete=models.SET_NULL, null=True, blank=True, related_name="workflow")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    # Newly added field to store assigned documents
+    assigned_document_items = models.ManyToManyField('Document', related_name="workflows")
+    assigned_dictionary_entries = models.ManyToManyField('DictionaryEntry', related_name="workflows")
+    assigned_collection_items = models.ManyToManyField('CollectionItem', related_name="workflows")
+
+    def get_next_item(self):
+        """Fetch the next item to work on."""
+        if self.workflow_type == 'review_documents':
+            if self.current_item_index < self.item_count:
+                item = self.assigned_document_items.all()[self.current_item_index]
+                return item
+        if self.workflow_type == 'review_collection':
+            if self.current_item_index < self.item_count:
+                item = self.assigned_collection_items.all()[self.current_item_index]
+                return item
+
+        return None
+
+    def advance(self):
+        """Advance the workflow to the next item."""
+        self.current_item_index += 1
+        self.save()
+
+    def finish(self):
+        """Mark the workflow as ended."""
+        self.status = 'ended'
+        self.save()
+
+        # Update the related task status if linked
+        if self.related_task:
+            self.related_task.status = 'SUCCESS'
+            self.related_task.end_time = timezone.now()
+            self.related_task.save()
+
+        # Restore the reserved status of the items
+        if self.workflow_type == 'review_documents':
+            for item in self.assigned_document_items.all():
+                item.is_reserved = False
+                item.save()
+        if self.workflow_type == 'review_collection':
+            for item in self.assigned_collection_items.all():
+                item.is_reserved = False
+                item.save()
+
+    def has_more_items(self):
+        """Check if there are more items to work on."""
+        return self.current_item_index+1 < self.item_count

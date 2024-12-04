@@ -25,6 +25,15 @@ class DocumentTable(tables.Table):
         """Renders the document_id column with the title and metadata of the document."""
         html = f"<strong>{value}: {record.title}</strong><br/><span class='small text-muted'>Metadata:</span> "
         html += ', '.join(f'<code>{item[0]}</code>' for item in record.metadata.items())
+        if record.status == 'reviewed':
+            html += f'<br/><span class="badge bg-success">reviewed</span>'
+        elif record.status == 'needs_tk_work' or record.status == 'irrelevant':
+            html += f'<br/><span class="badge bg-warning">needs TK work</span>'
+        if record.is_parked:
+            html += f'<br/><span class="badge bg-info">parked</span>'
+        if record.is_reserved:
+            html += f'<br/><span class="badge bg-info">in workflow</span>'
+
         return mark_safe(html)
 
     def render_pages(self, record):
