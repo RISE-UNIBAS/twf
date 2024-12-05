@@ -9,6 +9,7 @@ from django_filters.views import FilterView
 from django_tables2 import SingleTableView
 
 from twf.filters import CollectionItemFilter
+from twf.forms.dictionaries.collection_forms import CollectionOpenaiBatchForm
 from twf.forms.project_forms import CollectionForm, CollectionAddDocumentForm
 from twf.models import CollectionItem, Collection, Workflow
 from twf.tables.tables_collection import CollectionItemTable
@@ -45,6 +46,8 @@ class TWFCollectionsView(LoginRequiredMixin, TWFView):
                 'name': 'Collection Workflows',
                 'options': [
                     {"url": reverse('twf:collections_review'), "value": "Review Collections"},
+                    {"url": reverse('twf:collections_openai_batch'), "value": "OpenAI Batch Workflow"},
+                    {"url": reverse('twf:collections_openai_request'), "value": "OpenAI Single Workflow"},
                 ]
             }
         ]
@@ -320,3 +323,42 @@ class TWFCollectionsReviewView(TWFCollectionsView):
                     workflow.finish()
 
         return redirect('twf:collections_review')
+
+
+class TWFCollectionsOpenaiBatchView(FormView, TWFCollectionsView):
+    """View for naming documents."""
+    template_name = 'twf/collections/openai_batch.html'
+    page_title = 'OpenAI Batch Workflow'
+    form_class = CollectionOpenaiBatchForm
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['project'] = self.get_project()
+
+        kwargs['data-start-url'] = reverse_lazy('twf:task_collection_batch_openai')
+        kwargs['data-message'] = "Are you sure you want to start the openai task?"
+        kwargs['data-progress-url-base'] = "/celery/status/"
+        kwargs['data-progress-bar-id'] = "#taskProgressBar"
+        kwargs['data-log-textarea-id'] = "#id_progress_details"
+
+        return kwargs
+
+
+
+class TWFCollectionsOpenaiRequestView(FormView, TWFCollectionsView):
+    """View for naming documents."""
+    template_name = 'twf/collections/openai_request.html'
+    page_title = 'OpenAI Request'
+    form_class = CollectionOpenaiBatchForm
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['project'] = self.get_project()
+
+        kwargs['data-start-url'] = reverse_lazy('twf:task_collection_request_openai')
+        kwargs['data-message'] = "Are you sure you want to start the openai task?"
+        kwargs['data-progress-url-base'] = "/celery/status/"
+        kwargs['data-progress-bar-id'] = "#taskProgressBar"
+        kwargs['data-log-textarea-id'] = "#id_progress_details"
+
+        return kwargs

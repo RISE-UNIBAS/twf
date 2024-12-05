@@ -208,3 +208,10 @@ def start_test_export_task(request):
     # Trigger the task
     task = extract_zip_export_task.delay(project.id, user_id)
     return JsonResponse({'status': 'success', 'task_id': task.id})
+
+
+def start_openai_collection_batch(request):
+    pass
+
+def start_openai_collection_request(request):
+    pass

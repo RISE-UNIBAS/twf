@@ -5,7 +5,8 @@ from django.contrib.auth import views as auth_views
 from twf.tasks.task_status import task_status_view, task_cancel_view, task_remove_view
 from twf.tasks.task_triggers import start_tags_creation, start_extraction, start_gnd_batch, start_geonames_batch, \
     start_wikidata_batch, start_openai_batch, start_gnd_request, start_geonames_request, start_wikidata_request, \
-    start_openai_request, start_gemini_doc_batch, start_openai_doc_batch, start_claude_doc_batch, start_sheet_metadata
+    start_openai_request, start_gemini_doc_batch, start_openai_doc_batch, start_claude_doc_batch, start_sheet_metadata, \
+    start_openai_collection_batch, start_openai_collection_request
 from twf.views.ajax.views_ajax_field_validation import validate_page_field, validate_document_field
 from twf.views.ajax.views_ajax_transkribus_export import ajax_transkribus_request_export, \
     ajax_transkribus_reset_export, ajax_transkribus_request_export_status
@@ -24,7 +25,7 @@ from twf.views.ajax.views_ajax_download import ajax_transkribus_download_export,
 from twf.views.collections.views_collection import RemovePartView, SplitCollectionItemView, \
     UpdateCollectionItemView, TWFCollectionsView, TWFProjectCollectionsCreateView, \
     TWFProjectCollectionsDetailView, TWFProjectCollectionsReviewView, TWFProjectCollectionsAddDocumentView, \
-    TWFCollectionsReviewView
+    TWFCollectionsReviewView, TWFCollectionsOpenaiBatchView, TWFCollectionsOpenaiRequestView
 from twf.views.views_command import park_tag, unpark_tag, ungroup_tag
 from twf.views.dictionaries.views_dictionaries import TWFDictionaryOverviewView, TWFDictionaryDictionaryView, \
     delete_variation, TWFDictionaryDictionaryEditView, TWFDictionaryDictionaryEntryEditView, \
@@ -166,6 +167,9 @@ urlpatterns = [
     path('collections/create/', TWFProjectCollectionsCreateView.as_view(), name='project_collections_create'),
     path('collections/<int:pk>/', TWFProjectCollectionsDetailView.as_view(), name='collections_view'),
     path('collections/review/', TWFCollectionsReviewView.as_view(), name='collections_review'),
+    path('collections/openai/batch/', TWFCollectionsOpenaiBatchView.as_view(), name='collections_openai_batch'),
+    path('collections/openai/request/', TWFCollectionsOpenaiRequestView.as_view(), name='collections_openai_request'),
+
     path('collections/review/<int:pk>/', TWFProjectCollectionsReviewView.as_view(),
          name='project_collection_review'),
     path('collections/item/<int:item_id>/remove_part/<int:part_id>/', RemovePartView.as_view(),
@@ -222,6 +226,9 @@ urlpatterns = [
     path('celery/dictionaries/request/geonames/', start_geonames_request, name='task_dictionaries_request_geonames'),
     path('celery/dictionaries/request/wikidata/', start_wikidata_request, name='task_dictionaries_request_wikidata'),
     path('celery/dictionaries/request/openai/', start_openai_request, name='task_dictionaries_request_openai'),
+
+    path('celery/collections/batch/openai/', start_openai_collection_batch, name='task_collection_batch_openai'),
+    path('celery/collections/request/openai/', start_openai_collection_request, name='task_collection_request_openai'),
 
     #############################
     # AJAX CALLS
