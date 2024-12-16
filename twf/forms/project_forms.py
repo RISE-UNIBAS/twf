@@ -1,4 +1,5 @@
-"""Forms for creating and updating project settings."""
+"""Forms for creating and updating project settings.
+The settings views are separated into different forms for each section of the settings."""
 from crispy_forms.bootstrap import TabHolder, Tab
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Submit, Layout, Row, Column, Div, HTML
@@ -13,8 +14,11 @@ from twf.models import Project, Collection, Document, CollectionItem, User, Task
 
 
 class PasswordInputRetain(forms.PasswordInput):
-    """A PasswordInput widget that retains the value when the form is re-rendered."""
+    """A PasswordInput widget that retains the value when the form is re-rendered.
+    This is used for password fields in the settings forms."""
+
     def render(self, name, value, attrs=None, renderer=None):
+        """Render the widget with the value retained."""
         if value is None:
             value = ''
         # Set the value attribute if there's a value present
@@ -25,7 +29,9 @@ class PasswordInputRetain(forms.PasswordInput):
 
 
 class GeneralSettingsForm(forms.ModelForm):
-    """Form for creating and updating general settings."""
+    """Form for creating and updating general settings.
+
+    General settings include the project title, description, owner, members, and selected dictionaries."""
 
     class Meta:
         model = Project
@@ -484,72 +490,6 @@ class QueryDatabaseForm(forms.Form):
         )
         helper.layout = layout
         self.helper = helper
-
-
-class CollectionForm(forms.ModelForm):
-    """Form for creating and updating collections."""
-
-    class Meta:
-        model = Collection
-        fields = ['title', 'description']
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.helper = FormHelper()
-        self.helper.form_method = 'post'
-        self.helper.form_class = 'form form-control'
-
-        self.helper.layout = Layout(
-            Row(
-                Column('title', css_class='form-group col-12 mb-3'),
-                css_class='row form-row'
-            ),
-            Row(
-                Column('description', css_class='form-group col-12 mb-3'),
-                css_class='row form-row'
-            ),
-            Div(
-                Submit('submit', 'Save Collection', css_class='btn btn-dark'),
-                css_class='text-end pt-3'
-            )
-        )
-
-
-class CollectionAddDocumentForm(forms.Form):
-    """Form for adding a document to a collection."""
-
-    document = forms.ModelChoiceField(label='Document', required=True,
-                                      help_text='Please select the document to add to the collection.',
-                                      widget=Select2Widget(attrs={'style': 'width: 100%;'}),
-                                      queryset=Document.objects.none())
-
-    def __init__(self, *args, **kwargs):
-        collection = kwargs.pop('collection')
-        super().__init__(*args, **kwargs)
-
-        if collection:
-            # Filter documents that are not in the specified collection
-            self.fields['document'].queryset = Document.objects.filter(
-                project=collection.project
-            ).exclude(
-                id__in=Subquery(CollectionItem.objects.filter(collection=collection).values('document_id'))
-            )
-
-        self.helper = FormHelper()
-        self.helper.form_method = 'post'
-        self.helper.form_class = 'form form-control'
-
-        self.helper.layout = Layout(
-            Row(
-                Column('document', css_class='form-group'),
-                css_class='row form-row'
-            ),
-            Div(
-                Submit('submit', 'Add Document', css_class='btn btn-dark'),
-                css_class='text-end pt-3'
-            )
-        )
-
 
 
 class TaskFilterForm(forms.Form):
