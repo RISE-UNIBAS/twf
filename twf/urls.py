@@ -10,6 +10,9 @@ from twf.tasks.task_triggers import start_tags_creation, start_extraction, start
 from twf.views.ajax.views_ajax_field_validation import validate_page_field, validate_document_field
 from twf.views.ajax.views_ajax_transkribus_export import ajax_transkribus_request_export, \
     ajax_transkribus_reset_export, ajax_transkribus_request_export_status
+from twf.views.collections.views_crud import delete_collection, set_col_item_status_open, set_col_item_status_reviewed, \
+    set_col_item_status_faulty, split_collection_item, copy_collection_item, delete_collection_item_annotation, \
+    delete_collection_item, download_collection_item_txt, download_collection_item_json
 from twf.views.dictionaries.views_batches import TWFDictionaryGNDBatchView, TWFDictionaryGeonamesBatchView, \
     TWFDictionaryWikidataBatchView, TWFDictionaryOpenaiBatchView
 from twf.views.dictionaries.views_requests import TWFDictionaryGNDRequestView, TWFDictionaryGeonamesRequestView, \
@@ -22,10 +25,9 @@ from twf.views.home.views_home import TWFHomeView, TWFHomeLoginView, TWFHomePass
     TWFHomeUserManagementView, TWFSelectProjectView, TWFHomeUserProfileView
 from twf.views.project.views_project_setup import TWFProjectSetupView
 from twf.views.ajax.views_ajax_download import ajax_transkribus_download_export, download_progress_view
-from twf.views.collections.views_collection import RemovePartView, SplitCollectionItemView, \
-    UpdateCollectionItemView, TWFCollectionsView, TWFProjectCollectionsCreateView, \
-    TWFProjectCollectionsDetailView, TWFProjectCollectionsReviewView, TWFProjectCollectionsAddDocumentView, \
-    TWFCollectionsReviewView, TWFCollectionsOpenaiBatchView, TWFCollectionsOpenaiRequestView
+from twf.views.collections.views_collection import TWFCollectionsReviewView, TWFCollectionsOpenaiBatchView, \
+    TWFCollectionsOpenaiRequestView, TWFCollectionOverviewView, TWFCollectionsCreateView, TWFCollectionsDetailView, \
+    TWFCollectionsEditView, TWFCollectionsAddDocumentView, TWFCollectionItemEditView, TWFCollectionItemView
 from twf.views.views_command import park_tag, unpark_tag, ungroup_tag
 from twf.views.dictionaries.views_dictionaries import TWFDictionaryOverviewView, TWFDictionaryDictionaryView, \
     delete_variation, TWFDictionaryDictionaryEditView, TWFDictionaryDictionaryEntryEditView, \
@@ -163,26 +165,28 @@ urlpatterns = [
 
     #############################
     # COLLECTIONS
-    path('collections/', TWFCollectionsView.as_view(), name='collections'),
-    path('collections/create/', TWFProjectCollectionsCreateView.as_view(), name='project_collections_create'),
-    path('collections/<int:pk>/', TWFProjectCollectionsDetailView.as_view(), name='collections_view'),
+    path('collections/', TWFCollectionOverviewView.as_view(), name='collections'),
+    path('collections/create/', TWFCollectionsCreateView.as_view(), name='project_collections_create'),
+    path('collections/<int:pk>/', TWFCollectionsDetailView.as_view(), name='collections_view'),
     path('collections/review/', TWFCollectionsReviewView.as_view(), name='collections_review'),
     path('collections/openai/batch/', TWFCollectionsOpenaiBatchView.as_view(), name='collections_openai_batch'),
     path('collections/openai/request/', TWFCollectionsOpenaiRequestView.as_view(), name='collections_openai_request'),
 
-    path('collections/review/<int:pk>/', TWFProjectCollectionsReviewView.as_view(),
-         name='project_collection_review'),
-    path('collections/item/<int:item_id>/remove_part/<int:part_id>/', RemovePartView.as_view(),
-         name='project_collections_item_remove_part'),
-    path('collections/item/<int:pk>/split/<int:part_id>/', SplitCollectionItemView.as_view(),
-         name='project_collections_item_split'),
+    path('collections/delete/<int:collection_id>/', delete_collection, name='collection_delete'),
+    path('collections/edit/<int:pk>/', TWFCollectionsEditView.as_view(), name='collection_edit'),
 
-    path('item/update/<int:pk>/', UpdateCollectionItemView.as_view(),
-         name='project_collections_item_update'),
-
-    path('collections/<int:pk>/add/document', TWFProjectCollectionsAddDocumentView.as_view(),
-         name='project_collections_add_document'),
-
+    path('collections/item/<int:pk>/', TWFCollectionItemView.as_view(), name='collection_item_view'),
+    path('collections/item/edit/<int:pk>/', TWFCollectionItemEditView.as_view(), name='collection_item_edit'),
+    path('collections/item/copy/<int:pk>/', copy_collection_item, name='collection_item_copy'),
+    path('collections/item/delete/<int:pk>/', delete_collection_item, name='collection_item_delete'),
+    path('collections/item/download/txt/<int:pk>/', download_collection_item_txt, name='collection_item_download_txt'),
+    path('collections/item/download/json/<int:pk>/', download_collection_item_json, name='collection_item_download_json'),
+    path('collections/item/split/<int:pk>/<int:index>/', split_collection_item, name='collection_item_split'),
+    path('collections/item/delete/anno/<int:pk>/<int:index>/', delete_collection_item_annotation, name='collection_item_delete_annotation'),
+    path('collections/item/set_status/<int:pk>/open/', set_col_item_status_open, name='collection_item_status_open'),
+    path('collections/item/set_status/<int:pk>/reviewed/', set_col_item_status_reviewed, name='collection_item_status_reviewed'),
+    path('collections/item/set_status/<int:pk>/faulty/', set_col_item_status_faulty, name='collection_item_status_faulty'),
+    path('collections/<int:pk>/add/document', TWFCollectionsAddDocumentView.as_view(), name='collection_add_document'),
 
     #############################
     # EXPORT

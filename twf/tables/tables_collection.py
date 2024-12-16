@@ -1,6 +1,9 @@
 """Table classes for displaying CollectionItem objects."""
 import django_tables2 as tables
+from django.urls import reverse_lazy
 from django.utils.safestring import mark_safe
+from isort.profiles import attrs
+from pyasn1_modules.rfc5280 import pkcs_9
 
 from twf.models import CollectionItem
 
@@ -27,6 +30,10 @@ class CollectionItemTable(tables.Table):
             in_workflow = '<span class="badge bg-secondary">In Workflow</span>'
 
         return mark_safe(f'{value}<br/>{status}<br/>{in_workflow}')
+
+    def render_options(self, record):
+        """Render the options."""
+        return mark_safe(f'<a href="{reverse_lazy("twf:collection_item_view", kwargs={"pk": record.id})}" class="btn btn-dark btn-sm">View</a>')
 
 
     class Meta:

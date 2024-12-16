@@ -19,17 +19,17 @@
 {% endblock %}
 
 {% block number_2 %}
-    {{ project.batches.count }}
+    {{ open_workflows }}
 {% endblock %}
 
 {% block number_2_label %}
-    Batches
+    Open Workflows
 {% endblock %}
 
 {% block number_3 %}
-    {{ project.users.count }}
+    {{ percentage_reviewed|floatformat:2 }}%
 {% endblock %}
 
 {% block number_3_label %}
-    Users
+    % Reviewed
 {% endblock %}

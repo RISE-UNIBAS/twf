@@ -6,10 +6,12 @@ from django.contrib.auth.views import LoginView, PasswordChangeView
 from django.urls import reverse, reverse_lazy
 from django.utils.timezone import now, timedelta
 from django.views.generic import FormView
+from django_tables2 import SingleTableMixin
 
 from twf.forms.user_forms import LoginForm, ChangePasswordForm, UserProfileForm
 from twf.models import Project, Document, Page, Dictionary, DictionaryEntry, PageTag, Variation, DateVariation, \
     TWF_GROUPS, UserProfile
+from twf.tables.tables_home import UserPermissionTable
 from twf.views.views_base import TWFView
 
 
@@ -192,25 +194,12 @@ class TWFHomeUserManagementView(LoginRequiredMixin, TWFHomeView):
     """View to manage the users."""
     template_name = 'twf/home/users/management.html'
     page_title = 'User Management'
+    table_class = UserPermissionTable
 
     def get_context_data(self, **kwargs):
         """Add the user profiles to the context."""
         context = super().get_context_data(**kwargs)
-        project = self.get_project()
-        if project is not None:
-            member_profiles = project.members.all()
-        else:
-            member_profiles = []
-
-        permission_matrix = {}
-        for profile in member_profiles:
-            user_permission = []
-            for group in TWF_GROUPS:
-                user_permission.append(profile.user.groups.filter(name=group).exists())
-            permission_matrix[profile.user.username] = user_permission
-
-        context['member_profiles'] = permission_matrix
-        context['twf_groups'] = TWF_GROUPS
+        context['table'] = UserPermissionTable(project=self.get_project().pk)
         return context
 
 

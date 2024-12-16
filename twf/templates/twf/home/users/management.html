@@ -1,26 +1,13 @@
 {% extends 'twf/base/base.html' %}
+{% load django_tables2 %}
 
 {% block content %}
      <div class="border rounded bg-light mt-0 p-3">
         <h1 class="display-6">Permissions</h1>
         <p class="lead">Manage permissions for each user</p>
         <form method="post">
-            <table class="table">
-                <tr>
-                    <td></td>
-                    {% for group in twf_groups  %}
-                        <th class="text-center">{{ group }}</th>
-                    {% endfor %}
-                </tr>
-                 {% for user, perms in member_profiles.items %}
-                    <tr>
-                        <td>{{ user }}</td>
-                        {% for item in perms %}
-                            <td class="text-center"><input type="checkbox" name="{{ user }}_{{ forloop.counter0 }}" {% if item == True %}checked{% endif %}/></td>
-                        {% endfor %}
-                    </tr>
-                 {% endfor %}
-            </table>
+            {% csrf_token %}
+            {% render_table table %}
             <div class="w-100 text-end">
                 <button type="submit" class="btn btn-dark disabled">Save</button>
             </div>
