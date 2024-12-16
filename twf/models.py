@@ -129,7 +129,8 @@ class Project(TimeStampedModel):
 
     title = models.CharField(max_length=100,
                              verbose_name='Project Title',
-                             help_text='The title of the project. Can be used in data exports.')
+                             help_text='The title of the project. This can be any string, needs to be less than 100 '
+                                       'characters. Can be used in data exports.')
     """The title of the project."""
 
     collection_id = models.CharField(max_length=30,
@@ -173,39 +174,52 @@ class Project(TimeStampedModel):
     """The status of the project."""
 
     owner = models.ForeignKey(UserProfile, related_name='owned_projects', on_delete=models.CASCADE,
-                              verbose_name='Project Owner')
-    """The owner of the project."""
+                              verbose_name='Project Owner',
+                              help_text='The owner of the project. This user has all the permissions.')
+    """The owner of the project. This user has all the permissions."""
 
     members = models.ManyToManyField(UserProfile, related_name='projects',
                                      blank=True,
                                      verbose_name='Project Members',
                                      help_text='The members of the project. Their roles can be adjusted'
                                                'in the user management section.')
-    """The members of the project."""
+    """The members of the project. Their permissions can be adjusted in the user management section."""
 
     selected_dictionaries = models.ManyToManyField('Dictionary', related_name='selected_projects',
                                                    blank=True, verbose_name='Selected Dictionaries',
-                                                   help_text='The dictionaries selected for this project.')
+                                                   help_text='The dictionaries selected for this project.'
+                                                             'These will be used for assigning tags.')
     """The dictionaries selected for this project."""
 
     conf_credentials = models.JSONField(default=dict, blank=True,
                                         verbose_name='Credentials Configurations',
                                         help_text='A dictionary of credential configurations.')
+    """A dictionary of credential configurations. In order to keep these settings as dynamic as possible, they are
+    stored as JSONField. The keys in the dictionary are the services, and the values are the credentials for the 
+    services."""
 
     conf_export = models.JSONField(default=dict, blank=True,
                                    verbose_name='Export Configurations',
                                    help_text='A dictionary of export configurations.')
+    """A dictionary of export configurations. In order to keep these settings as dynamic as possible, they are
+    stored as JSONField. The keys in the dictionary are the services, and the values are the export configurations."""
 
     conf_tasks = models.JSONField(default=dict, blank=True,
                                   verbose_name='Task Configurations',
                                   help_text='A dictionary of task configurations.')
+    """A dictionary of task configurations. In order to keep these settings as dynamic as possible, they are
+    stored as JSONField. The keys in the dictionary are the services, and the values are the task configurations."""
 
     def get_credentials(self, service):
         """Return the credentials for a service.
 
         Available services
         ------------------
-
+        - transkribus: The Transkribus credentials Username, password).
+        - openai: The OpenAI credentials (API key, default model).
+        - genai: The GenAI credentials (API key, default model).
+        - anthropic: The Anthropic credentials (API key, default model).
+        - geonames: The Geonames credentials (Username).
         """
         return self.conf_credentials.get(service, {})
 
@@ -810,7 +824,8 @@ class CollectionItem(TimeStampedModel):
     collection = models.ForeignKey(Collection, related_name='items', on_delete=models.CASCADE)
     """The collection this item belongs to."""
 
-    document = models.ForeignKey(Document, related_name='collections', on_delete=models.CASCADE)
+    document = models.ForeignKey(Document, related_name='collections', on_delete=models.CASCADE,
+                                 blank=True, null=True)
     """The document this item belongs to."""
 
     document_configuration = models.JSONField(default=dict, blank=True)
@@ -831,6 +846,62 @@ class CollectionItem(TimeStampedModel):
     def __str__(self):
         """Return the string representation of the CollectionItem."""
         return f"{self.collection.title}: {self.title}"
+
+    def split(self, index, user=None):
+        """Split the collection item at the given index."""
+        annotations = self.document_configuration.get('annotations', [])
+
+        # Validate the index
+        if index < 0 or index > len(annotations):
+            return None
+
+        # Set user to the current modifier if none is provided
+        if user is None:
+            user = self.modified_by
+
+        # Split annotations into two parts
+        remaining_annotations = annotations[:index]
+        new_annotations = annotations[index:]
+
+        # If there's nothing to split (e.g., index is at the start or end), return None
+        if not new_annotations or not remaining_annotations:
+            return None
+
+        # Create the new collection item
+        new_item = CollectionItem(
+            collection=self.collection,
+            title=f"{self.title} (Part 2)",
+            document_configuration={'annotations': new_annotations},
+            status=self.status,
+            review_notes=self.review_notes,
+        )
+        new_item.save(current_user=user)
+
+        # Update the current item with remaining annotations
+        self.document_configuration['annotations'] = remaining_annotations
+        self.save(current_user=user)
+
+        return new_item
+
+    def delete_annotation(self, index, user=None):
+        """Delete the annotation at the given index."""
+        annotations = self.document_configuration.get('annotations', [])
+        index = index-1
+        print("Index: ", index)
+        # Validate the index
+        if index < 0 or index >= len(annotations):
+            return None
+
+        # Set user to the current modifier if none is provided
+        if user is None:
+            user = self.modified_by
+
+        # Remove the annotation
+        annotations.pop(index)
+        self.document_configuration['annotations'] = annotations
+        self.save(current_user=user)
+
+        return self
 
     class Meta:
         """Meta options for the Collection model."""
@@ -913,14 +984,17 @@ class Workflow(models.Model):
 
     def get_next_item(self):
         """Fetch the next item to work on."""
-        if self.workflow_type == 'review_documents':
-            if self.current_item_index < self.item_count:
-                item = self.assigned_document_items.all()[self.current_item_index]
-                return item
-        if self.workflow_type == 'review_collection':
-            if self.current_item_index < self.item_count:
-                item = self.assigned_collection_items.all()[self.current_item_index]
-                return item
+        try:
+            if self.workflow_type == 'review_documents':
+                if self.current_item_index < self.item_count:
+                    item = self.assigned_document_items.all().order_by('pk')[self.current_item_index]
+                    return item
+            if self.workflow_type == 'review_collection':
+                if self.current_item_index < self.item_count:
+                    item = self.assigned_collection_items.all().order_by('pk')[self.current_item_index]
+                    return item
+        except IndexError:
+            return None
 
         return None
 
@@ -929,14 +1003,19 @@ class Workflow(models.Model):
         self.current_item_index += 1
         self.save()
 
-    def finish(self):
+
+    def finish(self, with_error=False):
         """Mark the workflow as ended."""
         self.status = 'ended'
         self.save()
 
         # Update the related task status if linked
         if self.related_task:
-            self.related_task.status = 'SUCCESS'
+            if with_error:
+                self.related_task.status = 'FAILURE'
+            else:
+                self.related_task.status = 'SUCCESS'
+
             self.related_task.end_time = timezone.now()
             self.related_task.save()
 
