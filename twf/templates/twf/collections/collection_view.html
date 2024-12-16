@@ -5,9 +5,17 @@
 
 {% block content %}
 <div class="border rounded bg-light mt-0 p-3">
-    <h1 class="display-6">Collection: {{ collection.title }}</h1>
-    <p class="lead">Your collection has <strong>{{ table.paginator.count }}</strong> items.</p>
-    
+    <div class="row">
+        <div class="col-8">
+            <h1 class="display-6">Collection: {{ collection.title }}</h1>
+            <p class="lead">Your collection has <strong>{{ table.paginator.count }}</strong> items.</p>
+        </div>
+        <div class="col-4">
+            <a data-redirect-url="{% url 'twf:collection_delete' collection.id %}" class="btn btn-danger float-end ms-2 show-danger-modal">Delete</a>
+            <a href="{% url 'twf:collection_edit' collection.id %}" class="btn btn-dark float-end ms-2">Edit</a>
+            <a href="{% url 'twf:collection_add_document' collection.id %}" class="btn btn-dark float-end ms-2">Add Document</a>
+        </div>
+    </div>
     <!-- Filter Form -->
     {% twf_filter filter %}
     
@@ -17,15 +25,59 @@
 </div>
 {% endblock %}
 
+{% block css %}
+    <style>
+        .collapse-icon {
+            font-size: 1rem; /* Increase font size */
+            padding: 0.5em; /* Add padding */
+        }
+    </style>
+{% endblock %}
+
 {% block script %}
     <script>
-        document.addEventListener('click', function (event) {
-            if (event.target.matches('tr[data-bs-toggle="collapse"]')) {
-                const icon = event.target.querySelector('.collapse-icon');
-                if (icon) {
-                    icon.textContent = icon.textContent === '+' ? '−' : '+';
+       document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.collapse-icon').forEach(icon => {
+        const targetId = icon.getAttribute('data-bs-target');
+        const target = document.querySelector(targetId);
+
+        if (target) {
+            // Add click listener for toggling
+            icon.addEventListener('click', function (event) {
+                event.stopPropagation(); // Prevent row-level actions
+                
+                // Check current state
+                const isExpanded = icon.getAttribute('aria-expanded') === 'true';
+
+                // Toggle the collapse state using Bootstrap API
+                const collapseInstance = new bootstrap.Collapse(target, {
+                    toggle: false // Do not auto-toggle
+                });
+
+                if (isExpanded) {
+                    collapseInstance.hide(); // Collapse
+                    icon.textContent = '+'; // Update icon
+                    icon.setAttribute('aria-expanded', 'false'); // Update ARIA
+                } else {
+                    collapseInstance.show(); // Expand
+                    icon.textContent = '−'; // Update icon
+                    icon.setAttribute('aria-expanded', 'true'); // Update ARIA
                 }
-            }
-        });
+            });
+
+            // Synchronize icon with Bootstrap events
+            target.addEventListener('shown.bs.collapse', () => {
+                icon.textContent = '−';
+                icon.setAttribute('aria-expanded', 'true');
+            });
+
+            target.addEventListener('hidden.bs.collapse', () => {
+                icon.textContent = '+';
+                icon.setAttribute('aria-expanded', 'false');
+            });
+        }
+    });
+});
+
     </script>
 {% endblock %}

@@ -20,12 +20,14 @@ class Command(BaseCommand):
         collection = Collection.objects.get(pk=options['collection_id'])
 
         songs = []
-        for item in collection.items.all()[:2]:
-            doc_id = item.document.id
+        for item in collection.items.all():
+            print(f"Exporting {item.title}...")
+            doc_id = str(item.document.document_id)
             counter = 1
             while doc_id in existing_doc_ids:
-                doc_id + str(counter)
+                doc_id = doc_id + "_" + str(counter)
                 counter += 1
+                print(f">> Document ID {doc_id} already exists. Trying {doc_id}...")
             existing_doc_ids.append(doc_id)
 
             song = {
@@ -39,8 +41,8 @@ class Command(BaseCommand):
 
         with open(f"{collection.title}.csv", "w", newline='', encoding='utf-8') as f:
             writer = csv.writer(f, quoting=csv.QUOTE_ALL)
-            writer.writerow(["title", "text"])  # Write the header
+            writer.writerow(["doc_id", "title", "text"])  # Write the header
             for song in songs:
-                writer.writerow([song['title'], song['text']])
+                writer.writerow([song['doc_id'], song['title'], song['text']])
 
         print("Data exported.")

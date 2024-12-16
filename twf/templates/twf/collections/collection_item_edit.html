@@ -1,0 +1,31 @@
+{% extends 'twf/base/base.html' %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+     <div class="border rounded bg-light mt-0 p-3">
+        <h1 class="display-6">Edit Collection Item</h1>
+        <p class="lead">Update an existing collection item</p>
+     
+        {% crispy form %}        
+     </div>
+{% endblock %}
+
+{% block script %}
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Select all <a> elements with the specified class
+            const buttons = document.querySelectorAll('a.btn.btn-dark');
+        
+            buttons.forEach(button => {
+                const href = button.getAttribute('href');
+                
+                // Check if the href is missing or equals "#"
+                if (!href || href === '#') {
+                    button.classList.add('disabled'); // Add the Bootstrap 'disabled' class
+                    button.setAttribute('aria-disabled', 'true'); // Improve accessibility
+                    button.style.pointerEvents = 'none'; // Prevent click interactions
+                }
+            });
+        });
+    </script>
+{% endblock %}

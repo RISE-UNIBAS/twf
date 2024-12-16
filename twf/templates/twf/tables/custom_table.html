@@ -24,11 +24,14 @@
         <tbody {{ table.attrs.tbody.as_html }}>
         {% for row in table.paginated_rows %}
             <!-- Main Row -->
-            <tr data-bs-toggle="collapse" data-bs-target="#annotations-{{ table.page.number }}-{{ forloop.counter }}" style="cursor: pointer;">
+           <tr>
                 {% for column, cell in row.items %}
                     {% if forloop.first %}
                         <td>
-                            <span class="collapse-icon">+</span>
+                            <span class="badge bg-dark collapse-icon"
+                                  data-bs-target="#annotations-{{ table.page.number }}-{{ forloop.parentloop.counter }}" 
+                                  style="cursor: pointer;"
+                                  aria-expanded="false">+</span>
                             {{ cell }}
                         </td>
                     {% else %}

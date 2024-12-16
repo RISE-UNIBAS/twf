@@ -16,10 +16,8 @@
                         <small class="text-muted">Created: {{ col.created_at }} by {{ col.created_by }}, Items: {{ col.items.all.count }}</small>
                     </p>
                     <a href="{% url 'twf:collections_view' col.id %}" class="btn btn-dark float-end ms-2">View</a>
-                    <a href="{% url 'twf:project_collections_add_document' col.id %}" class="btn btn-dark float-end ms-2">Add Document</a>
-                    <a href="{% url 'twf:collections_view' col.id %}" 
-                       class="btn btn-danger float-end ms-2 show-confirm-modal"
-                       data-message="Are you sure you want to delete this collection?">Delete</a>
+                    
+                    
                 </div>
             </div>
         </div>

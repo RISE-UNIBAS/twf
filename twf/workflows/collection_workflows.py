@@ -34,6 +34,7 @@ def create_collection_workflow(project, user, collection, item_count):
     # Create the workflow
     workflow = Workflow.objects.create(
         project=project,
+        collection=collection,
         user=user,
         workflow_type='review_collection',
         item_count=item_count,
