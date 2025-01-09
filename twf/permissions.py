@@ -1,3 +1,5 @@
+from django.utils.safestring import mark_safe
+
 
 def check_permission(user, action, object_id=None):
 
@@ -41,68 +43,77 @@ def get_available_actions():
         "create_project": {
             "group": "project",
             "label": "Create project",
+            "description": mark_safe('Create a new project. <span class="text-danger">This is currently only '
+                                     'possible over the admin interface.</span>'),
         },
         "delete_project": {
             "group": "project",
             "label": "Delete project",
+            "description": mark_safe('Delete a project. <span class="text-danger">This cannot be undone and is '
+                                     'permanent.</span>'),
         },
         "close_project": {
             "group": "project",
             "label": "Close project",
+            "description": mark_safe('Close a project. <span class="text-danger">This will prevent any further '
+                                     'actions on the project.</span>'),
         },
         "reopen_project": {
             "group": "project",
             "label": "Reopen project",
+            "description": mark_safe('Reopen a project. <span class="text-danger">Not implemented yet.</span>'),
         },
-        "add_user_to_project": {
+        "change_project_settings": {
             "group": "project",
-            "label": "Add user to project",
-        },
-        "remove_user_from_project": {
-            "group": "project",
-            "label": "Remove user from project",
-        },
-        "add_dictionary_to_project": {
-            "group": "project",
-            "label": "Add dictionary to project",
+            "label": "Change project settings",
+            "description": "Change the project settings.",
         },
         "change_credential_settings": {
             "group": "project",
             "label": "Change credentials",
+            "description": "Change the credential settings for the project.",
         },
         "change_task_settings": {
             "group": "project",
             "label": "Change task settings",
+            "description": "Change the task settings for the project.",
         },
         "change_export_settings": {
             "group": "project",
             "label": "Change export settings",
+            "description": "Change the export settings for the project.",
         },
         "setup_project_permissions": {
             "group": "project",
             "label": "Setup project permissions",
+            "description": "Setup the project permissions.",
         },
         # Document actions
         "document_task_batch_action": {
             "group": "document",
             "label": "Document task batch action",
+            "description": "User is allowed to perform a batch task. These are ChatGPT, Gemini and Claude document batches.",
         },
         "document_task_review": {
             "group": "document",
             "label": "Document task review",
+            "description": "User is allowed to review documents.",
         },
         "document_create": {
             "group": "document",
             "label": "Create document",
+            "description": "User is allowed to manually create documents.",
         },
         # Tag actions
         "tag_task_group": {
             "group": "tag",
             "label": "Group Tags",
+            "description": "User is allowed to group tags.",
         },
         "tag_task_date_normalization": {
             "group": "tag",
             "label": "Date Normalization",
+            "description": "User is allowed to normalize dates.",
         },
         # Metadata actions
         "metadata_load_json_data": {
