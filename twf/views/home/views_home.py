@@ -3,10 +3,12 @@ from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import Group
 from django.contrib.auth.views import LoginView, PasswordChangeView
+from django.shortcuts import redirect
 from django.urls import reverse, reverse_lazy
 from django.utils.timezone import now, timedelta
 from django.views.generic import FormView
 
+from twf.forms.project_forms import CreateProjectForm
 from twf.forms.user_forms import LoginForm, ChangePasswordForm, UserProfileForm
 from twf.models import Project, Document, Page, Dictionary, DictionaryEntry, PageTag, Variation, DateVariation, \
     TWF_GROUPS, UserProfile
@@ -47,6 +49,11 @@ class TWFHomeView(TWFView):
             'options': self.get_user_options()
         })
 
+        sub_nav.append({
+            'name': 'Administrator Options',
+            'options': self.get_admin_options()
+        })
+
         return sub_nav
 
     def get_user_options(self):
@@ -61,13 +68,27 @@ class TWFHomeView(TWFView):
                 {'url': reverse('twf:user_management'), 'value': 'User Management'},
                 {'url': reverse('twf:user_logout'), 'value': 'Logout'},
             ]
+
             if user.is_superuser or user.is_staff:
+                nav.append({'url': reverse('twf:project_create'), 'value': 'Create Project'})
                 nav.append({'url': reverse('admin:index'), 'value': 'Admin'})
             return nav
 
         return [
             {'url': reverse('twf:login'), 'value': 'Login'},
         ]
+
+    def get_admin_options(self):
+        """Get the admin options."""
+        user = self.request.user
+        nav = []
+
+        if user.is_superuser or user.is_staff:
+            nav.append({'url': reverse('twf:project_create'), 'value': 'Create Project'})
+            nav.append({'url': reverse('twf:project_management'), 'value': 'Project Management'})
+            nav.append({'url': reverse('admin:index'), 'value': 'Admin Interface'})
+
+        return nav
 
     def get_navigation_index(self):
         return 0
@@ -238,4 +259,35 @@ class TWFSelectProjectView(LoginRequiredMixin, TWFHomeView):
             }
         )
 
+        return context
+
+
+class TWFCreateProjectView(LoginRequiredMixin, FormView, TWFHomeView):
+    """View to create a project."""
+    template_name = 'twf/home/create_project.html'
+    page_title = 'Create Project'
+    form_class = CreateProjectForm
+    success_url = reverse_lazy('twf:home')
+
+    def form_valid(self, form):
+        project = form.save(commit=False)
+        project.owner = self.request.user.profile
+        project.save(current_user=self.request.user)
+
+        messages.success(self.request, 'Project created successfully.')
+        return redirect(reverse('twf:project_do_select', args=[project.id]))
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        return context
+
+
+class TWFManageProjectsView(LoginRequiredMixin, TWFHomeView):
+    """View to manage the projects."""
+    template_name = 'twf/home/manage_projects.html'
+    page_title = 'Project Management'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['projects'] = Project.objects.all()
         return context

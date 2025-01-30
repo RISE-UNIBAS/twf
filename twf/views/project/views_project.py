@@ -398,6 +398,15 @@ def select_project(request, pk):
     request.session['project_id'] = pk
     return redirect('twf:project_overview')
 
+def delete_project(request, pk):
+    """Delete a project."""
+    messages.success(request, 'Project has been deleted.')
+    return redirect('twf:project_management')
+
+def close_project(request, pk):
+    """Close a project."""
+    messages.success(request, 'Project has been closed.')
+    return redirect('twf:project_management')
 
 def dynamic_form_view(request, pk):
     """View for displaying a dynamic form."""

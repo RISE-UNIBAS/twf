@@ -17,10 +17,11 @@
     <script src="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/js/select2.min.js"></script>
     <script src="{% static 'twf/js/celery_task_monitor.js' %}"></script>
     <script src="{% static 'twf/js/handle_modals.js' %}"></script>
+    <script src="{% static 'twf/js/help_overlay.js' %}"></script>
     {% block css %}
     {% endblock %}
 </head>
-<body>
+<body data-page="{{ request.resolver_match.view_name }}">
 
     <header>
        {% include 'twf/base/navigation.html' %}
@@ -50,7 +51,6 @@
                                     </ul>
                                 </div>
                             {% endfor %}
-
                     </nav>
                 </div>
                 <div class="col-10 bg-dark">
@@ -102,6 +102,7 @@
     
         {% include 'twf/base/confirm_modal.html' %}
         {% include 'twf/base/confirm_modal_danger.html' %}
+        {% include 'twf/base/help_overlay.html' %}
     </main>
 
     <footer class="footer">

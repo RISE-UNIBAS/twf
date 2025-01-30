@@ -13,6 +13,36 @@ from django_select2.forms import Select2MultipleWidget, Select2Widget
 from twf.models import Project, Collection, Document, CollectionItem, User, Task
 
 
+class CreateProjectForm(forms.ModelForm):
+
+    class Meta:
+        model = Project
+        fields = ['title', 'description', 'collection_id']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.helper = FormHelper()
+        self.helper.form_method = 'post'
+        self.helper.form_class = 'form form-control'
+        self.helper.layout = Layout(
+            Row(
+                Column('title', css_class='form-group col-12 mb-3'),
+                css_class='row form-row'
+            ),
+            Row(
+                Column('description', css_class='form-group col-12 mb-3'),
+                css_class='row form-row'
+            ),
+            Row(
+                Column('collection_id', css_class='form-group col-12 mb-3'),
+                css_class='row form-row'
+            ),
+            Div(
+                Submit('submit', 'Create Project', css_class='btn btn-dark'),
+                css_class='text-end pt-3'
+            )
+        )
+
 class PasswordInputRetain(forms.PasswordInput):
     """A PasswordInput widget that retains the value when the form is re-rendered.
     This is used for password fields in the settings forms."""

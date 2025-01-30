@@ -1,0 +1,31 @@
+{% extends 'twf/base/base.html' %}
+
+
+{% block content %}
+     <div class="border rounded bg-light mt-0 p-3">
+        <h1 class="display-6">Manage Projects</h1>
+        <p class="lead">This view allows you to delete and close your projects.</p>
+        {% for p in projects %}
+            <div class="border rounded bg-white mt-3 p-3">
+                <h2 class="display-6">{{ p.title }}</h2>
+                <p class="lead">{{ p.description }}</p>
+                <p class="lead">Created: {{ p.created_at }} by {{ p.created_by }}</p>
+                <p class="lead">Last Updated: {{ p.modified_at }} by {{ p.modified_by }}</p>
+                <p class="lead">Status: {{ p.status }}</p>
+
+                <button type="button" class="btn btn-sm btn-danger show-danger-modal"
+                        data-message="Are you sure you want to delete this project? <strong>This action cannot be undone.</strong>"
+                        data-redirect-url="{% url 'twf:project_do_delete' p.id %}">
+                    Delete Project
+                </button>
+
+                <button class="btn btn-sm btn-warning show-confirm-modal"
+                        data-start-url="{% url 'twf:project_do_close' p.id %}"
+                        data-message="Are you sure you want to close this project? It can no longer be edited."
+                        >Close Project</button>
+
+
+            </div>
+        {% endfor %}
+     </div>
+{% endblock %}

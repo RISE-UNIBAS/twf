@@ -22,12 +22,13 @@ from twf.views.documents.views_documents import TWFDocumentsOverviewView, TWFDoc
 from twf.views.documents.views_documents_ai import TWFDocumentOpenAIBatchView, \
     TWFDocumentGeminiBatchView, TWFDocumentClaudeBatchView
 from twf.views.home.views_home import TWFHomeView, TWFHomeLoginView, TWFHomePasswordChangeView, TWFHomeUserOverView, \
-    TWFHomeUserManagementView, TWFSelectProjectView, TWFHomeUserProfileView
+    TWFHomeUserManagementView, TWFSelectProjectView, TWFHomeUserProfileView, TWFCreateProjectView, TWFManageProjectsView
 from twf.views.project.views_project_setup import TWFProjectSetupView
 from twf.views.ajax.views_ajax_download import ajax_transkribus_download_export, download_progress_view
 from twf.views.collections.views_collection import TWFCollectionsReviewView, TWFCollectionsOpenaiBatchView, \
     TWFCollectionsOpenaiRequestView, TWFCollectionOverviewView, TWFCollectionsCreateView, TWFCollectionsDetailView, \
     TWFCollectionsEditView, TWFCollectionsAddDocumentView, TWFCollectionItemEditView, TWFCollectionItemView
+from twf.views.views_base import help_content
 from twf.views.views_command import park_tag, unpark_tag, ungroup_tag
 from twf.views.dictionaries.views_dictionaries import TWFDictionaryOverviewView, TWFDictionaryDictionaryView, \
     delete_variation, TWFDictionaryDictionaryEditView, TWFDictionaryDictionaryEntryEditView, \
@@ -42,7 +43,7 @@ from twf.views.metadata.views_metadata import TWFMetadataReviewDocumentsView, \
 from twf.views.project.views_project import select_project, TWFProjectQueryView, TWFProjectOverviewView, \
     TWFProjectTaskMonitorView, TWFProjectGeneralSettingsView, TWFProjectCredentialsSettingsView, \
     TWFProjectPromptsView, TWFProjectTaskSettingsView, TWFProjectExportSettingsView, TWFProjectCopyView, \
-    TWFProjectResetView
+    TWFProjectResetView, delete_project, close_project
 from twf.views.project.views_project_ai import TWFProjectAIQueryView
 from twf.views.tags.views_tags import TWFProjectTagsView, TWFProjectTagsOpenView, \
     TWFProjectTagsParkedView, TWFProjectTagsResolvedView, TWFProjectTagsIgnoredView, TWFTagsDatesGroupView, \
@@ -63,10 +64,14 @@ urlpatterns = [
     path('user/overview/', TWFHomeUserOverView.as_view(), name='user_overview'),
     path('user/management/', TWFHomeUserManagementView.as_view(), name='user_management'),
     path('logout/', auth_views.LogoutView.as_view(next_page='twf:home'), name='logout'),
-
+    path('help/<str:view_name>/', help_content, name='help'),
     # Select Project
     path('project/select/<int:pk>/confirm/', TWFSelectProjectView.as_view(), name='project_select'),
     path('project/select/<int:pk>', select_project, name='project_do_select'),
+    path('project/create/', TWFCreateProjectView.as_view(), name='project_create'),
+    path('projects/manage/', TWFManageProjectsView.as_view(), name='project_management'),
+    path('project/delete/<int:pk>', delete_project, name='project_do_delete'),
+    path('project/close/<int:pk>', close_project, name='project_do_close'),
 
     #############################
     # PROJECT

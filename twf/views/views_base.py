@@ -2,7 +2,10 @@
 from abc import ABC, abstractmethod
 
 from django.contrib import messages
+from django.http import HttpResponse
 from django.shortcuts import redirect
+from django.template import TemplateDoesNotExist
+from django.template.loader import get_template
 from django.urls import reverse
 from django.views.generic import TemplateView
 from django.conf import settings
@@ -102,4 +105,10 @@ class TWFView(TemplateView, ABC):
         return context
 
 
-
+def help_content(request, view_name):
+    template_path = f"twf/help/{view_name}.html"
+    try:
+        template = get_template(template_path)
+        return HttpResponse(template.render({}, request))
+    except TemplateDoesNotExist:
+        return HttpResponse("<p>Help content not found.</p>", status=404)

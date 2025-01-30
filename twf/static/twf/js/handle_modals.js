@@ -14,7 +14,7 @@ $(document).ready(function () {
 
     // Set modal message dynamically
     const message = $(this).data('message') || 'Are you sure you want to proceed?';
-    $('#confirmModal .modal-body').text(message);
+    $('#confirmModal .modal-body').html(message);
 
     // Prepare the action based on button's data attributes
     const button = $(this);
@@ -45,7 +45,7 @@ $(document).ready(function () {
 
     // Set modal message dynamically
     const message = $(this).data('message') || 'Are you sure you want to proceed?';
-    $('#confirmDangerModal .modal-body').text(message);
+    $('#confirmDangerModal .modal-body').html(message);
 
     // Prepare the action based on button's data attributes
     const button = $(this);
