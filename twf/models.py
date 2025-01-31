@@ -18,9 +18,6 @@ from twf.templatetags.tk_tags import tk_iiif_url, tk_bounding_box
 # The User model is retrieved dynamically to allow for custom user models
 User = get_user_model()
 
-# The permission groups in the app (#TODO this is not implemented yet)
-TWF_GROUPS = ['Setup Project', 'Group Tags', 'Run Batches', 'Import Dictionaries', 'Manipulate Dictionaries']
-
 
 class TimeStampedModel(models.Model):
     """
@@ -81,21 +78,18 @@ class UserProfile(models.Model):
     ~~~~~~~~~~
     user : OneToOneField
         The user this profile belongs to.
-    clearance_level : IntegerField
-        The clearance level of the user. This can be used to define different levels of access or permissions.
     """
 
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
     """The user this profile belongs to."""
-
-    clearance_level = models.IntegerField(default=0)  # You can define levels as constants
-    """The clearance level of the user."""
 
     orc_id = models.CharField(max_length=255, blank=True, null=True)
     """The ORCID of the user."""
 
     affiliation = models.CharField(max_length=255, blank=True, null=True)
     """The affiliation of the user."""
+
+    permissions = models.JSONField(default=dict)
 
     def get_projects(self):
         """Return the projects the user is a member of."""
@@ -105,6 +99,35 @@ class UserProfile(models.Model):
         all_projects = owned_projects | member_projects
         all_projects = all_projects.distinct().order_by('id')
         return all_projects
+
+    def get_project_permissions(self, project):
+        """Return the permissions of the user for a project."""
+        return self.permissions.get(str(project.id), {})
+
+    def has_permission(self, action, project):
+        """Check if the user has a specific permission."""
+        if self.user.is_superuser:
+            return True
+
+        project_permissions = self.permissions.get(str(project.id), {})
+        return project_permissions.get(action, False)  # Default to False
+
+    def add_permission(self, action, project):
+        """Grant a new permission to the user."""
+        project_permissions = self.permissions.get(str(project.id), None)
+        if project_permissions is None:
+            project_permissions = {}
+            self.permissions[str(project.id)] = project_permissions
+
+        self.permissions.get(str(project.id), {})[action] = True
+        self.save()
+
+    def remove_permission(self, action, project):
+        """Remove a permission from the user."""
+        project_permissions = self.permissions.get(str(project.id), {})
+        if action in project_permissions:
+            del self.permissions[project.id][action]
+            self.save()
 
     def __str__(self):
         """Return the string representation of the UserProfile."""

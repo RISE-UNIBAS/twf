@@ -1,7 +1,6 @@
 """Views for the home section of the TWF application."""
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.contrib.auth.models import Group
 from django.contrib.auth.views import LoginView, PasswordChangeView
 from django.shortcuts import redirect
 from django.urls import reverse, reverse_lazy
@@ -9,10 +8,10 @@ from django.utils.timezone import now, timedelta
 from django.views.generic import FormView
 
 from twf.forms.project_forms import CreateProjectForm
-from twf.forms.user_forms import LoginForm, ChangePasswordForm, UserProfileForm
+from twf.forms.user_forms import LoginForm, ChangePasswordForm, UserProfileForm, CreateUserForm
 from twf.models import Project, Document, Page, Dictionary, DictionaryEntry, PageTag, Variation, DateVariation, \
-    TWF_GROUPS, UserProfile
-from twf.permissions import get_actions_grouped_by_category
+    UserProfile
+from twf.permissions import get_available_actions
 from twf.views.views_base import TWFView
 
 
@@ -24,7 +23,7 @@ class TWFHomeView(TWFView):
     template_name = 'twf/home/home.html'
 
     def get_sub_navigation(self):
-        """Get the sub navigation."""
+        """Get the sub navigation for the home pages."""
         sub_nav = [
             {
                 'name': 'TWF',
@@ -62,16 +61,12 @@ class TWFHomeView(TWFView):
 
         if user.is_authenticated:
             nav = [
-                {'url': reverse('twf:user_overview'), 'value': 'Overview'},
-                {'url': reverse('twf:user_profile'), 'value': 'User Profile'},
+                {'url': reverse('twf:user_overview'), 'value': 'Your Activity'},
+                {'url': reverse('twf:user_profile'), 'value': 'User Information'},
                 {'url': reverse('twf:user_change_password'), 'value': 'Change Password'},
-                {'url': reverse('twf:user_management'), 'value': 'User Management'},
                 {'url': reverse('twf:user_logout'), 'value': 'Logout'},
             ]
 
-            if user.is_superuser or user.is_staff:
-                nav.append({'url': reverse('twf:project_create'), 'value': 'Create Project'})
-                nav.append({'url': reverse('admin:index'), 'value': 'Admin'})
             return nav
 
         return [
@@ -86,6 +81,7 @@ class TWFHomeView(TWFView):
         if user.is_superuser or user.is_staff:
             nav.append({'url': reverse('twf:project_create'), 'value': 'Create Project'})
             nav.append({'url': reverse('twf:project_management'), 'value': 'Project Management'})
+            nav.append({'url': reverse('twf:twf_user_management'), 'value': 'User Management'})
             nav.append({'url': reverse('admin:index'), 'value': 'Admin Interface'})
 
         return nav
@@ -210,23 +206,6 @@ class TWFHomeUserOverView(LoginRequiredMixin, TWFHomeView):
         return summary
 
 
-class TWFHomeUserManagementView(LoginRequiredMixin, TWFHomeView):
-    """View to manage the users."""
-    template_name = 'twf/home/users/management.html'
-    page_title = 'User Management'
-
-    def get_context_data(self, **kwargs):
-        """Add the user profiles to the context."""
-        context = super().get_context_data(**kwargs)
-
-        project = self.get_project()
-        users = [project.owner] + list(project.members.all())
-        context['users'] = users
-        context['permissions'] = get_actions_grouped_by_category()
-
-        return context
-
-
 class TWFSelectProjectView(LoginRequiredMixin, TWFHomeView):
     """View to select a project."""
     template_name = 'twf/home/select_project.html'
@@ -245,17 +224,11 @@ class TWFSelectProjectView(LoginRequiredMixin, TWFHomeView):
         if project.members.filter(pk=user.pk).exists():
             user_role = 'member'
 
-        groups = []
-        for group in TWF_GROUPS:
-            db_group, created = Group.objects.get_or_create(name=group)
-            groups.append((db_group, user.groups.filter(name=group).exists()))
-
         context.update(
             {
                 'project_to_select': project,
                 'project': self.get_project(),
-                'user_role': user_role,
-                'groups': groups
+                'user_role': user_role
             }
         )
 
@@ -271,8 +244,14 @@ class TWFCreateProjectView(LoginRequiredMixin, FormView, TWFHomeView):
 
     def form_valid(self, form):
         project = form.save(commit=False)
+
         project.owner = self.request.user.profile
         project.save(current_user=self.request.user)
+
+        all_permissions = get_available_actions()
+        for perm in all_permissions.keys():
+            self.request.user.profile.add_permission(perm, project)
+        self.request.user.profile.save()
 
         messages.success(self.request, 'Project created successfully.')
         return redirect(reverse('twf:project_do_select', args=[project.id]))
@@ -290,4 +269,20 @@ class TWFManageProjectsView(LoginRequiredMixin, TWFHomeView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['projects'] = Project.objects.all()
+        return context
+
+
+class TWFManageUsersView(LoginRequiredMixin, FormView, TWFHomeView):
+    """View to manage the projects."""
+    template_name = 'twf/home/manage_users.html'
+    page_title = 'User Management'
+    form_class = CreateUserForm
+    success_url = reverse_lazy('twf:twf_user_management')
+
+    def form_valid(self, form):
+        pass
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['users'] = UserProfile.objects.all().order_by('user__username')
         return context

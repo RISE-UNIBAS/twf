@@ -49,7 +49,10 @@ class TWFView(TemplateView, ABC):
         project = None
         if TWFView.s_is_project_set(request):
             project_id = request.session.get('project_id')
-            project = Project.objects.get(pk=project_id)
+            try:
+                project = Project.objects.get(pk=project_id)
+            except Project.DoesNotExist:
+                request.session['project_id'] = None
         return project
 
     def get_navigation_items(self):

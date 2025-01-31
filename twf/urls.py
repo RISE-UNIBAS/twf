@@ -22,7 +22,7 @@ from twf.views.documents.views_documents import TWFDocumentsOverviewView, TWFDoc
 from twf.views.documents.views_documents_ai import TWFDocumentOpenAIBatchView, \
     TWFDocumentGeminiBatchView, TWFDocumentClaudeBatchView
 from twf.views.home.views_home import TWFHomeView, TWFHomeLoginView, TWFHomePasswordChangeView, TWFHomeUserOverView, \
-    TWFHomeUserManagementView, TWFSelectProjectView, TWFHomeUserProfileView, TWFCreateProjectView, TWFManageProjectsView
+    TWFSelectProjectView, TWFHomeUserProfileView, TWFCreateProjectView, TWFManageProjectsView, TWFManageUsersView
 from twf.views.project.views_project_setup import TWFProjectSetupView
 from twf.views.ajax.views_ajax_download import ajax_transkribus_download_export, download_progress_view
 from twf.views.collections.views_collection import TWFCollectionsReviewView, TWFCollectionsOpenaiBatchView, \
@@ -43,7 +43,7 @@ from twf.views.metadata.views_metadata import TWFMetadataReviewDocumentsView, \
 from twf.views.project.views_project import select_project, TWFProjectQueryView, TWFProjectOverviewView, \
     TWFProjectTaskMonitorView, TWFProjectGeneralSettingsView, TWFProjectCredentialsSettingsView, \
     TWFProjectPromptsView, TWFProjectTaskSettingsView, TWFProjectExportSettingsView, TWFProjectCopyView, \
-    TWFProjectResetView, delete_project, close_project
+    TWFProjectResetView, delete_project, close_project, TWFProjectUserManagementView
 from twf.views.project.views_project_ai import TWFProjectAIQueryView
 from twf.views.tags.views_tags import TWFProjectTagsView, TWFProjectTagsOpenView, \
     TWFProjectTagsParkedView, TWFProjectTagsResolvedView, TWFProjectTagsIgnoredView, TWFTagsDatesGroupView, \
@@ -62,9 +62,10 @@ urlpatterns = [
     path('user/profile/', TWFHomeUserProfileView.as_view(), name='user_profile'),
     path('user/change/password/', TWFHomePasswordChangeView.as_view(), name='user_change_password'),
     path('user/overview/', TWFHomeUserOverView.as_view(), name='user_overview'),
-    path('user/management/', TWFHomeUserManagementView.as_view(), name='user_management'),
     path('logout/', auth_views.LogoutView.as_view(next_page='twf:home'), name='logout'),
     path('help/<str:view_name>/', help_content, name='help'),
+    path('user/management/', TWFManageUsersView.as_view(), name='twf_user_management'),
+
     # Select Project
     path('project/select/<int:pk>/confirm/', TWFSelectProjectView.as_view(), name='project_select'),
     path('project/select/<int:pk>', select_project, name='project_do_select'),
@@ -98,6 +99,7 @@ urlpatterns = [
          name='project_settings_credentials'),
     path('project/settings/tasks/', TWFProjectTaskSettingsView.as_view(), name='project_settings_tasks'),
     path('project/settings/export/', TWFProjectExportSettingsView.as_view(), name='project_settings_export'),
+    path('project/user/management/', TWFProjectUserManagementView.as_view(), name='user_management'),
 
     # Project options
     path('project/query/', TWFProjectQueryView.as_view(), name='project_query'),

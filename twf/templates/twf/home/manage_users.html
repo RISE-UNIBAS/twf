@@ -1,0 +1,27 @@
+{% extends 'twf/base/base.html' %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+     <div class="border rounded bg-light mt-0 p-3">
+        <h1 class="display-6">Manage Users</h1>
+        <p class="lead"></p>
+
+        <h3>Create New User</h3>
+        {% crispy form %}
+
+        <h3>Existing User</h3>
+        {% if users %}
+             {% for profile in users %}
+                <div class="border rounded bg-white mt-3 p-3">
+                    {{ profile }}
+                    {% if profile.user == request.user %}
+                        <span class="badge bg-info">You</span>
+                    {% endif %}
+
+                </div>
+            {% endfor %}
+        {% else %}
+            <p class="lead">There are no users.</p>
+        {% endif %}
+     </div>
+{% endblock %}

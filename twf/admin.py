@@ -9,7 +9,7 @@ from .models import (
 @admin.register(UserProfile)
 class UserProfileAdmin(admin.ModelAdmin):
     """Admin View for UserProfile."""
-    list_filter = ['clearance_level', 'user']
+    list_filter = ['user']
     search_fields = ['user__username', 'user__email']
 
 

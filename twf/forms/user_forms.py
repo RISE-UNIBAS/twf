@@ -43,8 +43,13 @@ class ChangePasswordForm(PasswordChangeForm):
         )
 
 
-class UserManagementForm(forms.Form):
+class CreateUserForm(forms.ModelForm):
     """Form for managing users."""
+
+    class Meta:
+        """Meta class for the form."""
+        model = User
+        fields = ['username', 'email']
 
     def __init__(self, *args, **kwargs):
         """Initialize the form."""
@@ -54,8 +59,8 @@ class UserManagementForm(forms.Form):
         self.helper.form_method = 'post'
         self.helper.layout = Layout(
             Row(
-                Column('user', css_class='form-group col-6 mb-0'),
-                Column('group', css_class='form-group col-6 mb-0'),
+                Column('username', css_class='form-group col-6 mb-0'),
+                Column('email', css_class='form-group col-6 mb-0'),
                 css_class='row form-row'
             ),
             Div(

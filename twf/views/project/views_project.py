@@ -15,7 +15,8 @@ from django.views.generic import FormView
 from twf.forms.dynamic_forms import DynamicForm
 from twf.forms.project_forms import QueryDatabaseForm, GeneralSettingsForm, CredentialsForm, \
     TaskSettingsForm, ExportSettingsForm, TaskFilterForm, PromptFilterForm
-from twf.models import Document, Page, PageTag
+from twf.models import Document, Page, PageTag, Project
+from twf.permissions import check_permission, get_actions_grouped_by_category, get_available_actions
 from twf.utils.project_statistics import get_document_statistics
 from twf.views.views_base import TWFView
 
@@ -42,6 +43,7 @@ class TWFProjectView(LoginRequiredMixin, TWFView):
                     {'url': reverse('twf:project_settings_credentials'), 'value': 'Credential Settings'},
                     {'url': reverse('twf:project_settings_tasks'), 'value': 'Task Settings'},
                     {'url': reverse('twf:project_settings_export'), 'value': 'Export Settings'},
+                    {'url': reverse('twf:user_management'), 'value': 'User Management'},
                 ]
             },
             {
@@ -336,6 +338,43 @@ class TWFProjectOverviewView(TWFProjectView):
         return context
 
 
+class TWFProjectUserManagementView(TWFProjectView):
+    """View to manage the users."""
+    template_name = 'twf/project/user_management.html'
+    page_title = 'User Management'
+
+    def get_context_data(self, **kwargs):
+        """Add the user profiles to the context."""
+        context = super().get_context_data(**kwargs)
+
+        project = self.get_project()
+        users = [project.owner] + list(project.members.all())
+        context['users'] = users
+        context['permissions'] = get_actions_grouped_by_category(project, profile=self.request.user.profile)
+
+        return context
+
+    def post(self, request, *args, **kwargs):
+        """Handle the post request."""
+        project = self.get_project()
+        context = self.get_context_data()
+
+        for profile in context['users']:
+            for action in get_available_actions(project).keys():
+                form_field_name = f"{profile.user.username}__{action}"
+                if form_field_name in request.POST:
+                    profile.add_permission(action)
+                    print(f"Adding permission {action} to {profile.user.username}")
+                else:
+                    profile.remove_permission(action)
+                    print(f"Removing permission {action} from {profile.user.username}")
+            profile.save()
+
+        print(request.POST)
+
+        return redirect(reverse('twf:user_management'))
+
+
 class TWFProjectCopyView(TWFProjectView):
     """View for copying a project."""
 
@@ -400,12 +439,36 @@ def select_project(request, pk):
 
 def delete_project(request, pk):
     """Delete a project."""
-    messages.success(request, 'Project has been deleted.')
+
+
+    try:
+        project = Project.objects.get(pk=pk)
+        if check_permission(request.user, "delete_project", project):
+            project.delete()
+            messages.success(request, 'Project has been deleted.')
+        else:
+            messages.error(request, 'You do not have the required permissions to delete this project.')
+    except Project.DoesNotExist:
+        messages.error(request, 'Project does not exist.')
+
     return redirect('twf:project_management')
 
 def close_project(request, pk):
     """Close a project."""
-    messages.success(request, 'Project has been closed.')
+
+    if check_permission(request.user,
+                        "close_project",
+                        object_id=pk):
+        try:
+            project = Project.objects.get(pk=pk)
+            project.is_closed = True
+            project.save(current_user=request.user)
+            messages.success(request, 'Project has been closed.')
+        except Project.DoesNotExist:
+            messages.error(request, 'Project does not exist.')
+    else:
+        messages.error(request, 'You do not have the required permissions to close this project.')
+
     return redirect('twf:project_management')
 
 def dynamic_form_view(request, pk):

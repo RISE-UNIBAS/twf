@@ -183,3 +183,12 @@ else:
 # Set the maximum size in bytes (5 MB = 5 * 1024 * 1024 bytes)
 DATA_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024  # 10MB
 FILE_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024  # 10MB
+
+# Email settings
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = "smtp.gmail.com"
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = "sorin.marti@gmail.com"
+EMAIL_HOST_PASSWORD = "trqw dkon njhr nnwp"
+DEFAULT_FROM_EMAIL = "no-reply@rise-test1.philhist.unibas.ch"
