@@ -17,7 +17,9 @@ class CreateProjectForm(forms.ModelForm):
 
     class Meta:
         model = Project
-        fields = ['title', 'description', 'collection_id']
+        fields = ['title', 'description', 'collection_id', 'owner', 'members']
+        widgets = { 'members': Select2MultipleWidget(attrs={'style': 'width: 100%;'}),
+                    'owner': Select2Widget(attrs={'style': 'width: 100%;'})}
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -26,7 +28,8 @@ class CreateProjectForm(forms.ModelForm):
         self.helper.form_class = 'form form-control'
         self.helper.layout = Layout(
             Row(
-                Column('title', css_class='form-group col-12 mb-3'),
+                Column('title', css_class='form-group col-6 mb-3'),
+                Column('collection_id', css_class='form-group col-6 mb-3'),
                 css_class='row form-row'
             ),
             Row(
@@ -34,7 +37,8 @@ class CreateProjectForm(forms.ModelForm):
                 css_class='row form-row'
             ),
             Row(
-                Column('collection_id', css_class='form-group col-12 mb-3'),
+                Column('owner', css_class='form-group col-6 mb-3'),
+                Column('members', css_class='form-group col-6 mb-3'),
                 css_class='row form-row'
             ),
             Div(

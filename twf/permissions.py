@@ -46,7 +46,7 @@ def get_actions_grouped_by_category(project, profile=None):
     return grouped_actions
 
 
-def get_available_actions(project=None, profile=None):
+def get_available_actions(project=None, profile=None, for_group=None):
     """Return a dictionary of available actions with their details.
     If a profile is provided, only return actions that the profile has permission for."""
 
@@ -229,6 +229,13 @@ def get_available_actions(project=None, profile=None):
         filtered_actions = {}
         for action_name, action_details in available_actions.items():
             if profile.has_permission(action_name, project):
+                filtered_actions[action_name] = action_details
+        return filtered_actions
+
+    if for_group:
+        filtered_actions = {}
+        for action_name, action_details in available_actions.items():
+            if action_details["default_for"] and for_group in action_details["default_for"]:
                 filtered_actions[action_name] = action_details
         return filtered_actions
 

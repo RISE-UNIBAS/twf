@@ -223,7 +223,7 @@ class TWFSelectProjectView(LoginRequiredMixin, TWFHomeView):
             user_role = 'admin'
         if project.owner == user:
             user_role = 'owner'
-        if project.members.filter(pk=user.pk).exists():
+        if project.members.filter(user_id=user.pk).exists():
             user_role = 'member'
 
         context.update(
@@ -246,14 +246,20 @@ class TWFCreateProjectView(LoginRequiredMixin, FormView, TWFHomeView):
 
     def form_valid(self, form):
         project = form.save(commit=False)
-
-        project.owner = self.request.user.profile
         project.save(current_user=self.request.user)
+        members = form.cleaned_data['members']
+
+        member_permissions = get_available_actions(for_group='user')
+        for member in members:
+            project.members.add(member)
+            for perm in member_permissions.keys():
+                member.add_permission(perm, project)
+            member.save()
 
         all_permissions = get_available_actions()
         for perm in all_permissions.keys():
-            self.request.user.profile.add_permission(perm, project)
-        self.request.user.profile.save()
+            project.owner.add_permission(perm, project)
+        project.owner.save()
 
         messages.success(self.request, 'Project created successfully.')
         return redirect(reverse('twf:project_do_select', args=[project.id]))
@@ -299,6 +305,8 @@ class TWFManageUsersView(LoginRequiredMixin, FormView, TWFHomeView):
                 messages.success(request, 'Password reset successfully. Message sent to user.')
             elif action == 'user_deactivate':
                 user.is_active = False
+                user.profile.permissions.clear()
+                user.profile.save()
                 user.save()
                 messages.success(request, 'User deactivated successfully.')
             elif action == 'user_activate':

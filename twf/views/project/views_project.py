@@ -363,15 +363,12 @@ class TWFProjectUserManagementView(TWFProjectView):
             for action in get_available_actions(project).keys():
                 form_field_name = f"{profile.user.username}__{action}"
                 if form_field_name in request.POST:
-                    profile.add_permission(action)
-                    print(f"Adding permission {action} to {profile.user.username}")
+                    profile.add_permission(action, project)
                 else:
-                    profile.remove_permission(action)
-                    print(f"Removing permission {action} from {profile.user.username}")
+                    profile.remove_permission(action, project)
             profile.save()
 
-        print(request.POST)
-
+        messages.success(request, 'Permissions have been updated successfully.')
         return redirect(reverse('twf:user_management'))
 
 

@@ -128,7 +128,7 @@ class UserProfile(models.Model):
         """Remove a permission from the user."""
         project_permissions = self.permissions.get(str(project.id), {})
         if action in project_permissions:
-            del self.permissions[project.id][action]
+            del self.permissions[str(project.id)][action]
             self.save()
 
     def __str__(self):

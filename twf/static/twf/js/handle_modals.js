@@ -26,7 +26,8 @@ $(document).ready(function () {
       taskFunction = () => {
         form.submit(); // Submit the correct form
       };
-    } else if (redirectUrl) {
+    }
+    if (redirectUrl) {
       // If no form is specified but a redirect URL is present
       taskFunction = () => {
         window.location.href = redirectUrl; // Redirect to the specified URL
@@ -54,7 +55,8 @@ $(document).ready(function () {
       taskFunction = () => {
         form.submit(); // Submit the correct form
       };
-    } else if (redirectUrl) {
+    }
+    if (redirectUrl) {
       // If no form is specified but a redirect URL is present
       taskFunction = () => {
         window.location.href = redirectUrl; // Redirect to the specified URL
