@@ -45,11 +45,13 @@ class TimeStampedModel(models.Model):
     """The date and time the object was last modified."""
 
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL,
-                                   related_name='created_%(class)s_set', on_delete=models.CASCADE)
+                                   related_name='created_%(class)s_set',
+                                   on_delete=models.SET_NULL, null=True, blank=True)
     """The user who created the object."""
 
     modified_by = models.ForeignKey(settings.AUTH_USER_MODEL,
-                                    related_name='modified_%(class)s_set', on_delete=models.CASCADE)
+                                    related_name='modified_%(class)s_set',
+                                    on_delete=models.SET_NULL, null=True, blank=True)
     """The user who last modified the object."""
 
     class Meta:
@@ -196,7 +198,7 @@ class Project(TimeStampedModel):
                               help_text='The status of the project.')
     """The status of the project."""
 
-    owner = models.ForeignKey(UserProfile, related_name='owned_projects', on_delete=models.CASCADE,
+    owner = models.ForeignKey(UserProfile, related_name='owned_projects', on_delete=models.PROTECT,
                               verbose_name='Project Owner',
                               help_text='The owner of the project. This user has all the permissions.')
     """The owner of the project. This user has all the permissions."""
@@ -333,7 +335,7 @@ class Task(models.Model):
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name="tasks")
     """The project this task belongs to."""
 
-    user = models.ForeignKey(User, on_delete=models.RESTRICT, related_name="tasks")
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="tasks")
     """The user who created the task."""
 
     task_id = models.CharField(max_length=255, unique=True)
@@ -666,14 +668,14 @@ class PageTag(TimeStampedModel):
     variation_type = models.CharField(max_length=100)
     """The type of the tag."""
 
-    dictionary_entry = models.ForeignKey(DictionaryEntry, on_delete=models.CASCADE,
+    dictionary_entry = models.ForeignKey(DictionaryEntry, on_delete=models.SET_NULL,
                                          null=True, blank=True)
     """The dictionary entry this tag is assigned to."""
 
     additional_information = models.JSONField(default=dict, blank=True)
     """Additional information about the tag."""
 
-    date_variation_entry = models.ForeignKey('DateVariation', on_delete=models.CASCADE,
+    date_variation_entry = models.ForeignKey('DateVariation', on_delete=models.SET_NULL,
                                              null=True, blank=True)
 
     is_parked = models.BooleanField(default=False)
@@ -847,7 +849,7 @@ class CollectionItem(TimeStampedModel):
     collection = models.ForeignKey(Collection, related_name='items', on_delete=models.CASCADE)
     """The collection this item belongs to."""
 
-    document = models.ForeignKey(Document, related_name='collections', on_delete=models.CASCADE,
+    document = models.ForeignKey(Document, related_name='collections', on_delete=models.SET_NULL,
                                  blank=True, null=True)
     """The document this item belongs to."""
 
@@ -987,7 +989,7 @@ class Workflow(models.Model):
     ]
 
     project = models.ForeignKey('Project', on_delete=models.CASCADE)
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="workflows")
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name="workflows")
 
     workflow_type = models.CharField(max_length=50, choices=WORKFLOW_TYPE_CHOICES)
     status = models.CharField(max_length=20, choices=[('started', 'Started'), ('ended', 'Ended')], default='started')
