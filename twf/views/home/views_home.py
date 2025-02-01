@@ -4,14 +4,16 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView, PasswordChangeView
 from django.shortcuts import redirect
 from django.urls import reverse, reverse_lazy
+from django.utils.crypto import get_random_string
 from django.utils.timezone import now, timedelta
 from django.views.generic import FormView
 
 from twf.forms.project_forms import CreateProjectForm
 from twf.forms.user_forms import LoginForm, ChangePasswordForm, UserProfileForm, CreateUserForm
 from twf.models import Project, Document, Page, Dictionary, DictionaryEntry, PageTag, Variation, DateVariation, \
-    UserProfile
+    UserProfile, User
 from twf.permissions import get_available_actions
+from twf.utils.mail_utils import send_welcome_email, send_reset_email
 from twf.views.views_base import TWFView
 
 
@@ -279,8 +281,43 @@ class TWFManageUsersView(LoginRequiredMixin, FormView, TWFHomeView):
     form_class = CreateUserForm
     success_url = reverse_lazy('twf:twf_user_management')
 
+    def post(self, request, *args, **kwargs):
+        if 'existing_user_id' in request.POST:
+            user = User.objects.get(pk=request.POST.get('existing_user_id'))
+            action = request.POST.get('action', None)
+            if action == 'user_delete':
+                if user == request.user:
+                    messages.error(request, 'You cannot delete yourself.')
+                    return redirect('twf:twf_user_management')
+                user.delete()
+                messages.success(request, 'User deleted successfully.')
+            elif action == 'pw_reset':
+                initial_password = get_random_string(length=8)
+                user.set_password(initial_password)
+                user.save()
+                send_reset_email(user.email, user.username, initial_password)
+                messages.success(request, 'Password reset successfully. Message sent to user.')
+            elif action == 'user_deactivate':
+                user.is_active = False
+                user.save()
+                messages.success(request, 'User deactivated successfully.')
+            elif action == 'user_activate':
+                user.is_active = True
+                user.save()
+                messages.success(request, 'User activated successfully.')
+
+            return redirect('twf:twf_user_management')
+        return super().post(request, *args, **kwargs)
+
     def form_valid(self, form):
-        pass
+        user = form.save(commit=False)
+        initial_password = get_random_string(length=8)
+        user.password = initial_password
+        user.save()
+
+        send_welcome_email(user.email, user.username, initial_password)
+        messages.success(self.request, 'User created successfully. Message sent to user.')
+        return super().form_valid(form)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

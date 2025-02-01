@@ -1,0 +1,40 @@
+<h3>User Management</h3>
+<p>The User Management view allows administrators and staff users to manage user accounts,
+    including creating new users, resetting passwords, deactivating, and deleting accounts.
+    This view is only available to users with administrative privileges.
+</p>
+<p>
+    This is the user management for TWF. Users are created and managed here. After creating a user,
+    you can add them to projects in the project user management view and assign them permissions.
+</p>
+<p>
+    <strong>Be careful when deleting or deactivating users, as this may affect project permissions.</strong>
+</p>
+
+<h4>Creating a New User</h4>
+<p>To create a new user, enter a username and an optional email address, then click
+    <strong>"Create User"</strong>. The user will be added to the system with default permissions.</p>
+
+<h4>Managing Existing Users</h4>
+<p>The list of existing users appears below the "Create New User" section. Each user has the
+    following options:</p>
+
+<ul>
+    <li><strong>Reset Password:</strong> Sends an email to the user with a new randomly generated password.</li>
+    <li><strong>Activate/Deactivate:</strong> If a user is deactivated, they cannot log in and their project
+        and their project permissions are removed. Deactivating a user does not delete the account or user
+        activity history. Activating restores login access. Project permissions must be reset.</li>
+    <li><strong>Delete:</strong> Permanently removes the user from the system. All user-related information is
+        deleted. <span class="text-danger">This action cannot be undone.</span></li>
+</ul>
+
+<h4>User Status and Badges</h4>
+<p>Each user may have special badges indicating their status:</p>
+<ul>
+    <li><span class="badge bg-success">admin</span> - This user all has administrative privileges.</li>
+    <li><span class="badge bg-success">staff</span> - This user has administrative privileges.</li>
+    <li><span class="badge bg-info">you</span> - This badge appears next to your own account. You cannot delete or deactivate your own account. If you need to reset your password, use the "Forgot Password" link on the login page.</li>
+    <li><span class="badge bg-secondary">inactive</span> - This user is currently deactivated and cannot log in.</li>
+</ul>
+
+<p><strong>Note:</strong> Deleting or deactivating a user may affect project access and permissions.</p>

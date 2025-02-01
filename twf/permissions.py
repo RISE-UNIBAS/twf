@@ -11,6 +11,9 @@ def check_permission(user, action, project, object_id=None):
     if not user.is_authenticated:
         return False
 
+    if not user.is_active:
+        return False
+
     # Check if user is superuser
     if user.is_superuser:
         return True

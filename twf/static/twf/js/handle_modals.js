@@ -21,13 +21,10 @@ $(document).ready(function () {
     redirectUrl = button.data('redirect-url'); // Get redirect URL
 
     // If a form exists, prepare to handle it
-    const formSelector = button.data('form-selector');
-    if (formSelector) {
-      const form = $(formSelector);
+    const form = button.closest("form"); // Automatically find the closest form
+    if (form) {
       taskFunction = () => {
-        if (form.length > 0) {
-          form.submit(); // Submit the form
-        }
+        form.submit(); // Submit the correct form
       };
     } else if (redirectUrl) {
       // If no form is specified but a redirect URL is present
@@ -52,13 +49,10 @@ $(document).ready(function () {
     redirectUrl = button.data('redirect-url'); // Get redirect URL
 
     // If a form exists, prepare to handle it
-    const formSelector = button.data('form-selector');
-    if (formSelector) {
-      const form = $(formSelector);
+    const form = button.closest("form"); // Automatically find the closest form
+    if (form) {
       taskFunction = () => {
-        if (form.length > 0) {
-          form.submit(); // Submit the form
-        }
+        form.submit(); // Submit the correct form
       };
     } else if (redirectUrl) {
       // If no form is specified but a redirect URL is present
@@ -80,11 +74,11 @@ $(document).ready(function () {
     normalModal.hide();
   });
 
-    dangerConfirmButton.on('click', function () {
-        if (taskFunction) {
-        taskFunction(); // Execute the task function (submit or redirect)
-        }
-        dangerModal.hide();
-    });
+  dangerConfirmButton.on('click', function () {
+      if (taskFunction) {
+      taskFunction(); // Execute the task function (submit or redirect)
+      }
+      dangerModal.hide();
+  });
 
 });

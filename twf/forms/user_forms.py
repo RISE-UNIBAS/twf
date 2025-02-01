@@ -64,7 +64,7 @@ class CreateUserForm(forms.ModelForm):
                 css_class='row form-row'
             ),
             Div(
-                Submit('submit', 'Save Settings', css_class='btn btn-dark'),
+                Submit('submit', 'Create User', css_class='btn btn-dark'),
                 css_class='text-end pt-3'
             )
         )
