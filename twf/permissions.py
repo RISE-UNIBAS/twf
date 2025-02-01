@@ -102,6 +102,24 @@ def get_available_actions(project=None, profile=None, for_group=None):
             "description": "Setup the project permissions.",
             "default_for": []
         },
+        "delete_all_documents": {
+            "group": "project",
+            "label": "Delete all documents",
+            "description": "Delete all documents in the project.",
+            "default_for": ["manager"]
+        },
+        "delete_all_tags": {
+            "group": "project",
+            "label": "Delete all tags",
+            "description": "Delete all tags in the project.",
+            "default_for": ["manager"]
+        },
+        "delete_all_collections": {
+            "group": "project",
+            "label": "Delete all collections",
+            "description": "Delete all collections in the project.",
+            "default_for": ["manager"]
+        },
         ###############################
         # Document actions
         "document_task_batch_action": {

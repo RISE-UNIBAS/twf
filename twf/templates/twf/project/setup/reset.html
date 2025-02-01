@@ -94,12 +94,10 @@
               Collections can no longer be edited.</p>
           </div>
           <div class="col-4 text-end">
-            <button 
-              type="submit" 
-              name="action" 
-              value="remove_documents" 
-              class="btn btn-danger show-confirm-danger-modal" 
-              data-message="Are you sure you want to remove all documents?">
+            <button
+              class="btn btn-danger show-danger-modal"
+              data-message="Are you sure you want to remove all documents?"
+              data-redirect-url="{% url 'twf:reset_remove_all_documents' %}">
               Remove Documents
             </button>
           </div>
@@ -111,12 +109,10 @@
               <p><strong>Delete all tags:</strong> This deletes all tags. They can be re-extracted from Transkribus document data. </p>
           </div>
           <div class="col-4 text-end">
-            <button 
-              type="submit" 
-              name="action" 
-              value="remove_all_tags" 
-              class="btn btn-danger show-confirm-danger-modal" 
-              data-message="Are you sure you want to delete all tags?">
+            <button
+              class="btn btn-danger show-danger-modal"
+              data-message="Are you sure you want to delete all tags?"
+              data-redirect-url="{% url 'twf:reset_remove_all_tags' %}">
               Delete All Tags
             </button>
           </div>
@@ -128,12 +124,10 @@
               <p><strong>Delete all collections:</strong> This deletes all collections in the project.</p>
           </div>
           <div class="col-4 text-end">
-            <button 
-              type="submit" 
-              name="action" 
-              value="remove_all_collections" 
-              class="btn btn-danger show-confirm-danger-modal" 
-              data-message="Are you sure you want to delete all collections?">
+            <button
+              class="btn btn-danger show-danger-modal"
+              data-message="Are you sure you want to delete all collections?"
+              data-redirect-url="{% url 'twf:reset_remove_all_collections' %}">
               Delete All Collections
             </button>
           </div>

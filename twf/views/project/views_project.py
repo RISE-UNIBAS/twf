@@ -1,5 +1,6 @@
 """Views for the project section."""
 from datetime import timedelta
+from platform import uname
 from statistics import median
 
 from django.contrib import messages
@@ -309,31 +310,19 @@ class TWFProjectOverviewView(TWFProjectView):
         project = self.get_project()
         context['doc_stats'] = get_document_statistics(project)
 
-        pagetag_count = PageTag.objects.filter(page__document__project=project).count()
+        transkribus_creds = self.get_project().get_credentials('transkribus')
+        username = None
+        password = None
+        if transkribus_creds:
+            username = transkribus_creds['username']
+            password = transkribus_creds['password']
 
-        unique_pagetag_count = (PageTag.objects.filter(page__document__project=project)
-        .aggregate(unique_variations=Count('variation', distinct=True))['unique_variations'])
-        average_pagetags_per_document = (Document.objects.annotate(num_pagetags=Count('pages__tags'))
-        .filter(project=project)
-        .aggregate(average_pagetags=Avg('num_pagetags'))['average_pagetags'])
-        pagetags_per_document_list = (Document.objects.annotate(num_pagetags=Count('pages__tags'))
-                                      .filter(project=project).values_list('num_pagetags', flat=True))
-        median_pagetags_per_document = median(pagetags_per_document_list) if pagetags_per_document_list else 0
-        total_pagetags = PageTag.objects.filter(page__document__project=project).count()
-        pagetags_with_dictionaryentry = PageTag.objects.filter(Q(page__document__project=project) &
-                                                               (Q(dictionary_entry__isnull=False) |
-                                                                Q(date_variation_entry__isnull=False))).count()
-        percentage_with_dictionaryentry = (pagetags_with_dictionaryentry / total_pagetags * 100) \
-            if total_pagetags > 0 else 0
-
-        context['stats'] = {
-            'pagetag_count': pagetag_count,
-            'unique_pagetag_count': unique_pagetag_count,
-            'average_pagetags_per_document': average_pagetags_per_document,
-            'median_pagetags_per_document': median_pagetags_per_document,
-            'total_pagetags': total_pagetags,
-            'pagetags_with_dictionaryentry': pagetags_with_dictionaryentry,
-            'percentage_with_dictionaryentry': percentage_with_dictionaryentry
+        context['steps'] = {
+            'transkribus_credentials': username is not None and password is not None,
+            'transkribus_export_present': project.downloaded_zip_file and bool(project.downloaded_zip_file.name.strip()),
+            'transkribus_export_extracted': project.documents.all().count() > 0,
+            'transkribus_tags_extracted': PageTag.objects.filter(page__document__project=project).count() > 0,
+            'dictionaries_connected': project.selected_dictionaries.all().count() > 0,
         }
         return context
 

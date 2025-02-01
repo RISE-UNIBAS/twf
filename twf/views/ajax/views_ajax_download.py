@@ -12,7 +12,7 @@ from django.http import JsonResponse, StreamingHttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 from twf.models import Project
-
+from twf.tasks.instant_tasks import save_instant_task_transkribus_export_download
 
 PROGRESS_JOB_NAME = "extract-progress"
 DETAIL_JOB_NAME = "extract-progress-detail"
@@ -77,6 +77,8 @@ def ajax_transkribus_download_export(request):
             set_progress(100, project_id, PROGRESS_JOB_NAME)
             project.downloaded_at = datetime.datetime.now()
             project.save(current_user=request.user)
+            save_instant_task_transkribus_export_download(project, request.user, "The export file was downloaded.")
+
     threading.Thread(target=download_thread).start()
     return JsonResponse({'status': 'Download started'})
 

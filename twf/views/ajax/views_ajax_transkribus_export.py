@@ -6,6 +6,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 
 from twf.models import Project
+from twf.tasks.instant_tasks import save_instant_task_request_transkribus_export
 from twf.utils.transkribus_collector import get_session_id, start_export, get_export_status
 
 
@@ -51,6 +52,9 @@ def ajax_transkribus_request_export(request):
 
     project.transkribus_job_id = export_job_id
     project.save(current_user=request.user)
+
+    save_instant_task_request_transkribus_export(project, request.user, f"Export job ID: {export_job_id}")
+
     return JsonResponse({'status': 'success', 'job_id': export_job_id}, status=200)
 
 

@@ -13,6 +13,7 @@ from twf.forms.user_forms import LoginForm, ChangePasswordForm, UserProfileForm,
 from twf.models import Project, Document, Page, Dictionary, DictionaryEntry, PageTag, Variation, DateVariation, \
     UserProfile, User
 from twf.permissions import get_available_actions
+from twf.tasks.instant_tasks import save_instant_task_create_project
 from twf.utils.mail_utils import send_welcome_email, send_reset_email
 from twf.views.views_base import TWFView
 
@@ -245,6 +246,9 @@ class TWFCreateProjectView(LoginRequiredMixin, FormView, TWFHomeView):
     success_url = reverse_lazy('twf:home')
 
     def form_valid(self, form):
+        """Save the project and add the user as the owner. Add the selected members to the project.
+        Add default permissions to the project owner and members.
+        """
         project = form.save(commit=False)
         project.save(current_user=self.request.user)
         members = form.cleaned_data['members']
@@ -260,6 +264,8 @@ class TWFCreateProjectView(LoginRequiredMixin, FormView, TWFHomeView):
         for perm in all_permissions.keys():
             project.owner.add_permission(perm, project)
         project.owner.save()
+
+        save_instant_task_create_project(project, self.request.user)
 
         messages.success(self.request, 'Project created successfully.')
         return redirect(reverse('twf:project_do_select', args=[project.id]))

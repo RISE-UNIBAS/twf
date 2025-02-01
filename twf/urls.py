@@ -23,6 +23,7 @@ from twf.views.documents.views_documents_ai import TWFDocumentOpenAIBatchView, \
     TWFDocumentGeminiBatchView, TWFDocumentClaudeBatchView
 from twf.views.home.views_home import TWFHomeView, TWFHomeLoginView, TWFHomePasswordChangeView, TWFHomeUserOverView, \
     TWFSelectProjectView, TWFHomeUserProfileView, TWFCreateProjectView, TWFManageProjectsView, TWFManageUsersView
+from twf.views.project.views_crud import delete_all_documents, delete_all_tags, delete_all_collections
 from twf.views.project.views_project_setup import TWFProjectSetupView
 from twf.views.ajax.views_ajax_download import ajax_transkribus_download_export, download_progress_view
 from twf.views.collections.views_collection import TWFCollectionsReviewView, TWFCollectionsOpenaiBatchView, \
@@ -90,6 +91,9 @@ urlpatterns = [
          name='project_test_export'),
     path('project/setup/copy/', TWFProjectCopyView.as_view(), name='project_copy'),
     path('project/setup/reset/', TWFProjectResetView.as_view(), name='project_reset'),
+    path('project/setup/reset/delete/documents/', delete_all_documents, name='reset_remove_all_documents'),
+    path('project/setup/reset/delete/tags/', delete_all_tags, name='reset_remove_all_tags'),
+    path('project/setup/reset/delete/collections/', delete_all_collections, name='reset_remove_all_collections'),
 
     path('project/task/monitor/', TWFProjectTaskMonitorView.as_view(), name='project_task_monitor'),
     path('project/prompts/', TWFProjectPromptsView.as_view(), name='project_prompts'),

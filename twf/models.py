@@ -486,7 +486,8 @@ class Page(TimeStampedModel):
     metadata = models.JSONField(default=dict, blank=True)
     """Metadata for the page."""
 
-    xml_file = models.FileField(upload_to=page_directory_path, null=False, blank=False)
+    xml_file = models.FileField(upload_to=page_directory_path, null=False, blank=False,
+                                max_length=255)
     """The XML file of the page."""
 
     tk_page_id = models.CharField(max_length=30)

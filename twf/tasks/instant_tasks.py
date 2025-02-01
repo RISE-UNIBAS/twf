@@ -17,6 +17,7 @@ def generated_task_id():
         if security_break > 100:
             return None
 
+
 def save_instant_task(project, user, title, description, text):
     """Save an instant task to the database."""
     task = Task(project=project,
@@ -29,11 +30,54 @@ def save_instant_task(project, user, title, description, text):
                 task_id=generated_task_id())
     task.save()
 
+
 def save_instant_task_add_dictionary(project, user, text):
     """Save an instant task to the database."""
     title = "Add Dictionary"
     description = "Add a new dictionary to the project."
     save_instant_task(project, user, title, description, text)
+
+
+def save_instant_task_create_project(project, user):
+    """Save an instant task to the database."""
+    title = "Create Project"
+    description = "Create a project"
+    save_instant_task(project, user, title, description, "The project was created.")
+
+
+def save_instant_task_request_transkribus_export(project, user, text):
+    """Save an instant task to the database."""
+    title = "Request Transkribus Export"
+    description = "Request an export of the project data from Transkribus."
+    save_instant_task(project, user, title, description, text)
+
+
+def save_instant_task_transkribus_export_download(project, user, text):
+    """Save an instant task to the database."""
+    title = "Download Transkribus Export"
+    description = "Download the exported data from Transkribus."
+    save_instant_task(project, user, title, description, text)
+
+
+def save_instant_task_delete_all_documents(project, user):
+    """Save an instant task to the database."""
+    title = "Delete All Documents"
+    description = "Delete all documents in the project."
+    save_instant_task(project, user, title, description, "All documents were deleted.")
+
+
+def save_instant_task_delete_all_tags(project, user):
+    """Save an instant task to the database."""
+    title = "Delete All Tags"
+    description = "Delete all tags in the project."
+    save_instant_task(project, user, title, description, "All tags were deleted.")
+
+
+def save_instant_task_delete_all_collections(project, user):
+    """Save an instant task to the database."""
+    title = "Delete All Collections"
+    description = "Delete all collections in the project."
+    save_instant_task(project, user, title, description, "All collections were deleted.")
 
 
 def start_related_task(project, user, title, description, text):

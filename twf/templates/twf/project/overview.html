@@ -5,9 +5,48 @@
         {% include 'twf/project/info_card_project.html' %}
      </div>
 
-    <div class="border rounded bg-light mt-0 p-3">
+    <div class="border rounded bg-light mt-0 mb-3 p-3">
         <h2 class="display-6">Next Steps</h2>
-
+        {% if not steps.transkribus_credentials %}
+            <div class="alert alert-warning" role="alert">
+                <h4 class="alert-heading">Transkribus Credentials</h4>
+                <p class="lead">You have not yet entered your Transkribus credentials. You will need these to access the Transkribus API.</p>
+                <hr>
+                <p class="mb-0">You can enter your credentials on the <a href="{% url 'twf:project_settings_credentials'%}">credential settings page</a>.</p>
+            </div>
+        {% endif %}
+        {% if not steps.transkribus_export_present %}
+            <div class="alert alert-warning" role="alert">
+                <h4 class="alert-heading">Transkribus Export</h4>
+                <p class="lead">You have not yet exported any data from Transkribus.</p>
+                <hr>
+                <p class="mb-0">You can export data from Transkribus on the <a href="{% url 'twf:project_tk_export'%}">request export page</a>.</p>
+            </div>
+        {% endif %}
+        {% if not steps.transkribus_export_extracted %}
+            <div class="alert alert-warning" role="alert">
+                <h4 class="alert-heading">Transkribus Export Extraction</h4>
+                <p class="lead">You have not yet extracted any data from the Transkribus export.</p>
+                <hr>
+                <p class="mb-0">You can extract data from the Transkribus export on the <a href="{% url 'twf:project_tk_structure'%}">extract data page</a>.</p>
+            </div>
+        {% endif %}
+        {% if not steps.transkribus_tags_extracted %}
+            <div class="alert alert-warning" role="alert">
+                <h4 class="alert-heading">Transkribus Tags Extraction</h4>
+                <p class="lead">You have not yet extracted any tags from the Transkribus export.</p>
+                <hr>
+                <p class="mb-0">You can extract tags from the Transkribus export on the <a href="{% url 'twf:tags_extract'%}">extract tags page</a>.</p>
+            </div>
+        {% endif %}
+        {% if not steps.dictionaries_connected %}
+            <div class="alert alert-warning" role="alert">
+                <h4 class="alert-heading">Dictionaries</h4>
+                <p class="lead">You have not yet connected any dictionaries to this project.</p>
+                <hr>
+                <p class="mb-0">You can connect dictionaries to this project on the <a href="{% url 'twf:dictionaries_add'%}">add dictionaries page</a>.</p>
+            </div>
+        {% endif %}
     </div>
 
     <div class="border rounded bg-light mt-0 p-3">
