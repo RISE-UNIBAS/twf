@@ -8,7 +8,7 @@ from django.utils.crypto import get_random_string
 from django.utils.timezone import now, timedelta
 from django.views.generic import FormView
 
-from twf.forms.project_forms import CreateProjectForm
+from twf.forms.project.project_forms import CreateProjectForm
 from twf.forms.user_forms import LoginForm, ChangePasswordForm, UserProfileForm, CreateUserForm
 from twf.models import Project, Document, Page, Dictionary, DictionaryEntry, PageTag, Variation, DateVariation, \
     UserProfile, User

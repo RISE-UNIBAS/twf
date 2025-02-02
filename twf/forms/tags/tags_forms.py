@@ -36,7 +36,7 @@ class DateNormalizationForm(forms.Form):
     date_tag = forms.IntegerField(widget=forms.HiddenInput())
 
     def __init__(self, *args, **kwargs):
-        project = kwargs.pop('project', None)
+        project = kwargs.pop('../project', None)
         date_tag = kwargs.pop('date_tag', None)
         super().__init__(*args, **kwargs)
 

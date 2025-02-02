@@ -8,6 +8,7 @@ $(document).ready(function () {
 
   let taskFunction = null; // Function to execute on confirmation
   let redirectUrl = null; // URL to redirect after confirmation
+  let startTaskUrl = null; // URL to start a task
 
   $('.show-confirm-modal').on('click', function (event) {
     event.preventDefault(); // Prevent default button behavior
@@ -19,6 +20,7 @@ $(document).ready(function () {
     // Prepare the action based on button's data attributes
     const button = $(this);
     redirectUrl = button.data('redirect-url'); // Get redirect URL
+    startTaskUrl = button.data('start-url'); // Get start task URL
 
     // If a form exists, prepare to handle it
     const form = button.closest("form"); // Automatically find the closest form
@@ -31,6 +33,16 @@ $(document).ready(function () {
       // If no form is specified but a redirect URL is present
       taskFunction = () => {
         window.location.href = redirectUrl; // Redirect to the specified URL
+      };
+    }
+    if (startTaskUrl) {
+      const progressUrlBase = button.data('progress-url-base');
+      const progressBarId = button.data('progress-bar-id');
+      const logTextareaId = button.data('log-textarea-id');
+
+      taskFunction = () => {
+        // Call the function to start the task
+        startTask(startTaskUrl, progressUrlBase, progressBarId, logTextareaId, {});
       };
     }
 
@@ -48,6 +60,7 @@ $(document).ready(function () {
     // Prepare the action based on button's data attributes
     const button = $(this);
     redirectUrl = button.data('redirect-url'); // Get redirect URL
+    startTaskUrl = button.data('start-url'); // Get start task URL
 
     // If a form exists, prepare to handle it
     const form = button.closest("form"); // Automatically find the closest form
@@ -60,6 +73,16 @@ $(document).ready(function () {
       // If no form is specified but a redirect URL is present
       taskFunction = () => {
         window.location.href = redirectUrl; // Redirect to the specified URL
+      };
+    }
+    if(startTaskUrl) {
+      const progressUrlBase = button.data('progress-url-base');
+      const progressBarId = button.data('progress-bar-id');
+      const logTextareaId = button.data('log-textarea-id');
+
+      taskFunction = () => {
+        // Call the function to start the task
+        startTask(startTaskUrl, progressUrlBase, progressBarId, logTextareaId, {});
       };
     }
 

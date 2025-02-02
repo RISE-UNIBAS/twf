@@ -8,7 +8,7 @@ from django.http import JsonResponse, HttpResponse
 from django.views.generic import FormView
 
 from twf.forms.dictionaries.dictionary_forms import DictionaryImportForm
-from twf.forms.project_forms import ExportSettingsForm
+from twf.forms.project.project_forms import ExportSettingsForm
 from twf.utils.create_export_utils import create_data, flatten_dict_keys
 from twf.utils.export_utils import get_dictionary_json_data, get_dictionary_csv_data, get_tags_json_data, \
     get_tags_csv_data

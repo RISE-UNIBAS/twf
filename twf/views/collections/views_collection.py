@@ -457,9 +457,6 @@ class TWFCollectionsOpenaiBatchView(FormView, TWFCollectionsView):
 
         kwargs['data-start-url'] = reverse_lazy('twf:task_collection_batch_openai')
         kwargs['data-message'] = "Are you sure you want to start the openai task?"
-        kwargs['data-progress-url-base'] = "/celery/status/"
-        kwargs['data-progress-bar-id'] = "#taskProgressBar"
-        kwargs['data-log-textarea-id'] = "#id_progress_details"
 
         return kwargs
 
@@ -477,8 +474,5 @@ class TWFCollectionsOpenaiRequestView(FormView, TWFCollectionsView):
 
         kwargs['data-start-url'] = reverse_lazy('twf:task_collection_request_openai')
         kwargs['data-message'] = "Are you sure you want to start the openai task?"
-        kwargs['data-progress-url-base'] = "/celery/status/"
-        kwargs['data-progress-bar-id'] = "#taskProgressBar"
-        kwargs['data-log-textarea-id'] = "#id_progress_details"
 
         return kwargs

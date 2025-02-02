@@ -1,12 +1,9 @@
 """Views for the project section."""
 from datetime import timedelta
-from platform import uname
-from statistics import median
 
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db import connection
-from django.db.models import Count, Avg, Q
 from django.http import HttpResponseRedirect
 from django.shortcuts import redirect, render
 from django.urls import reverse, reverse_lazy
@@ -14,9 +11,9 @@ from django.utils.timezone import now
 from django.views.generic import FormView
 
 from twf.forms.dynamic_forms import DynamicForm
-from twf.forms.project_forms import QueryDatabaseForm, GeneralSettingsForm, CredentialsForm, \
+from twf.forms.project.project_forms import QueryDatabaseForm, GeneralSettingsForm, CredentialsForm, \
     TaskSettingsForm, ExportSettingsForm, TaskFilterForm, PromptFilterForm
-from twf.models import Document, Page, PageTag, Project
+from twf.models import Page, PageTag, Project
 from twf.permissions import check_permission, get_actions_grouped_by_category, get_available_actions
 from twf.utils.project_statistics import get_document_statistics
 from twf.views.views_base import TWFView

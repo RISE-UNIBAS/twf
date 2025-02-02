@@ -1,6 +1,7 @@
 from django.contrib import messages
 from django.shortcuts import redirect
 
+from twf.models import PageTag
 from twf.permissions import check_permission
 from twf.tasks.instant_tasks import save_instant_task_delete_all_documents, save_instant_task_delete_all_tags, \
     save_instant_task_delete_all_collections
@@ -30,7 +31,7 @@ def delete_all_tags(request):
         messages.error(request, "You do not have permission to delete all tags.")
         return redirect('twf:project_reset')
 
-    project.tags.all().delete()
+    PageTag.objects.filter(page__document__project=project).select_related("page", "page__document").delete()
 
     save_instant_task_delete_all_tags(project, request.user)
     messages.success(request, "All tags deleted.")

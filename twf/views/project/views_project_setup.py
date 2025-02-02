@@ -1,4 +1,8 @@
 """Views for the project setup."""
+from django.urls import reverse_lazy
+from django.views.generic import FormView
+
+from twf.forms.project.batch_forms import DocumentExtractionBatchForm
 from twf.views.project.views_project import TWFProjectView
 
 
@@ -15,6 +19,23 @@ class TWFProjectSetupView(TWFProjectView):
             context['transkribus_password'] = transkribus_creds['password']
 
         return context
+
+
+class TWFProjectTranskribusExtractView(FormView, TWFProjectView):
+    """View for the project setup."""
+    template_name = 'twf/project/setup/setup_structure.html'
+    page_title = 'Project TK Structure'
+    form_class = DocumentExtractionBatchForm
+    success_url = reverse_lazy('twf:project_tk_structure')
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['project'] = self.get_project()
+
+        kwargs['data-start-url'] = reverse_lazy('twf:task_transkribus_extract_export')
+        kwargs['data-message'] = "Are you sure you want to extract your Transkribus export?"
+
+        return kwargs
 
 
 class TWFProjectExportTestView(TWFProjectView):

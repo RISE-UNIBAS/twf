@@ -457,7 +457,7 @@ class AIQueryDatabaseForm(forms.Form):
                                     required=True)
 
     def __init__(self, *args, **kwargs):
-        project = kwargs.pop('project')
+        project = kwargs.pop('')
         super().__init__(*args, **kwargs)
 
         if project:
@@ -491,7 +491,7 @@ class ProjectOpenAIForm(forms.Form):
     """Form for querying the OpenAI API with a question and documents."""
 
     def __init__(self, *args, **kwargs):
-        project = kwargs.pop('project')
+        project = kwargs.pop('')
         super().__init__(*args, **kwargs)
 
 

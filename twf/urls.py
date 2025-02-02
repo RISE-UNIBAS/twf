@@ -24,7 +24,7 @@ from twf.views.documents.views_documents_ai import TWFDocumentOpenAIBatchView, \
 from twf.views.home.views_home import TWFHomeView, TWFHomeLoginView, TWFHomePasswordChangeView, TWFHomeUserOverView, \
     TWFSelectProjectView, TWFHomeUserProfileView, TWFCreateProjectView, TWFManageProjectsView, TWFManageUsersView
 from twf.views.project.views_crud import delete_all_documents, delete_all_tags, delete_all_collections
-from twf.views.project.views_project_setup import TWFProjectSetupView
+from twf.views.project.views_project_setup import TWFProjectSetupView, TWFProjectTranskribusExtractView
 from twf.views.ajax.views_ajax_download import ajax_transkribus_download_export, download_progress_view
 from twf.views.collections.views_collection import TWFCollectionsReviewView, TWFCollectionsOpenaiBatchView, \
     TWFCollectionsOpenaiRequestView, TWFCollectionOverviewView, TWFCollectionsCreateView, TWFCollectionsDetailView, \
@@ -83,9 +83,7 @@ urlpatterns = [
     path('project/setup/tk/export/',
          TWFProjectSetupView.as_view(template_name='twf/project/setup/setup_export.html',
                                      page_title='Project TK Export'), name='project_tk_export'),
-    path('project/setup/tk/structure/', TWFProjectSetupView.as_view(
-        template_name='twf/project/setup/setup_structure.html',
-        page_title='Project TK Structure'), name='project_tk_structure'),
+    path('project/setup/tk/structure/', TWFProjectTranskribusExtractView.as_view(), name='project_tk_structure'),
     path('project/setup/tk/test/', TWFProjectSetupView.as_view(template_name='twf/project/setup/test_export.html',
                                                                page_title='Test Transkribus Export'),
          name='project_test_export'),
