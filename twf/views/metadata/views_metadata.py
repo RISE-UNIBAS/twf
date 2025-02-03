@@ -335,8 +335,11 @@ class TWFMetadataReviewDocumentsView(FormView, TWFMetadataView):
             metadata = next_page.metadata
 
         kwargs = super().get_form_kwargs()
-        kwargs['json_config'] = (self.get_project().get_task_configuration('metadata_review').
-                                 get('document_metadata_review', {}))
+        metadata_review_config = self.get_project().get_task_configuration('metadata_review', return_json=True)
+
+        doc_config = metadata_review_config.get('document_metadata_review', "{}")
+        doc_config = json.loads(doc_config)
+        kwargs['json_config'] = doc_config
         kwargs['json_data'] = metadata
         return kwargs
 

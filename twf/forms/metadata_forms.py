@@ -3,10 +3,11 @@ from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Row, Column, Layout, Div, Submit, HTML, Button
 from django import forms
 
+from twf.forms.base_batch_forms import BaseBatchForm
 from twf.models import Dictionary
 
 
-class LoadMetadataForm(forms.Form):
+class LoadMetadataForm(BaseBatchForm):
     """Form for loading metadata from a CSV file."""
 
     data_target_type = forms.ChoiceField(
@@ -36,11 +37,6 @@ class LoadMetadataForm(forms.Form):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-
-        self.helper = FormHelper()
-        self.helper.method = 'post'
-
-        self.helper.layout = Layout()
 
         self.helper.layout.append(
             Row(
