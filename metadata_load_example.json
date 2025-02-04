@@ -1,8 +1,22 @@
 {
   	"2515210": {
-
+      "attachments": [
+        "A sticky note with \"Korrespondenz\" written on it."
+      ],
+      "stapled": false
     },
-    "2515343": {},
-    "2515211": {},
-    "invalid": {}
+    "2515343": {
+        "attachments": [],
+        "stapled": true
+    },
+    "2515211": {
+        "attachments": [
+            "A postcard with an unknown landscape without any."
+        ]
+    },
+    "invalid": {
+        "attachments": [
+            "This is an invalid item for testing purposes."
+        ]
+    }
 }

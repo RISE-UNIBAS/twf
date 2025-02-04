@@ -7,26 +7,33 @@ $(document).ready(function () {
   $('.show-confirm-modal, .show-danger-modal').on('click', function (event) {
     event.preventDefault(); // Prevent default button behavior
 
-    // Identify which modal to show
-    const isDanger = $(this).hasClass('show-danger-modal');
+    const button = $(this);
+    const isDanger = button.hasClass('show-danger-modal');
     const modal = isDanger ? dangerModal : normalModal;
     const modalBody = isDanger ? '#confirmDangerModal .modal-body' : '#confirmModal .modal-body';
     const confirmButton = isDanger ? $('#confirmDangerActionButton') : $('#confirmActionButton');
 
+    // Automatically find the closest form
+    const form = button.closest("form");
+
+    // **Validate form before showing modal**
+    if (form.length > 0) {
+      if (!form[0].checkValidity()) {
+        form[0].reportValidity(); // Show native validation messages
+        return; // Stop here, don't show modal
+      }
+    }
+
     // Set modal message dynamically
-    const message = $(this).data('message') || 'Are you sure you want to proceed?';
+    const message = button.data('message') || 'Are you sure you want to proceed?';
     $(modalBody).html(message);
 
-    // Prepare the action based on button's data attributes
-    const button = $(this);
     let taskFunction = null;
     const redirectUrl = button.data('redirect-url');
     const startTaskUrl = button.data('start-url');
 
-    // Automatically find the closest form
-    const form = button.closest("form");
     if (form.length > 0) {
-      taskFunction = () => form.submit(); // Submit the correct form
+      taskFunction = () => form.submit(); // Submit the form
     }
     if (redirectUrl) {
       taskFunction = () => (window.location.href = redirectUrl); // Redirect to the specified URL
@@ -36,12 +43,7 @@ $(document).ready(function () {
       const progressBarId = button.data('progress-bar-id');
       const logTextareaId = button.data('log-textarea-id');
 
-      // Extract form data and pass it to startTask
-      let formData = {};
-      if (form.length > 0) {
-        const formEntries = new FormData(form[0]).entries();
-        formData = Object.fromEntries(formEntries);
-      }
+      let formData = new FormData(form[0]); // Keep FormData intact
 
       taskFunction = () => {
         console.log("Starting Celery task at:", startTaskUrl, "with data:", formData);

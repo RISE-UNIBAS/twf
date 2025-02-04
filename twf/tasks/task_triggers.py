@@ -7,6 +7,7 @@ from twf.tasks.dictionary_tasks import search_gnd_entries, search_geonames_entri
     search_openai_entries, search_gnd_entry, search_geonames_entry, search_wikidata_entry, search_openai_entry
 from twf.tasks.metadata_tasks import load_sheets_metadata, load_json_metadata
 from twf.tasks.tags_tasks import create_page_tags
+from twf.tasks.project_tasks import copy_project
 from twf.views.views_base import TWFView
 
 
@@ -194,13 +195,11 @@ def start_json_metadata(request):
     """Start the metadata loading from JSON as a Celery task."""
     project = TWFView.s_get_project(request)
     user_id = request.user.id
-    target_type = request.GET.get('target_type')
-    data_file = request.GET.get('data_file')
-    match_to = request.GET.get('match_to')
 
-    print("target_type: ", target_type)
-    print("data_file: ", data_file)
-    print("match_to: ", match_to)
+    data_target_type = request.POST.get('data_target_type')
+    data_file = request.FILES.get('data_file')
+    json_data_key = request.POST.get('json_data_key')
+    match_to_field = request.POST.get('match_to_field')
 
     # Trigger the task
     task = load_json_metadata.delay(project.id, user_id)
@@ -232,3 +231,13 @@ def start_openai_collection_batch(request):
 
 def start_openai_collection_request(request):
     pass
+
+def start_copy_project(request):
+    project = TWFView.s_get_project(request)
+    user_id = request.user.id
+
+    new_project_name = request.GET.get('new_project_name')
+
+    # Trigger the task
+    task = copy_project.delay(project.id, user_id, new_project_name)
+    return JsonResponse({'status': 'success', 'task_id': task.id})

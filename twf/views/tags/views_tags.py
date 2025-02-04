@@ -44,14 +44,17 @@ class TWFTagsView(LoginRequiredMixin, TWFView):
             {
                 'name': 'Tag Extraction',
                 'options': [
-                    {'url': reverse('twf:tags_extract'), 'value': 'Extract Tags'},
+                    {'url': reverse('twf:tags_extract'),
+                     'value': 'Extract Tags', 'permission': 'tags_extract'},
                 ]
             },
             {
                 'name': 'Tag Workflows',
                 'options': [
-                    {'url': reverse('twf:tags_group'), 'value': 'Grouping Wizard'},
-                    {'url': reverse('twf:tags_dates'), 'value': 'Date Normalization'},
+                    {'url': reverse('twf:tags_group'),
+                     'value': 'Grouping Wizard', 'permission': 'tag_task_group'},
+                    {'url': reverse('twf:tags_dates'),
+                     'value': 'Date Normalization', 'permission': 'tag_task_date_normalization'},
                 ]
             },
             {

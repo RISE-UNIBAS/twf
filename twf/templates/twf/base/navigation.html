@@ -1,9 +1,13 @@
 {% load static %}
 <nav class="navbar navbar-expand-lg navbar-light bg-light p-2">
-    <a class="navbar-brand" href="{% url 'twf:home' %}"><img class="img-fluid" style="height: 5vh;" alt="" src="{% static 'twf/images/logo.png' %}" /></a>
+    <a class="navbar-brand" href="{% url 'twf:home' %}">
+        <img class="img-fluid" style="height: 5vh;" alt="" src="{% static 'twf/images/logo.png' %}" />
+    </a>
+
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
     </button>
+
     <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav">
             {% for item in navigation.items %}
@@ -19,8 +23,10 @@
             {% endfor %}
         </ul>
 
-        <button id="helpButton" class="help-button" aria-label="Help">
-                                <i class="fas fa-question-circle"></i>
-                            </button>
+        <div class="ms-auto">
+            <button id="helpButton" class="btn btn-outline-dark help-button" aria-label="Help">
+                <i class="fas fa-question-circle"></i>
+            </button>
+        </div>
     </div>
 </nav>

@@ -240,19 +240,25 @@ tr[data-bs-toggle="collapse"]:hover {
     background-color: #f1f1f1;
 }
 
-/********** HELP BUTTON **************/
+/********** HELP OVERLAY STYLING **************/
 
 /* Help overlay */
 .help-overlay {
     position: fixed;
     top: 0;
-    right: -450px; /* Initially hidden */
-    width: 400px;
+    right: -550px; /* Initially hidden */
+    width: 500px;
     height: 100%;
-    background-color: #f8f9fa;
     box-shadow: -3px 0 10px rgba(0, 0, 0, 0.2);
     transition: right 0.3s ease-in-out;
     z-index: 999;
+    font-family: "Arial", sans-serif;
+    background-color: #eaeff5;
+}
+
+.helpHeader {
+    display: flex;
+    align-items: center;
 }
 
 /* Help overlay content */
@@ -262,21 +268,52 @@ tr[data-bs-toggle="collapse"]:hover {
     overflow-y: auto;
 }
 
+.help-content h1 {
+    font-size: 1.5rem;
+}
+
+/* Style help links as badges with icons */
+.help-link {
+    display: inline-flex;
+    align-items: center;
+    background-color: #343a40;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    text-decoration: none;
+    margin-right: 5px;
+}
+
+.help-link i {
+    margin-right: 4px;
+}
+
+/* Hover effect */
+.help-link:hover {
+    background-color: #1d2124;
+    color: white;
+    text-decoration: none;
+}
+
 /* Close button */
 .close-help {
-    background: none;
+    width: 35px;
+    height: 35px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #dc3545; /* Bootstrap danger color */
     border: none;
-    font-size: 24px;
+    color: white;
+    border-radius: 50%; /* Make it round */
+    font-size: 18px;
     cursor: pointer;
-    position: absolute;
-    top: 10px;
-    left: 10px; /* Move it to the left side */
-    color: #333;
-    z-index: 1100; /* Ensure it's above other elements */
+    margin-right: 10px; /* Space between button and links */
 }
 
 .close-help:hover {
-    color: red;
+     background-color: #c82333; /* Darker red on hover */
 }
 
 /* Show overlay */

@@ -1,13 +1,15 @@
 """This module contains Celery tasks for loading metadata from Google Sheets."""
+import json
+
 from celery import shared_task
 
 from twf.clients.google_sheets_client import GoogleSheetsClient
-from twf.models import Project, Document, User
+from twf.models import Project, Document, User, Page
 from twf.tasks.task_base import start_task, fail_task, update_task, end_task
 
 
 @shared_task(bind=True)
-def load_json_metadata(self, project_id, user_id):
+def load_json_metadata(self, project_id, user_id, data_file, data_target_type, json_data_key, match_to_field):
     """This function loads metadata from a JSON file."""
 
     try:
@@ -24,6 +26,44 @@ def load_json_metadata(self, project_id, user_id):
     except User.DoesNotExist as e:
         fail_task(self, task, f'User with ID {user_id} not found.', e)
         raise ValueError(f'User with ID {user_id} not found.') from e
+
+    # Open uploaded file and read the content as json
+    data = data_file.read()
+    data = json.loads(data)
+
+    # Iterate over the data and save the metadata
+    for item in data:
+        id_value_of_item = item[json_data_key]
+
+        if data_target_type == 'document':
+            try:
+                document = None
+                if match_to_field == 'dbid':
+                    document = Document.objects.get(project=project, id=id_value_of_item)
+                elif match_to_field == 'docid':
+                    document = Document.objects.get(project=project, document_id=id_value_of_item)
+                    print("Found document", document)
+                if document:
+                    document.metadata['import'] = item
+                    document.save(current_user=self.request.user)
+                    print("Saved document", document)
+
+            except Document.DoesNotExist:
+                print(f"Document with {match_to_field} {id_value_of_item} does not exist.")
+
+        elif data_target_type == 'page':
+            try:
+                page = None
+                if match_to_field == 'dbid':
+                    page = Page.objects.get(document__project=project, id=id_value_of_item)
+                elif match_to_field == 'docid':
+                    page = Page.objects.get(document__project=project, dbid=id_value_of_item)
+                if page:
+                    page.metadata['import'] = item
+                    page.save(current_user=self.request.user)
+            except Page.DoesNotExist:
+                print(f"Page with {match_to_field} {id_value_of_item} does not exist.")
+
 
     end_task(self, task, "Finished loading metadata from JSON File.")
 

@@ -27,8 +27,10 @@
         // Send AJAX request to start the task
         $.ajax({
             url: startUrl,
-            method: 'GET',
+            method: 'POST',
             data: data,
+            processData: false,
+            contentType: false,
             success: function(data) {
                 let taskId = data.task_id;
                 pollTaskProgress(taskId, progressUrlBase, progressBarId, logTextareaId);

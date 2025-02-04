@@ -64,19 +64,25 @@ def get_available_actions(project=None, profile=None, for_group=None):
             "label": "Close project",
             "description": mark_safe('Close a project. <span class="text-danger">This will prevent any further '
                                      'actions on the project.</span>'),
-            "default_for": []
+            "default_for": ["manager"]
         },
         "reopen_project": {
             "group": "project",
             "label": "Reopen project",
             "description": mark_safe('Reopen a project. <span class="text-danger">Not implemented yet.</span>'),
-            "default_for": []
+            "default_for": ["manager"]
+        },
+        "copy_project": {
+            "group": "project",
+            "label": "Copy project",
+            "description": "Copy a project.",
+            "default_for": ["manager"]
         },
         "change_project_settings": {
             "group": "project",
             "label": "Change project settings",
             "description": "Change the project settings.",
-            "default_for": []
+            "default_for": ["manager"]
         },
         "change_credential_settings": {
             "group": "project",
@@ -102,6 +108,24 @@ def get_available_actions(project=None, profile=None, for_group=None):
             "description": "Setup the project permissions.",
             "default_for": []
         },
+        "request_transkribus_export": {
+            "group": "project",
+            "label": "Request Transkribus export",
+            "description": "Request a Transkribus export.",
+            "default_for": ["manager"]
+        },
+        "test_transkribus_export": {
+            "group": "project",
+            "label": "Test Transkribus export (NIY)",
+            "description": "Test a Transkribus export.",
+            "default_for": ["manager"]
+        },
+        "extract_transkribus_export": {
+            "group": "project",
+            "label": "Extract Transkribus export",
+            "description": "Extract a Transkribus export.",
+            "default_for": ["manager"]
+        },
         "delete_all_documents": {
             "group": "project",
             "label": "Delete all documents",
@@ -122,10 +146,22 @@ def get_available_actions(project=None, profile=None, for_group=None):
         },
         ###############################
         # Document actions
-        "document_task_batch_action": {
+        "document_batch_workflow_openai": {
             "group": "document",
-            "label": "Document task batch action",
-            "description": "User is allowed to perform a batch task. These are ChatGPT, Gemini and Claude document batches.",
+            "label": "OpenAI Batch Workflow",
+            "description": "User is allowed to start an OpenAI batch workflow.",
+            "default_for": ["manager"]
+        },
+        "document_batch_workflow_gemini": {
+            "group": "document",
+            "label": "Gemini Batch Workflow",
+            "description": "User is allowed to start a Gemini batch workflow.",
+            "default_for": ["manager"]
+        },
+        "document_batch_workflow_claude": {
+            "group": "document",
+            "label": "Claude Batch Workflow",
+            "description": "User is allowed to start a Claude batch workflow.",
             "default_for": ["manager"]
         },
         "document_task_review": {
@@ -140,7 +176,14 @@ def get_available_actions(project=None, profile=None, for_group=None):
             "description": "User is allowed to manually create documents.",
             "default_for": ["manager"]
         },
+        ###############################
         # Tag actions
+        "tags_extract": {
+            "group": "tag",
+            "label": "Extract tags",
+            "description": "User is allowed to extract tags.",
+            "default_for": ["manager"]
+        },
         "tag_task_group": {
             "group": "tag",
             "label": "Group Tags",
@@ -153,6 +196,7 @@ def get_available_actions(project=None, profile=None, for_group=None):
             "description": "User is allowed to normalize dates.",
             "default_for": ["manager", "user"]
         },
+        ###############################
         # Metadata actions
         "metadata_load_json_data": {
             "group": "metadata",
@@ -166,6 +210,93 @@ def get_available_actions(project=None, profile=None, for_group=None):
             "description": "User is allowed to load Google Sheet data.",
             "default_for": ["manager"]
         },
+        "metadata_extract_values": {
+            "group": "metadata",
+            "label": "Extract controlled values",
+            "description": "User is allowed to extract controlled values.",
+            "default_for": ["manager"]
+        },
+        "metadata_review_documents": {
+            "group": "metadata",
+            "label": "Review documents",
+            "description": "User is allowed to review documents.",
+            "default_for": ["manager"]
+        },
+        "metadata_review_pages": {
+            "group": "metadata",
+            "label": "Review pages",
+            "description": "User is allowed to review pages.",
+            "default_for": ["manager"]
+        },
+        ###############################
+        # Dictionary actions
+        "dictionary_add": {
+            "group": "dictionary",
+            "label": "Add dictionary",
+            "description": "User is allowed to add an existing dictionary to a project.",
+            "default_for": ["manager"]
+        },
+        "dictionary_create": {
+            "group": "dictionary",
+            "label": "Create dictionary",
+            "description": "User is allowed to create a dictionary.",
+            "default_for": ["manager"]
+        },
+        "dictionary_batch_workflow_gnd": {
+            "group": "dictionary",
+            "label": "GND Batch Workflow",
+            "description": "User is allowed to start a GND batch workflow.",
+            "default_for": ["manager"]
+        },
+        "dictionary_batch_workflow_wikidata": {
+            "group": "dictionary",
+            "label": "Wikidata Batch Workflow",
+            "description": "User is allowed to start a Wikidata batch workflow.",
+            "default_for": ["manager"]
+        },
+        "dictionary_batch_workflow_openai": {
+            "group": "dictionary",
+            "label": "OpenAI Batch Workflow",
+            "description": "User is allowed to start an OpenAI batch workflow.",
+            "default_for": ["manager"]
+        },
+        "dictionary_batch_workflow_geonames": {
+            "group": "dictionary",
+            "label": "Geonames Batch Workflow",
+            "description": "User is allowed to start a Geonames batch workflow.",
+            "default_for": ["manager"]
+        },
+        "dictionary_manual_workflow_gnd": {
+            "group": "dictionary",
+            "label": "GND Manual Workflow",
+            "description": "User is allowed to start a GND manual workflow.",
+            "default_for": ["manager", "user"]
+        },
+        "dictionary_manual_workflow_wikidata": {
+            "group": "dictionary",
+            "label": "Wikidata Manual Workflow",
+            "description": "User is allowed to start a Wikidata manual workflow.",
+            "default_for": ["manager", "user"]
+        },
+        "dictionary_manual_workflow_openai": {
+            "group": "dictionary",
+            "label": "OpenAI Manual Workflow",
+            "description": "User is allowed to start an OpenAI manual workflow.",
+            "default_for": ["manager", "user"]
+        },
+        "dictionary_manual_workflow_geonames": {
+            "group": "dictionary",
+            "label": "Geonames Manual Workflow",
+            "description": "User is allowed to start a Geonames manual workflow.",
+            "default_for": ["manager", "user"]
+        },
+        "dictionary_merge_entries": {
+            "group": "dictionary",
+            "label": "Merge entries",
+            "description": "User is allowed to merge dictionary entries.",
+            "default_for": ["manager"]
+        },
+        ###############################
         # Collection actions
         "create_collection": {
             "group": "collection",
@@ -221,6 +352,63 @@ def get_available_actions(project=None, profile=None, for_group=None):
             "description": "User is allowed to delete a collection item annotation.",
             "default_for": ["manager", "user"]
         },
+        "collection_openai_batch": {
+            "group": "collection",
+            "label": "OpenAI Batch",
+            "description": "User is allowed to start an OpenAI batch.",
+            "default_for": ["manager"]
+        },
+        "collection_openai_workflow":   {
+            "group": "collection",
+            "label": "OpenAI Workflow",
+            "description": "User is allowed to start an OpenAI workflow.",
+            "default_for": ["manager", "user"]
+        },
+        "collection_item_naming_workflow": {
+            "group": "collection",
+            "label": "OpenAI Workflow",
+            "description": "User is allowed to start an OpenAI workflow.",
+            "default_for": ["manager", "user"]
+        },
+        ###############################
+        # Import Export actions
+        "import_dictionaries": {
+            "group": "import_export",
+            "label": "Import dictionary",
+            "description": "User is allowed to import a dictionary.",
+            "default_for": ["manager"]
+        },
+        "export_documents": {
+            "group": "import_export",
+            "label": "Export documents",
+            "description": "User is allowed to export documents.",
+            "default_for": ["manager"]
+        },
+        "export_collections": {
+            "group": "import_export",
+            "label": "Export collections",
+            "description": "User is allowed to export collections.",
+            "default_for": ["manager"]
+        },
+        "export_dictionaries": {
+            "group": "import_export",
+            "label": "Export dictionaries",
+            "description": "User is allowed to export dictionaries.",
+            "default_for": ["manager"]
+        },
+        "export_tags": {
+            "group": "import_export",
+            "label": "Export tags",
+            "description": "User is allowed to export tags.",
+            "default_for": ["manager"]
+        },
+        "export_project": {
+            "group": "import_export",
+            "label": "Export project",
+            "description": "User is allowed to export a project.",
+            "default_for": ["manager"]
+        },
+        ###############################
         # Task actions
         "cancel_task": {
             "group": "task",
@@ -234,6 +422,7 @@ def get_available_actions(project=None, profile=None, for_group=None):
             "description": "User is allowed to remove a task.",
             "default_for": ["manager"]
         },
+        ###############################
         # Prompt actions
         "delete_prompt": {
             "group": "prompt",

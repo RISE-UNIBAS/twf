@@ -31,33 +31,45 @@ class TWFDictionaryView(LoginRequiredMixin, TWFView):
                 'options': [
                     {'url': reverse('twf:dictionaries_overview'), 'value': 'Overview'},
                     {'url': reverse('twf:dictionaries'), 'value': 'Dictionaries'},
-                    {'url': reverse('twf:dictionaries_add'), 'value': 'Add Dictionaries'},
-                    {"url": reverse('twf:dictionary_create'), "value": "Create New Dictionary"},
+                    {'url': reverse('twf:dictionaries_add'),
+                     'value': 'Add Dictionaries', 'permission': 'dictionary_add'},
+                    {"url": reverse('twf:dictionary_create'),
+                     'value': 'Create New Dictionary', 'permission': 'dictionary_create'},
                 ]
             },
             {
                 'name': 'Automated Workflows',
                 'options': [
-                    {'url': reverse('twf:dictionaries_batch_gnd'), 'value': 'GND'},
-                    {'url': reverse('twf:dictionaries_batch_wikidata'), 'value': 'Wikidata'},
-                    {'url': reverse('twf:dictionaries_batch_geonames'), 'value': 'Geonames'},
-                    {'url': reverse('twf:dictionaries_batch_openai'), 'value': 'Open AI'},
+                    {'url': reverse('twf:dictionaries_batch_gnd'),
+                     'value': 'GND', 'permission': 'dictionary_batch_workflow_gnd'},
+                    {'url': reverse('twf:dictionaries_batch_wikidata'),
+                     'value': 'Wikidata', 'permission': 'dictionary_batch_workflow_wikidata'},
+                    {'url': reverse('twf:dictionaries_batch_geonames'),
+                     'value': 'Geonames', 'permission': 'dictionary_batch_workflow_geonames'},
+                    {'url': reverse('twf:dictionaries_batch_openai'),
+                     'value': 'Open AI', 'permission': 'dictionary_batch_workflow_openai'},
                 ]
             },
             {
                 'name': 'Supervised Workflows',
                 'options': [
-                    {'url': reverse('twf:dictionaries_request_gnd'), 'value': 'GND'},
-                    {'url': reverse('twf:dictionaries_request_wikidata'), 'value': 'Wikidata'},
-                    {'url': reverse('twf:dictionaries_request_geonames'), 'value': 'Geonames'},
-                    {'url': reverse('twf:dictionaries_request_openai'), 'value': 'Open AI'},
+                    {'url': reverse('twf:dictionaries_request_gnd'),
+                     'value': 'GND', 'permission': 'dictionary_manual_workflow_gnd'},
+                    {'url': reverse('twf:dictionaries_request_wikidata'),
+                     'value': 'Wikidata', 'permission': 'dictionary_manual_workflow_wikidata'},
+                    {'url': reverse('twf:dictionaries_request_geonames'),
+                     'value': 'Geonames', 'permission': 'dictionary_manual_workflow_geonames'},
+                    {'url': reverse('twf:dictionaries_request_openai'),
+                     'value': 'Open AI', 'permission': 'dictionary_manual_workflow_openai'},
                 ]
             },
             {
                 'name': 'Manual Workflows',
                 'options': [
-                    {'url': reverse('twf:dictionaries_normalization'), 'value': 'Manual Assignment'},
-                    {'url': reverse('twf:dictionaries_entry_merging'), 'value': 'Merge Entries'},
+                    {'url': reverse('twf:dictionaries_normalization'),
+                     'value': 'Manual Assignment', 'permission': 'dictionary_manual_workflow'},
+                    {'url': reverse('twf:dictionaries_entry_merging'),
+                     'value': 'Merge Entries', 'permission': 'dictionary_merge_entries'},
                 ]
             }
         ]

@@ -6,7 +6,7 @@ from twf.tasks.task_status import task_status_view, task_cancel_view, task_remov
 from twf.tasks.task_triggers import start_tags_creation, start_extraction, start_gnd_batch, start_geonames_batch, \
     start_wikidata_batch, start_openai_batch, start_gnd_request, start_geonames_request, start_wikidata_request, \
     start_openai_request, start_gemini_doc_batch, start_openai_doc_batch, start_claude_doc_batch, start_sheet_metadata, \
-    start_openai_collection_batch, start_openai_collection_request
+    start_openai_collection_batch, start_openai_collection_request, start_json_metadata, start_copy_project
 from twf.views.ajax.views_ajax_field_validation import validate_page_field, validate_document_field
 from twf.views.ajax.views_ajax_transkribus_export import ajax_transkribus_request_export, \
     ajax_transkribus_reset_export, ajax_transkribus_request_export_status
@@ -221,10 +221,12 @@ urlpatterns = [
     path('celery/remove/<int:pk>/', task_remove_view, name='celery_task_remove'),
 
     path('celery/transkribus/extract/', start_extraction, name='task_transkribus_extract_export'),
+    path('celery/project/copy/', start_copy_project, name='task_project_copy'),
 
     path('celery/transkribus/tags/extract/', start_tags_creation, name='task_transkribus_extract_tags'),
 
     path('celery/metadata/sheets/load/', start_sheet_metadata, name='task_metadata_load_sheets'),
+    path('celery/metadata/json/load/', start_json_metadata, name='task_metadata_load_json'),
 
     path('celery/documents/batch/openai/', start_openai_doc_batch, name='task_documents_batch_openai'),
     path('celery/documents/batch/gemini/', start_gemini_doc_batch, name='task_documents_batch_gemini'),

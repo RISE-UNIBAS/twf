@@ -32,16 +32,21 @@ class TWFDocumentView(LoginRequiredMixin, TWFView):
             {
                 'name': 'Document Batch',
                 'options': [
-                    {'url': reverse('twf:documents_batch_openai'), 'value': 'ChatGPT'},
-                    {'url': reverse('twf:documents_batch_gemini'), 'value': 'Gemini'},
-                    {'url': reverse('twf:documents_batch_claude'), 'value': 'Claude'},
+                    {'url': reverse('twf:documents_batch_openai'),
+                     'value': 'ChatGPT', 'permission': 'document_batch_workflow_openai'},
+                    {'url': reverse('twf:documents_batch_gemini'),
+                     'value': 'Gemini', 'permission': 'document_batch_workflow_gemini'},
+                    {'url': reverse('twf:documents_batch_claude'),
+                     'value': 'Claude', 'permission': 'document_batch_workflow_claude'},
                 ]
             },
             {
                 'name': 'Document Workflows',
                 'options': [
-                    {'url': reverse('twf:documents_review'), 'value': 'Review Documents'},
-                    {'url': reverse('twf:documents_create'), 'value': 'Manual Document Creation'},
+                    {'url': reverse('twf:documents_review'),
+                     'value': 'Review Documents', 'permission': 'document_task_review'},
+                    {'url': reverse('twf:documents_create'),
+                     'value': 'Manual Document Creation', 'permission': 'document_create'},
                 ]
             },
 

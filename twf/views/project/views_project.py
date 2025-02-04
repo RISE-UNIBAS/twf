@@ -11,6 +11,7 @@ from django.utils.timezone import now
 from django.views.generic import FormView
 
 from twf.forms.dynamic_forms import DynamicForm
+from twf.forms.project.batch_forms import ProjectCopyBatchForm
 from twf.forms.project.project_forms import QueryDatabaseForm, GeneralSettingsForm, CredentialsForm, \
     TaskSettingsForm, ExportSettingsForm, TaskFilterForm, PromptFilterForm
 from twf.models import Page, PageTag, Project
@@ -37,20 +38,29 @@ class TWFProjectView(LoginRequiredMixin, TWFView):
             {
                 'name': 'Settings',
                 'options': [
-                    {'url': reverse('twf:project_settings_general'), 'value': 'General Settings'},
-                    {'url': reverse('twf:project_settings_credentials'), 'value': 'Credential Settings'},
-                    {'url': reverse('twf:project_settings_tasks'), 'value': 'Task Settings'},
-                    {'url': reverse('twf:project_settings_export'), 'value': 'Export Settings'},
-                    {'url': reverse('twf:user_management'), 'value': 'User Management'},
+                    {'url': reverse('twf:project_settings_general'),
+                     'value': 'General Settings', 'permission': 'change_project_settings'},
+                    {'url': reverse('twf:project_settings_credentials'),
+                     'value': 'Credential Settings', 'permission': 'change_credential_settings'},
+                    {'url': reverse('twf:project_settings_tasks'),
+                     'value': 'Task Settings', 'permission': 'change_task_settings'},
+                    {'url': reverse('twf:project_settings_export'),
+                     'value': 'Export Settings', 'permission': 'change_export_settings'},
+                    {'url': reverse('twf:user_management'),
+                     'value': 'User Management', 'permission': 'setup_project_permissions'},
                 ]
             },
             {
                 'name': 'Setup Project',
                 'options': [
-                    {'url': reverse('twf:project_tk_export'), 'value': 'Request Transkribus Export'},
-                    {'url': reverse('twf:project_test_export'), 'value': 'Test Export'},
-                    {'url': reverse('twf:project_tk_structure'), 'value': 'Extract Transkribus Export'},
-                    {'url': reverse('twf:project_copy'), 'value': 'Create Copy of Project'},
+                    {'url': reverse('twf:project_tk_export'),
+                     'value': 'Request Transkribus Export', 'permission': 'request_transkribus_export'},
+                    {'url': reverse('twf:project_test_export'),
+                     'value': 'Test Export', 'permission': 'test_transkribus_export'},
+                    {'url': reverse('twf:project_tk_structure'),
+                     'value': 'Extract Transkribus Export', 'permission': 'extract_transkribus_export'},
+                    {'url': reverse('twf:project_copy'),
+                     'value': 'Create Copy of Project', 'permission': 'copy_project'},
                     {'url': reverse('twf:project_reset'), 'value': 'Reset Functions'},
                 ]
             },
@@ -62,6 +72,7 @@ class TWFProjectView(LoginRequiredMixin, TWFView):
                 ]
             },
         ]
+
         return sub_nav
 
     def get_navigation_index(self):
@@ -358,11 +369,22 @@ class TWFProjectUserManagementView(TWFProjectView):
         return redirect(reverse('twf:user_management'))
 
 
-class TWFProjectCopyView(TWFProjectView):
+class TWFProjectCopyView(FormView, TWFProjectView):
     """View for copying a project."""
 
     template_name = 'twf/project/setup/copy.html'
     page_title = 'Copy Project'
+    form_class = ProjectCopyBatchForm
+    success_url = reverse_lazy('twf:project_copy')
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['project'] = self.get_project()
+
+        kwargs['data-start-url'] = reverse_lazy('twf:task_project_copy')
+        kwargs['data-message'] = "Are you sure you want to copy this project?"
+
+        return kwargs
 
     def get_context_data(self, **kwargs):
         """Get the context data."""

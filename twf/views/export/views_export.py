@@ -36,23 +36,29 @@ class TWFExportView(LoginRequiredMixin, TWFView):
             {
                 'name': 'Import Data',
                 'options': [
-                    {'url': reverse_lazy('twf:import_dictionaries'), 'value': 'Import Dictionaries'},
+                    {'url': reverse_lazy('twf:import_dictionaries'),
+                     'value': 'Import Dictionaries', 'permission': 'import_dictionaries'},
                 ]
             },
             {
                 'name': 'Export Data',
                 'options': [
-                    {'url': reverse_lazy('twf:export_documents'), 'value': 'Export Documents'},
-                    {'url': reverse_lazy('twf:export_collections'), 'value': 'Export Collections'},
-                    {'url': reverse_lazy('twf:export_dictionaries'), 'value': 'Export Dictionaries'},
-                    {'url': reverse_lazy('twf:export_tags'), 'value': 'Export Tags'},
+                    {'url': reverse_lazy('twf:export_documents'),
+                     'value': 'Export Documents', 'permission': 'export_documents'},
+                    {'url': reverse_lazy('twf:export_collections'),
+                     'value': 'Export Collections', 'permission': 'export_collections'},
+                    {'url': reverse_lazy('twf:export_dictionaries'),
+                     'value': 'Export Dictionaries', 'permission': 'export_dictionaries'},
+                    {'url': reverse_lazy('twf:export_tags'),
+                     'value': 'Export Tags', 'permission': 'export_tags'},
                 ]
             },
 
             {
                 'name': 'Export Project',
                 'options': [
-                    {'url': reverse_lazy('twf:export_project'), 'value': 'Export Project'},
+                    {'url': reverse_lazy('twf:export_project'),
+                     'value': 'Export Project', 'permission': 'export_project'},
                 ]
             },
         ]

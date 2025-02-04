@@ -34,16 +34,21 @@ class TWFMetadataView(LoginRequiredMixin, TWFView):
             {
                 'name': 'Load Metadata',
                 'options': [
-                    {'url': reverse('twf:metadata_load_metadata'), 'value': 'Load JSON Metadata'},
-                    {'url': reverse('twf:metadata_load_sheets_metadata'), 'value': 'Load Google Sheets Metadata'},
+                    {'url': reverse('twf:metadata_load_metadata'),
+                     'value': 'Load JSON Metadata', 'permission': 'metadata_load_json_data'},
+                    {'url': reverse('twf:metadata_load_sheets_metadata'),
+                     'value': 'Load Google Sheets Metadata', 'permission': 'metadata_load_google_sheet_data'},
                 ]
             },
             {
                 'name': 'Metadata Workflows',
                 'options': [
-                    {'url': reverse('twf:metadata_extract'), 'value': 'Extract Controlled Values'},
-                    {'url': reverse('twf:metadata_review_documents'), 'value': 'Review Document Metadata'},
-                    {'url': reverse('twf:metadata_review_pages'), 'value': 'Review Page Metadata'},
+                    {'url': reverse('twf:metadata_extract'),
+                     'value': 'Extract Controlled Values', 'permission': 'metadata_extract_values'},
+                    {'url': reverse('twf:metadata_review_documents'),
+                     'value': 'Review Document Metadata', 'permission': 'metadata_review_documents'},
+                    {'url': reverse('twf:metadata_review_pages'),
+                     'value': 'Review Page Metadata', 'permission': 'metadata_review_pages'},
                 ]
             }
         ]
@@ -87,8 +92,17 @@ class TWFMetadataLoadDataView(FormView, TWFMetadataView):
     form_class = LoadMetadataForm
     success_url = reverse_lazy('twf:metadata_load_metadata')
 
-    def form_valid(self, form):
-        """Process the form data."""
+    def get_form_kwargs(self):
+        """Get the form kwargs."""
+        kwargs = super().get_form_kwargs()
+        kwargs['project'] = self.get_project()
+
+        kwargs['data-start-url'] = reverse_lazy('twf:task_metadata_load_json')
+        kwargs['data-message'] = "Are you sure you want to load the json metadata?"
+        return kwargs
+
+    """def form_valid(self, form):
+        Process the form data.
         form.is_valid()
 
         # Get the project
@@ -101,45 +115,9 @@ class TWFMetadataLoadDataView(FormView, TWFMetadataView):
         match_to_field = form.cleaned_data['match_to_field']
         print("Debug", data_target_type, json_data_key, data_file, match_to_field)
 
-        # Open uploaded file and read the content as json
-        data = data_file.read()
-        data = json.loads(data)
-
-        # Iterate over the data and save the metadata
-        for item in data:
-            id_value_of_item = item[json_data_key]
-
-            if data_target_type == 'document':
-                try:
-                    document = None
-                    if match_to_field == 'dbid':
-                        document = Document.objects.get(project=project, id=id_value_of_item)
-                    elif match_to_field == 'docid':
-                        document = Document.objects.get(project=project, document_id=id_value_of_item)
-                        print("Found document", document)
-                    if document:
-                        document.metadata['import'] = item
-                        document.save(current_user=self.request.user)
-                        print("Saved document", document)
-
-                except Document.DoesNotExist:
-                    print(f"Document with {match_to_field} {id_value_of_item} does not exist.")
-
-            elif data_target_type == 'page':
-                try:
-                    page = None
-                    if match_to_field == 'dbid':
-                        page = Page.objects.get(document__project=project, id=id_value_of_item)
-                    elif match_to_field == 'docid':
-                        page = Page.objects.get(document__project=project, dbid=id_value_of_item)
-                    if page:
-                        page.metadata['import'] = item
-                        page.save(current_user=self.request.user)
-                except Page.DoesNotExist:
-                    print(f"Page with {match_to_field} {id_value_of_item} does not exist.")
-
-        return super().form_valid(form)
-
+        
+        
+"""
 
 class TWFMetadataLoadSheetsDataView(FormView, TWFMetadataView):
     """View for loading metadata from Google Sheets."""

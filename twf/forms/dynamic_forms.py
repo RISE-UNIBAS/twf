@@ -58,7 +58,7 @@ class DynamicForm(forms.Form):
         self.helper.layout = Layout()
 
         for field in form_field_config:
-            field_name = field.get('name', '')
+            field_name = field.get('name', '')              # The field name is the name if the input field
             field_type = field.get('type', 'text')
             field_label = field.get('label', field_name)
             field_value = field.get('value', '')

@@ -15,11 +15,8 @@
                 the title column is <code>{{ project.conf_tasks.google_sheet.document_title_column }}</code>, and <code>{{ project.conf_tasks.google_sheet.valid_columns }}</code> are the valid columns.
             </small>
         </div>
-         
-        <div class="row">
-            <div class="col-12">
-                {% crispy form %}
-            </div>
-        </div>
+
+         {% crispy form %}
+
      </div>
 {% endblock %}

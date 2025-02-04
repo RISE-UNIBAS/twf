@@ -1,9 +1,26 @@
 <!-- Help Overlay -->
+{% load twf_help %}
 <div id="helpOverlay" class="help-overlay">
     <div class="help-content">
-        <button class="close-help" aria-label="Close">&times;</button>
-        <h3 class="mt-4">Page Help</h3>
-        <div id="helpText">
+         <div class="d-flex justify-content-between align-items-center mb-3">
+            <!-- Updated close button with new styles -->
+            <button class="close-help btn btn-danger rounded-circle" aria-label="Close">
+                <i class="fas fa-times"></i>
+            </button>
+            <div class="helpHeader">
+                <a href="{% help_url '' %}" target="_blank" class="help-link">
+                    <i class="fas fa-book"></i> Documentation
+                </a>
+                <a href="https://github.com/RISE-UNIBAS/twf" target="_blank" class="help-link">
+                    <i class="fab fa-github"></i> GitHub
+                </a>
+                <a href="https://github.com/RISE-UNIBAS/twf/issues" target="_blank" class="help-link">
+                    <i class="fas fa-bug"></i> Report Issue
+                </a>
+            </div>
+        </div>
+
+        <div class="mt-5" id="helpText">
             <!-- Dynamic help content will be loaded here -->
             <p>Loading help content...</p>
         </div>

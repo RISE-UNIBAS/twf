@@ -37,7 +37,8 @@ class TWFCollectionsView(LoginRequiredMixin, TWFView):
                 'name': 'Overview',
                 'options': [
                     {"url": reverse('twf:collections'), "value": "Overview"},
-                    {"url": reverse('twf:project_collections_create'), "value": "Create New Collection"},
+                    {"url": reverse('twf:project_collections_create'),
+                     "value": "Create New Collection", "permission": "create_collection"},
                 ]
             },
             {
@@ -48,10 +49,14 @@ class TWFCollectionsView(LoginRequiredMixin, TWFView):
                 'name': 'Collection Workflows',
                 'options': [
                     {"url": reverse('twf:collections_review'), "value": "Review Collections"},
-                    {"url": reverse('twf:collections_openai_batch'), "value": "OpenAI Batch Workflow"},
-                    {"url": reverse('twf:collections_openai_request'), "value": "OpenAI Single Workflow"},
-                    {"url": "", "value": "Name Collection Items"},
-                    {"url": "", "value": "Merge Collection Items"},
+                    {"url": reverse('twf:collections_openai_batch'),
+                     "value": "OpenAI Batch Workflow", "permission": "collection_openai_batch"},
+                    {"url": reverse('twf:collections_openai_request'),
+                     "value": "OpenAI Single Workflow", "permission": "collection_openai_workflow"},
+                    {"url": "",
+                     "value": "Name Collection Items", "permission": "collection_item_naming_workflow"},
+                    {"url": "",
+                     "value": "Merge Collection Items", "permission": "collection_item_merge"},
                 ]
             }
         ]

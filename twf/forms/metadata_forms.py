@@ -38,26 +38,22 @@ class LoadMetadataForm(BaseBatchForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.helper.layout.append(
+    def get_button_label(self):
+        return 'Load Data'
+
+    def get_dynamic_fields(self):
+        return [
             Row(
                 Column('data_target_type', css_class='form-group col-6 mb-3'),
                 Column('data_file', css_class='form-group col-6 mb-3'),
                 css_class='row form-row'
-            )
-        )
-        self.helper.layout.append(
+            ),
             Row(
                 Column('json_data_key', css_class='form-group col-6 mb-3'),
                 Column('match_to_field', css_class='form-group col-6 mb-3'),
                 css_class='row form-row'
             )
-        )
-        self.helper.layout.append(
-            Div(
-                Submit('submit', 'Load Data', css_class='btn btn-dark'),
-                css_class='text-end pt-3'
-            )
-        )
+        ]
 
 
 class ExtractMetadataValuesForm(forms.Form):
@@ -103,43 +99,14 @@ class ExtractMetadataValuesForm(forms.Form):
         )
 
 
-class LoadSheetsMetadataForm(forms.Form):
+class LoadSheetsMetadataForm(BaseBatchForm):
     """ Form for loading metadata from Google Sheets. """
 
-    project = None
-    progress_details = forms.CharField(label='Progress', required=False)
-
     def __init__(self, *args, **kwargs):
-        self.project = kwargs.pop('project', None)
         super().__init__(*args, **kwargs)
 
-        if self.project is None:
-            raise ValueError('Project must be provided.')
+    def get_button_label(self):
+        return 'Load Google Sheets Data'
 
-        progress_bar_html = """
-        <div class="col-12 border text-center">
-          <span>Progress:</span>
-          <div class="progress">
-            <div class="progress-bar bg-dark" role="progressbar" 
-                 style="width: 0;" id="taskProgressBar" aria-valuenow="0" 
-                 aria-valuemin="0" aria-valuemax="100">0%</div>
-            </div>
-        </div>"""
-
-        self.fields['progress_details'].widget = forms.Textarea()
-        self.fields['progress_details'].widget.attrs = {'readonly': True, 'rows': 5}
-
-        self.helper = FormHelper()
-        self.helper.form_method = 'post'
-
-        self.helper.layout = Layout(
-            HTML(progress_bar_html),
-            Row(
-                Column('progress_details', css_class='form-group col-12 mb-0'),
-                css_class='row form-row'
-            ),
-            Div(
-                Button('startBatch', 'Load Sheets Metadata', css_class='btn btn-dark'),
-                css_class='text-end pt-3'
-            )
-        )
+    def get_dynamic_fields(self):
+        return []

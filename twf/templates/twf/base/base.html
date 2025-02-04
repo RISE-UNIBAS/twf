@@ -1,4 +1,6 @@
 {% load static %}
+{% load twf_permissions %}
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -77,14 +79,17 @@
                                         <p class="text-center" style="font-weight: bold">Options</p>
                                         <ul class="nav flex-column">
                                             {% for option in context_sub_nav.options %}
-                                                {% if option.url == request.path %}
-                                                    <li class="nav-item small border rounded mx-1 mb-1 bg-dark">
-                                                        <a class="nav-link px-2 py-1 text-light" href="{{ option.url }}">{{ option.value }}</a>
-                                                    </li>
-                                                {% else %}
-                                                    <li class="nav-item small border rounded  mx-1 mb-1">
-                                                        <a class="nav-link px-2 py-1 text-dark" href="{{ option.url }}">{{ option.value }}</a>
-                                                    </li>
+                                                {% user_has_permission request.user.profile option.permission project as has_permission %}
+                                                {% if has_permission %}
+                                                    {% if option.url == request.path %}
+                                                        <li class="nav-item small border rounded mx-1 mb-1 bg-dark">
+                                                            <a class="nav-link px-2 py-1 text-light" href="{{ option.url }}">{{ option.value }}</a>
+                                                        </li>
+                                                    {% else %}
+                                                        <li class="nav-item small border rounded  mx-1 mb-1">
+                                                            <a class="nav-link px-2 py-1 text-dark" href="{{ option.url }}">{{ option.value }}</a>
+                                                        </li>
+                                                    {% endif %}
                                                 {% endif %}
                                             {% endfor %}
                                         </ul>
