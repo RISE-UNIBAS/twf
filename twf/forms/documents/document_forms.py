@@ -3,7 +3,7 @@ from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Submit, Layout, Row, Column, Div
 from django import forms
 
-from twf.forms.forms import BasicTaskForm
+from twf.forms.base_batch_forms import BaseBatchForm
 from twf.models import Document
 
 
@@ -42,7 +42,7 @@ class DocumentForm(forms.ModelForm):
         self.helper = helper
 
 
-class BatchOpenAIForm(BasicTaskForm):
+class BatchOpenAIForm(BaseBatchForm):
     """Form for running a batch of documents through OpenAI."""
 
     role_description = forms.CharField(max_length=200, widget=forms.TextInput(attrs={
@@ -53,17 +53,11 @@ class BatchOpenAIForm(BasicTaskForm):
         'placeholder': 'Enter your prompt here...'
     }), label="Prompt")
 
+    save_prompt = forms.BooleanField(required=False, label="Save Prompt")
+
     def get_button_label(self):
         """Get the label for the submit button."""
         return 'Run Project Batch'
-
-    def get_test_button_label(self):
-        """Get the label for the test button."""
-        return 'Test One Document'
-
-    def has_test_button(self):
-        """Check if the form has a test button."""
-        return True
 
     def get_dynamic_fields(self):
         """Get the dynamic fields for the form."""
@@ -76,4 +70,8 @@ class BatchOpenAIForm(BasicTaskForm):
                 Column('prompt', css_class='form-group'),
                 css_class='row form-row'
             ),
+            Row(
+                Column('save_prompt', css_class='form-group'),
+                css_class='row form-row'
+            )
         ]

@@ -57,7 +57,7 @@ def search_openai_for_docs(self, project_id, user_id, prompt, role_description):
 
     project, user, number_of_documents = get_project_and_user(self, task, project_id, user_id)
     client = AiApiClient(api='openai',
-                         api_key=openai_credentials.api_key,
+                         api_key=openai_credentials['api_key'],
                          gpt_role_description=role_description)
 
     processed_documents = 0
@@ -68,7 +68,7 @@ def search_openai_for_docs(self, project_id, user_id, prompt, role_description):
         # Perform OpenAI search for each document
         context = get_text_from_document(document)
         prompt = prompt + "\n\n" + "Context:\n" + context
-        response, elapsed_time = client.prompt(model=openai_credentials.default_model,
+        response, elapsed_time = client.prompt(model=openai_credentials['default_model'],
                                                prompt=prompt)
         response_dict = response.to_dict()
         document.metadata['openai_response'] = response_dict
@@ -95,7 +95,7 @@ def search_gemini_for_docs(self, project_id, user_id, prompt, role_description):
 
     project, user, number_of_documents = get_project_and_user(self, task, project_id, user_id)
     client = AiApiClient(api='genai',
-                         api_key=genai_credentials.api_key,
+                         api_key=genai_credentials['api_key'],
                          gpt_role_description=role_description)
 
     processed_documents = 0
@@ -105,7 +105,7 @@ def search_gemini_for_docs(self, project_id, user_id, prompt, role_description):
 
         context = get_text_from_document(document)
         prompt = prompt + "\n\n" + "Context:\n" + context
-        response, elapsed_time = client.prompt(model=genai_credentials.default_model,
+        response, elapsed_time = client.prompt(model=genai_credentials['default_model'],
                                                prompt=prompt)
         document.metadata['gemini_response'] = response
         document.save(current_user=user)
@@ -133,7 +133,7 @@ def search_claude_for_docs(self, project_id, user_id, prompt, role_description):
 
     project, user, number_of_documents = get_project_and_user(self, task, project_id, user_id)
     client = AiApiClient(api='anthropic',
-                         api_key=anthropic_credentials.api_key,
+                         api_key=anthropic_credentials['api_key'],
                          gpt_role_description=role_description)
 
     processed_documents = 0
@@ -145,7 +145,7 @@ def search_claude_for_docs(self, project_id, user_id, prompt, role_description):
         context = get_text_from_document(document)
 
         prompt = prompt + "\n\n" + "Context:\n" + context
-        response, elapsed_time = client.prompt(model=anthropic_credentials.default_model,
+        response, elapsed_time = client.prompt(model=anthropic_credentials['default_model'],
                                                prompt=prompt)
         document.metadata['claude_response'] = response.to_dict()
         document.save(current_user=user)

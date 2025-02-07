@@ -1,7 +1,5 @@
 import uuid
-
 from django.utils import timezone
-
 from twf.models import Task
 
 

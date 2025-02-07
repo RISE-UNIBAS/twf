@@ -11,3 +11,4 @@ Utilities modules for the project.
    utils/files.rst
    utils/transkribus.rst
    utils/statistics.rst
+   utils/mail.rst

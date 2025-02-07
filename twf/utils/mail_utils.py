@@ -1,20 +1,56 @@
-from django.core.mail import send_mail
+"""
+Module: mail_utils
 
+This module handles email notifications for user account management in TWF.
+It includes functions to send welcome emails and password reset emails.
+
+Functions:
+    - send_welcome_email(user_email, username, temp_password): Sends a welcome email with login details.
+    - send_reset_email(user_email, username, temp_password): Sends a password reset email with a temporary password.
+"""
+
+from django.core.mail import send_mail
 from transkribusWorkflow.settings import DEFAULT_FROM_EMAIL
 
 
 def send_welcome_email(user_email, username, temp_password):
-    subject = "Your TWF Account - Initial Login Details"
-    message = (f"Welcome to TWF!\n "
-               f"Your username is: {username}\n "
-               f"Your temporary password is: {temp_password}. Please reset it upon login.")
+    """
+    Sends a welcome email to a new user with their initial login credentials.
+
+    Parameters:
+        user_email (str): The recipient's email address.
+        username (str): The user's username.
+        temp_password (str): A temporary password assigned to the user.
+    """
+    subject = "Welcome to TWF - Your Account Details"
+    message = (f"Dear {username},\n\n"
+               "Welcome to TWF! We are excited to have you on board.\n\n"
+               f"Here are your initial login credentials:\n"
+               f"Username: {username}\n"
+               f"Temporary Password: {temp_password}\n\n"
+               "Please log in and change your password as soon as possible.\n\n"
+               "Best regards,\n"
+               "The TWF Team")
 
     send_mail(subject, message, DEFAULT_FROM_EMAIL, [user_email])
 
 
 def send_reset_email(user_email, username, temp_password):
-    subject = "Your TWF Account - Password Reset"
-    message = (f"Hello {username},\n "
-               f"Your temporary password is: {temp_password}. Please reset it upon login.")
+    """
+    Sends a password reset email with a new temporary password.
+
+    Parameters:
+        user_email (str): The recipient's email address.
+        username (str): The user's username.
+        temp_password (str): A temporary password assigned to the user.
+    """
+    subject = "TWF Password Reset Request"
+    message = (f"Hello {username},\n\n"
+               "You recently requested a password reset. Below is your new temporary password:\n\n"
+               f"Temporary Password: {temp_password}\n\n"
+               "Please log in and change your password immediately for security reasons.\n\n"
+               "If you did not request this change, please contact our support team immediately.\n\n"
+               "Best regards,\n"
+               "The TWF Team")
 
     send_mail(subject, message, DEFAULT_FROM_EMAIL, [user_email])

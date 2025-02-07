@@ -21,6 +21,10 @@ class TWFDocumentOpenAIBatchView(FormView, TWFDocumentView):
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
         kwargs['project'] = self.get_project()
+
+        kwargs['data-start-url'] = reverse_lazy('twf:task_documents_batch_openai')
+        kwargs['data-message'] = "Are you sure you want to start the openai task?"
+
         return kwargs
 
 
@@ -34,6 +38,10 @@ class TWFDocumentGeminiBatchView(FormView, TWFDocumentView):
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
         kwargs['project'] = self.get_project()
+
+        kwargs['data-start-url'] = reverse_lazy('twf:task_documents_batch_gemini')
+        kwargs['data-message'] = "Are you sure you want to start the gemini task?"
+
         return kwargs
 
 
@@ -47,4 +55,8 @@ class TWFDocumentClaudeBatchView(FormView, TWFDocumentView):
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
         kwargs['project'] = self.get_project()
+
+        kwargs['data-start-url'] = reverse_lazy('twf:task_documents_batch_claude')
+        kwargs['data-message'] = "Are you sure you want to start the claude task?"
+
         return kwargs

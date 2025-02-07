@@ -125,12 +125,16 @@ class TWFMetadataLoadSheetsDataView(FormView, TWFMetadataView):
     template_name = 'twf/metadata/load_sheets_data.html'
     page_title = 'Load Google Sheets Metadata'
     form_class = LoadSheetsMetadataForm
-    success_url = reverse_lazy('twf:metadata_load_metadata')
+    success_url = reverse_lazy('twf:metadata_load_sheets_metadata')
 
     def get_form_kwargs(self):
         """Get the form kwargs."""
         kwargs = super().get_form_kwargs()
         kwargs['project'] = self.get_project()
+
+        kwargs['data-start-url'] = reverse_lazy('twf:task_metadata_load_sheets')
+        kwargs['data-message'] = "Are you sure you want to load the sheets metadata?"
+
         return kwargs
 
 

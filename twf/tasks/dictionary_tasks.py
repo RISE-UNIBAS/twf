@@ -7,7 +7,6 @@ from twf.clients.geonames_client import search_location
 from twf.clients.gnd_client import search_gnd
 from twf.clients.simple_ai_clients import AiApiClient
 from twf.clients.wikidata_client import search_wikidata_entities
-# from twf.clients.wikidata_client import query_wikidata
 from twf.models import Dictionary, User, Project
 from twf.tasks.task_base import start_task, update_task, end_task, fail_task
 

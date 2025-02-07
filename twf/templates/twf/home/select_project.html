@@ -2,7 +2,7 @@
 
 {% block content %}
      <div class="border rounded bg-light mt-0 p-3">
-        <h1 class="display-6">Work on "{{ project.title }}"</h1>
+        <h1 class="display-6">Work on "{{ project_to_select.title }}"</h1>
         <p class="lead">Your role in this project: <strong>{{ user_role }}</strong></p>
          
          <form method="post" action="{% url 'twf:project_do_select' project_to_select.pk %}">

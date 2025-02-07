@@ -1,3 +1,4 @@
+"""Views for creating, reading, updating, and deleting projects."""
 from django.contrib import messages
 from django.shortcuts import redirect
 
@@ -9,7 +10,8 @@ from twf.views.views_base import TWFView
 
 
 def delete_all_documents(request):
-    """Delete all documents."""
+    """Delete all documents.
+    This will also delete all pages, page tags, and annotations."""
     project = TWFView.s_get_project(request)
 
     if not check_permission(request.user, "delete_all_documents", project):
@@ -24,7 +26,8 @@ def delete_all_documents(request):
     return redirect('twf:project_reset')
 
 def delete_all_tags(request):
-    """Delete all tags."""
+    """Delete all tags.
+    This will also delete all page tags."""
     project = TWFView.s_get_project(request)
 
     if not check_permission(request.user, "delete_all_tags", project):
@@ -39,7 +42,9 @@ def delete_all_tags(request):
     return redirect('twf:project_reset')
 
 def delete_all_collections(request):
-    """Delete all collections."""
+    """Delete all collections.
+    This will also delete all collection items and annotations."""
+
     project = TWFView.s_get_project(request)
 
     if not check_permission(request.user, "delete_all_collections", project):

@@ -1,6 +1,7 @@
 """This module contains the views for triggering the Celery tasks."""
 from django.http import JsonResponse
 
+from twf.models import Prompt
 from twf.tasks.document_tasks import search_openai_for_docs, search_gemini_for_docs, search_claude_for_docs
 from twf.tasks.structure_tasks import extract_zip_export_task
 from twf.tasks.dictionary_tasks import search_gnd_entries, search_geonames_entries, search_wikidata_entries, \
@@ -183,8 +184,13 @@ def start_ai_doc_batch(request, task_function_name):
     """ Start the AI requests as a Celery task."""
     project = TWFView.s_get_project(request)
     user_id = request.user.id
-    prompt = request.GET.get('prompt')
-    role_description = request.GET.get('role_description')
+    prompt = request.POST.get('prompt')
+    role_description = request.POST.get('role_description')
+    save_prompt = request.POST.get('save_prompt')
+
+    if save_prompt:
+        prompt = Prompt(project=project, prompt=prompt, system_role=role_description)
+        prompt.save(current_user=request.user)
 
     # Trigger the task
     task = task_function_name.delay(project.id, user_id, prompt, role_description)
