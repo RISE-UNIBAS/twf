@@ -29,7 +29,10 @@ class TagTable(tables.Table):
         date_types = self.get_date_types()
         print(f"Variation Type: {record.variation_type}, Value: {value}")
         if record.variation_type in date_types:
-            return record.date_variation_entry.edtf_of_normalized_variation or "-"
+            if record.date_variation_entry:
+                return record.date_variation_entry.edtf_of_normalized_variation or "-"
+            else:
+                return "-"
         return record.dictionary_entry or "-"
 
     def get_date_types(self):
