@@ -1,0 +1,49 @@
+<h1>Context Help</h1>
+<p>
+    This page allows you to load metadata from a file and match it to the documents or pages in your project.
+</p>
+<h2>Metadata File:</h2>
+The file must be a json file and adhere one of the following formats:
+
+
+<p>
+    <strong>List format:</strong> A list of dictionaries, where each dictionary represents a document or page and
+    contains metadata keys and values. Each object in the list must have a unique identifier pointing to the
+    document or page.
+    <pre class="bg-light border p-3">
+        <code>
+[
+    {
+      "some_doc_id": "123456",
+      "title": "Example Document",
+      "author": "John Doe",
+    },
+    {
+      "some_doc_id": "123457",
+      "title": "Another Document",
+      "author": "Jane Doe",
+    }
+]
+        </code>
+    </pre>
+<p>
+
+<p>
+    <strong>Dictionary format:</strong> A dictionary of dictionaries, where each dictionary represents a document or
+    page and contains metadata keys and values. The keys of the outer dictionary must be unique identifiers pointing
+    to the document or page.
+    <pre class="bg-light border p-3">
+        <code>
+{
+    "123456": {
+        "title": "Example Document",
+        "author": "John Doe",
+    },
+    "123457": {
+        "title": "Another Document",
+        "author": "Jane Doe",
+    }
+}
+        </code>
+    </pre>
+</p>

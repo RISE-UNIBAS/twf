@@ -14,17 +14,23 @@ class LoadMetadataForm(BaseBatchForm):
         label='Data Target Type',
         choices=[('document', 'Document'), ('page', 'Page')],
         required=True,
-        widget=forms.Select(attrs={'class': 'form-control'})
+        widget=forms.Select(attrs={'class': 'form-control'}),
+        help_text='Your json must be aimed at transkribus documents or pages. Select if you want to load the data to '
+                  'the documents (you provide a doc id) or the pages (you provide a page id).'
     )
     data_file = forms.FileField(
         label='Data File',
-        required=True
+        required=True,
+        help_text='Upload a JSON file with the metadata to load. It must be a list of objects or an object with keys '
+                  'that match yor document or page ids.',
     )
 
     json_data_key = forms.CharField(
         label='JSON Data Key',
         required=False,
-        widget=forms.TextInput(attrs={'class': 'form-control'})
+        widget=forms.TextInput(attrs={'class': 'form-control'}),
+        help_text='If your JSON data is a list of objects, provide the key that should be used to match the data to '
+                  'the documents or pages. If your JSON data is an object, leave this field empty.'
     )
 
     match_to_field = forms.ChoiceField(
@@ -32,7 +38,10 @@ class LoadMetadataForm(BaseBatchForm):
         choices=[('dbid', 'Database ID'),
                  ('docid', 'Transkribus Document/Page ID')],
         required=False,
-        widget=forms.Select(attrs={'class': 'form-control'})
+        initial='docid',
+        widget=forms.Select(attrs={'class': 'form-control'}),
+        help_text='Normally you will want to match the data to the Transkribus document or page ID. If you have '
+                  'provided a database ID in your JSON data, you can match to that instead.'
     )
 
     def __init__(self, *args, **kwargs):

@@ -272,6 +272,10 @@ tr[data-bs-toggle="collapse"]:hover {
     font-size: 1.5rem;
 }
 
+.help-content h2 {
+    font-size: 1.5rem;
+}
+
 /* Style help links as badges with icons */
 .help-link {
     display: inline-flex;
