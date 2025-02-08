@@ -136,46 +136,49 @@ def create_data_from_config(metadata, config, db_object=None, return_warnings=Fa
     warnings = []
 
     for key, mapping in config.items():
-        value_expression = mapping.get('value', "")
-        empty_value = mapping.get('empty_value', "")
+        try:
+            value_expression = mapping.get('value', "")
+            empty_value = mapping.get('empty_value', "")
 
-        # Handle nested keys and DB field references
-        if value_expression.startswith('{__') and value_expression.endswith('__}'):
-            # Handle DB field access like "{__tk_page_number__}"
-            db_field = value_expression[3:-3]
-            if db_object:
-                value = get_nested_value(db_object, db_field, empty_value)
-                if value == empty_value:
-                    warnings.append(f"Key '{key}' ({db_field}) missing in DB object")
+            # Handle nested keys and DB field references
+            if value_expression.startswith('{__') and value_expression.endswith('__}'):
+                # Handle DB field access like "{__tk_page_number__}"
+                db_field = value_expression[3:-3]
+                if db_object:
+                    value = get_nested_value(db_object, db_field, empty_value)
+                    if value == empty_value:
+                        warnings.append(f"Key '{key}' ({db_field}) missing in DB object")
+                else:
+                    warnings.append(f"Key '{key}' requires a DB object")
+                    value = empty_value
+            elif value_expression.startswith('{') and value_expression.endswith('}'):
+                # Handle metadata dynamic reference like "{tags1}"
+                metadata_key = value_expression[1:-1]
+                if metadata_key in SPECIAL_KEYS:
+                    value = get_special_value(metadata_key, metadata, db_object, mapping)
+                else:
+                    value = get_nested_value(metadata, metadata_key, empty_value)
+            elif '{' in value_expression and '}' in value_expression:
+                # Handle formatted strings like "p. {page}"
+                try:
+                    value = value_expression.format(**metadata)
+                except KeyError:
+                    warnings.append(f"Key '{key}' missing in metadata")
+                    value = empty_value
             else:
-                warnings.append(f"Key '{key}' requires a DB object")
-                value = empty_value
-        elif value_expression.startswith('{') and value_expression.endswith('}'):
-            # Handle metadata dynamic reference like "{tags1}"
-            metadata_key = value_expression[1:-1]
-            if metadata_key in SPECIAL_KEYS:
-                value = get_special_value(metadata_key, metadata, db_object, mapping)
-            else:
-                value = get_nested_value(metadata, metadata_key, empty_value)
-        elif '{' in value_expression and '}' in value_expression:
-            # Handle formatted strings like "p. {page}"
-            try:
-                value = value_expression.format(**metadata)
-            except KeyError:
-                warnings.append(f"Key '{key}' missing in metadata")
-                value = empty_value
-        else:
-            # Handle static values
-            value = value_expression
+                # Handle static values
+                value = value_expression
 
-        # Assign value to the transformed dictionary (handle nested keys)
-        keys = key.split('.')
-        current_level = transformed
-        for i, sub_key in enumerate(keys):
-            if i == len(keys) - 1:
-                current_level[sub_key] = value
-            else:
-                current_level = current_level.setdefault(sub_key, {})
+            # Assign value to the transformed dictionary (handle nested keys)
+            keys = key.split('.')
+            current_level = transformed
+            for i, sub_key in enumerate(keys):
+                if i == len(keys) - 1:
+                    current_level[sub_key] = value
+                else:
+                    current_level = current_level.setdefault(sub_key, {})
+        except AttributeError as e:
+            warnings.append(f"Error processing key '{key}': {e}")
 
     if return_warnings:
         return transformed, warnings
@@ -225,7 +228,7 @@ def create_document_data(document, return_warnings=False):
     data = {**document.metadata}
 
     all_warnings = []
-    config = document.project.get_export_configuration('document_export_configuration')
+    config = document.project.get_export_configuration('document_export_configuration', return_json=True)
     # If an empty config is returned, check if it is because the JSON could not be decoded
     if config == {}:
         try:

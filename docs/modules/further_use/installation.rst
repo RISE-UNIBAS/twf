@@ -24,6 +24,12 @@ file in the root of the repository.
     - This guide assumes you have a working installation of Redis. If you do not,
       you will need to install it before proceeding.
 
+    - This guide assumes you have credentials for a google service account with access to the
+      google sheets API. If you do not, you will need to create one before proceeding.
+
+    - This guide assumes you have access to an app email account. If you do not, you will need to
+      create one before proceeding.
+
 
 Preparation
 -----------

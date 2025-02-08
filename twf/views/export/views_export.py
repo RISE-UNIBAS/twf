@@ -95,21 +95,53 @@ class TWFExportDocumentsView(FormView, TWFExportView):
             return context
         
         transformed_metadata, warnings = create_data(sample_document, return_warnings=True)
-        context['json_data'] = transformed_metadata
-        doc_key_list = []
+
+        # Document Data
+        doc_key_list = [
+            {"group": "document",
+             "data": {
+                 "title": sample_document.title,
+                 "document_id": sample_document.document_id,
+                 "db_id": sample_document.id,
+                 "status": sample_document.status,
+                 "num_pages": sample_document.pages.all().count(),
+                 "transkribus_url": sample_document.get_transkribus_url(),
+             }}
+        ]
         for key in sample_document.metadata:
             doc_key_list.append({"group": key, "data": sample_document.metadata[key]})
         context['doc_key_list'] = doc_key_list
-        context['available_doc_data'] = flatten_dict_keys(sample_document.metadata)
-        context['available_page_data'] = (flatten_dict_keys(sample_document.pages.first().parsed_data) +
-                                          flatten_dict_keys(sample_document.pages.first().metadata))
+
+        first_page = sample_document.pages.first()
+        if not first_page:
+            return context
+
+        context['page_key_list'] = [
+            {"group": "page",
+             "data": {
+                    "page_id": first_page.tk_page_id,
+                    "db_id": first_page.id,
+                    "page_num": first_page.tk_page_number,
+             }},
+            {"group": "parsed_data",
+             "data": {"annos": first_page.get_annotations()}}
+        ]
+        for key in first_page.parsed_data:
+            context['page_key_list'].append({"group": key, "data":first_page.parsed_data[key]})
+
+        context['page_parsed_data'] = first_page.parsed_data
 
         context['warnings'] = warnings
+
+        context['doc_output'] = transformed_metadata
+        context['page_output'] = {}
+        context['project_output'] = {}
         return context
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
         kwargs['instance'] = self.get_project()
+        kwargs['show_help'] = False
         return kwargs
 
     def form_valid(self, form):

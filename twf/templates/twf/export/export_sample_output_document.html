@@ -1,0 +1,65 @@
+{% load nav_tags %}
+<div class="border rounded bg-white p-3 d-flex flex-column" style="height: 100%;">
+    <!-- Tabs Navigation -->
+    <ul class="nav nav-tabs" id="outputTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <a class="nav-link active small"
+               id="doc-output-tab"
+               data-bs-toggle="tab"
+               href="#doc-output"
+               role="tab"
+               aria-controls="doc-output"
+               aria-selected="true">
+               Document Output
+            </a>
+        </li>
+        <li class="nav-item" role="presentation">
+            <a class="nav-link small"
+               id="page-output-tab"
+               data-bs-toggle="tab"
+               href="#page-output"
+               role="tab"
+               aria-controls="page-output"
+               aria-selected="false">
+               Page Output
+            </a>
+        </li>
+        <li class="nav-item" role="presentation">
+            <a class="nav-link small"
+               id="proj-output-tab"
+               data-bs-toggle="tab"
+               href="#proj-output"
+               role="tab"
+               aria-controls="proj-output"
+               aria-selected="false">
+               Project Output
+            </a>
+        </li>
+    </ul>
+
+    <!-- Tab Content -->
+    <div class="tab-content mt-3 overflow-auto" id="outputTabsContent">
+        <div class="tab-pane fade show active"
+             id="doc-output"
+             role="tabpanel"
+             aria-labelledby="doc-output-tab">
+            Here is a sample output of the document data:<br/>
+            <code>{{ doc_output|pretty_json }}</code>
+        </div>
+        <div class="tab-pane fade"
+             id="page-output"
+             role="tabpanel"
+             aria-labelledby="page-output-tab">
+            Here is a sample output of the page data:<br/>
+            {{ page_output|pretty_json }}
+        </div>
+        <div class="tab-pane fade"
+             id="proj-output"
+             role="tabpanel"
+             aria-labelledby="proj-output-tab">
+            Here is a sample output of the project data:<br/>
+            {{ proj_output|pretty_json }}
+            {{ page_parsed_data|pretty_json }}
+        </div>
+    </div>
+</div>

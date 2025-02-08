@@ -1,0 +1,121 @@
+<div class="d-flex flex-column flex-grow-1" style="height: 100%;">
+    <div class="d-flex flex-grow-1 overflow-hidden">
+        <!-- Outer Tabs (Vertical) -->
+        <ul class="nav nav-pills flex-column me-3" id="sampleDataTabs" role="tablist" style="width: 50px; flex-shrink: 0;">
+            <li class="nav-item">
+        <a class="nav-link active"
+           id="doc-tab"
+           data-bs-toggle="pill"
+           href="#doc-data-tab"
+           role="tab"
+           aria-controls="doc-data-tab"
+           aria-selected="true"
+           data-bs-toggle="tooltip" data-bs-placement="right"
+           title="View document-related data">
+           📑
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link"
+           id="page-tab"
+           data-bs-toggle="pill"
+           href="#page-data-tab"
+           role="tab"
+           aria-controls="page-data-tab"
+           aria-selected="false"
+           data-bs-toggle="tooltip" data-bs-placement="right"
+           title="View page-related data">
+           📄
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link"
+           id="proj-tab"
+           data-bs-toggle="pill"
+           href="#proj-data-tab"
+           role="tab"
+           aria-controls="proj-data-tab"
+           aria-selected="false"
+           data-bs-toggle="tooltip" data-bs-placement="right"
+           title="View project-related data">
+           🏗
+        </a>
+    </li>
+        </ul>
+
+        <!-- Outer Tab Content (Takes Remaining Space & Scrolls) -->
+        <div class="tab-content flex-grow-1 overflow-auto" id="sampleDataTabsContent">
+
+            <!-- 📑 Document Data -->
+            <div class="tab-pane fade show active" id="doc-data-tab" role="tabpanel">
+                <ul class="nav nav-tabs" id="docSubTabs" role="tablist">
+                    {% for group in doc_key_list %}
+                        <li class="nav-item">
+                            <a class="nav-link {% if forloop.first %}active{% endif %}" id="doc-group-tab-{{ group.group }}" data-bs-toggle="tab" href="#doc-group-{{ group.group }}" role="tab">
+                               {{ group.group }}
+                            </a>
+                        </li>
+                    {% endfor %}
+                </ul>
+                <div class="tab-content mt-3 flex-grow-1 overflow-auto">
+                    {% for group in doc_key_list %}
+                        <div class="tab-pane fade {% if forloop.first %}show active{% endif %}" id="doc-group-{{ group.group }}" role="tabpanel">
+                            <div class="overflow-auto" style="max-height: 300px;">
+                                <ul>
+                                    {% for key, value in group.data.items %}
+                                        <li><kbd class="key_selector" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-html="true" data-value="{{ group.group }}.{{ key }}" title="Copy<br> <code>&lbrace;{{ group.group }}.{{ key }}&rbrace;</code><br> to clipboard">{{ key }}</kbd> {{ value }}</li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- 📄 Page Data -->
+            <div class="tab-pane fade" id="page-data-tab" role="tabpanel">
+                <ul class="nav nav-tabs" id="pageSubTabs" role="tablist">
+                    {% for group in page_key_list %}
+                        <li class="nav-item">
+                            <a class="nav-link {% if forloop.first %}active{% endif %}" id="page-group-tab-{{ group.group }}" data-bs-toggle="tab" href="#page-group-{{ group.group }}" role="tab">
+                               {{ group.group }}
+                            </a>
+                        </li>
+                    {% endfor %}
+                </ul>
+                <div class="tab-content mt-3 flex-grow-1 overflow-auto">
+                    {% for group in page_key_list %}
+                        <div class="tab-pane fade {% if forloop.first %}show active{% endif %}" id="page-group-{{ group.group }}" role="tabpanel">
+                            <div class="overflow-auto" style="max-height: 300px;">
+                                <ul>
+                                    {% for key, value in group.data.items %}
+                                        <li><kbd class="key_selector" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-html="true" data-value="{{ group.group }}.{{ key }}" title="Copy<br> <code>&lbrace;{{ group.group }}.{{ key }}&rbrace;</code><br> to clipboard">{{ key }}</kbd> {{ value }}</li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- 🏗 Project Data -->
+            <div class="tab-pane fade" id="proj-data-tab" role="tabpanel">
+                <ul class="nav nav-tabs" id="projSubTabs" role="tablist">
+                    <li class="nav-item">
+                        <a class="nav-link active" id="proj-data-main-tab" data-bs-toggle="tab" href="#proj-data-main" role="tab">
+                           Project Data Overview
+                        </a>
+                    </li>
+                </ul>
+                <div class="tab-content mt-3 flex-grow-1 overflow-auto">
+                    <div class="tab-pane fade show active" id="proj-data-main" role="tabpanel">
+                        <div class="overflow-auto" style="max-height: 300px;">
+                            <!-- Single Project Data Content Here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div> <!-- End of Outer Tab Content -->
+    </div>
+</div>

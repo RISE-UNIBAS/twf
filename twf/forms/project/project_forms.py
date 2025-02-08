@@ -372,10 +372,14 @@ class ExportSettingsForm(forms.ModelForm):
         fields = ['conf_export']
 
     def __init__(self, *args, **kwargs):
+        show_help = kwargs.pop('show_help', True)
         super().__init__(*args, **kwargs)
         self.helper = FormHelper()
         self.helper.form_method = 'post'
         self.helper.form_class = 'form form-control'
+
+        if not show_help:
+            self.helper.form_class += ' h-100'
 
         # Populate the fields from `conf_export` JSON if data exists
         conf_export = self.instance.conf_export or {}
@@ -394,8 +398,8 @@ class ExportSettingsForm(forms.ModelForm):
 
         static_keys_html = render_to_string('twf/forms/static_keys_tab.html')
 
-        self.helper.layout = Layout(
-            TabHolder(
+        self.helper.layout = Layout()
+        tab_holder = TabHolder(
                 Tab(
                     'Document Export Settings',
                     Row(
@@ -413,7 +417,11 @@ class ExportSettingsForm(forms.ModelForm):
                     Row(
                         Column('project_export_configuration', css_class='col-12'),
                     ), css_id='project_export_settings'
-                ),
+                )
+        )
+
+        if show_help:
+            tab_holder.append(
                 Tab(
                     'Help',
                     Row(
@@ -426,7 +434,10 @@ class ExportSettingsForm(forms.ModelForm):
                         Column(HTML(static_keys_html), css_class='col-12'),
                     ), css_id='export_static_keys'
                 ),
-            ),
+            )
+
+        self.helper.layout.append(tab_holder)
+        self.helper.layout.append(
             Div(
                 Submit('submit', 'Save Settings', css_class='btn btn-dark'),
                 css_class='text-end pt-3'
