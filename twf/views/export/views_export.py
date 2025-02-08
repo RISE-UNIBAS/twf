@@ -43,6 +43,8 @@ class TWFExportView(LoginRequiredMixin, TWFView):
             {
                 'name': 'Export Data',
                 'options': [
+                    {'url': reverse_lazy('twf:export_configure'),
+                     'value': 'Configure Exports', 'permission': 'export_configure'},
                     {'url': reverse_lazy('twf:export_documents'),
                      'value': 'Export Documents', 'permission': 'export_documents'},
                     {'url': reverse_lazy('twf:export_collections'),
@@ -77,13 +79,13 @@ class TWFExportOverviewView(TWFExportView):
         return context
 
 
-class TWFExportDocumentsView(FormView, TWFExportView):
+class TWFExportConfigurationView(FormView, TWFExportView):
     """View for exporting documents."""
 
-    template_name = "twf/export/export_documents.html"
-    page_title = 'Export Data'
+    template_name = "twf/export/export_configuration.html"
+    page_title = 'Export Configuration'
     form_class = ExportSettingsForm
-    success_url = reverse_lazy('twf:export_documents')
+    success_url = reverse_lazy('twf:export_configure')
 
     def get_context_data(self, **kwargs):
         """Get the context data for the view."""
@@ -161,6 +163,17 @@ class TWFExportDocumentsView(FormView, TWFExportView):
         # If the form is invalid, return the errors
         return JsonResponse({'status': 'error', 'errors': form.errors}, status=400)
 
+
+class TWFExportDocumentsView(TWFExportView):
+    """View for the export overview."""
+
+    template_name = "twf/export/export_documents.html"
+    page_title = 'Export Documents'
+
+    def get_context_data(self, **kwargs):
+        """Get the context data for the view."""
+        context = super().get_context_data(**kwargs)
+        return context
 
 class TWFExportCollectionsView(FormView, TWFExportView):
     """View for exporting collections."""

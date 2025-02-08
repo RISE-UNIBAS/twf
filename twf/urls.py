@@ -37,7 +37,8 @@ from twf.views.dictionaries.views_dictionaries import TWFDictionaryOverviewView,
     TWFDictionaryNormDataView, TWFDictionaryCreateView, skip_entry, TWFDictionaryDictionariesView, \
     TWFDictionaryAddView, TWFDictionaryMergeEntriesView, add_dictionary_to_project, remove_dictionary_from_project
 from twf.views.export.views_export import TWFExportDocumentsView, TWFExportCollectionsView, TWFExportProjectView, \
-    TWFExportOverviewView, TWFExportTagsView, TWFExportDictionariesView, TWFImportDictionaryView
+    TWFExportOverviewView, TWFExportTagsView, TWFExportDictionariesView, TWFImportDictionaryView, \
+    TWFExportConfigurationView
 from twf.views.metadata.views_metadata import TWFMetadataReviewDocumentsView, \
     TWFMetadataLoadDataView, TWFMetadataExtractTagsView, TWFMetadataReviewPagesView, TWFMetadataOverviewView, \
     TWFMetadataLoadSheetsDataView
@@ -200,6 +201,7 @@ urlpatterns = [
     #############################
     # EXPORT
     path('export/', TWFExportOverviewView.as_view(), name='export_overview'),
+    path('export/configuration/', TWFExportConfigurationView.as_view(), name='export_configure'),
     path('export/documents/', TWFExportDocumentsView.as_view(), name='export_documents'),
     path('export/collections/', TWFExportCollectionsView.as_view(), name='export_collections'),
     path('export/project/', TWFExportProjectView.as_view(), name='export_project'),
@@ -244,6 +246,8 @@ urlpatterns = [
 
     path('celery/collections/batch/openai/', start_openai_collection_batch, name='task_collection_batch_openai'),
     path('celery/collections/request/openai/', start_openai_collection_request, name='task_collection_request_openai'),
+
+
 
     #############################
     # AJAX CALLS

@@ -378,6 +378,12 @@ def get_available_actions(project=None, profile=None, for_group=None):
             "description": "User is allowed to import a dictionary.",
             "default_for": ["manager"]
         },
+        "export_configure": {
+            "group": "import_export",
+            "label": "Export configurations",
+            "description": "User is allowed change export configurations.",
+            "default_for": ["manager"]
+        },
         "export_documents": {
             "group": "import_export",
             "label": "Export documents",
