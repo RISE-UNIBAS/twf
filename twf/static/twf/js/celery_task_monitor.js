@@ -76,6 +76,20 @@
                     progressBar.addClass('bg-success'); // Change the progress bar color to red
                     progressBar.text('Completed');
                     $(logTextareaId).append('Task completed\n' + data.result.text + '\n');
+                    console.log('Task completed:', data.result);
+                    if (data.result.download_url) {
+                        $(logTextareaId).append("Click here to download: " + data.result.download_url + "\n");
+
+                        // Automatically trigger file download
+                        const downloadLink = document.createElement("a");
+                        downloadLink.href = data.result.download_url;
+                        downloadLink.download = "exported_documents.zip"; // Default name
+                        document.body.appendChild(downloadLink);
+                        downloadLink.click();
+                        document.body.removeChild(downloadLink);
+                        console.log('Download link clicked');
+                    }
+
                     scrollToBottom(logTextareaId);
                 } else if (status === 'FAILURE') {
                     progressBar.css('width', '100%');

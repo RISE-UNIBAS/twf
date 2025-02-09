@@ -249,7 +249,14 @@ class Project(TimeStampedModel):
         return self.conf_credentials.get(service, {})
 
     def get_export_configuration(self, service, return_json=True):
-        """Return the export configuration for a service."""
+        """Return the export configuration for a service.
+
+        Available services
+        ------------------
+        - document_export_configuration: The document export configuration.
+        - page_export_configuration: The page export configuration.
+        - project_export_configuration: The project export configuration.
+        """
         if return_json:
             value = self.conf_export.get(service, None)
             if value:

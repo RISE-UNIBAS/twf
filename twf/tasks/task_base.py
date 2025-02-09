@@ -128,7 +128,12 @@ def end_task(broker, task, text, description=None, meta=None):
     else:
         task.meta = {}
     task.save()
-    broker.update_state(state='SUCCESS', meta={'current': 100, 'total': 100, 'text': text})
+
+    task_meta = {'current': 100, 'total': 100, 'text': text}
+    if "download_url" in task.meta:
+        task_meta["download_url"] = task.meta["download_url"]
+
+    broker.update_state(state='SUCCESS', meta=task_meta)
 
 
 def fail_task(broker, task, text, exception, meta=None):
