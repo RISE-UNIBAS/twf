@@ -8,6 +8,7 @@ from django.http import JsonResponse, HttpResponse
 from django.views.generic import FormView
 
 from twf.forms.dictionaries.dictionary_forms import DictionaryImportForm
+from twf.forms.export_forms import ExportDocumentsForm, ExportCollectionsForm
 from twf.forms.project.project_forms import ExportSettingsForm
 from twf.utils.create_export_utils import create_data, flatten_dict_keys
 from twf.utils.export_utils import get_dictionary_json_data, get_dictionary_csv_data, get_tags_json_data, \
@@ -164,11 +165,22 @@ class TWFExportConfigurationView(FormView, TWFExportView):
         return JsonResponse({'status': 'error', 'errors': form.errors}, status=400)
 
 
-class TWFExportDocumentsView(TWFExportView):
+class TWFExportDocumentsView(FormView, TWFExportView):
     """View for the export overview."""
 
     template_name = "twf/export/export_documents.html"
     page_title = 'Export Documents'
+    form_class = ExportDocumentsForm
+    success_url = reverse_lazy('twf:export_documents')
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['project'] = self.get_project()
+
+        kwargs['data-start-url'] = reverse_lazy('twf:task_export_documents')
+        kwargs['data-message'] = "Are you sure you want to export documents?"
+
+        return kwargs
 
     def get_context_data(self, **kwargs):
         """Get the context data for the view."""
@@ -179,19 +191,17 @@ class TWFExportCollectionsView(FormView, TWFExportView):
     """View for exporting collections."""
     template_name = "twf/export/export_collections.html"
     page_title = 'Export Collections'
-    form_class = ExportSettingsForm
+    form_class = ExportCollectionsForm
     success_url = reverse_lazy('twf:export_collections')
 
-    def form_valid(self, form):
-        project = self.get_project()
-        # Start the export process using Celery
-        # task = export_data_task.delay(project.id, export_type, export_format, schema)
-        # Return the task ID for progress tracking (assuming this view is called via AJAX)
-        return JsonResponse({'status': 'success', 'task_id': 0}) # task.id})
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['project'] = self.get_project()
 
-    def form_invalid(self, form):
-        # If the form is invalid, return the errors
-        return JsonResponse({'status': 'error', 'errors': form.errors}, status=400)
+        kwargs['data-start-url'] = reverse_lazy('twf:task_export_collections')
+        kwargs['data-message'] = "Are you sure you want to export collections?"
+
+        return kwargs
 
 
 class TWFExportDictionariesView(TWFExportView):
@@ -270,7 +280,7 @@ class TWFExportTagsView(TWFExportView):
         return context
 
 
-class TWFExportProjectView(TWFExportView):
+class TWFExportProjectView(FormView, TWFExportView):
     """View for exporting a project"""
 
     template_name = "twf/export/export_project.html"
@@ -280,6 +290,15 @@ class TWFExportProjectView(TWFExportView):
         """Get the context data for the view."""
         context = super().get_context_data(**kwargs)
         return context
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['project'] = self.get_project()
+
+        kwargs['data-start-url'] = reverse_lazy('twf:task_export_project')
+        kwargs['data-message'] = "Are you sure you want to export your project?"
+
+        return kwargs
 
 
 class TWFImportDictionaryView(FormView, TWFExportView):

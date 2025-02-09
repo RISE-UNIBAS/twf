@@ -437,6 +437,14 @@ class Document(TimeStampedModel):
         """Return the active pages of the document."""
         return self.pages.filter(is_ignored=False)
 
+    def get_text(self):
+        text = ""
+        for page in self.pages.all():
+            for element in page.parsed_data['elements']:
+                if "text" in element:
+                    text += element['text'] + "\n"
+        return text
+
     def __str__(self):
         """Return the string representation of the Document."""
         if self.title:

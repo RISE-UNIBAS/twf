@@ -5,7 +5,7 @@ from celery import shared_task
 
 from twf.clients.google_sheets_client import GoogleSheetsClient
 from twf.models import Project, Document, User, Page
-from twf.tasks.task_base import start_task, fail_task, update_task, end_task
+from twf.tasks.task_base import start_task, fail_task, update_task, end_task, get_project_and_user
 
 
 @shared_task(bind=True)
@@ -13,19 +13,12 @@ def load_json_metadata(self, project_id, user_id, data_file, data_target_type, j
     """This function loads metadata from a JSON file."""
 
     try:
-        project = Project.objects.get(pk=project_id)
-    except Project.DoesNotExist as e:
-        self.update_state(state='FAILURE', meta={'error': f'Project with ID {project_id} not found.'})
-        raise ValueError(f'Project with ID {project_id} not found.') from e
+        project, user = get_project_and_user(project_id, user_id)
+    except ValueError as e:
+        raise ValueError(str(e)) from e
 
     task, percentage_complete = start_task(self, project, user_id, "Load Metadata from JSON File",
                                            text="Starting to load metadata from Json File...")
-
-    try:
-        user = User.objects.get(pk=user_id)
-    except User.DoesNotExist as e:
-        fail_task(self, task, f'User with ID {user_id} not found.', e)
-        raise ValueError(f'User with ID {user_id} not found.') from e
 
     # Open uploaded file and read the content as json
     data = data_file.read()
@@ -76,19 +69,13 @@ def load_sheets_metadata(self, project_id, user_id):
     :param user_id: User ID"""
 
     try:
-        project = Project.objects.get(pk=project_id)
-    except Project.DoesNotExist as e:
-        self.update_state(state='FAILURE', meta={'error': f'Project with ID {project_id} not found.'})
-        raise ValueError(f'Project with ID {project_id} not found.') from e
+        project, user = get_project_and_user(project_id, user_id)
+    except ValueError as e:
+        raise ValueError(str(e)) from e
+
 
     task, percentage_complete = start_task(self, project, user_id, "Load Metadata from Google Sheets",
                                            text="Starting to load metadata from Google Sheets...")
-
-    try:
-        user = User.objects.get(pk=user_id)
-    except User.DoesNotExist as e:
-        fail_task(self, task, f'User with ID {user_id} not found.', e)
-        raise ValueError(f'User with ID {user_id} not found.') from e
 
     sheets_configuration = project.get_task_configuration('google_sheet')
     auth_json = 'transkribusWorkflow/google_key.json'

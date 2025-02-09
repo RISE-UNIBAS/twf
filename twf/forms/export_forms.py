@@ -3,6 +3,44 @@ from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Submit, Column, Div, Row
 from django import forms
 
+from twf.forms.base_batch_forms import BaseBatchForm
+
+
+class ExportDocumentsForm(BaseBatchForm):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def get_button_label(self):
+        return 'Export Documents'
+
+    def get_dynamic_fields(self):
+        return []
+
+
+class ExportCollectionsForm(BaseBatchForm):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def get_button_label(self):
+        return 'Export Collection'
+
+    def get_dynamic_fields(self):
+        return []
+
+
+class ExportProjectForm(BaseBatchForm):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def get_button_label(self):
+        return 'Export Project'
+
+    def get_dynamic_fields(self):
+        return []
+
 
 class ExportDataForm(forms.Form):
     """Form for exporting data."""

@@ -4,9 +4,35 @@ import csv
 import pandas as pd
 from celery import shared_task
 from twf.models import Project
+from twf.tasks.task_base import get_project_and_user
 
 
 @shared_task(bind=True)
+def export_documents_task(self, project_id, user_id):
+    try:
+        project, user = get_project_and_user( project_id, user_id)
+    except ValueError as e:
+        raise ValueError(str(e)) from e
+
+
+@shared_task(bind=True)
+def export_collections_task(self, project_id, user_id):
+    try:
+        project, user = get_project_and_user(project_id, user_id)
+    except ValueError as e:
+        raise ValueError(str(e)) from e
+
+
+
+@shared_task(bind=True)
+def export_project_task(self, project_id, user_id):
+    try:
+        project, user = get_project_and_user(project_id, user_id)
+    except ValueError as e:
+        raise ValueError(str(e)) from e
+
+
+
 def export_data_task(self, project_id, export_type, export_format, schema):
     """Export data from a project.
     :param self: Celery task

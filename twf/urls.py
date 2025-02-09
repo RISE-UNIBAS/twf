@@ -6,7 +6,8 @@ from twf.tasks.task_status import task_status_view, task_cancel_view, task_remov
 from twf.tasks.task_triggers import start_tags_creation, start_extraction, start_gnd_batch, start_geonames_batch, \
     start_wikidata_batch, start_openai_batch, start_gnd_request, start_geonames_request, start_wikidata_request, \
     start_openai_request, start_gemini_doc_batch, start_openai_doc_batch, start_claude_doc_batch, start_sheet_metadata, \
-    start_openai_collection_batch, start_openai_collection_request, start_json_metadata, start_copy_project
+    start_openai_collection_batch, start_openai_collection_request, start_json_metadata, start_copy_project, \
+    start_export_documents, start_export_collections, start_export_project
 from twf.views.ajax.views_ajax_field_validation import validate_page_field, validate_document_field
 from twf.views.ajax.views_ajax_transkribus_export import ajax_transkribus_request_export, \
     ajax_transkribus_reset_export, ajax_transkribus_request_export_status
@@ -247,7 +248,9 @@ urlpatterns = [
     path('celery/collections/batch/openai/', start_openai_collection_batch, name='task_collection_batch_openai'),
     path('celery/collections/request/openai/', start_openai_collection_request, name='task_collection_request_openai'),
 
-
+    path('celery/export/documents/', start_export_documents, name='task_export_documents'),
+    path('celery/export/collections/', start_export_collections, name='task_export_collections'),
+    path('celery/export/project/', start_export_project, name='task_export_project'),
 
     #############################
     # AJAX CALLS

@@ -8,37 +8,23 @@ from twf.clients.gnd_client import search_gnd
 from twf.clients.simple_ai_clients import AiApiClient
 from twf.clients.wikidata_client import search_wikidata_entities
 from twf.models import Dictionary, User, Project
-from twf.tasks.task_base import start_task, update_task, end_task, fail_task
-
-
-def get_dictionary_and_user(broker, task, dictionary_id, user_id):
-    """Get the dictionary and user objects
-    :param broker: Celery broker
-    :param task: Task object
-    :param dictionary_id: Dictionary ID
-    :param user_id: User ID"""
-    try:
-        dictionary = Dictionary.objects.get(id=dictionary_id)
-        user = User.objects.get(id=user_id)
-        number_of_entries = dictionary.entries.count()
-        return dictionary, user, number_of_entries
-    except Dictionary.DoesNotExist as e:
-        fail_task(broker, task, f"Dictionary not found: {dictionary_id}", e)
-    except User.DoesNotExist as e:
-        fail_task(broker, task, f"User not found: {user_id}", e)
-    except Exception as e:
-        fail_task(broker, task, f"NBot found dict={dictionary_id}, user={user_id}", e)
+from twf.tasks.task_base import start_task, update_task, end_task, fail_task, get_dictionary_and_user
 
 
 @shared_task(bind=True)
 def search_gnd_entries(self, project_id, dictionary_id, user_id,
                        earliest_birth_year, latest_birth_year, show_empty):
     """ Search for entities using the GND API for all entries in a dictionary"""
-    project = Project.objects.get(id=project_id)
+    try:
+        dictionary, user = get_dictionary_and_user(dictionary_id, user_id)
+        project = dictionary.project
+        number_of_entries = dictionary.entries.count()
+    except ValueError as e:
+        raise ValueError(str(e)) from e
+
     task, percentage_complete = start_task(self, project, user_id, text="Starting GND Search...",
                                            title="Dictionary GND Search")
 
-    dictionary, user, number_of_entries = get_dictionary_and_user(self, task, dictionary_id, user_id)
     processed_entries = 0
     found_entries = 0
     for entry in dictionary.entries.all():
@@ -81,11 +67,15 @@ def search_gnd_entries(self, project_id, dictionary_id, user_id,
 @shared_task(bind=True)
 def search_wikidata_entries(self, project_id, dictionary_id, user_id, entity_type, language):
     """ Search for entities using the Wikidata API for all entries in a dictionary"""
-    project = Project.objects.get(id=project_id)
+    try:
+        dictionary, user = get_dictionary_and_user(dictionary_id, user_id)
+        project = dictionary.project
+    except ValueError as e:
+        raise ValueError(str(e)) from e
+
     task, percentage_complete = start_task(self, project, user_id, text="Starting Wikidata Search...",
                                            title="Dictionary Wikidata Search")
 
-    dictionary, user, number_of_entries = get_dictionary_and_user(self, task, dictionary_id, user_id)
     number_of_entries = dictionary.entries.count()
     processed_entries = 0
     found_entries = 0
@@ -113,11 +103,16 @@ def search_wikidata_entries(self, project_id, dictionary_id, user_id, entity_typ
 def search_geonames_entries(self, project_id, dictionary_id, user_id, geonames_username,
                             country_restriction, similarity_threshold):
     """ Search for locations using the GeoNames API for all entries in a dictionary"""
-    project = Project.objects.get(id=project_id)
+    try:
+        dictionary, user = get_dictionary_and_user(dictionary_id, user_id)
+        project = dictionary.project
+        number_of_entries = dictionary.entries.count()
+    except ValueError as e:
+        raise ValueError(str(e)) from e
+
     task, percentage_complete = start_task(self, project, user_id, text="Starting Geonames Search...",
                                            title="Dictionary Geonames Search")
 
-    dictionary, user, number_of_entries = get_dictionary_and_user(self, task, dictionary_id, user_id)
     if country_restriction == '':
         country_restriction = None
 
@@ -150,19 +145,24 @@ def search_geonames_entries(self, project_id, dictionary_id, user_id, geonames_u
 
 @shared_task(bind=True)
 def search_openai_entries(self, project_id, dictionary_id, user_id, prompt):
-    project = Project.objects.get(id=project_id)
     """ Search for entities using the Openai API for all entries in a dictionary
     :param self: Celery task object
     :param project_id: Project ID
     :param dictionary_id: Dictionary ID
     :param user_id: User ID
     :param prompt: Openai prompt template"""
+    try:
+        dictionary, user = get_dictionary_and_user(dictionary_id, user_id)
+        project = dictionary.project
+        number_of_entries = dictionary.entries.count()
+    except ValueError as e:
+        raise ValueError(str(e)) from e
+
     task, percentage_complete = start_task(self, project, user_id, text="Starting Openai Search...",
                                            title="Dictionary Openai Search")
 
     client = AiApiClient('openai', project.get_credentials('openai').get('api_key'))
 
-    dictionary, user, number_of_entries = get_dictionary_and_user(self, task, dictionary_id, user_id)
     processed_entries = 0
     for entry in dictionary.entries.all():
         # Perform Openai search for each entry
@@ -189,6 +189,7 @@ def search_openai_entries(self, project_id, dictionary_id, user_id, prompt):
 def search_gnd_entry(self, project_id, dictionary_id, user_id,
                      earliest_birth_year, latest_birth_year, show_empty):
     """Search for a single entry in the GND API"""
+    #TODO Implement the search_gnd_entry task
     try:
         # Fetch the dictionary
         dictionary = Dictionary.objects.get(id=dictionary_id)
@@ -212,6 +213,7 @@ def search_gnd_entry(self, project_id, dictionary_id, user_id,
 @shared_task(bind=True)
 def search_geonames_entry(self, project, dictionary_id, user_id):
     """Search for a single entry in the Geonames API"""
+    #TODO Implement the search_geonames_entry task
     try:
         # Fetch the dictionary
         dictionary = Dictionary.objects.get(id=dictionary_id)
@@ -235,6 +237,7 @@ def search_geonames_entry(self, project, dictionary_id, user_id):
 @shared_task(bind=True)
 def search_wikidata_entry(self, project, dictionary_id, user_id):
     """Search for a single entry in the Wikidata API"""
+    #TODO Implement the search_wikidata_entry task
     try:
         # Fetch the dictionary
         dictionary = Dictionary.objects.get(id=dictionary_id)

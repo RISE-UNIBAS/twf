@@ -2,7 +2,62 @@
 import traceback
 
 from django.utils import timezone
-from twf.models import Task
+from twf.models import Task, Project, User, Dictionary, Collection
+
+
+def get_user(user_id):
+    """Get the user object
+    :param user_id: User ID
+    :return: User object"""
+    try:
+        user = User.objects.get(id=user_id)
+        return user
+    except User.DoesNotExist as e:
+        raise ValueError(str(e)) from e
+    except Exception as e:
+        raise ValueError(str(e)) from e
+
+def get_dictionary_and_user(dictionary_id, user_id):
+    """Get the dictionary and user objects
+    :param dictionary_id: Dictionary ID
+    :param user_id: User ID
+    :return: Dictionary object, User object"""
+    try:
+        dictionary = Dictionary.objects.get(id=dictionary_id)
+        user = get_user(user_id)
+        return dictionary, user
+    except Dictionary.DoesNotExist as e:
+        raise ValueError(str(e)) from e
+    except Exception as e:
+        raise ValueError(str(e)) from e
+
+def get_collection_and_user(collection_id, user_id):
+    """Get the collection and user objects
+    :param collection_id: Collection ID
+    :param user_id: User ID
+    :return: Collection object, User object"""
+    try:
+        collection = Collection.objects.get(id=collection_id)
+        user = get_user(user_id)
+        return collection, user
+    except Collection.DoesNotExist as e:
+        raise ValueError(str(e)) from e
+    except Exception as e:
+        raise ValueError(str(e)) from e
+
+def get_project_and_user(project_id, user_id):
+    """Get the project and user objects
+    :param project_id: Project ID
+    :param user_id: User ID
+    :return: Project object, User object, number of documents"""
+    try:
+        project = Project.objects.get(id=project_id)
+        user = get_user(user_id)
+        return project, user
+    except Project.DoesNotExist as e:
+        raise ValueError(str(e)) from e
+    except Exception as e:
+        raise ValueError(str(e)) from e
 
 
 def start_task(broker, project, user_id, title="Task Title",

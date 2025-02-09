@@ -1,44 +1,10 @@
 """Celery tasks for processing documents in a project."""
 from celery import shared_task
+from sphinx.addnodes import document
 
 from twf.clients.simple_ai_clients import AiApiClient
 from twf.models import User, Project
-from twf.tasks.task_base import start_task, update_task, end_task, fail_task
-
-
-def get_project_and_user(broker, task, project_id, user_id):
-    """Get the project and user objects
-    :param broker: Celery broker
-    :param task: Celery task
-    :param project_id: Project ID
-    :param user_id: User ID
-    :return: Project object, User object, number of documents"""
-    try:
-        project = Project.objects.get(id=project_id)
-        user = User.objects.get(id=user_id)
-        number_of_documents = project.documents.count()
-        return project, user, number_of_documents
-    except Project.DoesNotExist as e:
-        fail_task(broker, task, f"Project not found: {project_id}", e)
-        raise ValueError(str(e)) from e
-    except User.DoesNotExist as e:
-        fail_task(broker, task, f"User not found: {user_id}", e)
-        raise ValueError(str(e)) from e
-    except Exception as e:
-        fail_task(broker, task, str(e), e)
-        raise ValueError(str(e)) from e
-
-
-def get_text_from_document(document):
-    """Get the text from a document
-    :param document: Document object
-    :return: Text from the document"""
-    text = ""
-    for page in document.pages.all():
-        for element in page.parsed_data['elements']:
-            if "text" in element:
-                text += element['text'] + "\n"
-    return text
+from twf.tasks.task_base import start_task, update_task, end_task, fail_task, get_project_and_user
 
 
 @shared_task(bind=True)
@@ -50,12 +16,16 @@ def search_openai_for_docs(self, project_id, user_id, prompt, role_description):
     :param prompt: Prompt text
     :param role_description: Role description for the AI model"""
 
-    project = Project.objects.get(id=project_id)
+    try:
+        project, user = get_project_and_user(project_id, user_id)
+        number_of_documents = project.documents.count()
+    except ValueError as e:
+        raise ValueError(str(e)) from e
+
     openai_credentials = project.get_credentials('openai')
     task, percentage_complete = start_task(self, project, user_id, text="Starting OpenAI Search...",
                                            title="Project Documents OpenAI Search")
 
-    project, user, number_of_documents = get_project_and_user(self, task, project_id, user_id)
     client = AiApiClient(api='openai',
                          api_key=openai_credentials['api_key'],
                          gpt_role_description=role_description)
@@ -66,7 +36,7 @@ def search_openai_for_docs(self, project_id, user_id, prompt, role_description):
                                                 processed_documents, number_of_documents)
 
         # Perform OpenAI search for each document
-        context = get_text_from_document(document)
+        context = document.get_text()
         prompt = prompt + "\n\n" + "Context:\n" + context
         response, elapsed_time = client.prompt(model=openai_credentials['default_model'],
                                                prompt=prompt)
@@ -88,12 +58,17 @@ def search_gemini_for_docs(self, project_id, user_id, prompt, role_description):
     :param user_id: User ID
     :param prompt: Prompt text
     :param role_description: Role description for the AI model"""
-    project = Project.objects.get(id=project_id)
+
+    try:
+        project, user = get_project_and_user(project_id, user_id)
+        number_of_documents = project.documents.count()
+    except ValueError as e:
+        raise ValueError(str(e)) from e
+
     genai_credentials = project.get_credentials('genai')
     task, percentage_complete = start_task(self, project, user_id, text="Starting Gemini Search...",
                                            title="Project Documents Gemini Search")
 
-    project, user, number_of_documents = get_project_and_user(self, task, project_id, user_id)
     client = AiApiClient(api='genai',
                          api_key=genai_credentials['api_key'],
                          gpt_role_description=role_description)
@@ -103,7 +78,7 @@ def search_gemini_for_docs(self, project_id, user_id, prompt, role_description):
         task, percentage_complete = update_task(self, task, f'Gemini Search in progress for document {document.id}...',
                                                 processed_documents, number_of_documents)
 
-        context = get_text_from_document(document)
+        context = document.get_text()
         prompt = prompt + "\n\n" + "Context:\n" + context
         response, elapsed_time = client.prompt(model=genai_credentials['default_model'],
                                                prompt=prompt)
@@ -126,12 +101,16 @@ def search_claude_for_docs(self, project_id, user_id, prompt, role_description):
     :param prompt: Prompt text
     :param role_description: Role description for the AI model"""
 
-    project = Project.objects.get(id=project_id)
+    try:
+        project, user = get_project_and_user(project_id, user_id)
+        number_of_documents = project.documents.count()
+    except ValueError as e:
+        raise ValueError(str(e)) from e
+
     anthropic_credentials = project.get_credentials('anthropic')
     task, percentage_complete = start_task(self, project, user_id, text="Starting Claude Search...",
                                            title="Project Documents Claude Search")
 
-    project, user, number_of_documents = get_project_and_user(self, task, project_id, user_id)
     client = AiApiClient(api='anthropic',
                          api_key=anthropic_credentials['api_key'],
                          gpt_role_description=role_description)
@@ -142,7 +121,7 @@ def search_claude_for_docs(self, project_id, user_id, prompt, role_description):
                                                 processed_documents, number_of_documents)
 
         # Perform Gemini search for each document
-        context = get_text_from_document(document)
+        context = document.get_text()
 
         prompt = prompt + "\n\n" + "Context:\n" + context
         response, elapsed_time = client.prompt(model=anthropic_credentials['default_model'],

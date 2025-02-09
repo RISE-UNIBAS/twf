@@ -9,6 +9,7 @@ from twf.tasks.dictionary_tasks import search_gnd_entries, search_geonames_entri
 from twf.tasks.metadata_tasks import load_sheets_metadata, load_json_metadata
 from twf.tasks.tags_tasks import create_page_tags
 from twf.tasks.project_tasks import copy_project
+from twf.tasks.export_tasks import export_documents_task, export_collections_task, export_project_task
 from twf.views.views_base import TWFView
 
 
@@ -246,4 +247,26 @@ def start_copy_project(request):
 
     # Trigger the task
     task = copy_project.delay(project.id, user_id, new_project_name)
+    return JsonResponse({'status': 'success', 'task_id': task.id})
+
+
+def start_export_documents(request):
+    project = TWFView.s_get_project(request)
+    user_id = request.user.id
+
+    task = export_documents_task.delay(project.id, user_id)
+    return JsonResponse({'status': 'success', 'task_id': task.id})
+
+def start_export_collections(request):
+    project = TWFView.s_get_project(request)
+    user_id = request.user.id
+
+    task = export_collections_task.delay(project.id, user_id)
+    return JsonResponse({'status': 'success', 'task_id': task.id})
+
+def start_export_project(request):
+    project = TWFView.s_get_project(request)
+    user_id = request.user.id
+
+    task = export_project_task.delay(project.id, user_id)
     return JsonResponse({'status': 'success', 'task_id': task.id})
