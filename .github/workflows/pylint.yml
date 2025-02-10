@@ -52,10 +52,10 @@ jobs:
       run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
-          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
+          git remote set-url origin https://x-access-token:${{ secrets.PAT_TOKEN }}@github.com/${{ github.repository }}.git
     - name: Commit and Push Changes
       run: |
           git pull
           git add README.md
           git diff-index --quiet HEAD || git commit -m "Update Pylint Score Badge"
-          git push
+          git push origin master --force
