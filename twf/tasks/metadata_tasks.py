@@ -1,5 +1,6 @@
 """This module contains Celery tasks for loading metadata from Google Sheets."""
 import json
+import os
 
 from celery import shared_task
 
@@ -7,9 +8,18 @@ from twf.clients.google_sheets_client import GoogleSheetsClient
 from twf.models import Project, Document, User, Page
 from twf.tasks.task_base import start_task, fail_task, update_task, end_task, get_project_and_user
 
+def store_metadata(project, doc_id, metadata, user):
+    try:
+        document = project.documents.filter(document_id=doc_id).first()
+        if document:
+            document.metadata['json_import'] = metadata
+            document.save(current_user=user)
+    except Exception as e:
+        print(f"Error while storing metadata: {str(e)}")
+
 
 @shared_task(bind=True)
-def load_json_metadata(self, project_id, user_id, data_file, data_target_type, json_data_key, match_to_field):
+def load_json_metadata(self, project_id, user_id, data_file_path, data_target_type, json_data_key, match_to_field):
     """This function loads metadata from a JSON file."""
 
     try:
@@ -21,42 +31,49 @@ def load_json_metadata(self, project_id, user_id, data_file, data_target_type, j
                                            text="Starting to load metadata from Json File...")
 
     # Open uploaded file and read the content as json
-    data = data_file.read()
-    data = json.loads(data)
+    try:
+        # Read the saved file
+        with open(data_file_path, 'r', encoding='utf-8') as file:
+            data = json.load(file)
+    except Exception as e:
+        fail_task(self, task, f"Error while reading the file: {str(e)}")
 
-    # Iterate over the data and save the metadata
-    for item in data:
-        id_value_of_item = item[json_data_key]
+    if isinstance(data, list):
+        for item in data:
+            if not isinstance(item, dict):
+                fail_task(self, task, "Invalid format: List elements must be dictionaries.")
+                return
+            if match_to_field not in item:
+                fail_task(self, task, f"Missing required identifier field '{match_to_field}' in list format.")
+                return
 
-        if data_target_type == 'document':
-            try:
-                document = None
-                if match_to_field == 'dbid':
-                    document = Document.objects.get(project=project, id=id_value_of_item)
-                elif match_to_field == 'docid':
-                    document = Document.objects.get(project=project, document_id=id_value_of_item)
-                    print("Found document", document)
-                if document:
-                    document.metadata['import'] = item
-                    document.save(current_user=self.request.user)
-                    print("Saved document", document)
+    elif isinstance(data, dict):
+        for key, value in data.items():
+            if not isinstance(value, dict):
+                fail_task(self, task, "Invalid format: Dictionary values must be dictionaries.")
+                return
+    else:
+        fail_task(self, task, "Invalid JSON structure: Expected a list or a dictionary.")
+        return
 
-            except Document.DoesNotExist:
-                print(f"Document with {match_to_field} {id_value_of_item} does not exist.")
+    # Process metadata
+    processed_count = 0
+    if isinstance(data, list):
+        for item in data:
+            doc_id = item.get(match_to_field)
+            if not doc_id:
+                continue  # Skip if no valid document ID
+            metadata = item  # Use the full dictionary as metadata
+            store_metadata(project, doc_id, metadata, user)  # Implement this function
+            processed_count += 1
 
-        elif data_target_type == 'page':
-            try:
-                page = None
-                if match_to_field == 'dbid':
-                    page = Page.objects.get(document__project=project, id=id_value_of_item)
-                elif match_to_field == 'docid':
-                    page = Page.objects.get(document__project=project, dbid=id_value_of_item)
-                if page:
-                    page.metadata['import'] = item
-                    page.save(current_user=self.request.user)
-            except Page.DoesNotExist:
-                print(f"Page with {match_to_field} {id_value_of_item} does not exist.")
+    elif isinstance(data, dict):
+        for doc_id, metadata in data.items():
+            store_metadata(project, doc_id, metadata, user)  # Implement this function
+            processed_count += 1
 
+    # Clean up temporary file
+    os.remove(data_file_path)
 
     end_task(self, task, "Finished loading metadata from JSON File.")
 

@@ -8,7 +8,7 @@ from django.views.generic import FormView
 
 from twf.forms.dynamic_forms import DynamicForm
 from twf.forms.metadata_forms import LoadMetadataForm, ExtractMetadataValuesForm, LoadSheetsMetadataForm
-from twf.models import Page, Document, PageTag
+from twf.models import Page, Document, PageTag, Variation
 from twf.views.views_base import TWFView
 
 
@@ -153,34 +153,64 @@ class TWFMetadataExtractTagsView(FormView, TWFMetadataView):
         # Get the project
         project = self.get_project()
 
-        # Get the json data key
+        # Get the json data key and the dictionary
+        extract_from = 'documents'  # form.cleaned_data['extract_from']
         json_data_key = form.cleaned_data['json_data_key']
-
-
-        # Get the dictionary
         dictionary = form.cleaned_data['dictionary']
+        extracted_values = 0
 
-        data = Page.objects.filter(document__project=project)
+        if extract_from == 'documents':
+            data = Document.objects.filter(project=project)
+            for doc in data:
+                if 'json_import' in doc.metadata:
+                    metadata = doc.metadata['json_import']
+                    if json_data_key in metadata:
+                        page = doc.pages.order_by('tk_page_number').first()
 
-        # Loop through the data
-        for item in data:
-            # Get the metadata
-            metadata = item.metadata
-            page_tags = item.tags.filter(variation_type=json_data_key)
-            page_tags.delete()
+                        if page.tags.filter(variation=metadata[json_data_key]).exists():
+                            page.tags.filter(variation=metadata[json_data_key]).delete()
 
-            # Check if the json data key exists
-            if json_data_key in metadata:
-                # Get the value
-                value = metadata[json_data_key]
-                if value and not value.strip() == '':
-                    new_tag = PageTag(
-                        page=item,
-                        variation_type=json_data_key,
-                        variation=value,
-                    )
-                    new_tag.save(current_user=self.request.user)
+                        tag = PageTag(page=page,
+                                      variation=metadata[json_data_key],
+                                      variation_type=dictionary.type,
+                                      dictionary_entry=None)
+                        # Try to assign the tag to its dictionary entry
+                        variations = Variation.objects.filter(entry__dictionary=dictionary,
+                                                              variation=metadata[json_data_key])
+                        if variations.exists():
+                            tag.dictionary_entry = variations.first().entry
 
+                        tag.save(current_user=self.request.user)
+                        extracted_values += 1
+                else:
+                    print("there is no json doc metadata")
+
+        elif extract_from == 'pages':
+            data = Page.objects.filter(document__project=project)
+            for page in data:
+                if 'json_import' in page.metadata:
+                    metadata = page.metadata['json_import']
+                    if json_data_key in metadata:
+                        tag = PageTag(page=page,
+                                      variation=metadata[json_data_key],
+                                      variation_type=dictionary.type,
+                                      dictionary_entry=None)
+
+                        # Try to assign the tag to its dictionary entry
+                        variations = Variation.objects.filter(entry__dictionary=dictionary,
+                                                              variation=metadata[json_data_key])
+                        if variations.exists():
+                            tag.dictionary_entry = variations.first().entry
+
+                        tag.save(current_user=self.request.user)
+                        extracted_values += 1
+                else:
+                    print("there is no json page metadata")
+
+        else:
+            pass
+
+        messages.success(self.request, f"Extracted {extracted_values} values from the metadata.")
         return super().form_valid(form)
 
     def get_example_keys(self):

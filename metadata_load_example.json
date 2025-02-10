@@ -3,20 +3,30 @@
       "attachments": [
         "A sticky note with \"Korrespondenz\" written on it."
       ],
-      "stapled": false
+      "stapled": false,
+      "language": "de",
+      "gender": "m",
+      "profession": "baker"
     },
     "2515343": {
         "attachments": [],
-        "stapled": true
+        "stapled": true,
+        "language": "deutsch",
+        "gender": "f",
+        "profession": "teacher"
     },
     "2515211": {
         "attachments": [
             "A postcard with an unknown landscape without any."
-        ]
+        ],
+        "language": "dt.",
+        "gender": "male",
+        "profession": "maitresse"
     },
     "invalid": {
         "attachments": [
             "This is an invalid item for testing purposes."
-        ]
+        ],
+        "language": "en"
     }
 }

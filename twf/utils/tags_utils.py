@@ -15,6 +15,8 @@ def get_translated_tag_type(project, tag_type):
     if tag_type in tag_type_translator:
         return tag_type_translator[tag_type]
 
+    return tag_type
+
 
 def get_all_tag_types(project):
     """Get the distinct tag types."""

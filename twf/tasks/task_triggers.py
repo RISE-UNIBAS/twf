@@ -1,4 +1,9 @@
 """This module contains the views for triggering the Celery tasks."""
+import os
+import uuid
+
+from django.conf import settings
+from django.core.files.storage import default_storage
 from django.http import JsonResponse
 
 from twf.models import Prompt
@@ -204,12 +209,30 @@ def start_json_metadata(request):
     user_id = request.user.id
 
     data_target_type = request.POST.get('data_target_type')
-    data_file = request.FILES.get('data_file')
     json_data_key = request.POST.get('json_data_key')
     match_to_field = request.POST.get('match_to_field')
 
-    # Trigger the task
-    task = load_json_metadata.delay(project.id, user_id)
+    data_file = request.FILES.get('data_file')
+
+    if data_file:
+        # Generate a unique filename
+        file_name = f"metadata_upload_{uuid.uuid4().hex}.json"
+        file_path = os.path.join(settings.MEDIA_ROOT, "temp", file_name)
+
+        # Ensure the temp directory exists
+        os.makedirs(os.path.dirname(file_path), exist_ok=True)
+
+        # Save the file
+        with default_storage.open(file_path, 'wb') as destination:
+            for chunk in data_file.chunks():
+                destination.write(chunk)
+
+    else:
+        return JsonResponse({'status': 'error', 'message': 'No file uploaded'}, status=400)
+
+    # Trigger the task with the file path
+    task = load_json_metadata.delay(project.id, user_id, file_path, data_target_type, json_data_key, match_to_field)
+
     return JsonResponse({'status': 'success', 'task_id': task.id})
 
 

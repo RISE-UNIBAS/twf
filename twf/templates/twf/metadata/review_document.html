@@ -6,6 +6,10 @@
      <div class="border rounded bg-light mt-0 p-3">
         <h1 class="display-6">Review Document Metadata</h1>
         <p class="lead">You are reviewing document <code>db_id={{ document.id }}</code> with the document_id <code>{{ document.document_id }}</code></p>
+        <p class="small">
+            This document was created by <strong>{{ document.created_by }}</strong> at <i>{{ document.created_at }}</i>.
+            It was last modified by <strong>{{ document.modified_by }}</strong> at <i>{{ document.modified_at }}</i>.
+        </p>
         <div class="row">
             <div class="col-6">
                 {% crispy form %}

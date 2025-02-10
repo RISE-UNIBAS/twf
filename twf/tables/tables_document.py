@@ -12,8 +12,9 @@ class DocumentTable(tables.Table):
     pages = tables.Column(verbose_name="Pages", attrs={"td": {"class": "align-middle"}})
     options = tables.TemplateColumn(template_name='twf/tables/document_table_options.html',
                                     verbose_name="Options",
-                                    attrs={"td": {"class": "align-middle text-center", "width": "10%"}},
+                                    attrs={"td": {"class": "align-middle text-center", "width": "7%"}},
                                     orderable=False)
+    dates = tables.Column(accessor='created_at', verbose_name="Dates", attrs={"width": "7%"})
 
     class Meta:
         """Meta class for the DocumentTable."""
@@ -57,6 +58,24 @@ class DocumentTable(tables.Table):
             html += '</div>'
         html += '</div>'
 
+        return mark_safe(html)
+
+    def render_dates(self, record):
+        """Renders the dates column with detailed date information."""
+
+        created_at = record.created_at.strftime("%Y-%m-%d %H:%M:%S") if record.created_at else "N/A"
+        modified_at = record.modified_at.strftime("%Y-%m-%d %H:%M:%S") if record.modified_at else "N/A"
+        created_by = record.created_by.username if record.created_by else "Unknown"
+        modified_by = record.modified_by.username if record.modified_by else "Unknown"
+
+        html = f'''
+                <div class="container-fluid">
+                    <div class="row fw-bold text-secondary small">
+                        <div>Created: {created_at} by {created_by}</div>
+                        <div>Modified: {modified_at} by {modified_by}</div>
+                    </div>
+                </div>
+                '''
         return mark_safe(html)
 
     @staticmethod
