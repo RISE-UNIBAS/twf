@@ -47,8 +47,8 @@ jobs:
         echo "Version file updated"
         
         # Set up Git
-        git config --local user.email "action@github.com"
-        git config --local user.name "GitHub Action"
+        git config --local user.email "sorin.marti@gmail.com"
+        git config --local user.name "sorinmarti"
         git remote set-url origin https://x-access-token:${{ secrets.PAT_GITHUB }}@github.com/${{ github.repository }}.git
         
         # Add changes to staging
