@@ -49,12 +49,12 @@ jobs:
         # Set up Git
         git config --local user.email "action@github.com"
         git config --local user.name "GitHub Action"
-        git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
+        git remote set-url origin https://x-access-token:${{ secrets.PAT_GITHUB }}@github.com/${{ github.repository }}.git
         
         # Add changes to staging
         git add ./info.json ./twf/VERSION
         echo "Files added to Git staging"
         
         git commit -m "Bump version to $NEW_VERSION"
-        git push
+        git push origin master --force
         echo "Changes pushed"
