@@ -7,8 +7,9 @@ from django.urls import reverse_lazy
 from django.http import JsonResponse, HttpResponse
 from django.views.generic import FormView
 
+from twf.clients.zenodo_client import get_zenodo_uploads
 from twf.forms.dictionaries.dictionary_forms import DictionaryImportForm
-from twf.forms.export_forms import ExportDocumentsForm, ExportCollectionsForm
+from twf.forms.export_forms import ExportDocumentsForm, ExportCollectionsForm, ExportProjectForm, ExportZenodoForm
 from twf.forms.project.project_forms import ExportSettingsForm
 from twf.utils.create_export_utils import create_data, flatten_dict_keys
 from twf.utils.export_utils import get_dictionary_json_data, get_dictionary_csv_data, get_tags_json_data, \
@@ -62,8 +63,11 @@ class TWFExportView(LoginRequiredMixin, TWFView):
                 'options': [
                     {'url': reverse_lazy('twf:export_project'),
                      'value': 'Export Project', 'permission': 'export_project'},
+                    {'url': reverse_lazy('twf:export_to_zenodo'),
+                     'value': 'Export to Zenodo', 'permission': 'export_to_zenodo'},
                 ]
             },
+
         ]
         return sub_nav
 
@@ -285,6 +289,8 @@ class TWFExportProjectView(FormView, TWFExportView):
 
     template_name = "twf/export/export_project.html"
     page_title = 'Export Project'
+    form_class = ExportProjectForm
+    success_url = reverse_lazy('twf:export_project')
 
     def get_context_data(self, **kwargs):
         """Get the context data for the view."""
@@ -300,6 +306,27 @@ class TWFExportProjectView(FormView, TWFExportView):
 
         return kwargs
 
+class TWFExportZenodoView(FormView, TWFExportView):
+    """View for exporting a project"""
+
+    template_name = "twf/export/export_zenodo.html"
+    page_title = 'Export to Zenodo'
+    form_class = ExportZenodoForm
+    success_url = reverse_lazy('twf:export_to_zenodo')
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['project'] = self.get_project()
+
+        kwargs['data-start-url'] = reverse_lazy('twf:task_export_zenodo')
+        kwargs['data-message'] = "Are you sure you want to export your project to Zenodo?"
+
+        return kwargs
+
+    def get_context_data(self, **kwargs):
+        """Get the context data for the view."""
+        context = super().get_context_data(**kwargs)
+        return context
 
 class TWFImportDictionaryView(FormView, TWFExportView):
     """View for importing a dictionary."""

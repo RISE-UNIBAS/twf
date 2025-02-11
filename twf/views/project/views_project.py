@@ -13,7 +13,7 @@ from django.views.generic import FormView
 from twf.forms.dynamic_forms import DynamicForm
 from twf.forms.project.batch_forms import ProjectCopyBatchForm
 from twf.forms.project.project_forms import QueryDatabaseForm, GeneralSettingsForm, CredentialsForm, \
-    TaskSettingsForm, ExportSettingsForm, TaskFilterForm, PromptFilterForm
+    TaskSettingsForm, ExportSettingsForm, TaskFilterForm, PromptFilterForm, RepositorySettingsForm
 from twf.models import Page, PageTag, Project
 from twf.permissions import check_permission, get_actions_grouped_by_category, get_available_actions
 from twf.utils.project_statistics import get_document_statistics
@@ -46,6 +46,8 @@ class TWFProjectView(LoginRequiredMixin, TWFView):
                      'value': 'Task Settings', 'permission': 'change_task_settings'},
                     {'url': reverse('twf:project_settings_export'),
                      'value': 'Export Settings', 'permission': 'change_export_settings'},
+                    {'url': reverse('twf:project_settings_repository'),
+                     'value': 'Repository Settings', 'permission': 'export_to_zenodo'},
                     {'url': reverse('twf:user_management'),
                      'value': 'User Management', 'permission': 'setup_project_permissions'},
                 ]
@@ -265,6 +267,32 @@ class TWFProjectExportSettingsView(FormView, TWFProjectView):
 
         # Add a success message
         messages.success(self.request, 'Project Task settings have been updated successfully.')
+        # Redirect to the success URL
+        return super().form_valid(form)
+
+
+class TWFProjectRepositorySettingsView(FormView, TWFProjectView):
+    """View for the project repository settings."""
+
+    template_name = 'twf/project/settings/settings_repository.html'
+    page_title = 'Project Repository Settings'
+    form_class = RepositorySettingsForm
+    success_url = reverse_lazy('twf:project_settings_repository')
+
+    def get_form_kwargs(self):
+        """Get the form kwargs."""
+        kwargs = super().get_form_kwargs()
+        kwargs['instance'] = self.get_project()
+        return kwargs
+
+    def form_valid(self, form):
+        """Handle the form submission."""
+        # Save the form
+        self.object = form.save(commit=False)
+        self.object.save(current_user=self.request.user)
+
+        # Add a success message
+        messages.success(self.request, 'Project Repository settings have been updated successfully.')
         # Redirect to the success URL
         return super().form_valid(form)
 

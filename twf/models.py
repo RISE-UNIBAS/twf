@@ -236,6 +236,27 @@ class Project(TimeStampedModel):
     """A dictionary of task configurations. In order to keep these settings as dynamic as possible, they are
     stored as JSONField. The keys in the dictionary are the services, and the values are the task configurations."""
 
+    keywords = models.JSONField(default=list, blank=True,
+                                verbose_name='Keywords',
+                                help_text='Keywords for the project. These can be used for data exports.')
+    """Keywords for the project. These can be used for data exports."""
+
+    license = models.CharField(max_length=255, blank=True, default='CC BY 4.0',
+                                verbose_name='License',
+                                help_text='The license of the project. This can be used for data exports.')
+    """The license of the project. This can be used for data exports."""
+
+    version = models.CharField(max_length=255, blank=True, default='1.0',
+                               verbose_name='Version',
+                               help_text='The version of the project. This can be used for data exports.')
+
+    workflow_description = models.TextField(blank=True, default='',
+                                           verbose_name='Workflow Description',
+                                           help_text='The description of the workflow for this project.'
+                                                     'You can use Markdown to format the text.')
+    """The description of the workflow for this project. You can use Markdown to format the text."""
+
+
     def get_credentials(self, service):
         """Return the credentials for a service.
 
@@ -1074,3 +1095,20 @@ class Workflow(models.Model):
     def has_more_items(self):
         """Check if there are more items to work on."""
         return self.current_item_index+1 < self.item_count
+
+
+class Export(TimeStampedModel):
+    """Model to store export information."""
+
+    EXPORT_TYPE_CHOICES = [
+        ("documents", "Documents"),
+        ("pages", "Pages"),
+        ("collection", "Collection"),
+    ]
+
+    project = models.ForeignKey(Project, on_delete=models.CASCADE)
+    export_file = models.FileField(upload_to='exports/', blank=True, null=True)
+    export_type = models.CharField(max_length=20, choices=EXPORT_TYPE_CHOICES)
+
+    def __str__(self):
+        return f"Export - {self.export_type} - {self.created_by}"

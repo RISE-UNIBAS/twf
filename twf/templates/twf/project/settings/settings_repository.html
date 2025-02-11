@@ -1,0 +1,105 @@
+{% extends 'twf/base/base.html' %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+     <div class="border rounded bg-light mt-0 p-3">
+        <h1 class="display-6">Repository Settings</h1>
+        <p class="lead">Set the repository settings for the project.</p>
+        {% crispy form %}
+     </div>
+{% endblock %}
+
+{% block script %}
+    <script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const descriptionField = document.getElementById("workflow_description");
+        const previewDiv = document.getElementById("div_id_workflow_description_preview");
+        const generateButton = document.getElementById("generate_md");
+        const PROJECT_ID = "{{ project.id }}";
+
+        function updateMarkdownPreview() {
+            const markdownText = descriptionField.value;
+            fetch("/ajax/markdown-preview/", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": getCookie("csrftoken"),
+                },
+                body: JSON.stringify({ text: markdownText }),
+            })
+            .then(response => response.text())
+            .then(html => {
+                previewDiv.innerHTML = html;
+            })
+            .catch(error => console.error("Error:", error));
+        }
+
+        // Live update preview on input
+        descriptionField.addEventListener("input", updateMarkdownPreview);
+
+        // Generate default markdown
+        generateButton.addEventListener("click", function () {
+            fetch("/ajax/markdown-generate/", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": getCookie("csrftoken"),
+                },
+                body: JSON.stringify({ project_id: PROJECT_ID }),
+            })
+            .then(response => response.text())
+            .then(markdown => {
+                descriptionField.value = markdown;
+                updateMarkdownPreview();
+            })
+            .catch(error => console.error("Error:", error));
+        });
+
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.startsWith(name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        // Init the preview
+        updateMarkdownPreview();
+        let keywordsField = $('#id_keywords');
+
+        // Initialize Select2
+        keywordsField.select2({
+            tags: true,  // Allows adding new tags
+            width: '100%'
+        });
+
+        // load data
+        let currentKeywords = keywordsField.attr("data-value");  // Read the injected data-value
+        if (currentKeywords) {
+            try {
+                let parsedKeywords = JSON.parse(currentKeywords);  // Convert JSON string to array
+
+                // Add missing options dynamically
+                parsedKeywords.forEach(keyword => {
+                    if (!keywordsField.find(`option[value="${keyword}"]`).length) {
+                        let newOption = new Option(keyword, keyword, true, true);
+                        keywordsField.append(newOption).trigger('change');
+                    }
+                });
+                // Finally, set the values
+                keywordsField.val(parsedKeywords).trigger('change');
+            } catch (e) {
+                console.error("Error parsing keywords:", e);
+            }
+        }
+
+    });
+</script>
+{% endblock %}

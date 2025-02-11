@@ -293,3 +293,10 @@ def start_export_project(request):
 
     task = export_project_task.delay(project.id, user_id)
     return JsonResponse({'status': 'success', 'task_id': task.id})
+
+def start_export_to_zenodo(request):
+    project = TWFView.s_get_project(request)
+    user_id = request.user.id
+
+    task = export_to_zenodo_task.delay(project.id, user_id)
+    return JsonResponse({'status': 'success', 'task_id': task.id})

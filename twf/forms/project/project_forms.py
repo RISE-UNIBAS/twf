@@ -1,5 +1,7 @@
 """Forms for creating and updating project settings.
 The settings views are separated into different forms for each section of the settings."""
+import json
+
 from crispy_forms.bootstrap import TabHolder, Tab
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Submit, Layout, Row, Column, Div, HTML
@@ -8,8 +10,11 @@ from django.db.models import Subquery
 from django.forms import TextInput
 from django.template.loader import render_to_string
 from django.urls import reverse
-from django_select2.forms import Select2MultipleWidget, Select2Widget
+from django.utils.safestring import mark_safe
+from django_select2.forms import Select2MultipleWidget, Select2Widget, Select2TagWidget
+from markdown import markdown
 
+from twf.clients import zenodo_client
 from twf.models import Project, Collection, Document, CollectionItem, User, Task
 
 
@@ -132,6 +137,8 @@ class CredentialsForm(forms.ModelForm):
 
     geonames_username = forms.CharField(required=False, widget=TextInput(attrs={'placeholder': 'Geonames Username'}))
 
+    zenodo_token = forms.CharField(required=False, widget=TextInput(attrs={'placeholder': 'Zenodo Access Token'}))
+
     class Meta:
         model = Project
         fields = ['conf_credentials', 'active_tab']
@@ -154,6 +161,8 @@ class CredentialsForm(forms.ModelForm):
         self.fields['transkribus_password'].initial = conf_credentials.get('transkribus', {}).get('password', '')
 
         self.fields['geonames_username'].initial = conf_credentials.get('geonames', {}).get('username', '')
+
+        self.fields['zenodo_token'].initial = conf_credentials.get('zenodo', {}).get('zenodo_token', '')
 
         self.helper = FormHelper()
         self.helper.form_method = 'post'
@@ -189,6 +198,11 @@ class CredentialsForm(forms.ModelForm):
                     'Geonames',
                     Row(Column('geonames_username', css_class='col-12')),
                     css_id='geonames'
+                ),
+                Tab(
+                    'Zenodo',
+                    Row(Column('zenodo_token', css_class='col-12')),
+                    css_id='zenodo'
                 )
             ),
             Div(
@@ -212,7 +226,8 @@ class CredentialsForm(forms.ModelForm):
                 'username': cleaned_data.get('transkribus_username'),
                 'password': cleaned_data.get('transkribus_password')
             },
-            'geonames': {'username': cleaned_data.get('geonames_username')}
+            'geonames': {'username': cleaned_data.get('geonames_username')},
+            'zenodo': {'zenodo_token': cleaned_data.get('zenodo_token')}
         }
         return cleaned_data
 
@@ -427,7 +442,9 @@ class ExportSettingsForm(forms.ModelForm):
                     Row(
                         Column(HTML(help_text_html), css_class='col-12'),
                     ), css_id='export_settings_help'
-                ),
+                )
+            )
+            tab_holder.append(
                 Tab(
                     'Additional Data Fields',
                     Row(
@@ -452,6 +469,100 @@ class ExportSettingsForm(forms.ModelForm):
             'document_export_configuration': cleaned_data.get('document_export_configuration'),
             'page_export_configuration': cleaned_data.get('page_export_configuration')
         }
+        return cleaned_data
+
+
+class RepositorySettingsForm(forms.ModelForm):
+    """Form for updating repository settings."""
+
+    license = forms.ChoiceField(
+        choices=zenodo_client.LICENSE_CHOICES,
+        widget=Select2Widget(attrs={'style': 'width: 100%;'}),
+        required=True,
+    )
+
+    keywords = forms.JSONField(
+        widget=Select2TagWidget(attrs={'style': 'width: 100%;'}),
+        required=False,
+    )
+
+    workflow_description_preview = forms.CharField(
+        required=False,
+    )
+
+    class Meta:
+        model = Project
+        fields = ['keywords', 'license', 'version', 'workflow_description']
+        widgets = {
+            'version': TextInput(attrs={'placeholder': 'Version'}),
+            'workflow_description': forms.Textarea(attrs={'rows': 20, 'id': 'workflow_description'}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.helper = FormHelper()
+        self.helper.form_method = 'post'
+        self.helper.form_class = 'form form-control'
+
+        if self.instance and self.instance.keywords:
+            print("Loading keywords:", self.instance.keywords)
+
+            if isinstance(self.instance.keywords, str):
+                try:
+                    self.initial['keywords'] = json.loads(self.instance.keywords)  # Ensure it's a list
+                except json.JSONDecodeError:
+                    self.initial['keywords'] = []
+            else:
+                print("Setting keywords as list", self.instance.keywords)
+                self.initial['keywords'] = self.instance.keywords  # Expecting a list
+
+            # Add the value as a data attribute
+            self.fields['keywords'].widget.attrs['data-value'] = json.dumps(self.initial['keywords'])
+
+        self.helper.layout = Layout(
+            Row(
+                Column('version', css_class='form-group col-6 mb-3'),
+                Column('license', css_class='form-group col-6 mb-3'),
+                css_class='row form-row'
+            ),
+            Row(
+                Column('keywords', css_class='form-group col-12 mb-3'),
+                css_class='row form-row'
+            ),
+            Row(
+                Column(HTML(
+                    '<button type="button" class="btn btn-secondary mt-2" id="generate_md">Generate Default</button>'
+                ), css_class='form-group col-12 mb-3'),
+                css_class='row form-row'
+            ),
+            Row(
+                Column('workflow_description', css_class='form-group col-6 mb-3'),
+                Column('workflow_description_preview', css_class='form-group col-6 mb-3'),
+                css_class='row form-row'
+            ),
+            Div(
+                Submit('submit', 'Save Settings', css_class='btn btn-dark'),
+                css_class='text-end pt-3'
+            )
+        )
+
+    def clean(self):
+        cleaned_data = super().clean()
+        if 'workflow_description' in cleaned_data:
+            cleaned_data['workflow_description_preview'] = mark_safe(
+                markdown(cleaned_data['workflow_description'])
+            )
+
+        if 'keywords' in cleaned_data:
+            if isinstance(cleaned_data['keywords'], str):
+                try:
+                    cleaned_data['keywords'] = json.loads(cleaned_data['keywords'])  # Convert to list
+                except json.JSONDecodeError:
+                    cleaned_data['keywords'] = []  # Default to an empty list if parsing fails
+            elif not cleaned_data['keywords']:
+                cleaned_data['keywords'] = []  # Ensure it's an empty list instead of None
+
         return cleaned_data
 
 

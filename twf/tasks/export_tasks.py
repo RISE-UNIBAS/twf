@@ -11,7 +11,7 @@ from django.conf import settings
 from django.core.files import File
 from django.core.files.storage import default_storage
 
-from twf.models import Project
+from twf.models import Project, Export
 from twf.tasks.task_base import get_project_and_user, start_task, end_task, update_task
 from twf.utils.create_export_utils import create_data
 
@@ -96,8 +96,16 @@ def export_documents_task(self, project_id, user_id, export_single_file=True, ex
         if os.path.exists(temp_dir):
             shutil.rmtree(temp_dir)
 
+
+    export_instance = Export(
+        project=project,
+        export_file=saved_filename,  # Save the path to the file
+        export_type=export_type
+    )
+    export_instance.save(current_user=user)
+
     # 4th step: End task and return the download URL
-    download_url = f"{settings.MEDIA_URL}{saved_filename}"
+    download_url = export_instance.export_file.url
     end_task(self, task, "Export Completed", description=f"{number_of_docs} documents exported.",
              meta={"download_url": download_url})
 
@@ -117,6 +125,16 @@ def export_collections_task(self, project_id, user_id):
 
 @shared_task(bind=True)
 def export_project_task(self, project_id, user_id):
+    try:
+        project, user = get_project_and_user(project_id, user_id)
+    except ValueError as e:
+        raise ValueError(str(e)) from e
+
+    export_type = 'sql' # Can be 'sql' or 'json'
+
+
+@shared_task(bind=True)
+def export_to_zenodo_task(self, project_id, user_id):
     try:
         project, user = get_project_and_user(project_id, user_id)
     except ValueError as e:

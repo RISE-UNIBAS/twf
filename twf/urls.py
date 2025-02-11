@@ -7,8 +7,9 @@ from twf.tasks.task_triggers import start_tags_creation, start_extraction, start
     start_wikidata_batch, start_openai_batch, start_gnd_request, start_geonames_request, start_wikidata_request, \
     start_openai_request, start_gemini_doc_batch, start_openai_doc_batch, start_claude_doc_batch, start_sheet_metadata, \
     start_openai_collection_batch, start_openai_collection_request, start_json_metadata, start_copy_project, \
-    start_export_documents, start_export_collections, start_export_project
+    start_export_documents, start_export_collections, start_export_project, start_export_to_zenodo
 from twf.views.ajax.views_ajax_field_validation import validate_page_field, validate_document_field
+from twf.views.ajax.views_ajax_markdown import ajax_markdown_generate, ajax_markdown_preview
 from twf.views.ajax.views_ajax_transkribus_export import ajax_transkribus_request_export, \
     ajax_transkribus_reset_export, ajax_transkribus_request_export_status
 from twf.views.collections.views_crud import delete_collection, set_col_item_status_open, set_col_item_status_reviewed, \
@@ -39,14 +40,14 @@ from twf.views.dictionaries.views_dictionaries import TWFDictionaryOverviewView,
     TWFDictionaryAddView, TWFDictionaryMergeEntriesView, add_dictionary_to_project, remove_dictionary_from_project
 from twf.views.export.views_export import TWFExportDocumentsView, TWFExportCollectionsView, TWFExportProjectView, \
     TWFExportOverviewView, TWFExportTagsView, TWFExportDictionariesView, TWFImportDictionaryView, \
-    TWFExportConfigurationView
+    TWFExportConfigurationView, TWFExportZenodoView
 from twf.views.metadata.views_metadata import TWFMetadataReviewDocumentsView, \
     TWFMetadataLoadDataView, TWFMetadataExtractTagsView, TWFMetadataReviewPagesView, TWFMetadataOverviewView, \
     TWFMetadataLoadSheetsDataView
 from twf.views.project.views_project import select_project, TWFProjectQueryView, TWFProjectOverviewView, \
     TWFProjectTaskMonitorView, TWFProjectGeneralSettingsView, TWFProjectCredentialsSettingsView, \
     TWFProjectPromptsView, TWFProjectTaskSettingsView, TWFProjectExportSettingsView, TWFProjectCopyView, \
-    TWFProjectResetView, delete_project, close_project, TWFProjectUserManagementView
+    TWFProjectResetView, delete_project, close_project, TWFProjectUserManagementView, TWFProjectRepositorySettingsView
 from twf.views.project.views_project_ai import TWFProjectAIQueryView
 from twf.views.tags.views_tags import TWFProjectTagsView, TWFProjectTagsOpenView, \
     TWFProjectTagsParkedView, TWFProjectTagsResolvedView, TWFProjectTagsIgnoredView, TWFTagsDatesGroupView, \
@@ -103,6 +104,8 @@ urlpatterns = [
          name='project_settings_credentials'),
     path('project/settings/tasks/', TWFProjectTaskSettingsView.as_view(), name='project_settings_tasks'),
     path('project/settings/export/', TWFProjectExportSettingsView.as_view(), name='project_settings_export'),
+    path('project/settings/repositories/', TWFProjectRepositorySettingsView.as_view(),
+         name='project_settings_repository'),
     path('project/user/management/', TWFProjectUserManagementView.as_view(), name='user_management'),
 
     # Project options
@@ -206,6 +209,7 @@ urlpatterns = [
     path('export/documents/', TWFExportDocumentsView.as_view(), name='export_documents'),
     path('export/collections/', TWFExportCollectionsView.as_view(), name='export_collections'),
     path('export/project/', TWFExportProjectView.as_view(), name='export_project'),
+    path('export/zenodo/', TWFExportZenodoView.as_view(), name='export_to_zenodo'),
     path('export/tags/', TWFExportTagsView.as_view(), name='export_tags'),
 
     path('export/dictionaries/', TWFExportDictionariesView.as_view(), name='export_dictionaries'),
@@ -251,19 +255,24 @@ urlpatterns = [
     path('celery/export/documents/', start_export_documents, name='task_export_documents'),
     path('celery/export/collections/', start_export_collections, name='task_export_collections'),
     path('celery/export/project/', start_export_project, name='task_export_project'),
+    path('celery/export/zenodo/', start_export_to_zenodo, name='task_export_zenodo'),
 
     #############################
     # AJAX CALLS
-    path('ajax/transkribus/export/request/',
-         ajax_transkribus_request_export, name='ajax_transkribus_request_export'),
-    path('ajax/transkribus/export/reset/',
-         ajax_transkribus_reset_export, name='ajax_transkribus_reset_export'),
-    path('ajax/transkribus/export/status/',
-         ajax_transkribus_request_export_status, name='ajax_transkribus_request_export__status'),
-    path('ajax/transkribus/export/start/download/',
-         ajax_transkribus_download_export, name='ajax_transkribus_download_export'),
-    path('ajax/transkribus/export/monitor/download/',
-         download_progress_view, name='download_progress'),
+    path('ajax/transkribus/export/request/', ajax_transkribus_request_export,
+         name='ajax_transkribus_request_export'),
+    path('ajax/transkribus/export/reset/', ajax_transkribus_reset_export,
+         name='ajax_transkribus_reset_export'),
+    path('ajax/transkribus/export/status/', ajax_transkribus_request_export_status,
+         name='ajax_transkribus_request_export__status'),
+    path('ajax/transkribus/export/start/download/', ajax_transkribus_download_export,
+         name='ajax_transkribus_download_export'),
+    path('ajax/transkribus/export/monitor/download/', download_progress_view,
+         name='download_progress'),
+    path('ajax/markdown-generate/', ajax_markdown_generate,
+         name='ajax_markdown_generate'),
+    path('ajax/markdown-preview/', ajax_markdown_preview,
+         name='ajax_markdown_preview'),
 
     #############################
     # METADATA

@@ -414,6 +414,12 @@ def get_available_actions(project=None, profile=None, for_group=None):
             "description": "User is allowed to export a project.",
             "default_for": ["manager"]
         },
+        "export_to_zenodo": {
+            "group": "import_export",
+            "label": "Export to Zenodo",
+            "description": "User is allowed to export a project to Zenodo.",
+            "default_for": []
+        },
         ###############################
         # Task actions
         "cancel_task": {
