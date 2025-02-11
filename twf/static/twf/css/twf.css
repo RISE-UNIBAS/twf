@@ -324,3 +324,30 @@ tr[data-bs-toggle="collapse"]:hover {
 .help-overlay.show {
     right: 0;
 }
+
+/* Sidebar Default Width */
+#sidebar-container {
+    width: 250px; /* Default expanded width */
+    min-width: 250px;
+    max-width: 250px;
+    transition: width 0.3s ease-in-out;
+    overflow: hidden;
+}
+
+/* Sidebar Collapsed */
+#sidebar-container.collapsed {
+    width: 50px; /* Smaller width when collapsed */
+    min-width: 50px;
+    max-width: 50px;
+}
+
+/* Content Container (Main Content) */
+#content-container {
+    transition: margin-left 0.3s ease-in-out;
+    width: calc(100% - 250px); /* Default state with sidebar expanded */
+}
+
+/* Adjust Content When Sidebar is Collapsed */
+#sidebar-container.collapsed + #content-container {
+    width: calc(100% - 50px); /* When sidebar is collapsed */
+}
