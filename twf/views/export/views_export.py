@@ -33,6 +33,8 @@ class TWFExportView(LoginRequiredMixin, TWFView):
                 'name': 'Overview',
                 'options': [
                     {'url': reverse_lazy('twf:export_overview'), 'value': 'Export Overview'},
+                    {'url': reverse_lazy('twf:export_view_exports'),
+                     'value': 'Export List', 'permission': 'exports_download'},
                 ]
             },
             {
@@ -76,6 +78,18 @@ class TWFExportOverviewView(TWFExportView):
     """View for the export overview."""
 
     template_name = "twf/export/export_overview.html"
+    page_title = 'Export Overview'
+
+    def get_context_data(self, **kwargs):
+        """Get the context data for the view."""
+        context = super().get_context_data(**kwargs)
+        return context
+
+
+class TWFExportListView(TWFExportView):
+    """View for the export overview."""
+
+    template_name = "twf/export/export_list.html"
     page_title = 'Export Overview'
 
     def get_context_data(self, **kwargs):
