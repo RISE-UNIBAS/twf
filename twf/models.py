@@ -155,7 +155,8 @@ class Project(TimeStampedModel):
     title = models.CharField(max_length=100,
                              verbose_name='Project Title',
                              help_text='The title of the project. This can be any string, needs to be less than 100 '
-                                       'characters. Can be used in data exports.')
+                                       'characters. Can be used in data exports.',
+                             unique=True)
     """The title of the project."""
 
     collection_id = models.CharField(max_length=30,
