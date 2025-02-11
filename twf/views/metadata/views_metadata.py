@@ -81,6 +81,7 @@ class TWFMetadataOverviewView(TWFMetadataView):
         context['page_count'] = pages_with_metadata_count
         context['page_total_count'] = pages.count()
 
+        context['doc_coverage'] = documents_with_metadata_count / documents.count() * 100
         return context
 
 
