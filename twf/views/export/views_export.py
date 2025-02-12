@@ -11,6 +11,7 @@ from twf.clients.zenodo_client import get_zenodo_uploads
 from twf.forms.dictionaries.dictionary_forms import DictionaryImportForm
 from twf.forms.export_forms import ExportDocumentsForm, ExportCollectionsForm, ExportProjectForm, ExportZenodoForm
 from twf.forms.project.project_forms import ExportSettingsForm
+from twf.models import Export
 from twf.utils.create_export_utils import create_data, flatten_dict_keys
 from twf.utils.export_utils import get_dictionary_json_data, get_dictionary_csv_data, get_tags_json_data, \
     get_tags_csv_data
@@ -95,6 +96,7 @@ class TWFExportListView(TWFExportView):
     def get_context_data(self, **kwargs):
         """Get the context data for the view."""
         context = super().get_context_data(**kwargs)
+        context['exports'] = Export.objects.all().order_by('-created_at')
         return context
 
 

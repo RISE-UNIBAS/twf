@@ -256,6 +256,9 @@ class Project(TimeStampedModel):
                                                      'You can use Markdown to format the text.')
     """The description of the workflow for this project. You can use Markdown to format the text."""
 
+    project_doi = models.CharField(max_length=255, blank=True, null=True,
+                                  verbose_name='Project DOI',
+                                  help_text='The DOI of the project.')
 
     def get_credentials(self, service):
         """Return the credentials for a service.
