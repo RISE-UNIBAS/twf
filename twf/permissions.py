@@ -426,6 +426,12 @@ def get_available_actions(project=None, profile=None, for_group=None):
             "description": "User is allowed to download exports.",
             "default_for": ["manager"]
         },
+        "exports_delete": {
+            "group": "import_export",
+            "label": "Delete exports",
+            "description": "User is allowed to delete exports.",
+            "default_for": ["manager"]
+        },
         ###############################
         # Task actions
         "cancel_task": {

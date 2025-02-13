@@ -51,10 +51,10 @@ class ExportZenodoForm(BaseBatchForm):
                                           widget=Select2Widget(attrs={'style': 'width: 100%;'}),
                                           required=True)
 
-    choose_export = forms.ChoiceField(choices=[],
-                                      label='Choose Export...',
-                                      widget=Select2Widget(attrs={'style': 'width: 100%;'}),
-                                      required=True)
+    choose_export = forms.ModelChoiceField(queryset=None,
+                                           label='Choose Export...',
+                                           widget=Select2Widget(attrs={'style': 'width: 100%;'}),
+                                           required=True)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -62,6 +62,8 @@ class ExportZenodoForm(BaseBatchForm):
         existing_zenodo_uploads = get_zenodo_uploads(self.project)
         existing_repositories = [(upload['id'], upload['metadata']['title']) for upload in existing_zenodo_uploads]
         self.fields['choose_repository'].choices += existing_repositories
+
+        self.fields['choose_export'].queryset = self.project.export_set.all()
 
     def get_button_label(self):
         return 'Export Project to Zenodo'

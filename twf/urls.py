@@ -23,6 +23,7 @@ from twf.views.documents.views_documents import TWFDocumentsOverviewView, TWFDoc
     TWFDocumentCreateView, TWFDocumentNameView, TWFDocumentDetailView, TWFDocumentReviewView
 from twf.views.documents.views_documents_ai import TWFDocumentOpenAIBatchView, \
     TWFDocumentGeminiBatchView, TWFDocumentClaudeBatchView
+from twf.views.export.views_crud import delete_export
 from twf.views.home.views_home import TWFHomeView, TWFHomeLoginView, TWFHomePasswordChangeView, TWFHomeUserOverView, \
     TWFSelectProjectView, TWFHomeUserProfileView, TWFCreateProjectView, TWFManageProjectsView, TWFManageUsersView
 from twf.views.project.views_crud import delete_all_documents, delete_all_tags, delete_all_collections
@@ -206,6 +207,7 @@ urlpatterns = [
     # EXPORT
     path('export/', TWFExportOverviewView.as_view(), name='export_overview'),
     path('export/exports/', TWFExportListView.as_view(), name='export_view_exports'),
+    path('export/exports/<int:pk>/delete/', delete_export, name='export_exports_delete'),
     path('export/configuration/', TWFExportConfigurationView.as_view(), name='export_configure'),
     path('export/documents/', TWFExportDocumentsView.as_view(), name='export_documents'),
     path('export/collections/', TWFExportCollectionsView.as_view(), name='export_collections'),
