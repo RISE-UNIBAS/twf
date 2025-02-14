@@ -111,6 +111,8 @@ def split_collection_item(request, pk, index):
 def download_collection_item_txt(request, pk):
     """Download the text of a collection item as a .txt file."""
 
+    # TODO - Implement permission check
+
     item = CollectionItem.objects.get(id=pk)
     text = f"Title: {item.title}\n"
     for annotation in item.document_configuration['annotations']:
@@ -124,6 +126,8 @@ def download_collection_item_txt(request, pk):
 def download_collection_item_json(request, pk):
     """Download the annotations of a collection item as a .json file."""
 
+    # TODO - Implement permission check
+
     item = CollectionItem.objects.get(id=pk)
     json = item.document_configuration
     json['title'] = item.title
@@ -134,16 +138,22 @@ def download_collection_item_json(request, pk):
 
 def set_col_item_status_open(request, pk):
     """Set the status of a collection item to open."""
+
+    # TODO - Implement permission check
     return set_col_item_status(request, pk, 'open')
 
 
 def set_col_item_status_reviewed(request, pk):
     """Set the status of a collection item to reviewed."""
+
+    # TODO - Implement permission check
     return set_col_item_status(request, pk, 'reviewed')
 
 
 def set_col_item_status_faulty(request, pk):
     """Set the status of a collection item to faulty."""
+
+    # TODO - Implement permission check
     return set_col_item_status(request, pk, 'faulty')
 
 
@@ -187,6 +197,9 @@ def delete_collection(request, collection_id):
 
 def fill_collection_item(item, page, skip_empty_types=False, structure_tag_filter_list=None):
     """Create a collection item."""
+
+    # TODO Not sure if I need a permission check here
+
     if structure_tag_filter_list is None:
         structure_tag_filter_list = []
 
