@@ -48,6 +48,10 @@ class TWFDictionaryView(LoginRequiredMixin, TWFView):
                      'value': 'Geonames', 'permission': 'dictionary_batch_workflow_geonames'},
                     {'url': reverse('twf:dictionaries_batch_openai'),
                      'value': 'Open AI', 'permission': 'dictionary_batch_workflow_openai'},
+                    {'url': reverse('twf:dictionaries_batch_claude'),
+                     'value': 'Claude', 'permission': 'dictionary_batch_workflow_claude'},
+                    {'url': reverse('twf:dictionaries_batch_gemini'),
+                     'value': 'Gemini', 'permission': 'dictionary_batch_workflow_gemini'},
                 ]
             },
             {
@@ -61,6 +65,10 @@ class TWFDictionaryView(LoginRequiredMixin, TWFView):
                      'value': 'Geonames', 'permission': 'dictionary_manual_workflow_geonames'},
                     {'url': reverse('twf:dictionaries_request_openai'),
                      'value': 'Open AI', 'permission': 'dictionary_manual_workflow_openai'},
+                    {'url': reverse('twf:dictionaries_request_claude'),
+                     'value': 'Claude', 'permission': 'dictionary_manual_workflow_claude'},
+                    {'url': reverse('twf:dictionaries_request_gemini'),
+                     'value': 'Gemini', 'permission': 'dictionary_manual_workflow_gemini'},
                 ]
             },
             {

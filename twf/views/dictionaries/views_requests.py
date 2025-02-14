@@ -57,3 +57,29 @@ class TWFDictionaryOpenaiRequestView(FormView, TWFDictionaryView):
         kwargs = super().get_form_kwargs()
         kwargs['project'] = self.get_project()
         return kwargs
+
+
+class TWFDictionaryClaudeRequestView(FormView, TWFDictionaryView):
+    """Normalization Data Wizard."""
+    template_name = 'twf/dictionaries/requests/claude.html'
+    page_title = 'Claude Request'
+    form_class = OpenaiRequestForm
+    success_url = reverse_lazy('twf:dictionaries_request_claude')
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['project'] = self.get_project()
+        return kwargs
+
+
+class TWFDictionaryGeminiRequestView(FormView, TWFDictionaryView):
+    """Normalization Data Wizard."""
+    template_name = 'twf/dictionaries/requests/gemini.html'
+    page_title = 'Gemini Request'
+    form_class = OpenaiRequestForm
+    success_url = reverse_lazy('twf:dictionaries_request_gemini')
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['project'] = self.get_project()
+        return kwargs

@@ -72,3 +72,37 @@ class TWFDictionaryOpenaiBatchView(FormView, TWFDictionaryView):
         kwargs['data-message'] = "Are you sure you want to start the openai task?"
 
         return kwargs
+
+
+class TWFDictionaryGeminiBatchView(FormView, TWFDictionaryView):
+    """Normalization Data Wizard."""
+    template_name = 'twf/dictionaries/batches/gemini.html'
+    page_title = 'Gemini Batch'
+    form_class = OpenaiBatchForm
+    success_url = reverse_lazy('twf:dictionaries_batch_gemini')
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['project'] = self.get_project()
+
+        kwargs['data-start-url'] = reverse_lazy('twf:task_dictionaries_batch_gemini')
+        kwargs['data-message'] = "Are you sure you want to start the gemini task?"
+
+        return kwargs
+
+
+class TWFDictionaryClaudeBatchView(FormView, TWFDictionaryView):
+    """Normalization Data Wizard."""
+    template_name = 'twf/dictionaries/batches/claude.html'
+    page_title = 'Claude Batch'
+    form_class = OpenaiBatchForm
+    success_url = reverse_lazy('twf:dictionaries_batch_claude')
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['project'] = self.get_project()
+
+        kwargs['data-start-url'] = reverse_lazy('twf:task_dictionaries_batch_claude')
+        kwargs['data-message'] = "Are you sure you want to start the claude task?"
+
+        return kwargs

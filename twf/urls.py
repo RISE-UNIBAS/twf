@@ -7,7 +7,8 @@ from twf.tasks.task_triggers import start_tags_creation, start_extraction, start
     start_wikidata_batch, start_openai_batch, start_gnd_request, start_geonames_request, start_wikidata_request, \
     start_openai_request, start_gemini_doc_batch, start_openai_doc_batch, start_claude_doc_batch, start_sheet_metadata, \
     start_openai_collection_batch, start_openai_collection_request, start_json_metadata, start_copy_project, \
-    start_export_documents, start_export_collections, start_export_project, start_export_to_zenodo
+    start_export_documents, start_export_collections, start_export_project, start_export_to_zenodo, start_claude_batch, \
+    start_gemini_batch, start_claude_request, start_gemini_request
 from twf.views.ajax.views_ajax_field_validation import validate_page_field, validate_document_field
 from twf.views.ajax.views_ajax_markdown import ajax_markdown_generate, ajax_markdown_preview
 from twf.views.ajax.views_ajax_transkribus_export import ajax_transkribus_request_export, \
@@ -16,9 +17,11 @@ from twf.views.collections.views_crud import delete_collection, set_col_item_sta
     set_col_item_status_faulty, split_collection_item, copy_collection_item, delete_collection_item_annotation, \
     delete_collection_item, download_collection_item_txt, download_collection_item_json
 from twf.views.dictionaries.views_batches import TWFDictionaryGNDBatchView, TWFDictionaryGeonamesBatchView, \
-    TWFDictionaryWikidataBatchView, TWFDictionaryOpenaiBatchView
+    TWFDictionaryWikidataBatchView, TWFDictionaryOpenaiBatchView, TWFDictionaryClaudeBatchView, \
+    TWFDictionaryGeminiBatchView
 from twf.views.dictionaries.views_requests import TWFDictionaryGNDRequestView, TWFDictionaryGeonamesRequestView, \
-    TWFDictionaryWikidataRequestView, TWFDictionaryOpenaiRequestView
+    TWFDictionaryWikidataRequestView, TWFDictionaryOpenaiRequestView, TWFDictionaryClaudeRequestView, \
+    TWFDictionaryGeminiRequestView
 from twf.views.documents.views_documents import TWFDocumentsOverviewView, TWFDocumentsBrowseView, \
     TWFDocumentCreateView, TWFDocumentNameView, TWFDocumentDetailView, TWFDocumentReviewView
 from twf.views.documents.views_documents_ai import TWFDocumentOpenAIBatchView, \
@@ -169,14 +172,24 @@ urlpatterns = [
     path('dictionaries/batch/gnd/', TWFDictionaryGNDBatchView.as_view(), name='dictionaries_batch_gnd'),
     path('dictionaries/batch/geonames/', TWFDictionaryGeonamesBatchView.as_view(), name='dictionaries_batch_geonames'),
     path('dictionaries/batch/wikidata/', TWFDictionaryWikidataBatchView.as_view(), name='dictionaries_batch_wikidata'),
-    path('dictionaries/batch/openai/', TWFDictionaryOpenaiBatchView.as_view(), name='dictionaries_batch_openai'),
+    path('dictionaries/batch/openai/', TWFDictionaryOpenaiBatchView.as_view(),
+         name='dictionaries_batch_openai'),
+    path('dictionaries/batch/claude/', TWFDictionaryClaudeBatchView.as_view(),
+         name='dictionaries_batch_claude'),
+    path('dictionaries/batch/gemini/', TWFDictionaryGeminiBatchView.as_view(),
+         name='dictionaries_batch_gemini'),
 
     path('dictionaries/request/gnd/', TWFDictionaryGNDRequestView.as_view(), name='dictionaries_request_gnd'),
     path('dictionaries/request/geonames/', TWFDictionaryGeonamesRequestView.as_view(),
          name='dictionaries_request_geonames'),
     path('dictionaries/request/wikidata/', TWFDictionaryWikidataRequestView.as_view(),
          name='dictionaries_request_wikidata'),
-    path('dictionaries/request/openai/', TWFDictionaryOpenaiRequestView.as_view(), name='dictionaries_request_openai'),
+    path('dictionaries/request/openai/', TWFDictionaryOpenaiRequestView.as_view(),
+         name='dictionaries_request_openai'),
+    path('dictionaries/request/claude/', TWFDictionaryClaudeRequestView.as_view(),
+         name='dictionaries_request_claude'),
+    path('dictionaries/request/gemini/', TWFDictionaryGeminiRequestView.as_view(),
+         name='dictionaries_request_gemini'),
 
     #############################
     # COLLECTIONS
@@ -246,11 +259,15 @@ urlpatterns = [
     path('celery/dictionaries/batch/geonames/', start_geonames_batch, name='task_dictionaries_batch_geonames'),
     path('celery/dictionaries/batch/wikidata/', start_wikidata_batch, name='task_dictionaries_batch_wikidata'),
     path('celery/dictionaries/batch/openai/', start_openai_batch, name='task_dictionaries_batch_openai'),
+    path('celery/dictionaries/batch/claude/', start_claude_batch, name='task_dictionaries_batch_claude'),
+    path('celery/dictionaries/batch/gemini/', start_gemini_batch, name='task_dictionaries_batch_gemini'),
 
     path('celery/dictionaries/request/gnd/', start_gnd_request, name='task_dictionaries_request_gnd'),
     path('celery/dictionaries/request/geonames/', start_geonames_request, name='task_dictionaries_request_geonames'),
     path('celery/dictionaries/request/wikidata/', start_wikidata_request, name='task_dictionaries_request_wikidata'),
     path('celery/dictionaries/request/openai/', start_openai_request, name='task_dictionaries_request_openai'),
+    path('celery/dictionaries/request/claude/', start_claude_request, name='task_dictionaries_request_claude'),
+    path('celery/dictionaries/request/gemini/', start_gemini_request, name='task_dictionaries_request_gemini'),
 
     path('celery/collections/batch/openai/', start_openai_collection_batch, name='task_collection_batch_openai'),
     path('celery/collections/request/openai/', start_openai_collection_request, name='task_collection_request_openai'),

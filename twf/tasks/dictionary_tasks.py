@@ -186,6 +186,16 @@ def search_openai_entries(self, project_id, dictionary_id, user_id, prompt):
 
 
 @shared_task(bind=True)
+def search_claude_entries(self, project_id, dictionary_id, user_id, prompt):
+    pass
+
+
+@shared_task(bind=True)
+def search_gemini_entries(self, project_id, dictionary_id, user_id, prompt):
+    pass
+
+
+@shared_task(bind=True)
 def search_gnd_entry(self, project_id, dictionary_id, user_id,
                      earliest_birth_year, latest_birth_year, show_empty):
     """Search for a single entry in the GND API"""
@@ -279,3 +289,13 @@ def search_openai_entry(self, project, dictionary_id, user_id):
     except Exception as e:
         self.update_state(state='FAILURE', meta={'error': str(e)})
         raise ValueError(str(e)) from e
+
+
+@shared_task(bind=True)
+def search_claude_entry(self, project, dictionary_id, user_id):
+    pass
+
+
+@shared_task(bind=True)
+def search_gemini_entry(self, project, dictionary_id, user_id):
+    pass

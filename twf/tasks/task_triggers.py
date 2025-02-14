@@ -10,11 +10,13 @@ from twf.models import Prompt
 from twf.tasks.document_tasks import search_openai_for_docs, search_gemini_for_docs, search_claude_for_docs
 from twf.tasks.structure_tasks import extract_zip_export_task
 from twf.tasks.dictionary_tasks import search_gnd_entries, search_geonames_entries, search_wikidata_entries, \
-    search_openai_entries, search_gnd_entry, search_geonames_entry, search_wikidata_entry, search_openai_entry
+    search_openai_entries, search_gnd_entry, search_geonames_entry, search_wikidata_entry, search_openai_entry, \
+    search_claude_entries, search_gemini_entries, search_claude_entry, search_gemini_entry
 from twf.tasks.metadata_tasks import load_sheets_metadata, load_json_metadata
 from twf.tasks.tags_tasks import create_page_tags
 from twf.tasks.project_tasks import copy_project
-from twf.tasks.export_tasks import export_documents_task, export_collections_task, export_project_task
+from twf.tasks.export_tasks import export_documents_task, export_collections_task, export_project_task, \
+    export_to_zenodo_task
 from twf.views.views_base import TWFView
 
 
@@ -127,6 +129,36 @@ def start_openai_batch(request):
     return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=405)
 
 
+def start_claude_batch(request):
+    """Start the GND requests as a Celery task."""
+    if request.method == "GET":  # Use GET to receive serialized form data
+        project = TWFView.s_get_project(request)
+        dictionary_id = request.GET.get('dictionary')
+        user_id = request.user.id
+
+        prompt = request.GET.get('prompt')
+
+        # Trigger the task
+        task = search_claude_entries.delay(project.id, dictionary_id, user_id, prompt)
+        return JsonResponse({'status': 'success', 'task_id': task.id})
+    return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=405)
+
+
+def start_gemini_batch(request):
+    """Start the GND requests as a Celery task."""
+    if request.method == "GET":  # Use GET to receive serialized form data
+        project = TWFView.s_get_project(request)
+        dictionary_id = request.GET.get('dictionary')
+        user_id = request.user.id
+
+        prompt = request.GET.get('prompt')
+
+        # Trigger the task
+        task = search_gemini_entries.delay(project.id, dictionary_id, user_id, prompt)
+        return JsonResponse({'status': 'success', 'task_id': task.id})
+    return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=405)
+
+
 def start_gnd_request(request):
     """Start the GND requests as a Celery task."""
     project = TWFView.s_get_project(request)
@@ -168,6 +200,28 @@ def start_openai_request(request):
 
     # Trigger the task
     task = search_openai_entry.delay(project, dictionary_id, user_id)
+    return JsonResponse({'status': 'success', 'task_id': task.id})
+
+
+def start_claude_request(request):
+    """Start the GND requests as a Celery task."""
+    project = TWFView.s_get_project(request)
+    dictionary_id = request.GET.get('dictionary_id')
+    user_id = request.user.id
+
+    # Trigger the task
+    task = search_claude_entry.delay(project, dictionary_id, user_id)
+    return JsonResponse({'status': 'success', 'task_id': task.id})
+
+
+def start_gemini_request(request):
+    """Start the GND requests as a Celery task."""
+    project = TWFView.s_get_project(request)
+    dictionary_id = request.GET.get('dictionary_id')
+    user_id = request.user.id
+
+    # Trigger the task
+    task = search_gemini_entry.delay(project, dictionary_id, user_id)
     return JsonResponse({'status': 'success', 'task_id': task.id})
 
 
