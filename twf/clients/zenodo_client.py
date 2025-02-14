@@ -81,7 +81,7 @@ def upload_to_zenodo(project):
 def get_zenodo_uploads(project):
     """Returns a list of uploads to Zenodo."""
     access_token = project.get_credentials('zenodo').get('zenodo_token')
-
+    print("", access_token)
     r = requests.get(ZENODO_URL,
                      params={'access_token': access_token})
 
