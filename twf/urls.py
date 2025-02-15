@@ -10,7 +10,8 @@ from twf.tasks.task_triggers import start_tags_creation, start_extraction, start
     start_export_documents, start_export_collections, start_export_project, start_export_to_zenodo, start_claude_batch, \
     start_gemini_batch, start_claude_request, start_gemini_request, start_gemini_collection_batch, \
     start_claude_collection_batch, start_gemini_collection_request, start_claude_collection_request, \
-    start_openai_page_batch, start_gemini_page_batch, start_claude_page_batch
+    start_openai_page_batch, start_gemini_page_batch, start_claude_page_batch, start_query_project_openai, \
+    start_query_project_gemini, start_query_project_claude
 from twf.views.ajax.views_ajax_field_validation import validate_page_field, validate_document_field
 from twf.views.ajax.views_ajax_markdown import ajax_markdown_generate, ajax_markdown_preview
 from twf.views.ajax.views_ajax_transkribus_export import ajax_transkribus_request_export, \
@@ -57,7 +58,8 @@ from twf.views.project.views_project import select_project, TWFProjectQueryView,
     TWFProjectTaskMonitorView, TWFProjectGeneralSettingsView, TWFProjectCredentialsSettingsView, \
     TWFProjectPromptsView, TWFProjectTaskSettingsView, TWFProjectExportSettingsView, TWFProjectCopyView, \
     TWFProjectResetView, delete_project, close_project, TWFProjectUserManagementView, TWFProjectRepositorySettingsView
-from twf.views.project.views_project_ai import TWFProjectAIQueryView
+from twf.views.project.views_project_ai import TWFProjectAIQueryView, TWFProjectGeminiQueryView, \
+    TWFProjectClaudeQueryView
 from twf.views.tags.views_tags import TWFProjectTagsView, TWFProjectTagsOpenView, \
     TWFProjectTagsParkedView, TWFProjectTagsResolvedView, TWFProjectTagsIgnoredView, TWFTagsDatesGroupView, \
     TWFTagsGroupView, TWFTagsOverviewView, TWFTagsExtractView, TWFTagsSettingsView
@@ -119,7 +121,9 @@ urlpatterns = [
 
     # Project options
     path('project/query/', TWFProjectQueryView.as_view(), name='project_query'),
-    path('project/ai/query/', TWFProjectAIQueryView.as_view(), name='project_ai_query'),
+    path('project/openai/query/', TWFProjectAIQueryView.as_view(), name='project_ai_query'),
+    path('project/gemini/query/', TWFProjectGeminiQueryView.as_view(), name='project_gemini_query'),
+    path('project/claude/query/', TWFProjectClaudeQueryView.as_view(), name='project_claude_query'),
 
 
     #############################
@@ -261,6 +265,11 @@ urlpatterns = [
 
     path('celery/transkribus/extract/', start_extraction, name='task_transkribus_extract_export'),
     path('celery/project/copy/', start_copy_project, name='task_project_copy'),
+
+    path('celery/project/query/openai/', start_query_project_openai, name='task_project_query_openai'),
+    path('celery/project/query/gemini/', start_query_project_gemini, name='task_project_query_gemini'),
+    path('celery/project/query/claude/', start_query_project_claude, name='task_project_query_claude'),
+
 
     path('celery/transkribus/tags/extract/', start_tags_creation, name='task_transkribus_extract_tags'),
 

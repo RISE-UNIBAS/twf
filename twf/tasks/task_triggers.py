@@ -372,6 +372,18 @@ def start_copy_project(request):
     return JsonResponse({'status': 'success', 'task_id': task.id})
 
 
+def start_query_project_openai(request):
+    pass
+
+
+def start_query_project_gemini(request):
+    pass
+
+
+def start_query_project_claude(request):
+    pass
+
+
 def start_export_documents(request):
     project = TWFView.s_get_project(request)
     user_id = request.user.id

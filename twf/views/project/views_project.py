@@ -36,6 +36,15 @@ class TWFProjectView(LoginRequiredMixin, TWFView):
                 ]
             },
             {
+                'name': 'Ask Questions',
+                'options': [
+                    {'url': reverse('twf:project_query'), 'value': 'Query'},
+                    {'url': reverse('twf:project_ai_query'), 'value': 'Ask ChatGPT'},
+                    {'url': reverse('twf:project_gemini_query'), 'value': 'Ask Gemini'},
+                    {'url': reverse('twf:project_claude_query'), 'value': 'Ask Claude'},
+                ]
+            },
+            {
                 'name': 'Settings',
                 'options': [
                     {'url': reverse('twf:project_settings_general'),
@@ -64,13 +73,6 @@ class TWFProjectView(LoginRequiredMixin, TWFView):
                     {'url': reverse('twf:project_copy'),
                      'value': 'Create Copy of Project', 'permission': 'copy_project'},
                     {'url': reverse('twf:project_reset'), 'value': 'Reset Functions'},
-                ]
-            },
-            {
-                'name': 'Ask Questions',
-                'options': [
-                    {'url': reverse('twf:project_query'), 'value': 'Query'},
-                    {'url': reverse('twf:project_ai_query'), 'value': 'Ask ChatGPT'},
                 ]
             },
         ]

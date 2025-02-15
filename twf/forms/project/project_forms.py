@@ -15,6 +15,7 @@ from django_select2.forms import Select2MultipleWidget, Select2Widget, Select2Ta
 from markdown import markdown
 
 from twf.clients import zenodo_client
+from twf.forms.base_batch_forms import BaseBatchForm
 from twf.models import Project, Collection, Document, CollectionItem, User, Task
 
 
@@ -566,7 +567,7 @@ class RepositorySettingsForm(forms.ModelForm):
         return cleaned_data
 
 
-class AIQueryDatabaseForm(forms.Form):
+class AIQueryDatabaseForm(BaseBatchForm):
     """Form for querying the AI model with a question and documents."""
 
     documents = forms.ModelMultipleChoiceField(label='Documents', required=True,
@@ -574,39 +575,72 @@ class AIQueryDatabaseForm(forms.Form):
                                                widget=Select2MultipleWidget(attrs={'style': 'width: 100%;'}),
                                                queryset=Document.objects.none())
 
-    question = forms.CharField(widget=forms.Textarea(attrs={'rows': 5}), label='Question',
-                                 help_text='Please provide a question to ask the AI model.',
-                                    required=True)
-
     def __init__(self, *args, **kwargs):
-        project = kwargs.pop('')
         super().__init__(*args, **kwargs)
+        self.fields['documents'].queryset = Document.objects.filter(project=self.project)
 
-        if project:
-            self.fields['documents'].queryset = Document.objects.filter(project=project)
+    def get_button_label(self):
+        """Get the label for the submit button."""
+        return 'Ask OpenAI'
 
-        helper = FormHelper()
-        helper.form_method = 'post'
-        helper.form_class = 'form form-control'
-
-        layout = helper.layout = Layout(
+    def get_dynamic_fields(self):
+        """Get the dynamic fields for the form."""
+        return [
             Row(
                 Column('documents', css_class='form-group col-12 mb-3'),
                 css_class='row form-row'
             ),
+        ]
+
+
+class GeminiQueryDatabaseForm(BaseBatchForm):
+
+    documents = forms.ModelMultipleChoiceField(label='Documents', required=True,
+                                               help_text='Please select the documents to query.',
+                                               widget=Select2MultipleWidget(attrs={'style': 'width: 100%;'}),
+                                               queryset=Document.objects.none())
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['documents'].queryset = Document.objects.filter(project=self.project)
+
+    def get_button_label(self):
+        """Get the label for the submit button."""
+        return 'Ask Gemini'
+
+    def get_dynamic_fields(self):
+        """Get the dynamic fields for the form."""
+        return [
             Row(
-                Column('question', css_class='form-group col-12 mb-3'),
+                Column('documents', css_class='form-group col-12 mb-3'),
                 css_class='row form-row'
             ),
-            Div(
-                HTML(f'<a href="{reverse("twf:project_ai_query")}" class="btn btn-dark '
-                     f'color-light me-2">Clear</a>'),
-                Submit('submit', 'Ask Question', css_class='btn btn-dark'),
-                css_class='text-end pt-3'
-            )
-        )
-        helper.layout = layout
-        self.helper = helper
+        ]
+
+
+class ClaudeQueryDatabaseForm(BaseBatchForm):
+
+    documents = forms.ModelMultipleChoiceField(label='Documents', required=True,
+                                               help_text='Please select the documents to query.',
+                                               widget=Select2MultipleWidget(attrs={'style': 'width: 100%;'}),
+                                               queryset=Document.objects.none())
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['documents'].queryset = Document.objects.filter(project=self.project)
+
+    def get_button_label(self):
+        """Get the label for the submit button."""
+        return 'Ask Claude'
+
+    def get_dynamic_fields(self):
+        """Get the dynamic fields for the form."""
+        return [
+            Row(
+                Column('documents', css_class='form-group col-12 mb-3'),
+                css_class='row form-row'
+            ),
+        ]
 
 
 class ProjectOpenAIForm(forms.Form):
