@@ -134,3 +134,16 @@ def search_claude_for_docs(self, project_id, user_id, prompt, role_description):
     end_task(self, task, 'Claude Search Completed.',
              description=f'Claude Search for all documents in the project "{project.title}". '
                          f'Processed {processed_documents} documents.')
+
+
+@shared_task(bind=True)
+def search_openai_for_pages(self, project_id, user_id, prompt, role_description):
+    pass
+
+@shared_task(bind=True)
+def search_gemini_for_pages(self, project_id, user_id, prompt, role_description):
+    pass
+
+@shared_task(bind=True)
+def search_claude_for_pages(self, project_id, user_id, prompt, role_description):
+    pass

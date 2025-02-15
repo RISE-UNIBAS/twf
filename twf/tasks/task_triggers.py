@@ -7,7 +7,8 @@ from django.core.files.storage import default_storage
 from django.http import JsonResponse
 
 from twf.models import Prompt
-from twf.tasks.document_tasks import search_openai_for_docs, search_gemini_for_docs, search_claude_for_docs
+from twf.tasks.document_tasks import search_openai_for_docs, search_gemini_for_docs, search_claude_for_docs, \
+    search_openai_for_pages, search_gemini_for_pages, search_claude_for_pages
 from twf.tasks.structure_tasks import extract_zip_export_task
 from twf.tasks.dictionary_tasks import search_gnd_entries, search_geonames_entries, search_wikidata_entries, \
     search_openai_entries, search_gnd_entry, search_geonames_entry, search_wikidata_entry, search_openai_entry, \
@@ -240,7 +241,39 @@ def start_claude_doc_batch(request):
     return start_ai_doc_batch(request, search_claude_for_docs)
 
 
+def start_openai_page_batch(request):
+    """ Start the OpenAI requests as a Celery task."""
+    return start_ai_page_batch(request, search_openai_for_pages)
+
+
+def start_gemini_page_batch(request):
+    """ Start the Gemini requests as a Celery task."""
+    return start_ai_page_batch(request, search_gemini_for_pages)
+
+
+def start_claude_page_batch(request):
+    """ Start the Claude requests as a Celery task."""
+    return start_ai_page_batch(request, search_claude_for_pages)
+
+
 def start_ai_doc_batch(request, task_function_name):
+    """ Start the AI requests as a Celery task."""
+    project = TWFView.s_get_project(request)
+    user_id = request.user.id
+    prompt = request.POST.get('prompt')
+    role_description = request.POST.get('role_description')
+    save_prompt = request.POST.get('save_prompt')
+
+    if save_prompt:
+        prompt = Prompt(project=project, prompt=prompt, system_role=role_description)
+        prompt.save(current_user=request.user)
+
+    # Trigger the task
+    task = task_function_name.delay(project.id, user_id, prompt, role_description)
+    return JsonResponse({'status': 'success', 'task_id': task.id})
+
+
+def start_ai_page_batch(request, task_function_name):
     """ Start the AI requests as a Celery task."""
     project = TWFView.s_get_project(request)
     user_id = request.user.id

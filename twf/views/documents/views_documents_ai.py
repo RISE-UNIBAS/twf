@@ -60,3 +60,54 @@ class TWFDocumentClaudeBatchView(FormView, TWFDocumentView):
         kwargs['data-message'] = "Are you sure you want to start the claude task?"
 
         return kwargs
+
+
+class TWFDocumentOpenAIPageBatchView(FormView, TWFDocumentView):
+    """Ask ChatGPT."""
+    template_name = 'twf/documents/batches/openai_page_batch_query.html'
+    page_title = 'OpenAI Page Batch'
+    form_class = BatchOpenAIForm
+    success_url = reverse_lazy('twf:documents_page_batch_openai')
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['project'] = self.get_project()
+
+        kwargs['data-start-url'] = reverse_lazy('twf:task_documents_page_batch_openai')
+        kwargs['data-message'] = "Are you sure you want to start the openai task?"
+
+        return kwargs
+
+
+class TWFDocumentGeminiPageBatchView(FormView, TWFDocumentView):
+    """Ask Gemini."""
+    template_name = 'twf/documents/batches/gemini_page_batch_query.html'
+    page_title = 'Gemini Batch'
+    form_class = BatchOpenAIForm
+    success_url = reverse_lazy('twf:documents_page_batch_gemini')
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['project'] = self.get_project()
+
+        kwargs['data-start-url'] = reverse_lazy('twf:task_documents_page_batch_gemini')
+        kwargs['data-message'] = "Are you sure you want to start the gemini task?"
+
+        return kwargs
+
+
+class TWFDocumentClaudePageBatchView(FormView, TWFDocumentView):
+    """Ask Claude."""
+    template_name = 'twf/documents/batches/claude_page_batch_query.html'
+    page_title = 'Claude Batch'
+    form_class = BatchOpenAIForm
+    success_url = reverse_lazy('twf:documents_page_batch_claude')
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['project'] = self.get_project()
+
+        kwargs['data-start-url'] = reverse_lazy('twf:task_documents_page_batch_claude')
+        kwargs['data-message'] = "Are you sure you want to start the claude task?"
+
+        return kwargs

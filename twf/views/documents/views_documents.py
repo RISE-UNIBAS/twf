@@ -41,7 +41,18 @@ class TWFDocumentView(LoginRequiredMixin, TWFView):
                 ]
             },
             {
-                'name': 'Document Workflows',
+                'name': 'Page Batch',
+                'options': [
+                    {'url': reverse('twf:documents_page_batch_openai'),
+                     'value': 'ChatGPT', 'permission': 'document_page_batch_workflow_openai'},
+                    {'url': reverse('twf:documents_page_batch_gemini'),
+                     'value': 'Gemini', 'permission': 'document_page_batch_workflow_gemini'},
+                    {'url': reverse('twf:documents_page_batch_claude'),
+                     'value': 'Claude', 'permission': 'document_page_batch_workflow_claude'},
+                ]
+            },
+            {
+                'name': 'Manual Workflows',
                 'options': [
                     {'url': reverse('twf:documents_review'),
                      'value': 'Review Documents', 'permission': 'document_task_review'},

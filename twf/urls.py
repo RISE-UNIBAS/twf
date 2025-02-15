@@ -9,7 +9,8 @@ from twf.tasks.task_triggers import start_tags_creation, start_extraction, start
     start_openai_collection_batch, start_openai_collection_request, start_json_metadata, start_copy_project, \
     start_export_documents, start_export_collections, start_export_project, start_export_to_zenodo, start_claude_batch, \
     start_gemini_batch, start_claude_request, start_gemini_request, start_gemini_collection_batch, \
-    start_claude_collection_batch, start_gemini_collection_request, start_claude_collection_request
+    start_claude_collection_batch, start_gemini_collection_request, start_claude_collection_request, \
+    start_openai_page_batch, start_gemini_page_batch, start_claude_page_batch
 from twf.views.ajax.views_ajax_field_validation import validate_page_field, validate_document_field
 from twf.views.ajax.views_ajax_markdown import ajax_markdown_generate, ajax_markdown_preview
 from twf.views.ajax.views_ajax_transkribus_export import ajax_transkribus_request_export, \
@@ -26,7 +27,8 @@ from twf.views.dictionaries.views_requests import TWFDictionaryGNDRequestView, T
 from twf.views.documents.views_documents import TWFDocumentsOverviewView, TWFDocumentsBrowseView, \
     TWFDocumentCreateView, TWFDocumentNameView, TWFDocumentDetailView, TWFDocumentReviewView
 from twf.views.documents.views_documents_ai import TWFDocumentOpenAIBatchView, \
-    TWFDocumentGeminiBatchView, TWFDocumentClaudeBatchView
+    TWFDocumentGeminiBatchView, TWFDocumentClaudeBatchView, TWFDocumentOpenAIPageBatchView, \
+    TWFDocumentGeminiPageBatchView, TWFDocumentClaudePageBatchView
 from twf.views.export.views_crud import delete_export
 from twf.views.home.views_home import TWFHomeView, TWFHomeLoginView, TWFHomePasswordChangeView, TWFHomeUserOverView, \
     TWFSelectProjectView, TWFHomeUserProfileView, TWFCreateProjectView, TWFManageProjectsView, TWFManageUsersView
@@ -132,6 +134,12 @@ urlpatterns = [
     path('documents/batch/openai/', TWFDocumentOpenAIBatchView.as_view(), name='documents_batch_openai'),
     path('documents/batch/gemini/', TWFDocumentGeminiBatchView.as_view(), name='documents_batch_gemini'),
     path('documents/batch/claude/', TWFDocumentClaudeBatchView.as_view(), name='documents_batch_claude'),
+    path('documents/page/batch/openai/', TWFDocumentOpenAIPageBatchView.as_view(),
+         name='documents_page_batch_openai'),
+    path('documents/page/batch/gemini/', TWFDocumentGeminiPageBatchView.as_view(),
+         name='documents_page_batch_gemini'),
+    path('documents/page/batch/claude/', TWFDocumentClaudePageBatchView.as_view(),
+         name='documents_page_batch_claude'),
 
     #############################
     # TAGS
@@ -262,6 +270,9 @@ urlpatterns = [
     path('celery/documents/batch/openai/', start_openai_doc_batch, name='task_documents_batch_openai'),
     path('celery/documents/batch/gemini/', start_gemini_doc_batch, name='task_documents_batch_gemini'),
     path('celery/documents/batch/claude/', start_claude_doc_batch, name='task_documents_batch_claude'),
+    path('celery/documents/page/batch/openai/', start_openai_page_batch, name='task_documents_page_batch_openai'),
+    path('celery/documents/page/batch/gemini/', start_gemini_page_batch, name='task_documents_page_batch_gemini'),
+    path('celery/documents/page/batch/claude/', start_claude_page_batch, name='task_documents_page_batch_claude'),
 
     path('celery/dictionaries/batch/gnd/', start_gnd_batch, name='task_dictionaries_batch_gnd'),
     path('celery/dictionaries/batch/geonames/', start_geonames_batch, name='task_dictionaries_batch_geonames'),
