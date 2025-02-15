@@ -313,7 +313,19 @@ def start_test_export_task(request):
 def start_openai_collection_batch(request):
     pass
 
+def start_gemini_collection_batch(request):
+    pass
+
+def start_claude_collection_batch(request):
+    pass
+
 def start_openai_collection_request(request):
+    pass
+
+def start_gemini_collection_request(request):
+    pass
+
+def start_claude_collection_request(request):
     pass
 
 def start_copy_project(request):

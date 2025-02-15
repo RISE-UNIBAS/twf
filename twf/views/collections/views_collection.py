@@ -8,7 +8,8 @@ from django_filters.views import FilterView
 from django_tables2 import SingleTableView
 
 from twf.filters import CollectionItemFilter
-from twf.forms.dictionaries.collection_forms import CollectionOpenaiBatchForm
+from twf.forms.dictionaries.collection_forms import CollectionOpenaiBatchForm, CollectionGeminiBatchForm, \
+    CollectionClaudeBatchForm
 from twf.forms.collection_forms import CollectionCreateForm, CollectionAddDocumentForm, CollectionUpdateForm, \
     CollectionItemReviewForm, CollectionItemUpdateForm
 from twf.models import CollectionItem, Collection, Workflow
@@ -37,22 +38,37 @@ class TWFCollectionsView(LoginRequiredMixin, TWFView):
                 'name': 'Overview',
                 'options': [
                     {"url": reverse('twf:collections'), "value": "Overview"},
+                    {"url": reverse('twf:collections_view'), "value": "Your Collections"},
                     {"url": reverse('twf:project_collections_create'),
-                     "value": "Create New Collection", "permission": "create_collection"},
+                     "value": "Create New Collection", "permission": "create_collection"}
                 ]
             },
             {
-                'name': 'Your collections',
-                'options': []
+                'name': 'Automated Workflows',
+                'options': [
+                    {"url": reverse('twf:collections_openai_batch'),
+                     "value": "OpenAI", "permission": "collection_openai_batch"},
+                    {"url": reverse('twf:collections_gemini_batch'),
+                     "value": "Gemini", "permission": "collection_gemini_batch"},
+                    {"url": reverse('twf:collections_claude_batch'),
+                     "value": "Claude", "permission": "collection_claude_batch"},
+                ]
             },
             {
-                'name': 'Collection Workflows',
+                'name': 'Supervised Workflows',
                 'options': [
                     {"url": reverse('twf:collections_review'), "value": "Review Collections"},
-                    {"url": reverse('twf:collections_openai_batch'),
-                     "value": "OpenAI Batch Workflow", "permission": "collection_openai_batch"},
                     {"url": reverse('twf:collections_openai_request'),
-                     "value": "OpenAI Single Workflow", "permission": "collection_openai_workflow"},
+                     "value": "OpenAI", "permission": "collection_openai_workflow"},
+                    {"url": reverse('twf:collections_gemini_request'),
+                     "value": "Gemini", "permission": "collection_gemini_workflow"},
+                    {"url": reverse('twf:collections_claude_request'),
+                     "value": "Claude", "permission": "collection_claude_workflow"},
+                ]
+            },
+            {
+                'name': 'Manual Workflows',
+                'options': [
                     {"url": "",
                      "value": "Name Collection Items", "permission": "collection_item_naming_workflow"},
                     {"url": "",
@@ -60,13 +76,6 @@ class TWFCollectionsView(LoginRequiredMixin, TWFView):
                 ]
             }
         ]
-
-        collections = Collection.objects.filter(project=self.get_project())
-        for collection in collections:
-            sub_nav[1]['options'].append({
-                'url': reverse('twf:collections_view', kwargs={'pk': collection.pk}),
-                'value': collection.title
-            })
 
         return sub_nav
 
@@ -104,6 +113,12 @@ class TWFCollectionOverviewView(TWFCollectionsView):
         context['percentage_reviewed'] = percentage_reviewed
 
         return context
+
+
+class TWFCollectionListView(TWFCollectionsView):
+    template_name = 'twf/collections/collections_list.html'
+    page_title = 'Collection List'
+
 
 class TWFCollectionsEditView(FormView, TWFCollectionsView):
     """ View for creating a new collection. """
@@ -466,6 +481,37 @@ class TWFCollectionsOpenaiBatchView(FormView, TWFCollectionsView):
         return kwargs
 
 
+class TWFCollectionsGeminiBatchView(FormView, TWFCollectionsView):
+    """View for naming documents."""
+    template_name = 'twf/collections/gemini_batch.html'
+    page_title = 'Gemini Batch Workflow'
+    form_class = CollectionGeminiBatchForm
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['project'] = self.get_project()
+
+        kwargs['data-start-url'] = reverse_lazy('twf:task_collection_batch_gemini')
+        kwargs['data-message'] = "Are you sure you want to start the gemini task?"
+
+        return kwargs
+
+
+class TWFCollectionsClaudeBatchView(FormView, TWFCollectionsView):
+    """View for naming documents."""
+    template_name = 'twf/collections/claude_batch.html'
+    page_title = 'Claude Batch Workflow'
+    form_class = CollectionClaudeBatchForm
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['project'] = self.get_project()
+
+        kwargs['data-start-url'] = reverse_lazy('twf:task_collection_batch_claude')
+        kwargs['data-message'] = "Are you sure you want to start the claude task?"
+
+        return kwargs
+
 
 class TWFCollectionsOpenaiRequestView(FormView, TWFCollectionsView):
     """View for naming documents."""
@@ -479,5 +525,37 @@ class TWFCollectionsOpenaiRequestView(FormView, TWFCollectionsView):
 
         kwargs['data-start-url'] = reverse_lazy('twf:task_collection_request_openai')
         kwargs['data-message'] = "Are you sure you want to start the openai task?"
+
+        return kwargs
+
+
+class TWFCollectionsGeminiRequestView(FormView, TWFCollectionsView):
+    """View for naming documents."""
+    template_name = 'twf/collections/gemini_request.html'
+    page_title = 'Gemini Request'
+    form_class = CollectionGeminiBatchForm
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['project'] = self.get_project()
+
+        kwargs['data-start-url'] = reverse_lazy('twf:task_collection_request_gemini')
+        kwargs['data-message'] = "Are you sure you want to start the gemini task?"
+
+        return kwargs
+
+
+class TWFCollectionsClaudeRequestView(FormView, TWFCollectionsView):
+    """View for naming documents."""
+    template_name = 'twf/collections/claude_request.html'
+    page_title = 'Gemini Request'
+    form_class = CollectionClaudeBatchForm
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['project'] = self.get_project()
+
+        kwargs['data-start-url'] = reverse_lazy('twf:task_collection_request_claude')
+        kwargs['data-message'] = "Are you sure you want to start the claude task?"
 
         return kwargs

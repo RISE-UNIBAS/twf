@@ -1,0 +1,25 @@
+{% extends 'twf/base/base.html' %}
+
+{% block content %}
+     <div class="border rounded bg-light mt-0 p-3">
+        
+     {% for col in collections %}
+         <div class="container p-0 m-0 mt-3">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">{{ col.title }}</h5>
+                    <p class="card-text">
+                        {{ col.description }}
+                    </p>
+                    <p>
+                        <small class="text-muted">Created: {{ col.created_at }} by {{ col.created_by }}, Items: {{ col.items.all.count }}</small>
+                    </p>
+                    <a href="{% url 'twf:collections_view' col.id %}" class="btn btn-dark float-end ms-2">View</a>
+                    
+                    
+                </div>
+            </div>
+        </div>
+     {% endfor %}
+     </div>
+{% endblock %}

@@ -1,5 +1,4 @@
-from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, Row, Column, HTML, Div, Button
+from crispy_forms.layout import Row, Column
 from django import forms
 from django_select2.forms import Select2Widget
 
@@ -33,19 +32,23 @@ class CollectionBatchForm(BaseBatchForm):
 class CollectionOpenaiBatchForm(CollectionBatchForm):
     """Form for batch processing Geonames data."""
 
-    prompt = forms.CharField(label='Prompt', required=True, widget=forms.Textarea,
-                             help_text='The prompt for the OpenAI API. '
-                                       'Use the token {label} to insert the entry label.')
-
     def get_button_label(self):
         """Get the label for the submit button."""
         return 'Start OpenAI Batch'
 
-    def get_dynamic_fields(self):
-        """Get the dynamic fields for the form."""
-        fields = super().get_dynamic_fields()
-        fields.append(Row(
-            Column('prompt', css_class='form-group col-12 mb-0'),
-            css_class='row form-row'
-        ))
-        return fields
+
+class CollectionGeminiBatchForm(CollectionBatchForm):
+    """Form for batch processing Geonames data."""
+
+    def get_button_label(self):
+        """Get the label for the submit button."""
+        return 'Start Gemini Batch'
+
+
+class CollectionClaudeBatchForm(CollectionBatchForm):
+    """Form for batch processing Geonames data."""
+
+    def get_button_label(self):
+        """Get the label for the submit button."""
+        return 'Start Claude Batch'
+

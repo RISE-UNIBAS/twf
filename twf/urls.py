@@ -8,7 +8,8 @@ from twf.tasks.task_triggers import start_tags_creation, start_extraction, start
     start_openai_request, start_gemini_doc_batch, start_openai_doc_batch, start_claude_doc_batch, start_sheet_metadata, \
     start_openai_collection_batch, start_openai_collection_request, start_json_metadata, start_copy_project, \
     start_export_documents, start_export_collections, start_export_project, start_export_to_zenodo, start_claude_batch, \
-    start_gemini_batch, start_claude_request, start_gemini_request
+    start_gemini_batch, start_claude_request, start_gemini_request, start_gemini_collection_batch, \
+    start_claude_collection_batch, start_gemini_collection_request, start_claude_collection_request
 from twf.views.ajax.views_ajax_field_validation import validate_page_field, validate_document_field
 from twf.views.ajax.views_ajax_markdown import ajax_markdown_generate, ajax_markdown_preview
 from twf.views.ajax.views_ajax_transkribus_export import ajax_transkribus_request_export, \
@@ -34,7 +35,9 @@ from twf.views.project.views_project_setup import TWFProjectSetupView, TWFProjec
 from twf.views.ajax.views_ajax_download import ajax_transkribus_download_export, download_progress_view
 from twf.views.collections.views_collection import TWFCollectionsReviewView, TWFCollectionsOpenaiBatchView, \
     TWFCollectionsOpenaiRequestView, TWFCollectionOverviewView, TWFCollectionsCreateView, TWFCollectionsDetailView, \
-    TWFCollectionsEditView, TWFCollectionsAddDocumentView, TWFCollectionItemEditView, TWFCollectionItemView
+    TWFCollectionsEditView, TWFCollectionsAddDocumentView, TWFCollectionItemEditView, TWFCollectionItemView, \
+    TWFCollectionListView, TWFCollectionsGeminiBatchView, TWFCollectionsClaudeBatchView, \
+    TWFCollectionsGeminiRequestView, TWFCollectionsClaudeRequestView
 from twf.views.views_base import help_content
 from twf.views.views_command import park_tag, unpark_tag, ungroup_tag
 from twf.views.dictionaries.views_dictionaries import TWFDictionaryOverviewView, TWFDictionaryDictionaryView, \
@@ -194,11 +197,16 @@ urlpatterns = [
     #############################
     # COLLECTIONS
     path('collections/', TWFCollectionOverviewView.as_view(), name='collections'),
+    path('collections/list/', TWFCollectionListView.as_view(), name='collections_view'),
     path('collections/create/', TWFCollectionsCreateView.as_view(), name='project_collections_create'),
     path('collections/<int:pk>/', TWFCollectionsDetailView.as_view(), name='collections_view'),
     path('collections/review/', TWFCollectionsReviewView.as_view(), name='collections_review'),
     path('collections/openai/batch/', TWFCollectionsOpenaiBatchView.as_view(), name='collections_openai_batch'),
+    path('collections/gemini/batch/', TWFCollectionsGeminiBatchView.as_view(), name='collections_gemini_batch'),
+    path('collections/claude/batch/', TWFCollectionsClaudeBatchView.as_view(), name='collections_claude_batch'),
     path('collections/openai/request/', TWFCollectionsOpenaiRequestView.as_view(), name='collections_openai_request'),
+    path('collections/gemini/request/', TWFCollectionsGeminiRequestView.as_view(), name='collections_gemini_request'),
+    path('collections/claude/request/', TWFCollectionsClaudeRequestView.as_view(), name='collections_claude_request'),
 
     path('collections/delete/<int:collection_id>/', delete_collection, name='collection_delete'),
     path('collections/edit/<int:pk>/', TWFCollectionsEditView.as_view(), name='collection_edit'),
@@ -270,7 +278,11 @@ urlpatterns = [
     path('celery/dictionaries/request/gemini/', start_gemini_request, name='task_dictionaries_request_gemini'),
 
     path('celery/collections/batch/openai/', start_openai_collection_batch, name='task_collection_batch_openai'),
+    path('celery/collections/batch/gemini/', start_gemini_collection_batch, name='task_collection_batch_gemini'),
+    path('celery/collections/batch/claude/', start_claude_collection_batch, name='task_collection_batch_claude'),
     path('celery/collections/request/openai/', start_openai_collection_request, name='task_collection_request_openai'),
+    path('celery/collections/request/gemini/', start_gemini_collection_request, name='task_collection_request_gemini'),
+    path('celery/collections/request/claude/', start_claude_collection_request, name='task_collection_request_claude'),
 
     path('celery/export/documents/', start_export_documents, name='task_export_documents'),
     path('celery/export/collections/', start_export_collections, name='task_export_collections'),

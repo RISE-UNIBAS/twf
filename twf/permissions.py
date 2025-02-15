@@ -358,10 +358,34 @@ def get_available_actions(project=None, profile=None, for_group=None):
             "description": "User is allowed to start an OpenAI batch.",
             "default_for": ["manager"]
         },
+        "collection_gemini_batch": {
+            "group": "collection",
+            "label": "Gemini Batch",
+            "description": "User is allowed to start a Gemini batch.",
+            "default_for": ["manager"]
+        },
+        "collection_claude_batch": {
+            "group": "collection",
+            "label": "Claude Batch",
+            "description": "User is allowed to start a Claude batch.",
+            "default_for": ["manager"]
+        },
         "collection_openai_workflow":   {
             "group": "collection",
             "label": "OpenAI Workflow",
             "description": "User is allowed to start an OpenAI workflow.",
+            "default_for": ["manager", "user"]
+        },
+        "collection_gemini_workflow":   {
+            "group": "collection",
+            "label": "Gemini Workflow",
+            "description": "User is allowed to start a Gemini workflow.",
+            "default_for": ["manager", "user"]
+        },
+        "collection_claude_workflow":   {
+            "group": "collection",
+            "label": "Claude Workflow",
+            "description": "User is allowed to start a Claude workflow.",
             "default_for": ["manager", "user"]
         },
         "collection_item_naming_workflow": {
