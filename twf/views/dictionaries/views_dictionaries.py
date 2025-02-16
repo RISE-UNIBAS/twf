@@ -516,18 +516,3 @@ def add_dictionary_to_project(request, pk):
     return redirect('twf:dictionaries_add')
 
 
-def remove_dictionary_from_project(request, pk):
-    """Remove a dictionary from the project."""
-    dictionary = get_object_or_404(Dictionary, pk=pk)
-    project = TWFView.s_get_project(request)
-    project.selected_dictionaries.remove(dictionary)
-    project.save(current_user=request.user)
-
-    messages.success(request, f'Dictionary {dictionary.label} has been removed from your project.')
-
-    # Get the HTTP referer URL
-    referer = request.META.get('HTTP_REFERER')
-    if referer:
-        return HttpResponseRedirect(referer)
-
-    return redirect('twf:dictionaries')
