@@ -551,6 +551,14 @@ class Page(TimeStampedModel):
     class Meta:
         ordering = ['tk_page_number']
 
+    def get_text(self):
+        """Return the text of the page."""
+        text = ""
+        for element in self.parsed_data['elements']:
+            if "text" in element:
+                text += element['text'] + "\n"
+        return text # TODO CHeck if this is correct
+
     def get_annotations(self):
         """Return the annotations of the page."""
         # print("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX")

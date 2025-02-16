@@ -15,7 +15,7 @@ class BaseTWFTask(CeleryTask):
         """Initialize project and user before the task starts."""
 
         self.task_id = task_id
-        self.get_project_and_user(kwargs.get("project_id"), kwargs.get("user_id"))
+        self.get_project_and_user(args[0], args[1])
 
         self.task_params = kwargs
 
@@ -24,7 +24,7 @@ class BaseTWFTask(CeleryTask):
 
         # Create a new task object in the database
         self.twf_task = Task.objects.create(
-            task_id=task_id,
+            celery_task_id=task_id,
             project=self.project,
             user=self.user,
             status="STARTED",
