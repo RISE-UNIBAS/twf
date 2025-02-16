@@ -12,27 +12,19 @@ from django.core.files import File
 from django.core.files.storage import default_storage
 
 from twf.models import Project, Export
-from twf.tasks.task_base import get_project_and_user, start_task, end_task, update_task
+from twf.tasks.task_base import BaseTWFTask
 from twf.utils.create_export_utils import create_data
 
 
-@shared_task(bind=True)
-def export_documents_task(self, project_id, user_id, export_single_file=True, export_type="documents"):
-    try:
-        project, user = get_project_and_user(project_id, user_id)
-    except ValueError as e:
-        raise ValueError(str(e)) from e
+@shared_task(bind=True, base=BaseTWFTask)
+def export_documents_task(self, project_id, user_id, **kwargs):
+    self.validate_task_parameters(kwargs, ['export_type', 'export_single_file'])
 
-    docs_to_export = project.documents.all()
-    number_of_docs = docs_to_export.count()
+    docs_to_export = self.project.documents.all()
+    self.set_total_items(docs_to_export.count())
 
-    task, percentage = start_task(
-        self, project, user_id,
-        title="Export Documents",
-        description="Ongoing task",
-        text="Starting Task",
-        percentage_complete=0
-    )
+    export_type = kwargs.get('export_type')
+    export_single_file = kwargs.get('export_single_file')
 
     # 1st step: Create a temporary directory
     temp_dir = tempfile.mkdtemp()
@@ -66,16 +58,15 @@ def export_documents_task(self, project_id, user_id, export_single_file=True, ex
                     else:
                         export_data_list.append(export_page_data)
 
-            processed_entries += 1
-            update_task(self, task, f"Exporting {processed_entries}/{number_of_docs}", processed_entries, number_of_docs)
+            self.advance_task()
 
         # 3rd step: Store the final result
         if export_single_file:
-            zip_filename = f"export_{project.id}.zip"
+            zip_filename = f"export_{self.project.id}.zip"
             zip_filepath = shutil.make_archive(zip_filename.replace(".zip", ""), "zip", temp_dir)
             result_filepath = zip_filepath
         else:
-            export_filename = f"export_{project.id}.json"
+            export_filename = f"export_{self.project.id}.json"
             export_filepath = os.path.join(temp_dir, export_filename)
             with open(export_filepath, "w", encoding="utf8") as sf:
                 json.dump(export_data_list, sf, indent=4)
@@ -98,49 +89,38 @@ def export_documents_task(self, project_id, user_id, export_single_file=True, ex
 
 
     export_instance = Export(
-        project=project,
+        project=self.project,
         export_file=saved_filename,  # Save the path to the file
         export_type=export_type
     )
-    export_instance.save(current_user=user)
+    export_instance.save(current_user=self.user)
 
     # 4th step: End task and return the download URL
     download_url = export_instance.export_file.url
-    end_task(self, task, "Export Completed", description=f"{number_of_docs} documents exported.",
-             meta={"download_url": download_url})
+    self.end_task()
 
     return {"download_url": download_url}
 
 
-@shared_task(bind=True)
-def export_collections_task(self, project_id, user_id):
-    try:
-        project, user = get_project_and_user(project_id, user_id)
-    except ValueError as e:
-        raise ValueError(str(e)) from e
+@shared_task(bind=True, base=BaseTWFTask)
+def export_collections_task(self, project_id, user_id, **kwargs):
 
     collection_id = None
     export_single_file = True
+    self.end_task()
 
 
-@shared_task(bind=True)
-def export_project_task(self, project_id, user_id):
-    try:
-        project, user = get_project_and_user(project_id, user_id)
-    except ValueError as e:
-        raise ValueError(str(e)) from e
+@shared_task(bind=True, base=BaseTWFTask)
+def export_project_task(self, project_id, user_id, **kwargs):
 
     export_type = 'sql' # Can be 'sql' or 'json'
 
 
-@shared_task(bind=True)
-def export_to_zenodo_task(self, project_id, user_id):
-    try:
-        project, user = get_project_and_user(project_id, user_id)
-    except ValueError as e:
-        raise ValueError(str(e)) from e
+@shared_task(bind=True, base=BaseTWFTask)
+def export_to_zenodo_task(self, project_id, user_id, **kwargs):
 
     export_type = 'sql' # Can be 'sql' or 'json'
+    self.end_task()
 
 
 def export_data_task(self, project_id, export_type, export_format, schema):

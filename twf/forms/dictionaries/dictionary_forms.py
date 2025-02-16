@@ -36,9 +36,9 @@ class DictionaryEntryForm(forms.ModelForm):
 
     class Meta:
         model = DictionaryEntry
-        fields = ['label', 'notes', 'authorization_data']
+        fields = ['label', 'notes', 'metadata']
         widgets = {
-            'authorization_data': JSONEditor(attrs={
+            'metadata': JSONEditor(attrs={
                 'style': 'min-height: 400px;'  # Set your desired minimum height here
             })
         }
@@ -53,7 +53,7 @@ class DictionaryEntryForm(forms.ModelForm):
                 css_class='row form-row'
             ),
             Row(
-                Column('authorization_data', css_class='form-group col-md-12 mb-0'),
+                Column('metadata', css_class='form-group col-md-12 mb-0'),
             ),
             Div(
                 Submit('delete_entry', 'Delete Dictionary Entry', css_class='btn btn-danger'),

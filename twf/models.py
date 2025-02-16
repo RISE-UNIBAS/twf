@@ -370,8 +370,11 @@ class Task(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="tasks")
     """The user who created the task."""
 
-    task_id = models.CharField(max_length=255, unique=True)
+    celery_task_id = models.CharField(max_length=255, unique=True)
     """The ID of the Celery task."""
+
+    progress = models.IntegerField(default=0)
+    """The progress of the task."""
 
     status = models.CharField(max_length=10, choices=TASK_STATUS_CHOICES, default='PENDING')
     """The status of the task."""
@@ -647,7 +650,7 @@ class DictionaryEntry(TimeStampedModel):
     label = models.CharField(max_length=255)
     """The label of the entry."""
 
-    authorization_data = models.JSONField(default=dict, blank=True)
+    metadata = models.JSONField(default=dict, blank=True)
     """Authorization data for the entry."""
 
     notes = models.TextField(blank=True, default='')
@@ -659,6 +662,10 @@ class DictionaryEntry(TimeStampedModel):
     class Meta:
         """Meta options for the DictionaryEntry model."""
         ordering = ['label']
+
+    def get_text(self):
+        """Return the text of the entry."""
+        return self.label
 
     def get_documents(self):
         """Return the documents that contain this entry."""
@@ -903,6 +910,8 @@ class CollectionItem(TimeStampedModel):
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='open')
     """The status of the item."""
 
+    metadata = models.JSONField(default=dict, blank=True)
+
     review_notes = models.TextField(blank=True, default='')
     """Notes from the review of the item."""
 
@@ -912,6 +921,9 @@ class CollectionItem(TimeStampedModel):
     def __str__(self):
         """Return the string representation of the CollectionItem."""
         return f"{self.collection.title}: {self.title}"
+
+    def get_text(self):
+        return "TODO" #TODO
 
     def split(self, index, user=None):
         """Split the collection item at the given index."""

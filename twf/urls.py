@@ -3,15 +3,7 @@ from django.urls import path
 from django.contrib.auth import views as auth_views
 
 from twf.tasks.task_status import task_status_view, task_cancel_view, task_remove_view
-from twf.tasks.task_triggers import start_tags_creation, start_extraction, start_gnd_batch, start_geonames_batch, \
-    start_wikidata_batch, start_openai_batch, start_gnd_request, start_geonames_request, start_wikidata_request, \
-    start_openai_request, start_gemini_doc_batch, start_openai_doc_batch, start_claude_doc_batch, start_sheet_metadata, \
-    start_openai_collection_batch, start_openai_collection_request, start_json_metadata, start_copy_project, \
-    start_export_documents, start_export_collections, start_export_project, start_export_to_zenodo, start_claude_batch, \
-    start_gemini_batch, start_claude_request, start_gemini_request, start_gemini_collection_batch, \
-    start_claude_collection_batch, start_gemini_collection_request, start_claude_collection_request, \
-    start_openai_page_batch, start_gemini_page_batch, start_claude_page_batch, start_query_project_openai, \
-    start_query_project_gemini, start_query_project_claude
+from twf.tasks.task_triggers import *
 from twf.views.ajax.views_ajax_field_validation import validate_page_field, validate_document_field
 from twf.views.ajax.views_ajax_markdown import ajax_markdown_generate, ajax_markdown_preview
 from twf.views.ajax.views_ajax_transkribus_export import ajax_transkribus_request_export, \
@@ -283,19 +275,19 @@ urlpatterns = [
     path('celery/documents/page/batch/gemini/', start_gemini_page_batch, name='task_documents_page_batch_gemini'),
     path('celery/documents/page/batch/claude/', start_claude_page_batch, name='task_documents_page_batch_claude'),
 
-    path('celery/dictionaries/batch/gnd/', start_gnd_batch, name='task_dictionaries_batch_gnd'),
-    path('celery/dictionaries/batch/geonames/', start_geonames_batch, name='task_dictionaries_batch_geonames'),
-    path('celery/dictionaries/batch/wikidata/', start_wikidata_batch, name='task_dictionaries_batch_wikidata'),
-    path('celery/dictionaries/batch/openai/', start_openai_batch, name='task_dictionaries_batch_openai'),
-    path('celery/dictionaries/batch/claude/', start_claude_batch, name='task_dictionaries_batch_claude'),
-    path('celery/dictionaries/batch/gemini/', start_gemini_batch, name='task_dictionaries_batch_gemini'),
+    path('celery/dictionaries/batch/gnd/', start_dict_gnd_batch, name='task_dictionaries_batch_gnd'),
+    path('celery/dictionaries/batch/geonames/', start_dict_geonames_batch, name='task_dictionaries_batch_geonames'),
+    path('celery/dictionaries/batch/wikidata/', start_dict_wikidata_batch, name='task_dictionaries_batch_wikidata'),
+    path('celery/dictionaries/batch/openai/', start_dict_openai_batch, name='task_dictionaries_batch_openai'),
+    path('celery/dictionaries/batch/claude/', start_dict_claude_batch, name='task_dictionaries_batch_claude'),
+    path('celery/dictionaries/batch/gemini/', start_dict_gemini_batch, name='task_dictionaries_batch_gemini'),
 
-    path('celery/dictionaries/request/gnd/', start_gnd_request, name='task_dictionaries_request_gnd'),
-    path('celery/dictionaries/request/geonames/', start_geonames_request, name='task_dictionaries_request_geonames'),
-    path('celery/dictionaries/request/wikidata/', start_wikidata_request, name='task_dictionaries_request_wikidata'),
-    path('celery/dictionaries/request/openai/', start_openai_request, name='task_dictionaries_request_openai'),
-    path('celery/dictionaries/request/claude/', start_claude_request, name='task_dictionaries_request_claude'),
-    path('celery/dictionaries/request/gemini/', start_gemini_request, name='task_dictionaries_request_gemini'),
+    path('celery/dictionaries/request/gnd/', start_dict_gnd_request, name='task_dictionaries_request_gnd'),
+    path('celery/dictionaries/request/geonames/', start_dict_geonames_request, name='task_dictionaries_request_geonames'),
+    path('celery/dictionaries/request/wikidata/', start_dict_wikidata_request, name='task_dictionaries_request_wikidata'),
+    path('celery/dictionaries/request/openai/', start_dict_openai_request, name='task_dictionaries_request_openai'),
+    path('celery/dictionaries/request/claude/', start_dict_claude_request, name='task_dictionaries_request_claude'),
+    path('celery/dictionaries/request/gemini/', start_dict_gemini_request, name='task_dictionaries_request_gemini'),
 
     path('celery/collections/batch/openai/', start_openai_collection_batch, name='task_collection_batch_openai'),
     path('celery/collections/batch/gemini/', start_gemini_collection_batch, name='task_collection_batch_gemini'),

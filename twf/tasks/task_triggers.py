@@ -7,6 +7,9 @@ from django.core.files.storage import default_storage
 from django.http import JsonResponse
 
 from twf.models import Prompt
+from twf.tasks.collection_tasks import search_openai_for_collection, search_gemini_for_collection, \
+    search_claude_for_collection, search_openai_for_collection_item, search_gemini_for_collection_item, \
+    search_claude_for_collection_item
 from twf.tasks.document_tasks import search_openai_for_docs, search_gemini_for_docs, search_claude_for_docs, \
     search_openai_for_pages, search_gemini_for_pages, search_claude_for_pages
 from twf.tasks.structure_tasks import extract_zip_export_task
@@ -15,285 +18,260 @@ from twf.tasks.dictionary_tasks import search_gnd_entries, search_geonames_entri
     search_claude_entries, search_gemini_entries, search_claude_entry, search_gemini_entry
 from twf.tasks.metadata_tasks import load_sheets_metadata, load_json_metadata
 from twf.tasks.tags_tasks import create_page_tags
-from twf.tasks.project_tasks import copy_project
+from twf.tasks.project_tasks import copy_project, query_project_openai, query_project_gemini, query_project_claude
 from twf.tasks.export_tasks import export_documents_task, export_collections_task, export_project_task, \
     export_to_zenodo_task
 from twf.views.views_base import TWFView
 
+def trigger_task(request, task_function, *args, **kwargs):
+    """Trigger a task and return a JSON response with the task ID."""
+    project = TWFView.s_get_project(request)
+    user_id = request.user.id
 
+    task = task_function.delay(project.id, user_id, *args, **kwargs)
+    return JsonResponse({'status': 'success', 'task_id': task.id})
+
+##############################
+## PROJECT TASKS
 def start_extraction(request):
-    """Start the extraction process as a Celery task."""
-    project = TWFView.s_get_project(request)
-    user_id = request.user.id
-
-    # Trigger the task
-    task = extract_zip_export_task.delay(project.id, user_id)
-    return JsonResponse({'status': 'success', 'task_id': task.id})
+    """Start Transkribus export zip extraction and page parsing process.
+    No additional parameters are required."""
+    return trigger_task(request, extract_zip_export_task)
 
 
+def start_test_export_task(request):
+    """Start the test export task."""
+    return JsonResponse({'status': 'error', 'message': 'Not implemented'}, status=400)
+
+
+##############################
+## TAGS TASKS
 def start_tags_creation(request):
-    """Start the extraction process as a Celery task."""
-    project = TWFView.s_get_project(request)
-    user_id = request.user.id
-
-    # Trigger the task
-    task = create_page_tags.delay(project.id, user_id)
-    return JsonResponse({'status': 'success', 'task_id': task.id})
+    """Start the page tags creation process.
+    No additional parameters are required."""
+    return trigger_task(request, create_page_tags)
 
 
-def start_gnd_batch(request):
+##############################
+## DICTIONARY TASKS
+def start_dict_gnd_batch(request):
     """Start the GND requests as a Celery task."""
-    if request.method == "GET":  # Use GET to receive serialized form data
-        project = TWFView.s_get_project(request)
-        dictionary_id = request.GET.get('dictionary')
-        user_id = request.user.id
-        earliest_birth_year = request.GET.get('earliest_birth_year', None)
-        latest_birth_year = request.GET.get('latest_birth_year', None)
-        show_empty = request.GET.get('show_empty', False)
-        if show_empty == 'on':
-            show_empty = True
-        if earliest_birth_year != '':
-            earliest_birth_year = int(earliest_birth_year)
-        if latest_birth_year != '':
-            latest_birth_year = int(latest_birth_year)
+    dictionary_id = request.POST.get('dictionary')
+    earliest_birth_year = request.POST.get('earliest_birth_year', None)
+    latest_birth_year = request.POST.get('latest_birth_year', None)
+    show_empty = request.POST.get('show_empty', False)
+    if show_empty == 'on':
+        show_empty = True
+    if earliest_birth_year != '':
+        earliest_birth_year = int(earliest_birth_year)
+    if latest_birth_year != '':
+        latest_birth_year = int(latest_birth_year)
 
-        print(f"earliest_birth_year: {earliest_birth_year}")
-        print(f"latest_birth_year: {latest_birth_year}")
-        print(f"show_empty: {show_empty}")
-
-        if not dictionary_id:
-            return JsonResponse({'status': 'error', 'message': 'Dictionary ID is required.'}, status=400)
-
-        # Trigger the task
-        task = search_gnd_entries.delay(project.id, dictionary_id, user_id,
-                                        earliest_birth_year, latest_birth_year, show_empty)
-
-        return JsonResponse({'status': 'success', 'task_id': task.id})
-    return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=405)
+    return trigger_task(request, search_gnd_entries,
+                        dictionary_id,
+                        earliest_birth_year=earliest_birth_year,
+                        latest_birth_year=latest_birth_year,
+                        show_empty=show_empty)
 
 
-def start_geonames_batch(request):
+def start_dict_geonames_batch(request):
     """Start the GeoNames requests as a Celery task."""
-    if request.method == "GET":  # Use GET to receive serialized form data
-        project = TWFView.s_get_project(request)
-        geonames_credentials = project.get_credentials('geonames')
 
-        # Retrieve form data from POST request
-        dictionary_id = request.GET.get('dictionary')
-        user_id = request.user.id
-        geonames_username = geonames_credentials.get('username')
-        country_restriction = request.GET.get('only_search_in')
-        similarity_threshold = request.GET.get('similarity_threshold')
+    dictionary_id = request.POST.get('dictionary')
+    country_restriction = request.POST.get('only_search_in')
+    similarity_threshold = request.POST.get('similarity_threshold')
 
-        # Validate GeoNames username
-        if not geonames_username:
-            return JsonResponse({'status': 'error', 'message': 'No GeoNames username set'})
-
-        # Trigger the task
-        task = search_geonames_entries.delay(
-            project.id, dictionary_id, user_id, geonames_username,
-            country_restriction, similarity_threshold
-        )
-        return JsonResponse({'status': 'success', 'task_id': task.id})
-
-    return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=405)
+    return trigger_task(request, search_geonames_entries,
+                        dictionary_id=dictionary_id,
+                        country_restriction=country_restriction,
+                        similarity_threshold=similarity_threshold)
 
 
-def start_wikidata_batch(request):
+def start_dict_wikidata_batch(request):
     """Start the GND requests as a Celery task."""
-    if request.method == "GET":  # Use GET to receive serialized form data
-        project = TWFView.s_get_project(request)
-        dictionary_id = request.GET.get('dictionary')
-        user_id = request.user.id
+    dictionary_id = request.POST.get('dictionary')
+    entity_type = request.POST.get('entity_type')
+    language = request.POST.get('language')
 
-        entity_type = request.GET.get('entity_type')
-        language = request.GET.get('language')
-
-        # Trigger the task
-        task = search_wikidata_entries.delay(project.id, dictionary_id, user_id, entity_type, language)
-        return JsonResponse({'status': 'success', 'task_id': task.id})
-    return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=405)
+    return trigger_task(request, search_wikidata_entries,
+                        dictionary_id=dictionary_id,
+                        entity_type=entity_type,
+                        language=language)
 
 
-def start_openai_batch(request):
+def start_dict_openai_batch(request):
     """Start the GND requests as a Celery task."""
-    if request.method == "GET":  # Use GET to receive serialized form data
-        project = TWFView.s_get_project(request)
-        dictionary_id = request.GET.get('dictionary')
-        user_id = request.user.id
+    dictionary_id = request.POST.get('dictionary')
+    prompt = request.POST.get('prompt')
+    role_description = request.POST.get('role_description')
 
-        prompt = request.GET.get('prompt')
-
-        # Trigger the task
-        task = search_openai_entries.delay(project.id, dictionary_id, user_id, prompt)
-        return JsonResponse({'status': 'success', 'task_id': task.id})
-    return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=405)
+    return trigger_task(request, search_openai_entries,
+                        dictionary_id=dictionary_id,
+                        prompt=prompt,
+                        role_description=role_description)
 
 
-def start_claude_batch(request):
+def start_dict_claude_batch(request):
     """Start the GND requests as a Celery task."""
-    if request.method == "GET":  # Use GET to receive serialized form data
-        project = TWFView.s_get_project(request)
-        dictionary_id = request.GET.get('dictionary')
-        user_id = request.user.id
+    dictionary_id = request.POST.get('dictionary')
+    prompt = request.POST.get('prompt')
+    role_description = request.POST.get('role_description')
 
-        prompt = request.GET.get('prompt')
-
-        # Trigger the task
-        task = search_claude_entries.delay(project.id, dictionary_id, user_id, prompt)
-        return JsonResponse({'status': 'success', 'task_id': task.id})
-    return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=405)
+    return trigger_task(request, search_claude_entries,
+                        dictionary_id=dictionary_id,
+                        prompt=prompt,
+                        role_description=role_description)
 
 
-def start_gemini_batch(request):
-    """Start the GND requests as a Celery task."""
-    if request.method == "GET":  # Use GET to receive serialized form data
-        project = TWFView.s_get_project(request)
-        dictionary_id = request.GET.get('dictionary')
-        user_id = request.user.id
+def start_dict_gemini_batch(request):
+    """Start the Gemini requests as a Celery task."""
+    dictionary_id = request.POST.get('dictionary')
+    prompt = request.POST.get('prompt')
+    role_description = request.POST.get('role_description')
 
-        prompt = request.GET.get('prompt')
-
-        # Trigger the task
-        task = search_gemini_entries.delay(project.id, dictionary_id, user_id, prompt)
-        return JsonResponse({'status': 'success', 'task_id': task.id})
-    return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=405)
+    return trigger_task(request, search_gemini_entries,
+                        dictionary_id=dictionary_id,
+                        prompt=prompt,
+                        role_description=role_description)
 
 
-def start_gnd_request(request):
-    """Start the GND requests as a Celery task."""
-    project = TWFView.s_get_project(request)
+def start_dict_gnd_request(request):
     dictionary_id = request.GET.get('dictionary_id')
-    user_id = request.user.id
+    earliest_birth_year = request.POST.get('earliest_birth_year', None)
+    latest_birth_year = request.POST.get('latest_birth_year', None)
+    show_empty = request.POST.get('show_empty', False)
+    if show_empty == 'on':
+        show_empty = True
+    if earliest_birth_year != '':
+        earliest_birth_year = int(earliest_birth_year)
+    if latest_birth_year != '':
+        latest_birth_year = int(latest_birth_year)
 
-    # Trigger the task
-    task = search_gnd_entry.delay(project, dictionary_id, user_id)
-    return JsonResponse({'status': 'success', 'task_id': task.id})
+    return trigger_task(request, search_gnd_entry,
+                        dictionary_id=dictionary_id,
+                        earliest_birth_year=earliest_birth_year,
+                        latest_birth_year=latest_birth_year,
+                        show_empty=show_empty)
 
 
-def start_geonames_request(request):
-    """Start the GND requests as a Celery task."""
-    project = TWFView.s_get_project(request)
+def start_dict_geonames_request(request):
     dictionary_id = request.GET.get('dictionary_id')
-    user_id = request.user.id
+    country_restriction = request.POST.get('only_search_in')
+    similarity_threshold = request.POST.get('similarity_threshold')
+    return trigger_task(request, search_geonames_entry,
+                        dictionary_id=dictionary_id,
+                        country_restriction=country_restriction,
+                        similarity_threshold=similarity_threshold)
 
-    # Trigger the task
-    task = search_geonames_entry.delay(project, dictionary_id, user_id)
-    return JsonResponse({'status': 'success', 'task_id': task.id})
 
-
-def start_wikidata_request(request):
-    """Start the GND requests as a Celery task."""
-    project = TWFView.s_get_project(request)
+def start_dict_wikidata_request(request):
     dictionary_id = request.GET.get('dictionary_id')
-    user_id = request.user.id
+    entity_type = request.POST.get('entity_type')
+    language = request.POST.get('language')
+    return trigger_task(request, search_wikidata_entry,
+                        dictionary_id=dictionary_id,
+                        entity_type=entity_type,
+                        language=language)
 
-    # Trigger the task
-    task = search_wikidata_entry.delay(project, dictionary_id, user_id)
-    return JsonResponse({'status': 'success', 'task_id': task.id})
 
-
-def start_openai_request(request):
-    """Start the GND requests as a Celery task."""
-    project = TWFView.s_get_project(request)
+def start_dict_openai_request(request):
     dictionary_id = request.GET.get('dictionary_id')
-    user_id = request.user.id
+    prompt = request.POST.get('prompt')
+    role_description = request.POST.get('role_description')
+    return trigger_task(request, search_openai_entry,
+                        dictionary_id=dictionary_id,
+                        prompt=prompt,
+                        role_description=role_description)
 
-    # Trigger the task
-    task = search_openai_entry.delay(project, dictionary_id, user_id)
-    return JsonResponse({'status': 'success', 'task_id': task.id})
 
-
-def start_claude_request(request):
+def start_dict_claude_request(request):
     """Start the GND requests as a Celery task."""
-    project = TWFView.s_get_project(request)
     dictionary_id = request.GET.get('dictionary_id')
-    user_id = request.user.id
+    prompt = request.POST.get('prompt')
+    role_description = request.POST.get('role_description')
+    return trigger_task(request, search_claude_entry,
+                        dictionary_id=dictionary_id,
+                        prompt=prompt,
+                        role_description=role_description)
 
-    # Trigger the task
-    task = search_claude_entry.delay(project, dictionary_id, user_id)
-    return JsonResponse({'status': 'success', 'task_id': task.id})
 
-
-def start_gemini_request(request):
+def start_dict_gemini_request(request):
     """Start the GND requests as a Celery task."""
-    project = TWFView.s_get_project(request)
     dictionary_id = request.GET.get('dictionary_id')
-    user_id = request.user.id
+    prompt = request.POST.get('prompt')
+    role_description = request.POST.get('role_description')
+    return trigger_task(request, search_gemini_entry,
+                        dictionary_id=dictionary_id,
+                        prompt=prompt,
+                        role_description=role_description)
 
-    # Trigger the task
-    task = search_gemini_entry.delay(project, dictionary_id, user_id)
-    return JsonResponse({'status': 'success', 'task_id': task.id})
 
-
+##############################
+## DOCUMENT TASKS
 def start_openai_doc_batch(request):
     """ Start the OpenAI requests as a Celery task."""
-    return start_ai_doc_batch(request, search_openai_for_docs)
+    prompt = request.POST.get('prompt')
+    role_description = request.POST.get('role_description')
+
+    return trigger_task(request, search_openai_for_docs,
+                        prompt=prompt,
+                        role_description=role_description)
 
 
 def start_gemini_doc_batch(request):
     """ Start the Gemini requests as a Celery task."""
-    return start_ai_doc_batch(request, search_gemini_for_docs)
+    prompt = request.POST.get('prompt')
+    role_description = request.POST.get('role_description')
+
+    return trigger_task(request, search_gemini_for_docs,
+                        prompt=prompt,
+                        role_description=role_description)
 
 
 def start_claude_doc_batch(request):
     """ Start the Claude requests as a Celery task."""
-    return start_ai_doc_batch(request, search_claude_for_docs)
+    prompt = request.POST.get('prompt')
+    role_description = request.POST.get('role_description')
+
+    return trigger_task(request, search_claude_for_docs,
+                        prompt=prompt,
+                        role_description=role_description)
 
 
 def start_openai_page_batch(request):
     """ Start the OpenAI requests as a Celery task."""
-    return start_ai_page_batch(request, search_openai_for_pages)
+    prompt = request.POST.get('prompt')
+    role_description = request.POST.get('role_description')
+
+    return trigger_task(request, search_openai_for_pages,
+                        prompt=prompt,
+                        role_description=role_description)
 
 
 def start_gemini_page_batch(request):
     """ Start the Gemini requests as a Celery task."""
-    return start_ai_page_batch(request, search_gemini_for_pages)
+    prompt = request.POST.get('prompt')
+    role_description = request.POST.get('role_description')
+
+    return trigger_task(request, search_gemini_for_pages,
+                        prompt=prompt,
+                        role_description=role_description)
 
 
 def start_claude_page_batch(request):
     """ Start the Claude requests as a Celery task."""
-    return start_ai_page_batch(request, search_claude_for_pages)
-
-
-def start_ai_doc_batch(request, task_function_name):
-    """ Start the AI requests as a Celery task."""
-    project = TWFView.s_get_project(request)
-    user_id = request.user.id
     prompt = request.POST.get('prompt')
     role_description = request.POST.get('role_description')
-    save_prompt = request.POST.get('save_prompt')
 
-    if save_prompt:
-        prompt = Prompt(project=project, prompt=prompt, system_role=role_description)
-        prompt.save(current_user=request.user)
-
-    # Trigger the task
-    task = task_function_name.delay(project.id, user_id, prompt, role_description)
-    return JsonResponse({'status': 'success', 'task_id': task.id})
+    return trigger_task(request, search_claude_for_pages,
+                        prompt=prompt,
+                        role_description=role_description)
 
 
-def start_ai_page_batch(request, task_function_name):
-    """ Start the AI requests as a Celery task."""
-    project = TWFView.s_get_project(request)
-    user_id = request.user.id
-    prompt = request.POST.get('prompt')
-    role_description = request.POST.get('role_description')
-    save_prompt = request.POST.get('save_prompt')
-
-    if save_prompt:
-        prompt = Prompt(project=project, prompt=prompt, system_role=role_description)
-        prompt.save(current_user=request.user)
-
-    # Trigger the task
-    task = task_function_name.delay(project.id, user_id, prompt, role_description)
-    return JsonResponse({'status': 'success', 'task_id': task.id})
-
-
+##############################
+## METADATA TASKS
 def start_json_metadata(request):
     """Start the metadata loading from JSON as a Celery task."""
-    project = TWFView.s_get_project(request)
-    user_id = request.user.id
 
     data_target_type = request.POST.get('data_target_type')
     json_data_key = request.POST.get('json_data_key')
@@ -317,97 +295,122 @@ def start_json_metadata(request):
     else:
         return JsonResponse({'status': 'error', 'message': 'No file uploaded'}, status=400)
 
-    # Trigger the task with the file path
-    task = load_json_metadata.delay(project.id, user_id, file_path, data_target_type, json_data_key, match_to_field)
-
-    return JsonResponse({'status': 'success', 'task_id': task.id})
+    return trigger_task(request, load_json_metadata,
+                        file_path=file_path,
+                        data_target_type=data_target_type,
+                        json_data_key=json_data_key,
+                        match_to_field=match_to_field)
 
 
 def start_sheet_metadata(request):
     """Start the metadata loading from Google Sheets as a Celery task."""
-    project = TWFView.s_get_project(request)
-    user_id = request.user.id
-
-    # Trigger the task
-    task = load_sheets_metadata.delay(project.id, user_id)
-    return JsonResponse({'status': 'success', 'task_id': task.id})
+    return trigger_task(request, load_sheets_metadata)
 
 
-def start_test_export_task(request):
-    """Start the test export task."""
-    project = TWFView.s_get_project(request)
-    user_id = request.user.id
-
-    # Trigger the task
-    task = extract_zip_export_task.delay(project.id, user_id)
-    return JsonResponse({'status': 'success', 'task_id': task.id})
-
-
+##############################
+## COLLECTION TASKS
 def start_openai_collection_batch(request):
-    pass
+    collection_id = request.POST.get('collection')
+    prompt = request.POST.get('prompt')
+    role_description = request.POST.get('role_description')
+
+    return trigger_task(request, search_openai_for_collection,
+                        collection_id=collection_id,
+                        prompt=prompt,
+                        role_description=role_description)
 
 def start_gemini_collection_batch(request):
-    pass
+    collection_id = request.POST.get('collection')
+    prompt = request.POST.get('prompt')
+    role_description = request.POST.get('role_description')
+
+    return trigger_task(request, search_gemini_for_collection,
+                        collection_id=collection_id,
+                        prompt=prompt,
+                        role_description=role_description)
 
 def start_claude_collection_batch(request):
-    pass
+    collection_id = request.POST.get('collection')
+    prompt = request.POST.get('prompt')
+    role_description = request.POST.get('role_description')
+
+    return trigger_task(request, search_claude_for_collection,
+                        collection_id=collection_id,
+                        prompt=prompt,
+                        role_description=role_description)
 
 def start_openai_collection_request(request):
-    pass
+    collection_id = request.POST.get('collection_id')
+    prompt = request.POST.get('prompt')
+    role_description = request.POST.get('role_description')
+
+    return trigger_task(request, search_openai_for_collection_item,
+                        collection_id=collection_id,
+                        prompt=prompt,
+                        role_description=role_description)
 
 def start_gemini_collection_request(request):
-    pass
+    collection_id = request.POST.get('collection_id')
+    prompt = request.POST.get('prompt')
+    role_description = request.POST.get('role_description')
+
+    return trigger_task(request, search_gemini_for_collection_item,
+                        collection_id=collection_id,
+                        prompt=prompt,
+                        role_description=role_description)
 
 def start_claude_collection_request(request):
-    pass
+    collection_id = request.POST.get('collection_id')
+    prompt = request.POST.get('prompt')
+    role_description = request.POST.get('role_description')
+
+    return trigger_task(request, search_claude_for_collection_item,
+                        collection_id=collection_id,
+                        prompt=prompt,
+                        role_description=role_description)
 
 def start_copy_project(request):
-    project = TWFView.s_get_project(request)
-    user_id = request.user.id
+    new_project_name = request.POST.get('new_project_name')
 
-    new_project_name = request.GET.get('new_project_name')
-
-    # Trigger the task
-    task = copy_project.delay(project.id, user_id, new_project_name)
-    return JsonResponse({'status': 'success', 'task_id': task.id})
+    return trigger_task(request, copy_project,
+                        new_project_name=new_project_name)
 
 
 def start_query_project_openai(request):
-    pass
+    prompt = request.POST.get('prompt')
+    role_description = request.POST.get('role_description')
+
+    return trigger_task(request, query_project_openai,
+                        prompt=prompt,
+                        role_description=role_description)
 
 
 def start_query_project_gemini(request):
-    pass
+    prompt = request.POST.get('prompt')
+    role_description = request.POST.get('role_description')
+
+    return trigger_task(request, query_project_gemini,
+                        prompt=prompt,
+                        role_description=role_description)
 
 
 def start_query_project_claude(request):
-    pass
+    prompt = request.POST.get('prompt')
+    role_description = request.POST.get('role_description')
+
+    return trigger_task(request, query_project_claude,
+                        prompt=prompt,
+                        role_description=role_description)
 
 
 def start_export_documents(request):
-    project = TWFView.s_get_project(request)
-    user_id = request.user.id
-
-    task = export_documents_task.delay(project.id, user_id)
-    return JsonResponse({'status': 'success', 'task_id': task.id})
+    return trigger_task(request, export_documents_task)
 
 def start_export_collections(request):
-    project = TWFView.s_get_project(request)
-    user_id = request.user.id
-
-    task = export_collections_task.delay(project.id, user_id)
-    return JsonResponse({'status': 'success', 'task_id': task.id})
+    return trigger_task(request, export_collections_task)
 
 def start_export_project(request):
-    project = TWFView.s_get_project(request)
-    user_id = request.user.id
-
-    task = export_project_task.delay(project.id, user_id)
-    return JsonResponse({'status': 'success', 'task_id': task.id})
+    return trigger_task(request, export_project_task)
 
 def start_export_to_zenodo(request):
-    project = TWFView.s_get_project(request)
-    user_id = request.user.id
-
-    task = export_to_zenodo_task.delay(project.id, user_id)
-    return JsonResponse({'status': 'success', 'task_id': task.id})
+    return trigger_task(request, export_to_zenodo_task)

@@ -38,7 +38,7 @@ class TWFProjectView(LoginRequiredMixin, TWFView):
             {
                 'name': 'Ask Questions',
                 'options': [
-                    {'url': reverse('twf:project_query'), 'value': 'Query'},
+                    {'url': reverse('twf:project_query'), 'value': 'Query Database'},
                     {'url': reverse('twf:project_ai_query'), 'value': 'Ask ChatGPT'},
                     {'url': reverse('twf:project_gemini_query'), 'value': 'Ask Gemini'},
                     {'url': reverse('twf:project_claude_query'), 'value': 'Ask Claude'},

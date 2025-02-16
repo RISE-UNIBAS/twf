@@ -9,60 +9,40 @@ from django.core.files.storage import FileSystemStorage
 from django.utils import timezone
 from simple_alto_parser import PageFileParser
 
-from twf.models import Project, User, Document, Page
+from twf.models import Document, Page
 from twf.utils.page_file_meta_data_reader import extract_transkribus_file_metadata
-from twf.tasks.task_base import start_task, update_task_percentage, end_task, fail_task
+from twf.tasks.task_base import BaseTWFTask
 from twf.utils.file_utils import delete_all_in_folder
 
 
-@shared_task(bind=True)
-def extract_zip_export_task(self, project_id, user_id):
+@shared_task(bind=True, base=BaseTWFTask)
+def extract_zip_export_task(self, project_id, user_id, **kwargs):
     """Extract the Transkribus export zip file and create Document and Page instances."""
 
     try:
-        project, extracting_user, task = initialize_task(self, project_id, user_id)
 
         # Step 1: Validate and prepare the zip file
-        zip_file, extract_to_path = prepare_zip_file(project, task)
+        zip_file, extract_to_path = prepare_zip_file(self.project, self)
 
         # Step 2: Extract files from the zip archive
-        copied_files = extract_files_from_zip(zip_file, extract_to_path, project, task)
+        copied_files = extract_files_from_zip(zip_file, extract_to_path, self.project, self)
 
         # Step 3: Process extracted files and create/update Document and Page instances
-        process_extracted_files(copied_files, project, extracting_user, task)
+        process_extracted_files(copied_files, self.project, self.user, self)
 
         # Step 4: Parse page data
-        parse_pages(project, extracting_user, task)
+        parse_pages(self.project, self.user, self)
 
         # Finalize the task
-        finalize_task(self, task, project, copied_files)
+        self.end_task()
 
         return {'status': 'completed'}
 
     except Exception as e:
-        handle_task_failure(self, task, str(e), e)
-        raise
+        self.end_task(status="FAILURE")
 
 
-def initialize_task(self, project_id, user_id):
-    """Initialize task and validate project and user."""
-    try:
-        project = Project.objects.get(pk=project_id)
-    except Project.DoesNotExist:
-        raise ValueError(f"Project with id {project_id} does not exist.")
-
-    try:
-        extracting_user = User.objects.get(pk=user_id)
-    except User.DoesNotExist:
-        raise ValueError(f"User with id {user_id} does not exist.")
-
-    task, _ = start_task(self, project, user_id,
-                         text="Starting Transkribus Export Extraction...",
-                         title="Transkribus Export Extraction")
-    return project, extracting_user, task
-
-
-def prepare_zip_file(project, task):
+def prepare_zip_file(project, celery_task):
     """Check the zip file and prepare the extraction path."""
     zip_file = project.downloaded_zip_file
     if not zip_file or not os.path.exists(zip_file.path):
@@ -75,11 +55,11 @@ def prepare_zip_file(project, task):
         os.makedirs(extract_to_path)
     delete_all_in_folder(extract_to_path)
 
-    update_task_percentage(task, "Preparing extraction...", 2)
+    celery_task.update_progress(2)
     return zip_file, extract_to_path
 
 
-def extract_files_from_zip(zip_file, extract_to_path, project, task):
+def extract_files_from_zip(zip_file, extract_to_path, project, celery_task):
     """Extract valid files from the zip archive."""
     copied_files = []
     with zipfile.ZipFile(zip_file.path, 'r') as zip_ref:
@@ -100,7 +80,7 @@ def extract_files_from_zip(zip_file, extract_to_path, project, task):
 
                 # Update progress
                 progress = (i / total_files) * 30  # Allocate 30% for extraction
-                update_task_percentage(task, f"Extracted {i}/{total_files} files...", 2 + progress)
+                celery_task.update_progress(2 + progress)
     return copied_files
 
 
@@ -112,7 +92,7 @@ def generate_new_filename(file_info, project):
         return f"{project.collection_id}_{uuid.uuid4().hex}.xml"
 
 
-def process_extracted_files(copied_files, project, extracting_user, task):
+def process_extracted_files(copied_files, project, extracting_user, celery_task):
     """Process extracted files and create/update Document and Page instances."""
     all_existing_documents = set(Document.objects.filter(project=project).values_list('document_id', flat=True))
     total_files = len(copied_files)
@@ -124,7 +104,7 @@ def process_extracted_files(copied_files, project, extracting_user, task):
             except Exception as e:
                 logging.warning(f"Failed to process file {file}: {e}")
         progress = (i / total_files) * 30  # Allocate another 30% for processing
-        update_task_percentage(task, f"Processed {i}/{total_files} files...", 32 + progress)
+        celery_task.update_progress(32 + progress)
 
 
 def handle_document_and_page(data, file, project, extracting_user, existing_documents):
@@ -146,7 +126,7 @@ def handle_document_and_page(data, file, project, extracting_user, existing_docu
     page_instance.save(current_user=extracting_user)
 
 
-def parse_pages(project, extracting_user, task):
+def parse_pages(project, extracting_user, celery_task):
     """Parse pages and extract data."""
     all_pages = Page.objects.filter(document__project=project).order_by('document__document_id', 'tk_page_number')
     total_pages = all_pages.count()
@@ -164,25 +144,6 @@ def parse_pages(project, extracting_user, task):
         page.save(current_user=extracting_user)
 
         progress = (i / total_pages) * 30  # Allocate last 30% for parsing
-        update_task_percentage(task, f"Parsed {i}/{total_pages} pages...", 66 + progress)
+        celery_task.update_progress(66 + progress)
 
 
-def finalize_task(broker, task, project, copied_files):
-    """Finalize the task with completion status."""
-    end_task(broker, task, "Transkribus Export Extraction Completed.",
-             description=f'Transkribus Export Extraction for project "{project.title}".',
-             meta={"total_files": len(copied_files)})
-
-
-def handle_task_failure(self, task, error_message, exc):
-    """Handle task failure by updating its status."""
-    if task:
-        fail_task(self, task, error_message, exc)
-
-
-def update_task_percentage(task, text, percentage):
-    """Update the task's percentage and text."""
-    task.text = text
-    task.percentage = percentage
-    task.save()
-    return task, percentage
