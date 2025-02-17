@@ -8,6 +8,9 @@ from twf.views.ajax.views_ajax_field_validation import validate_page_field, vali
 from twf.views.ajax.views_ajax_markdown import ajax_markdown_generate, ajax_markdown_preview
 from twf.views.ajax.views_ajax_transkribus_export import ajax_transkribus_request_export, \
     ajax_transkribus_reset_export, ajax_transkribus_request_export_status
+from twf.views.collections.views_collections_ai import TWFCollectionsOpenaiBatchView, TWFCollectionsGeminiBatchView, \
+    TWFCollectionsClaudeBatchView, TWFCollectionsOpenaiRequestView, TWFCollectionsGeminiRequestView, \
+    TWFCollectionsClaudeRequestView
 from twf.views.collections.views_crud import delete_collection, set_col_item_status_open, set_col_item_status_reviewed, \
     set_col_item_status_faulty, split_collection_item, copy_collection_item, delete_collection_item_annotation, \
     delete_collection_item, download_collection_item_txt, download_collection_item_json
@@ -27,16 +30,16 @@ from twf.views.documents.views_documents_ai import TWFDocumentOpenAIBatchView, \
 from twf.views.export.views_crud import delete_export
 from twf.views.home.views_home import TWFHomeView, TWFHomeLoginView, TWFHomePasswordChangeView, TWFHomeUserOverView, \
     TWFSelectProjectView, TWFHomeUserProfileView, TWFCreateProjectView, TWFManageProjectsView, TWFManageUsersView
-from twf.views.project.views_crud import delete_all_documents, delete_all_tags, delete_all_collections
+from twf.views.metadata.views_metadata_ai import TWFMetadataLoadDataView, TWFMetadataLoadSheetsDataView
+from twf.views.project.views_crud import delete_all_documents, delete_all_tags, delete_all_collections, select_project, \
+    delete_project, close_project
 from twf.views.project.views_project_setup import TWFProjectSetupView, TWFProjectTranskribusExtractView
 from twf.views.ajax.views_ajax_download import ajax_transkribus_download_export, download_progress_view
-from twf.views.collections.views_collection import TWFCollectionsReviewView, TWFCollectionsOpenaiBatchView, \
-    TWFCollectionsOpenaiRequestView, TWFCollectionOverviewView, TWFCollectionsCreateView, TWFCollectionsDetailView, \
-    TWFCollectionsEditView, TWFCollectionsAddDocumentView, TWFCollectionItemEditView, TWFCollectionItemView, \
-    TWFCollectionListView, TWFCollectionsGeminiBatchView, TWFCollectionsClaudeBatchView, \
-    TWFCollectionsGeminiRequestView, TWFCollectionsClaudeRequestView
+from twf.views.collections.views_collections import TWFCollectionsReviewView, TWFCollectionOverviewView, \
+    TWFCollectionsCreateView, TWFCollectionsDetailView, TWFCollectionsEditView, TWFCollectionsAddDocumentView, \
+    TWFCollectionItemEditView, TWFCollectionItemView, TWFCollectionListView
 from twf.views.views_base import help_content
-from twf.views.views_command import park_tag, unpark_tag, ungroup_tag
+from twf.views.tags.views_crud import park_tag, unpark_tag, ungroup_tag
 from twf.views.dictionaries.views_dictionaries import TWFDictionaryOverviewView, TWFDictionaryDictionaryView, \
     TWFDictionaryDictionaryEditView, TWFDictionaryDictionaryEntryEditView, TWFDictionaryDictionaryEntryView, \
     TWFDictionaryNormDataView, TWFDictionaryCreateView, TWFDictionaryDictionariesView, \
@@ -44,13 +47,12 @@ from twf.views.dictionaries.views_dictionaries import TWFDictionaryOverviewView,
 from twf.views.export.views_export import TWFExportDocumentsView, TWFExportCollectionsView, TWFExportProjectView, \
     TWFExportOverviewView, TWFExportTagsView, TWFExportDictionariesView, TWFImportDictionaryView, \
     TWFExportConfigurationView, TWFExportZenodoView, TWFExportListView
-from twf.views.metadata.views_metadata import TWFMetadataReviewDocumentsView, \
-    TWFMetadataLoadDataView, TWFMetadataExtractTagsView, TWFMetadataReviewPagesView, TWFMetadataOverviewView, \
-    TWFMetadataLoadSheetsDataView
-from twf.views.project.views_project import select_project, TWFProjectQueryView, TWFProjectOverviewView, \
+from twf.views.metadata.views_metadata import TWFMetadataReviewDocumentsView, TWFMetadataExtractTagsView, \
+    TWFMetadataReviewPagesView, TWFMetadataOverviewView
+from twf.views.project.views_project import TWFProjectQueryView, TWFProjectOverviewView, \
     TWFProjectTaskMonitorView, TWFProjectGeneralSettingsView, TWFProjectCredentialsSettingsView, \
     TWFProjectPromptsView, TWFProjectTaskSettingsView, TWFProjectExportSettingsView, TWFProjectCopyView, \
-    TWFProjectResetView, delete_project, close_project, TWFProjectUserManagementView, TWFProjectRepositorySettingsView
+    TWFProjectResetView, TWFProjectUserManagementView, TWFProjectRepositorySettingsView
 from twf.views.project.views_project_ai import TWFProjectAIQueryView, TWFProjectGeminiQueryView, \
     TWFProjectClaudeQueryView
 from twf.views.tags.views_tags import TWFProjectTagsView, TWFProjectTagsOpenView, \

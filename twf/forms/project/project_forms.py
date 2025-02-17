@@ -6,7 +6,6 @@ from crispy_forms.bootstrap import TabHolder, Tab
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Submit, Layout, Row, Column, Div, HTML
 from django import forms
-from django.db.models import Subquery
 from django.forms import TextInput
 from django.template.loader import render_to_string
 from django.urls import reverse
@@ -16,7 +15,7 @@ from markdown import markdown
 
 from twf.clients import zenodo_client
 from twf.forms.base_batch_forms import BaseBatchForm
-from twf.models import Project, Collection, Document, CollectionItem, User, Task
+from twf.models import Project, Document
 
 
 class CreateProjectForm(forms.ModelForm):
@@ -507,15 +506,12 @@ class RepositorySettingsForm(forms.ModelForm):
         self.helper.form_class = 'form form-control'
 
         if self.instance and self.instance.keywords:
-            print("Loading keywords:", self.instance.keywords)
-
             if isinstance(self.instance.keywords, str):
                 try:
                     self.initial['keywords'] = json.loads(self.instance.keywords)  # Ensure it's a list
                 except json.JSONDecodeError:
                     self.initial['keywords'] = []
             else:
-                print("Setting keywords as list", self.instance.keywords)
                 self.initial['keywords'] = self.instance.keywords  # Expecting a list
 
             # Add the value as a data attribute
@@ -643,13 +639,6 @@ class ClaudeQueryDatabaseForm(BaseBatchForm):
         ]
 
 
-class ProjectOpenAIForm(forms.Form):
-    """Form for querying the OpenAI API with a question and documents."""
-
-    def __init__(self, *args, **kwargs):
-        project = kwargs.pop('')
-        super().__init__(*args, **kwargs)
-
 
 class QueryDatabaseForm(forms.Form):
     """Form for querying the database with a SQL query."""
@@ -682,51 +671,6 @@ class QueryDatabaseForm(forms.Form):
         self.helper = helper
 
 
-class TaskFilterForm(forms.Form):
-    """Form for filtering tasks."""
-
-    started_by = forms.ModelChoiceField(
-        queryset=User.objects.all(),
-        required=False,
-        label="Started by",
-    )
-    status = forms.ChoiceField(
-        choices=[("", "All")] + Task.TASK_STATUS_CHOICES,
-        required=False,
-        label="Status",
-    )
-    date_range = forms.ChoiceField(
-        choices=[
-            ("", "All time"),
-            ("last_week", "Last week"),
-            ("last_month", "Last month"),
-            ("last_year", "Last year"),
-        ],
-        required=False,
-        label="Date Range",
-    )
 
 
-class PromptFilterForm(forms.Form):
-    """Form for filtering prompts."""
 
-    system_role = forms.CharField(
-        required=False,
-        label="System Role",
-        widget=forms.TextInput(attrs={"placeholder": "Enter system role"}),
-    )
-    has_document_context = forms.ChoiceField(
-        choices=[("", "All"), ("yes", "Yes"), ("no", "No")],
-        required=False,
-        label="Document Context",
-    )
-    has_page_context = forms.ChoiceField(
-        choices=[("", "All"), ("yes", "Yes"), ("no", "No")],
-        required=False,
-        label="Page Context",
-    )
-    has_collection_context = forms.ChoiceField(
-        choices=[("", "All"), ("yes", "Yes"), ("no", "No")],
-        required=False,
-        label="Collection Context",
-    )

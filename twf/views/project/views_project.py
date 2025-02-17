@@ -467,45 +467,6 @@ class TWFProjectResetView(TWFProjectView):
         return context
 
 
-def select_project(request, pk):
-    """Select a project."""
-    request.session['project_id'] = pk
-    return redirect('twf:project_overview')
-
-def delete_project(request, pk):
-    """Delete a project."""
-
-
-    try:
-        project = Project.objects.get(pk=pk)
-        if check_permission(request.user, "delete_project", project):
-            project.delete()
-            messages.success(request, 'Project has been deleted.')
-        else:
-            messages.error(request, 'You do not have the required permissions to delete this project.')
-    except Project.DoesNotExist:
-        messages.error(request, 'Project does not exist.')
-
-    return redirect('twf:project_management')
-
-def close_project(request, pk):
-    """Close a project."""
-
-    if check_permission(request.user,
-                        "close_project",
-                        object_id=pk):
-        try:
-            project = Project.objects.get(pk=pk)
-            project.is_closed = True
-            project.save(current_user=request.user)
-            messages.success(request, 'Project has been closed.')
-        except Project.DoesNotExist:
-            messages.error(request, 'Project does not exist.')
-    else:
-        messages.error(request, 'You do not have the required permissions to close this project.')
-
-    return redirect('twf:project_management')
-
 def dynamic_form_view(request, pk):
     """View for displaying a dynamic form."""
 

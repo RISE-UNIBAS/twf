@@ -1,8 +1,7 @@
 """Views for the dictionary overview and the dictionary entries."""
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.http import HttpResponseRedirect
-from django.shortcuts import get_object_or_404, redirect
+from django.shortcuts import redirect
 from django.urls import reverse, reverse_lazy
 from django.views.generic import FormView
 from django_filters.views import FilterView
@@ -12,7 +11,6 @@ from twf.filters import DictionaryEntryFilter
 from twf.forms.dictionaries.dictionary_forms import DictionaryForm, DictionaryEntryForm
 from twf.forms.enrich_forms import EnrichEntryManualForm, EnrichEntryForm
 from twf.models import Dictionary, DictionaryEntry, Variation, PageTag
-from twf.tasks.instant_tasks import save_instant_task_add_dictionary
 from twf.utils.project_statistics import get_dictionary_statistics
 from twf.tables.tables_dictionary import DictionaryTable, DictionaryEntryTable, DictionaryEntryVariationTable, \
     DictionaryAddTable

@@ -2,7 +2,7 @@
 from django.contrib import messages
 from django.shortcuts import redirect
 
-from twf.models import PageTag
+from twf.models import PageTag, Project
 from twf.permissions import check_permission
 from twf.tasks.instant_tasks import save_instant_task_delete_all_documents, save_instant_task_delete_all_tags, \
     save_instant_task_delete_all_collections
@@ -57,3 +57,41 @@ def delete_all_collections(request):
     messages.success(request, "All collections deleted.")
 
     return redirect('twf:project_reset')
+
+def select_project(request, pk):
+    """Select a project."""
+    request.session['project_id'] = pk
+    return redirect('twf:project_overview')
+
+def delete_project(request, pk):
+    """Delete a project."""
+
+    try:
+        project = Project.objects.get(pk=pk)
+        if check_permission(request.user, "delete_project", project):
+            project.delete()
+            messages.success(request, 'Project has been deleted.')
+        else:
+            messages.error(request, 'You do not have the required permissions to delete this project.')
+    except Project.DoesNotExist:
+        messages.error(request, 'Project does not exist.')
+
+    return redirect('twf:project_management')
+
+def close_project(request, pk):
+    """Close a project."""
+
+    if check_permission(request.user,
+                        "close_project",
+                        object_id=pk):
+        try:
+            project = Project.objects.get(pk=pk)
+            project.is_closed = True
+            project.save(current_user=request.user)
+            messages.success(request, 'Project has been closed.')
+        except Project.DoesNotExist:
+            messages.error(request, 'Project does not exist.')
+    else:
+        messages.error(request, 'You do not have the required permissions to close this project.')
+
+    return redirect('twf:project_management')

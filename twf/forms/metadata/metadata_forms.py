@@ -82,7 +82,7 @@ class ExtractMetadataValuesForm(forms.Form):
     )
 
     def __init__(self, *args, **kwargs):
-        project = kwargs.pop('project', None)
+        project = kwargs.pop('../project', None)
         super().__init__(*args, **kwargs)
 
         self.fields['dictionary'].queryset = project.selected_dictionaries.all()
