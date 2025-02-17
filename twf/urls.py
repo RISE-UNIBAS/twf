@@ -14,7 +14,8 @@ from twf.views.collections.views_crud import delete_collection, set_col_item_sta
 from twf.views.dictionaries.views_batches import TWFDictionaryGNDBatchView, TWFDictionaryGeonamesBatchView, \
     TWFDictionaryWikidataBatchView, TWFDictionaryOpenaiBatchView, TWFDictionaryClaudeBatchView, \
     TWFDictionaryGeminiBatchView
-from twf.views.dictionaries.views_crud import remove_dictionary_from_project
+from twf.views.dictionaries.views_crud import remove_dictionary_from_project, add_dictionary_to_project, skip_entry, \
+    delete_variation
 from twf.views.dictionaries.views_requests import TWFDictionaryGNDRequestView, TWFDictionaryGeonamesRequestView, \
     TWFDictionaryWikidataRequestView, TWFDictionaryOpenaiRequestView, TWFDictionaryClaudeRequestView, \
     TWFDictionaryGeminiRequestView
@@ -37,10 +38,9 @@ from twf.views.collections.views_collection import TWFCollectionsReviewView, TWF
 from twf.views.views_base import help_content
 from twf.views.views_command import park_tag, unpark_tag, ungroup_tag
 from twf.views.dictionaries.views_dictionaries import TWFDictionaryOverviewView, TWFDictionaryDictionaryView, \
-    delete_variation, TWFDictionaryDictionaryEditView, TWFDictionaryDictionaryEntryEditView, \
-    TWFDictionaryDictionaryEntryView, \
-    TWFDictionaryNormDataView, TWFDictionaryCreateView, skip_entry, TWFDictionaryDictionariesView, \
-    TWFDictionaryAddView, TWFDictionaryMergeEntriesView, add_dictionary_to_project
+    TWFDictionaryDictionaryEditView, TWFDictionaryDictionaryEntryEditView, TWFDictionaryDictionaryEntryView, \
+    TWFDictionaryNormDataView, TWFDictionaryCreateView, TWFDictionaryDictionariesView, \
+    TWFDictionaryAddView, TWFDictionaryMergeEntriesView
 from twf.views.export.views_export import TWFExportDocumentsView, TWFExportCollectionsView, TWFExportProjectView, \
     TWFExportOverviewView, TWFExportTagsView, TWFExportDictionariesView, TWFImportDictionaryView, \
     TWFExportConfigurationView, TWFExportZenodoView, TWFExportListView
