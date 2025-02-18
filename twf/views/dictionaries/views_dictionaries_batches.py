@@ -5,6 +5,7 @@ from django.views.generic import FormView
 from twf.forms.dictionaries.dictionaries_forms_batches import GeonamesBatchForm, GNDBatchForm, WikidataBatchForm, \
     DictionariesOpenAIBatchForm, DictionariesGeminiBatchForm, DictionariesClaudeBatchForm
 from twf.views.dictionaries.views_dictionaries import TWFDictionaryView
+from twf.views.views_base import AIFormView
 
 
 class TWFDictionaryGeonamesBatchView(FormView, TWFDictionaryView):
@@ -58,38 +59,24 @@ class TWFDictionaryWikidataBatchView(FormView, TWFDictionaryView):
         return kwargs
 
 
-class TWFDictionaryOpenaiBatchView(FormView, TWFDictionaryView):
+class TWFDictionaryOpenaiBatchView(AIFormView, TWFDictionaryView):
     """Normalization Data Wizard."""
     template_name = 'twf/dictionaries/batches/openai.html'
     page_title = 'OpenAI Batch'
     form_class = DictionariesOpenAIBatchForm
     success_url = reverse_lazy('twf:dictionaries_batch_openai')
-
-    def get_form_kwargs(self):
-        kwargs = super().get_form_kwargs()
-        kwargs['project'] = self.get_project()
-
-        kwargs['data-start-url'] = reverse_lazy('twf:task_dictionaries_batch_openai')
-        kwargs['data-message'] = "Are you sure you want to start the openai task?"
-
-        return kwargs
+    start_url = reverse_lazy('twf:task_dictionaries_batch_openai')
+    message = "Are you sure you want to start the openai task?"
 
 
-class TWFDictionaryGeminiBatchView(FormView, TWFDictionaryView):
+class TWFDictionaryGeminiBatchView(AIFormView, TWFDictionaryView):
     """Normalization Data Wizard."""
     template_name = 'twf/dictionaries/batches/gemini.html'
     page_title = 'Gemini Batch'
     form_class = DictionariesGeminiBatchForm
     success_url = reverse_lazy('twf:dictionaries_batch_gemini')
-
-    def get_form_kwargs(self):
-        kwargs = super().get_form_kwargs()
-        kwargs['project'] = self.get_project()
-
-        kwargs['data-start-url'] = reverse_lazy('twf:task_dictionaries_batch_gemini')
-        kwargs['data-message'] = "Are you sure you want to start the gemini task?"
-
-        return kwargs
+    start_url = reverse_lazy('twf:task_dictionaries_batch_gemini')
+    message = "Are you sure you want to start the gemini task?"
 
 
 class TWFDictionaryClaudeBatchView(FormView, TWFDictionaryView):
@@ -98,15 +85,9 @@ class TWFDictionaryClaudeBatchView(FormView, TWFDictionaryView):
     page_title = 'Claude Batch'
     form_class = DictionariesClaudeBatchForm
     success_url = reverse_lazy('twf:dictionaries_batch_claude')
+    start_url = reverse_lazy('twf:task_dictionaries_batch_claude')
+    message = "Are you sure you want to start the claude task?"
 
-    def get_form_kwargs(self):
-        kwargs = super().get_form_kwargs()
-        kwargs['project'] = self.get_project()
-
-        kwargs['data-start-url'] = reverse_lazy('twf:task_dictionaries_batch_claude')
-        kwargs['data-message'] = "Are you sure you want to start the claude task?"
-
-        return kwargs
 
 class TWFDictionaryGeonamesRequestView(FormView, TWFDictionaryView):
     """Normalization Data Wizard."""
@@ -144,17 +125,15 @@ class TWFDictionaryWikidataRequestView(FormView, TWFDictionaryView):
         kwargs['project'] = self.get_project()
         return kwargs
 
-class TWFDictionaryOpenaiRequestView(FormView, TWFDictionaryView):
+class TWFDictionaryOpenaiRequestView(AIFormView, TWFDictionaryView):
     """Normalization Data Wizard."""
     template_name = 'twf/dictionaries/requests/openai.html'
     page_title = 'OpenAI Request'
     form_class = DictionariesOpenAIBatchForm
     success_url = reverse_lazy('twf:dictionaries_request_openai')
+    start_url = reverse_lazy('twf:task_dictionaries_request_openai')
+    message = "Are you sure you want to start the openai task?"
 
-    def get_form_kwargs(self):
-        kwargs = super().get_form_kwargs()
-        kwargs['project'] = self.get_project()
-        return kwargs
 
 class TWFDictionaryClaudeRequestView(FormView, TWFDictionaryView):
     """Normalization Data Wizard."""
@@ -162,11 +141,9 @@ class TWFDictionaryClaudeRequestView(FormView, TWFDictionaryView):
     page_title = 'Claude Request'
     form_class = DictionariesClaudeBatchForm
     success_url = reverse_lazy('twf:dictionaries_request_claude')
+    start_url = reverse_lazy('twf:task_dictionaries_request_claude')
+    message = "Are you sure you want to start the claude task?"
 
-    def get_form_kwargs(self):
-        kwargs = super().get_form_kwargs()
-        kwargs['project'] = self.get_project()
-        return kwargs
 
 class TWFDictionaryGeminiRequestView(FormView, TWFDictionaryView):
     """Normalization Data Wizard."""
@@ -174,8 +151,5 @@ class TWFDictionaryGeminiRequestView(FormView, TWFDictionaryView):
     page_title = 'Gemini Request'
     form_class = DictionariesGeminiBatchForm
     success_url = reverse_lazy('twf:dictionaries_request_gemini')
-
-    def get_form_kwargs(self):
-        kwargs = super().get_form_kwargs()
-        kwargs['project'] = self.get_project()
-        return kwargs
+    start_url = reverse_lazy('twf:task_dictionaries_request_gemini')
+    message = "Are you sure you want to start the gemini task?"

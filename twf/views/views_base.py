@@ -7,7 +7,7 @@ from django.shortcuts import redirect
 from django.template import TemplateDoesNotExist
 from django.template.loader import get_template
 from django.urls import reverse
-from django.views.generic import TemplateView
+from django.views.generic import TemplateView, FormView
 from django.conf import settings
 from twf.models import Project
 
@@ -115,3 +115,18 @@ def help_content(request, view_name):
         return HttpResponse(template.render({}, request))
     except TemplateDoesNotExist:
         return HttpResponse("<p>Help content not found.</p>", status=404)
+
+
+class AIFormView(FormView):
+    """Mixin for AI views."""
+    start_url = None
+    message = None
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['project'] = self.get_project()
+
+        kwargs['data-start-url'] = self.start_url
+        kwargs['data-message'] = self.message
+
+        return kwargs
