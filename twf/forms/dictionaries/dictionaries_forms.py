@@ -63,29 +63,6 @@ class DictionaryEntryForm(forms.ModelForm):
         )
 
 
-class CreateDictionaryEntryForm(forms.Form):
-    """Form for creating a new dictionary entry."""
-
-    label = forms.CharField(max_length=100, label='Label')
-    notes = forms.CharField(widget=forms.Textarea(
-        attrs={'rows': '3'}
-    ), required=False, label='Notes')
-
-
-class AssignToEntryForm(forms.Form):
-    """Form for assigning a tag to a dictionary entry."""
-    entry = forms.ChoiceField(
-        label="Select Dictionary Entry",
-        widget=s2forms.Select2Widget
-    )
-
-    def __init__(self, *args, **kwargs):
-        tag_type = kwargs.pop('tag_type')
-        super().__init__(*args, **kwargs)
-        self.fields['entry'].choices = DictionaryEntry.objects.filter(
-            dictionary__type=tag_type).values_list('id', 'label')
-
-
 class DictionaryImportForm(forms.Form):
     """Form for importing a dictionary."""
 

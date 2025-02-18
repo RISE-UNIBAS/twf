@@ -11,9 +11,10 @@ from django.utils.timezone import now
 from django.views.generic import FormView
 
 from twf.forms.dynamic_forms import DynamicForm
-from twf.forms.project.batch_forms import ProjectCopyBatchForm
+from twf.forms.filters.project_filter_forms import TaskFilterForm, PromptFilterForm
+from twf.forms.project.project_forms_batches import ProjectCopyBatchForm
 from twf.forms.project.project_forms import QueryDatabaseForm, GeneralSettingsForm, CredentialsForm, \
-    TaskSettingsForm, ExportSettingsForm, TaskFilterForm, PromptFilterForm, RepositorySettingsForm
+    TaskSettingsForm, ExportSettingsForm, RepositorySettingsForm
 from twf.models import Page, PageTag, Project
 from twf.permissions import check_permission, get_actions_grouped_by_category, get_available_actions
 from twf.utils.project_statistics import get_document_statistics

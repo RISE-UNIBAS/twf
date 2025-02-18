@@ -8,7 +8,7 @@ from django.http import JsonResponse, HttpResponse
 from django.views.generic import FormView
 
 from twf.clients.zenodo_client import get_zenodo_uploads
-from twf.forms.dictionaries.dictionary_forms import DictionaryImportForm
+from twf.forms.dictionaries.dictionaries_forms import DictionaryImportForm
 from twf.forms.export_forms import ExportDocumentsForm, ExportCollectionsForm, ExportProjectForm, ExportZenodoForm
 from twf.forms.project.project_forms import ExportSettingsForm
 from twf.models import Export

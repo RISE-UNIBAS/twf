@@ -8,7 +8,7 @@ from django_filters.views import FilterView
 from django_tables2 import SingleTableView
 
 from twf.filters import DictionaryEntryFilter
-from twf.forms.dictionaries.dictionary_forms import DictionaryForm, DictionaryEntryForm
+from twf.forms.dictionaries.dictionaries_forms import DictionaryForm, DictionaryEntryForm
 from twf.forms.enrich_forms import EnrichEntryManualForm, EnrichEntryForm
 from twf.models import Dictionary, DictionaryEntry, Variation, PageTag
 from twf.utils.project_statistics import get_dictionary_statistics

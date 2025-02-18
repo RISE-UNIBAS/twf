@@ -2,7 +2,7 @@
 from django.urls import reverse_lazy
 from django.views.generic import FormView
 
-from twf.forms.project.batch_forms import DocumentExtractionBatchForm
+from twf.forms.project.project_forms_batches import DocumentExtractionBatchForm
 from twf.views.project.views_project import TWFProjectView
 
 

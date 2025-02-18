@@ -14,8 +14,7 @@ from django_select2.forms import Select2MultipleWidget, Select2Widget, Select2Ta
 from markdown import markdown
 
 from twf.clients import zenodo_client
-from twf.forms.base_batch_forms import BaseBatchForm
-from twf.models import Project, Document
+from twf.models import Project
 
 
 class CreateProjectForm(forms.ModelForm):
@@ -561,82 +560,6 @@ class RepositorySettingsForm(forms.ModelForm):
                 cleaned_data['keywords'] = []  # Ensure it's an empty list instead of None
 
         return cleaned_data
-
-
-class AIQueryDatabaseForm(BaseBatchForm):
-    """Form for querying the AI model with a question and documents."""
-
-    documents = forms.ModelMultipleChoiceField(label='Documents', required=True,
-                                               help_text='Please select the documents to query.',
-                                               widget=Select2MultipleWidget(attrs={'style': 'width: 100%;'}),
-                                               queryset=Document.objects.none())
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields['documents'].queryset = Document.objects.filter(project=self.project)
-
-    def get_button_label(self):
-        """Get the label for the submit button."""
-        return 'Ask OpenAI'
-
-    def get_dynamic_fields(self):
-        """Get the dynamic fields for the form."""
-        return [
-            Row(
-                Column('documents', css_class='form-group col-12 mb-3'),
-                css_class='row form-row'
-            ),
-        ]
-
-
-class GeminiQueryDatabaseForm(BaseBatchForm):
-
-    documents = forms.ModelMultipleChoiceField(label='Documents', required=True,
-                                               help_text='Please select the documents to query.',
-                                               widget=Select2MultipleWidget(attrs={'style': 'width: 100%;'}),
-                                               queryset=Document.objects.none())
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields['documents'].queryset = Document.objects.filter(project=self.project)
-
-    def get_button_label(self):
-        """Get the label for the submit button."""
-        return 'Ask Gemini'
-
-    def get_dynamic_fields(self):
-        """Get the dynamic fields for the form."""
-        return [
-            Row(
-                Column('documents', css_class='form-group col-12 mb-3'),
-                css_class='row form-row'
-            ),
-        ]
-
-
-class ClaudeQueryDatabaseForm(BaseBatchForm):
-
-    documents = forms.ModelMultipleChoiceField(label='Documents', required=True,
-                                               help_text='Please select the documents to query.',
-                                               widget=Select2MultipleWidget(attrs={'style': 'width: 100%;'}),
-                                               queryset=Document.objects.none())
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields['documents'].queryset = Document.objects.filter(project=self.project)
-
-    def get_button_label(self):
-        """Get the label for the submit button."""
-        return 'Ask Claude'
-
-    def get_dynamic_fields(self):
-        """Get the dynamic fields for the form."""
-        return [
-            Row(
-                Column('documents', css_class='form-group col-12 mb-3'),
-                css_class='row form-row'
-            ),
-        ]
 
 
 

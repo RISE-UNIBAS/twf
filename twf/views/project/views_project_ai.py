@@ -1,13 +1,10 @@
 """ Views for the AI model. """
 import logging
 
-from django.contrib import messages
-from django.shortcuts import render
 from django.urls import reverse_lazy
 from django.views.generic import FormView
 
-from twf.forms.project.project_forms import AIQueryDatabaseForm, GeminiQueryDatabaseForm, ClaudeQueryDatabaseForm
-from twf.clients.simple_ai_clients import AiApiClient
+from twf.forms.project.project_forms_batches import OpenAIQueryDatabaseForm, GeminiQueryDatabaseForm, ClaudeQueryDatabaseForm
 from twf.views.project.views_project import TWFProjectView
 
 logger = logging.getLogger(__name__)
@@ -15,12 +12,11 @@ logger = logging.getLogger(__name__)
 
 class TWFProjectAIQueryView(FormView, TWFProjectView):
     """View for querying the AI model.
-    # TODO Rework this view to use the new API client and batch forms.
     """
 
     template_name = 'twf/project/questions/ai_query.html'
     page_title = 'OpenAI Query'
-    form_class = AIQueryDatabaseForm
+    form_class = OpenAIQueryDatabaseForm
     success_url = reverse_lazy('twf:project_ai_query')
 
     def get_form_kwargs(self):

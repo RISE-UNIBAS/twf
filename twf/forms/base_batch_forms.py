@@ -53,7 +53,7 @@ class BaseBatchForm(forms.Form):
         filtered_kwargs = {key: value for key, value in button_kwargs.items() if value}
 
         self.helper.layout = Layout(
-            *self.get_dynamic_fields(),
+            *self.get_dynamic_fields() or [],
             HTML(progress_bar_html),
             Row(
                 Column('progress_details', css_class='form-group col-12 mb-0'),
@@ -72,3 +72,23 @@ class BaseBatchForm(forms.Form):
     def get_dynamic_fields(self):
         """Get the dynamic fields for the form."""
         return []
+
+
+class BaseAIBatchForm(BaseBatchForm):
+    """ Base form for AI batches. """
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.fields['role_description'] = forms.CharField(label='Role Description', required=False)
+        self.fields['prompt'] = forms.CharField(label='Prompt', required=False)
+
+    def get_dynamic_fields(self):
+        """Get the dynamic fields for the form."""
+        fields = super().get_dynamic_fields() or []
+        fields.append(Row(
+            Column('role_description', css_class='form-group col-6 mb-0'),
+            Column('prompt', css_class='form-group col-6 mb-0'),
+            css_class='row form-row'
+        ))
+        return fields

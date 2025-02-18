@@ -1,7 +1,7 @@
 from django.urls import reverse_lazy
 from django.views.generic import FormView
 
-from twf.forms.dictionaries.collection_forms import CollectionOpenaiBatchForm, CollectionGeminiBatchForm, \
+from twf.forms.collections.collections_forms_batches import CollectionOpenaiBatchForm, CollectionGeminiBatchForm, \
     CollectionClaudeBatchForm
 from twf.views.collections.views_collections import TWFCollectionsView
 

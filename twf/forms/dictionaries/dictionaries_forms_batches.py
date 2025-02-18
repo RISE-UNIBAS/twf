@@ -1,22 +1,22 @@
 """Contains all forms concerning batch processes."""
-from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, Row, Column, Div, Submit
+from crispy_forms.layout import Row, Column
 from django import forms
 from django_select2.forms import Select2Widget
 
-from twf.forms.base_batch_forms import BaseBatchForm
+from twf.forms.base_batch_forms import BaseBatchForm, BaseAIBatchForm
 
 
-class DictionaryRequestForm(BaseBatchForm):
+class DictionaryBatchForm(BaseBatchForm):
     """ Base form for batches of dictionaries. """
 
     dictionary = forms.ChoiceField(label='Dictionary', required=True,
-                                   widget= Select2Widget(attrs={'style': 'width: 100%;'}))
+                                   widget=Select2Widget(attrs={'style': 'width: 100%;'}))
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.fields['dictionary'].choices = [(d.pk, d.label) for d in self.project.selected_dictionaries.all()]
+        self.fields['dictionary'].choices = ([('', 'Select a dictionary')] +
+                                             [(d.pk, d.label) for d in self.project.selected_dictionaries.all()])
 
     def get_button_label(self):
         """Get the label for the submit button."""
@@ -24,13 +24,61 @@ class DictionaryRequestForm(BaseBatchForm):
 
     def get_dynamic_fields(self):
         """Get the dynamic fields for the form."""
-        return [Row(
+        return super().get_dynamic_fields() + [Row(
             Column('dictionary', css_class='form-group col-12 mb-0'),
             css_class='row form-row'
         )]
 
 
-class GeonamesRequestForm(DictionaryRequestForm):
+class DictionaryAIBatchForm(BaseAIBatchForm):
+    """ Base form for batches of dictionaries. """
+
+    dictionary = forms.ChoiceField(label='Dictionary', required=True,
+                                   widget=Select2Widget(attrs={'style': 'width: 100%;'}))
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.fields['dictionary'].choices = ([('', 'Select a dictionary')] +
+                                             [(d.pk, d.label) for d in self.project.selected_dictionaries.all()])
+
+    def get_button_label(self):
+        """Get the label for the submit button."""
+        return 'Start Batch'
+
+    def get_dynamic_fields(self):
+        """Get the dynamic fields for the form."""
+        return super().get_dynamic_fields() + [Row(
+            Column('dictionary', css_class='form-group col-12 mb-0'),
+            css_class='row form-row'
+        )]
+
+
+class DictionariesOpenAIBatchForm(DictionaryAIBatchForm):
+    """Form for batch processing Geonames data."""
+
+    def get_button_label(self):
+        """Get the label for the submit button."""
+        return 'Start OpenAI Batch'
+
+class DictionariesGeminiBatchForm(DictionaryAIBatchForm):
+    """Form for batch processing Geonames data."""
+
+
+    def get_button_label(self):
+        """Get the label for the submit button."""
+        return 'Start Gemini Batch'
+
+
+class DictionariesClaudeBatchForm(DictionaryAIBatchForm):
+    """Form for batch processing Geonames data."""
+
+    def get_button_label(self):
+        """Get the label for the submit button."""
+        return 'Start Claude Batch'
+
+
+class GeonamesBatchForm(DictionaryBatchForm):
     """Form for batch processing Geonames data."""
 
     only_search_in = forms.CharField(label='Only search in', required=False,
@@ -50,7 +98,7 @@ class GeonamesRequestForm(DictionaryRequestForm):
 
     def get_dynamic_fields(self):
         """Get the dynamic fields for the form."""
-        fields = []
+        fields = super().get_dynamic_fields()
         fields.append(Row(
             Column('only_search_in', css_class='form-group col-6 mb-0'),
             Column('similarity_threshold', css_class='form-group col-6 mb-0'),
@@ -59,7 +107,7 @@ class GeonamesRequestForm(DictionaryRequestForm):
         return fields
 
 
-class GNDRequestForm(DictionaryRequestForm):
+class GNDBatchForm(DictionaryBatchForm):
     """Form for batch processing Geonames data."""
 
     earliest_birth_year = forms.IntegerField(label='Earliest Birth Year', required=False)
@@ -67,12 +115,11 @@ class GNDRequestForm(DictionaryRequestForm):
     show_empty = forms.BooleanField(label='Include results without birth dates/years', required=False)
 
     def get_button_label(self):
-        """Get the label for the submit button."""
         return 'Start GND Batch'
 
     def get_dynamic_fields(self):
         """Get the dynamic fields for the form."""
-        fields = []
+        fields = super().get_dynamic_fields()
         fields.append(Row(
             Column('earliest_birth_year', css_class='form-group col-4 mb-0'),
             Column('latest_birth_year', css_class='form-group col-4 mb-0'),
@@ -82,7 +129,7 @@ class GNDRequestForm(DictionaryRequestForm):
         return fields
 
 
-class WikidataRequestForm(DictionaryRequestForm):
+class WikidataBatchForm(DictionaryBatchForm):
     """Form for batch processing Geonames data."""
 
     entity_type = forms.ChoiceField(label='Entity Type', required=True,
@@ -97,7 +144,7 @@ class WikidataRequestForm(DictionaryRequestForm):
 
     def get_dynamic_fields(self):
         """Get the dynamic fields for the form."""
-        fields = []
+        fields = super().get_dynamic_fields()
         fields.append(Row(
             Column('entity_type', css_class='form-group col-6 mb-0'),
             Column('language', css_class='form-group col-6 mb-0'),
@@ -105,23 +152,3 @@ class WikidataRequestForm(DictionaryRequestForm):
         ))
         return fields
 
-
-class OpenaiRequestForm(DictionaryRequestForm):
-    """Form for batch processing Geonames data."""
-
-    prompt = forms.CharField(label='Prompt', required=True, widget=forms.Textarea,
-                             help_text='The prompt for the OpenAI API. '
-                                       'Use the token {label} to insert the entry label.')
-
-    def get_button_label(self):
-        """Get the label for the submit button."""
-        return 'Start OpenAI Batch'
-
-    def get_dynamic_fields(self):
-        """Get the dynamic fields for the form."""
-        fields = []
-        fields.append(Row(
-            Column('prompt', css_class='form-group col-12 mb-0'),
-            css_class='row form-row'
-        ))
-        return fields
