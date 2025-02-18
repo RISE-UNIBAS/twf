@@ -2,6 +2,8 @@ from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Row, Column, HTML, Div, Button
 from django import forms
 
+from twf.models import Prompt
+
 
 class BaseBatchForm(forms.Form):
     """ Base form for batches of dictionaries. """
@@ -77,18 +79,38 @@ class BaseBatchForm(forms.Form):
 class BaseAIBatchForm(BaseBatchForm):
     """ Base form for AI batches. """
 
+    class Meta:
+        js = ('twf/js/ai_prompt_manager.js',)
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
         self.fields['role_description'] = forms.CharField(label='Role Description', required=False)
         self.fields['prompt'] = forms.CharField(label='Prompt', required=False)
+        self.fields['saved_prompts'] = forms.ModelChoiceField(queryset=Prompt.objects.filter(project=self.project),
+                                                              required=False)
 
     def get_dynamic_fields(self):
         """Get the dynamic fields for the form."""
+        button_html = """
+         <div class="mt-4">
+            <button type="button" id="loadPrompt" class="btn btn-sm btn-dark">Load Prompt</button>
+            <button type="button" id="savePrompt" class="btn btn-sm btn-dark">Save Prompt</button>
+        </div>"""
+
         fields = super().get_dynamic_fields() or []
-        fields.append(Row(
-            Column('role_description', css_class='form-group col-6 mb-0'),
-            Column('prompt', css_class='form-group col-6 mb-0'),
-            css_class='row form-row'
-        ))
+        fields.append(
+            Row(
+                Column('role_description', css_class='form-group col-8 mb-0'),
+                Column(HTML(button_html), css_class='form-group col-4 mb-0'),
+                css_class='row form-row'
+            )
+        )
+        fields.append(
+            Row(
+                Column('prompt', css_class='form-group col-8 mb-0'),
+                Column('saved_prompts', css_class='form-group col-4 mb-0'),
+                css_class='row form-row'
+            )
+        )
         return fields

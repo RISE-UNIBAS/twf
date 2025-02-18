@@ -4,10 +4,8 @@
 
 {% block content %}
      <div class="border rounded bg-light mt-0 p-3">
-        <h1 class="display-6">Search with Gemini</h1>
-         <p class="lead">Gemini can search for any data. Its results might be unreliable and also depend on your prompt.</p>
-         
+        <h1 class="display-6">{{ ai_heading }}</h1>
+         <p class="lead">{{ ai_lead }}</p>
          {% crispy form %}
-     
      </div>
 {% endblock %}

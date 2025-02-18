@@ -61,32 +61,50 @@ class TWFDictionaryWikidataBatchView(FormView, TWFDictionaryView):
 
 class TWFDictionaryOpenaiBatchView(AIFormView, TWFDictionaryView):
     """Normalization Data Wizard."""
-    template_name = 'twf/dictionaries/batches/openai.html'
+    template_name = 'twf/base/base_ai_batch.html'
     page_title = 'OpenAI Batch'
     form_class = DictionariesOpenAIBatchForm
     success_url = reverse_lazy('twf:dictionaries_batch_openai')
     start_url = reverse_lazy('twf:task_dictionaries_batch_openai')
     message = "Are you sure you want to start the openai task?"
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['ai_heading'] = 'OpenAI'
+        context['ai_lead'] = 'OpenAI is an AI model that can be used to generate text based on a prompt.'
+        return context
+
 
 class TWFDictionaryGeminiBatchView(AIFormView, TWFDictionaryView):
     """Normalization Data Wizard."""
-    template_name = 'twf/dictionaries/batches/gemini.html'
+    template_name = 'twf/base/base_ai_batch.html'
     page_title = 'Gemini Batch'
     form_class = DictionariesGeminiBatchForm
     success_url = reverse_lazy('twf:dictionaries_batch_gemini')
     start_url = reverse_lazy('twf:task_dictionaries_batch_gemini')
     message = "Are you sure you want to start the gemini task?"
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['ai_heading'] = 'Gemini'
+        context['ai_lead'] = 'Gemini is an AI model that can be used to generate text based on a prompt.'
+        return context
 
-class TWFDictionaryClaudeBatchView(FormView, TWFDictionaryView):
+
+class TWFDictionaryClaudeBatchView(AIFormView, TWFDictionaryView):
     """Normalization Data Wizard."""
-    template_name = 'twf/dictionaries/batches/claude.html'
+    template_name = 'twf/base/base_ai_batch.html'
     page_title = 'Claude Batch'
     form_class = DictionariesClaudeBatchForm
     success_url = reverse_lazy('twf:dictionaries_batch_claude')
     start_url = reverse_lazy('twf:task_dictionaries_batch_claude')
     message = "Are you sure you want to start the claude task?"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['ai_heading'] = 'Claude'
+        context['ai_lead'] = 'Claude is an AI model that can be used to generate text based on a prompt.'
+        return context
 
 
 class TWFDictionaryGeonamesRequestView(FormView, TWFDictionaryView):
@@ -127,29 +145,47 @@ class TWFDictionaryWikidataRequestView(FormView, TWFDictionaryView):
 
 class TWFDictionaryOpenaiRequestView(AIFormView, TWFDictionaryView):
     """Normalization Data Wizard."""
-    template_name = 'twf/dictionaries/requests/openai.html'
+    template_name = 'twf/base/base_ai_batch.html'
     page_title = 'OpenAI Request'
     form_class = DictionariesOpenAIBatchForm
     success_url = reverse_lazy('twf:dictionaries_request_openai')
     start_url = reverse_lazy('twf:task_dictionaries_request_openai')
     message = "Are you sure you want to start the openai task?"
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['ai_heading'] = 'OpenAI'
+        context['ai_lead'] = 'OpenAI is an AI model that can be used to generate text based on a prompt.'
+        return context
 
-class TWFDictionaryClaudeRequestView(FormView, TWFDictionaryView):
+
+class TWFDictionaryClaudeRequestView(AIFormView, TWFDictionaryView):
     """Normalization Data Wizard."""
-    template_name = 'twf/dictionaries/requests/claude.html'
+    template_name = 'twf/base/base_ai_batch.html'
     page_title = 'Claude Request'
     form_class = DictionariesClaudeBatchForm
     success_url = reverse_lazy('twf:dictionaries_request_claude')
     start_url = reverse_lazy('twf:task_dictionaries_request_claude')
     message = "Are you sure you want to start the claude task?"
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['ai_heading'] = 'Claude'
+        context['ai_lead'] = 'Claude is an AI model that can be used to generate text based on a prompt.'
+        return context
 
-class TWFDictionaryGeminiRequestView(FormView, TWFDictionaryView):
+
+class TWFDictionaryGeminiRequestView(AIFormView, TWFDictionaryView):
     """Normalization Data Wizard."""
-    template_name = 'twf/dictionaries/requests/gemini.html'
+    template_name = 'twf/base/base_ai_batch.html'
     page_title = 'Gemini Request'
     form_class = DictionariesGeminiBatchForm
     success_url = reverse_lazy('twf:dictionaries_request_gemini')
     start_url = reverse_lazy('twf:task_dictionaries_request_gemini')
     message = "Are you sure you want to start the gemini task?"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['ai_heading'] = 'Gemini'
+        context['ai_lead'] = 'Gemini is an AI model that can be used to generate text based on a prompt.'
+        return context
