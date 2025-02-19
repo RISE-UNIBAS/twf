@@ -14,7 +14,7 @@ from django_select2.forms import Select2MultipleWidget, Select2Widget, Select2Ta
 from markdown import markdown
 
 from twf.clients import zenodo_client
-from twf.models import Project
+from twf.models import Project, Prompt
 
 
 class CreateProjectForm(forms.ModelForm):
@@ -594,6 +594,28 @@ class QueryDatabaseForm(forms.Form):
         self.helper = helper
 
 
+class PromptForm(forms.ModelForm):
+    """Form for creating and updating prompts."""
 
+    class Meta:
+        model = Prompt
+        fields = ['system_role', 'prompt']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.helper = FormHelper()
+        self.helper.form_method = 'post'
+        self.helper.form_class = 'form form-control'
+        self.helper.layout = Layout(
+            Row(
+                Column('system_role', css_class='form-group col-6 mb-3'),
+                Column('prompt', css_class='form-group col-6 mb-3'),
+                css_class='row form-row'
+            ),
+            Div(
+                Submit('submit', 'Save Prompt', css_class='btn btn-dark'),
+                css_class='text-end pt-3'
+            )
+        )
 
 

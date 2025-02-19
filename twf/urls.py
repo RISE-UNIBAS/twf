@@ -52,7 +52,7 @@ from twf.views.metadata.views_metadata import TWFMetadataReviewDocumentsView, TW
 from twf.views.project.views_project import TWFProjectQueryView, TWFProjectOverviewView, \
     TWFProjectTaskMonitorView, TWFProjectGeneralSettingsView, TWFProjectCredentialsSettingsView, \
     TWFProjectPromptsView, TWFProjectTaskSettingsView, TWFProjectExportSettingsView, TWFProjectCopyView, \
-    TWFProjectResetView, TWFProjectUserManagementView, TWFProjectRepositorySettingsView
+    TWFProjectResetView, TWFProjectUserManagementView, TWFProjectRepositorySettingsView, TWFProjectPromptEditView
 from twf.views.project.views_project_ai import TWFProjectAIQueryView, TWFProjectGeminiQueryView, \
     TWFProjectClaudeQueryView
 from twf.views.tags.views_tags import TWFProjectTagsView, TWFProjectTagsOpenView, \
@@ -105,6 +105,7 @@ urlpatterns = [
     path('project/task/monitor/', TWFProjectTaskMonitorView.as_view(), name='project_task_monitor'),
     path('project/prompts/', TWFProjectPromptsView.as_view(), name='project_prompts'),
     path('project/prompts/delete/<int:pk>/', delete_prompt, name='project_delete_prompt'),
+    path('project/prompts/edit/<int:pk>/', TWFProjectPromptEditView.as_view(), name='project_edit_prompt'),
 
     path('project/settings/general/', TWFProjectGeneralSettingsView.as_view(), name='project_settings_general'),
     path('project/settings/credentials/', TWFProjectCredentialsSettingsView.as_view(),

@@ -14,8 +14,8 @@ from twf.forms.dynamic_forms import DynamicForm
 from twf.forms.filters.project_filter_forms import TaskFilterForm, PromptFilterForm
 from twf.forms.project.project_forms_batches import ProjectCopyBatchForm
 from twf.forms.project.project_forms import QueryDatabaseForm, GeneralSettingsForm, CredentialsForm, \
-    TaskSettingsForm, ExportSettingsForm, RepositorySettingsForm
-from twf.models import Page, PageTag, Project
+    TaskSettingsForm, ExportSettingsForm, RepositorySettingsForm, PromptForm
+from twf.models import Page, PageTag, Project, Prompt
 from twf.permissions import check_permission, get_actions_grouped_by_category, get_available_actions
 from twf.utils.project_statistics import get_document_statistics
 from twf.views.views_base import TWFView
@@ -153,6 +153,34 @@ class TWFProjectPromptsView(TWFProjectView):
         context['filter_form'] = filter_form
         return context
 
+
+class TWFProjectPromptEditView(FormView, TWFProjectView):
+    """View for the project prompts."""
+
+    template_name = 'twf/project/edit_prompt.html'
+    page_title = 'Prompts'
+    form_class = PromptForm
+    success_url = reverse_lazy('twf:project_prompts')
+
+    def get_form_kwargs(self):
+        """Get the form kwargs."""
+        kwargs = super().get_form_kwargs()
+        kwargs['instance'] = Prompt.objects.get(pk=self.kwargs['pk'])
+        return kwargs
+
+    def form_valid(self, form):
+        """Handle the form submission."""
+        # Save the form and show a success message
+        self.object = form.save(commit=False)
+        self.object.save(current_user=self.request.user)
+
+        messages.success(self.request, 'Prompt has been updated successfully.')
+        return super().form_valid(form)
+
+    def get_context_data(self, **kwargs):
+        """Get the context data."""
+        context = super().get_context_data(**kwargs)
+        return context
 
 
 class TWFProjectGeneralSettingsView(FormView, TWFProjectView):
