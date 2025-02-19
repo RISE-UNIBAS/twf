@@ -1,7 +1,7 @@
 """Filter classes for the twf app."""
 import django_filters
 from django.forms import CheckboxInput
-from .models import Document, DictionaryEntry, PageTag, CollectionItem
+from twf.models import Document, DictionaryEntry, PageTag, CollectionItem
 
 
 class TagFilter(django_filters.FilterSet):

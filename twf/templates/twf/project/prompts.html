@@ -3,7 +3,7 @@
 
 {% block content %}
     <div class="border rounded bg-light mt-0 p-3">
-        <h1 class="display-6">Monitor Prompts</h1>
+        <h1 class="display-6">Saved Prompts</h1>
         <p class="lead">All prompts from your project are listed here.</p>
 
         <!-- Filter Form -->
@@ -13,17 +13,9 @@
                     {{ filter_form.system_role.label_tag }}
                     {{ filter_form.system_role|add_class:"form-control" }}
                 </div>
-                <div class="col-md-2">
-                    {{ filter_form.has_document_context.label_tag }}
-                    {{ filter_form.has_document_context|add_class:"form-select" }}
-                </div>
-                <div class="col-md-2">
-                    {{ filter_form.has_page_context.label_tag }}
-                    {{ filter_form.has_page_context|add_class:"form-select" }}
-                </div>
-                <div class="col-md-2">
-                    {{ filter_form.has_collection_context.label_tag }}
-                    {{ filter_form.has_collection_context|add_class:"form-select" }}
+                <div class="col-md-4">
+                    {{ filter_form.prompt.label_tag }}
+                    {{ filter_form.prompt|add_class:"form-control" }}
                 </div>
                 <div class="col-md-auto ms-auto">
                     <button type="submit" class="btn btn-dark">Filter</button>
@@ -38,11 +30,13 @@
                     <div class="card-body">
                         <h5 class="card-title">{{ prompt.system_role }}</h5>
                         <p class="card-text">{{ prompt.prompt }}</p>
-                        <p>
-                            <strong>Document Context:</strong> {{ prompt.document_context.count }}<br>
-                            <strong>Page Context:</strong> {{ prompt.page_context.count }}<br>
-                            <strong>Collection Context:</strong> {{ prompt.collection_context.count }}
-                        </p>
+                    </div>
+                    <div class="card-footer text-end">
+                        <button class="btn btn-sm btn-danger show-danger-modal"
+                                data-url="{% url 'twf:project_delete_prompt' prompt.id %}"
+                                data-title="Delete Prompt"
+                                data-message="Are you sure you want to delete this prompt?">Delete</button>
+                        <a href="" class="btn btn-sm btn-dark">Edit</a>
                     </div>
                 </div>
             {% endfor %}

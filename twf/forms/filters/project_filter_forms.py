@@ -36,18 +36,8 @@ class PromptFilterForm(forms.Form):
         label="System Role",
         widget=forms.TextInput(attrs={"placeholder": "Enter system role"}),
     )
-    has_document_context = forms.ChoiceField(
-        choices=[("", "All"), ("yes", "Yes"), ("no", "No")],
+    prompt = forms.CharField(
         required=False,
-        label="Document Context",
-    )
-    has_page_context = forms.ChoiceField(
-        choices=[("", "All"), ("yes", "Yes"), ("no", "No")],
-        required=False,
-        label="Page Context",
-    )
-    has_collection_context = forms.ChoiceField(
-        choices=[("", "All"), ("yes", "Yes"), ("no", "No")],
-        required=False,
-        label="Collection Context",
+        label="Prompt",
+        widget=forms.TextInput(attrs={"placeholder": "Enter prompt"}),
     )

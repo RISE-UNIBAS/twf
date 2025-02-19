@@ -95,3 +95,21 @@ def close_project(request, pk):
         messages.error(request, 'You do not have the required permissions to close this project.')
 
     return redirect('twf:project_management')
+
+
+def delete_prompt(request, pk):
+    """Delete a prompt."""
+    project = TWFView.s_get_project(request)
+
+    if not check_permission(request.user, "delete_prompt", project):
+        messages.error(request, "You do not have permission to delete a prompt.")
+        return redirect('twf:project_prompts')
+
+    try:
+        prompt = project.prompts.get(pk=pk)
+        prompt.delete()
+        messages.success(request, "Prompt deleted.")
+    except project.prompts.model.DoesNotExist:
+        messages.error(request, "Prompt does not exist.")
+
+    return redirect('twf:project_prompts')

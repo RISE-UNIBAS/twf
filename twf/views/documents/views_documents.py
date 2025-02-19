@@ -8,7 +8,7 @@ from django.views.generic import FormView
 from django_filters.views import FilterView
 from django_tables2 import SingleTableView
 
-from twf.filters import DocumentFilter
+from twf.forms.filters.filters import DocumentFilter
 from twf.forms.documents.documents_forms import DocumentForm
 from twf.models import Document, Workflow
 from twf.tables.tables_document import DocumentTable

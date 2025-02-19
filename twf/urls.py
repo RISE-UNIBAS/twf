@@ -32,7 +32,7 @@ from twf.views.home.views_home import TWFHomeView, TWFHomeLoginView, TWFHomePass
     TWFSelectProjectView, TWFHomeUserProfileView, TWFCreateProjectView, TWFManageProjectsView, TWFManageUsersView
 from twf.views.metadata.views_metadata_ai import TWFMetadataLoadDataView, TWFMetadataLoadSheetsDataView
 from twf.views.project.views_crud import delete_all_documents, delete_all_tags, delete_all_collections, select_project, \
-    delete_project, close_project
+    delete_project, close_project, delete_prompt
 from twf.views.project.views_project_setup import TWFProjectSetupView, TWFProjectTranskribusExtractView
 from twf.views.ajax.views_ajax_download import ajax_transkribus_download_export, download_progress_view
 from twf.views.collections.views_collections import TWFCollectionsReviewView, TWFCollectionOverviewView, \
@@ -104,6 +104,7 @@ urlpatterns = [
 
     path('project/task/monitor/', TWFProjectTaskMonitorView.as_view(), name='project_task_monitor'),
     path('project/prompts/', TWFProjectPromptsView.as_view(), name='project_prompts'),
+    path('project/prompts/delete/<int:pk>/', delete_prompt, name='project_delete_prompt'),
 
     path('project/settings/general/', TWFProjectGeneralSettingsView.as_view(), name='project_settings_general'),
     path('project/settings/credentials/', TWFProjectCredentialsSettingsView.as_view(),

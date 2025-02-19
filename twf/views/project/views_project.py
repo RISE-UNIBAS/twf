@@ -146,18 +146,8 @@ class TWFProjectPromptsView(TWFProjectView):
         if filter_form.is_valid():
             if filter_form.cleaned_data['system_role']:
                 prompts = prompts.filter(system_role__icontains=filter_form.cleaned_data['system_role'])
-            if filter_form.cleaned_data['has_document_context'] == "yes":
-                prompts = prompts.filter(document_context__isnull=False)
-            elif filter_form.cleaned_data['has_document_context'] == "no":
-                prompts = prompts.filter(document_context__isnull=True)
-            if filter_form.cleaned_data['has_page_context'] == "yes":
-                prompts = prompts.filter(page_context__isnull=False)
-            elif filter_form.cleaned_data['has_page_context'] == "no":
-                prompts = prompts.filter(page_context__isnull=True)
-            if filter_form.cleaned_data['has_collection_context'] == "yes":
-                prompts = prompts.filter(collection_context__isnull=False)
-            elif filter_form.cleaned_data['has_collection_context'] == "no":
-                prompts = prompts.filter(collection_context__isnull=True)
+            if filter_form.cleaned_data['prompt']:
+                prompts = prompts.filter(prompt__icontains=filter_form.cleaned_data['prompt'])
 
         context['prompts'] = prompts
         context['filter_form'] = filter_form

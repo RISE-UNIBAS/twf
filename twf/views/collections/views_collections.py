@@ -7,7 +7,7 @@ from django.views.generic import FormView
 from django_filters.views import FilterView
 from django_tables2 import SingleTableView
 
-from twf.filters import CollectionItemFilter
+from twf.forms.filters.filters import CollectionItemFilter
 from twf.forms.collections.collections_forms import CollectionCreateForm, CollectionAddDocumentForm, CollectionUpdateForm, \
     CollectionItemReviewForm, CollectionItemUpdateForm
 from twf.models import CollectionItem, Collection, Workflow
