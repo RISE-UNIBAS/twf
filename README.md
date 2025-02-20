@@ -1,6 +1,6 @@
 Transkribus workflow
 ====================
-![pylint score](https://mperlet.github.io/pybadge/badges/9.20.svg)
+![pylint score](https://mperlet.github.io/pybadge/badges/9.19.svg)
 
 # Table of Contents
 1. [Navigation (Parts of the App)](#twf-navigation)
