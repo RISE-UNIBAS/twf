@@ -3,7 +3,7 @@ $(document).ready(function() {
     const loadButton = document.getElementById("loadPrompt");
     const promptSelect = document.querySelector("select[name='saved_prompts']");
     const roleInput = document.querySelector("input[name='role_description']");
-    const promptInput = document.querySelector("input[name='prompt']");
+    const promptInput = document.querySelector("textarea[name='prompt']");
 
     $("#id_saved_prompts").select2({
         templateResult: formatDropdown,
@@ -122,7 +122,7 @@ $(document).ready(function() {
                 do_alert("Error loading prompt: " + data.error, "danger");
             }
         })
-        .catch(error => do_alert("Error loading prompt.", "danger"));
+        .catch(error => do_alert("Error loading prompt." + error, "danger"));
     });
 
     // CSRF Token Helper Function

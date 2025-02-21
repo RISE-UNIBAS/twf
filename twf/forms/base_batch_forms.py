@@ -85,8 +85,9 @@ class BaseAIBatchForm(BaseBatchForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.fields['role_description'] = forms.CharField(label='Role Description', required=False)
-        self.fields['prompt'] = forms.CharField(label='Prompt', required=False)
+        self.fields['role_description'] = forms.CharField(label='Role Description', required=True)
+        self.fields['prompt'] = forms.CharField(label='Prompt', required=True,
+                                                widget=forms.Textarea(attrs={'rows': 5}))
         self.fields['saved_prompts'] = forms.ModelChoiceField(queryset=Prompt.objects.filter(project=self.project),
                                                               required=False)
 

@@ -18,6 +18,13 @@ def task_status_view(request, task_id):
         # Get the task result by its task_id
         task_result = AsyncResult(task_id)
 
+        if task_result.state == 'PENDING':
+            # Task is not yet started
+            response_data = {
+                'status': 'PENDING',
+                'progress': 0,
+                'text': 'Task is pending...'
+            }
         # If the task is in progress, return the progress meta information
         if task_result.state == 'PROGRESS':
             response_data = {
@@ -61,20 +68,22 @@ def task_status_view(request, task_id):
 def task_cancel_view(request, task_id):
     """Cancel a task by its task_id. """
     try:
-        task = Task.objects.get(task_id=task_id)
-        AsyncResult(task_id).revoke(terminate=True)
+        task = Task.objects.get(pk=task_id)
+        AsyncResult(task.celery_task_id).revoke(terminate=True)
         task.status = 'CANCELED'
         task.end_time = timezone.now()
         task.save()
-        return JsonResponse({'status': 'success', 'message': 'Task canceled'})
+        messages.success(request, 'Task cancelled successfully.')
+        return redirect('twf:project_task_monitor')
     except Task.DoesNotExist:
-        return JsonResponse({'status': 'error', 'message': 'Task not found'}, status=404)
+        messages.error(request, 'Task not found.')
+        return redirect('twf:project_task_monitor')
 
 
-def task_remove_view(request, pk):
+def task_remove_view(request, task_id):
     """Remove a task from the database. """
     try:
-        task = Task.objects.get(pk=pk)
+        task = Task.objects.get(pk=task_id)
         task.delete()
         messages.success(request, 'Task removed successfully.')
         # return to the task list page

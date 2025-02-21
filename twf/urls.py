@@ -258,7 +258,7 @@ urlpatterns = [
     # CELERY TASKS
     path('celery/status/<str:task_id>/', task_status_view, name='celery_task_status'),
     path('celery/cancel/<str:task_id>/', task_cancel_view, name='celery_task_cancel'),
-    path('celery/remove/<int:pk>/', task_remove_view, name='celery_task_remove'),
+    path('celery/remove/<str:task_id>/', task_remove_view, name='celery_task_remove'),
 
     path('celery/transkribus/extract/', start_extraction, name='task_transkribus_extract_export'),
     path('celery/project/copy/', start_copy_project, name='task_project_copy'),

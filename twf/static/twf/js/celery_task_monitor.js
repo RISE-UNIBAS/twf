@@ -60,7 +60,7 @@
                 const progressBar = $(progressBarId);
                 const status = data.status.toUpperCase();
 
-                if (status === 'PROGRESS' || status === 'PENDING') {
+                if (status === 'STARTED' || status === 'PROGRESS' || status === 'PENDING') {
                     let progress = (data.current / data.total) * 100;
                     progressBar.css('width', progress + '%');
                     progressBar.text(progress.toFixed(2) + '%');

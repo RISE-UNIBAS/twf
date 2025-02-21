@@ -30,6 +30,7 @@ class BaseTWFTask(CeleryTask):
             status="STARTED",
             title=self.name,  # Defaults to the task name
         )
+        self.update_state(state="STARTED", meta={"current": 0, "total": 100, "text": "Task started"})
 
     @staticmethod
     def validate_task_parameters(kwargs, required_params):
@@ -56,15 +57,16 @@ class BaseTWFTask(CeleryTask):
         self.total_items = total
         self.processed_items = 0  # Reset counter
 
-    def advance_task(self):
+    def advance_task(self, text="In progress"):
         if self.total_items is not None and self.total_items > 0:
             self.processed_items += 1  # Increment processed count
             progress = int((self.processed_items / self.total_items) * 100)
-            self.update_progress(progress)
+            self.update_progress(progress, text)
 
-    def update_progress(self, progress):
+    def update_progress(self, progress, text="In progress"):
         """Update task progress in the database."""
         if self.twf_task:
+            self.update_state(state="PROGRESS", meta={"current": progress, "total": 100, "text": text})
             self.twf_task.progress = progress
             self.twf_task.save(update_fields=["progress"])
 
@@ -77,13 +79,15 @@ class BaseTWFTask(CeleryTask):
             response_dict, elapsed_time = self.prompt_client(item, prompt)
             item.metadata[metadata_field] = response_dict
             item.save(current_user=self.user)
-            self.advance_task()
+            self.advance_task(text=f"Processed {self.processed_items}/{self.total_items}")
 
         self.end_task()
 
     def end_task(self, status="SUCCESS"):
         """Mark the task as completed or failed."""
         if self.twf_task:
+            self.update_state(state=status)
+            self.twf_task.end_time = timezone.now()
             self.twf_task.status = status
             self.twf_task.save(update_fields=["status"])
 
@@ -101,22 +105,6 @@ class BaseTWFTask(CeleryTask):
                                                     prompt=prompt)
         response_dict = response.to_dict()
         return response_dict, elapsed_time
-
-
-def update_task_percentage(broker, task, text, percentage_complete):
-    """Update the task. Update the Task object and update the state of the Celery broker.
-    :param broker: Celery broker
-    :param task: Task object
-    :param text: Task text
-    :param percentage_complete: Percentage complete
-    :return: Task object, percentage complete"""
-
-    task.status = 'PROGRESS'
-    task.text = text
-    task.save()
-    broker.update_state(state='PROGRESS', meta={'current': percentage_complete, 'total': 100, 'text': text})
-
-    return task, percentage_complete
 
 
 def end_task(broker, task, text, description=None, meta=None):

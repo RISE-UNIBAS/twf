@@ -608,8 +608,11 @@ class PromptForm(forms.ModelForm):
         self.helper.form_class = 'form form-control'
         self.helper.layout = Layout(
             Row(
-                Column('system_role', css_class='form-group col-6 mb-3'),
-                Column('prompt', css_class='form-group col-6 mb-3'),
+                Column('system_role', css_class='form-group col-12 mb-3'),
+                css_class='row form-row'
+            ),
+            Row(
+                Column('prompt', css_class='form-group col-12 mb-3'),
                 css_class='row form-row'
             ),
             Div(
