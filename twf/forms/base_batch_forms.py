@@ -51,6 +51,12 @@ class BaseBatchForm(forms.Form):
             'data_log_textarea_id': self.task_data.get('data-log-textarea-id'),
         }
 
+        cancel_kwargs = {
+            'css_class': 'btn btn-danger show-danger-modal',
+            'data_message': 'Are you sure you want to cancel the task?',
+            'disabled': 'disabled',
+        }
+
         # Filter out None or empty values
         filtered_kwargs = {key: value for key, value in button_kwargs.items() if value}
 
@@ -62,6 +68,7 @@ class BaseBatchForm(forms.Form):
                 css_class='row form-row'
             ),
             Div(
+                Button('cancelBatch', "Cancel Batch", **cancel_kwargs),
                 Button('startBatch', self.get_button_label(), **filtered_kwargs),
                 css_class='text-end pt-3'
             )

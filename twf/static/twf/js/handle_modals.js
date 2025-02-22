@@ -31,6 +31,7 @@ $(document).ready(function () {
     let taskFunction = null;
     const redirectUrl = button.data('redirect-url');
     const startTaskUrl = button.data('start-url');
+    const cancelTaskUrl = button.data('cancel-url');
 
     if (form.length > 0) {
       taskFunction = () => form.submit(); // Submit the form
@@ -49,6 +50,9 @@ $(document).ready(function () {
         console.log("Starting Celery task at:", startTaskUrl, "with data:", formData);
         startTask(startTaskUrl, progressUrlBase, progressBarId, logTextareaId, formData);
       };
+    }
+    if (cancelTaskUrl) {
+      taskFunction = () => cancelTask(cancelTaskUrl, button.attr('id')); // Cancel the task
     }
 
     // Attach task function to confirm button

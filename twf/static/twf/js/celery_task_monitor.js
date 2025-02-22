@@ -1,5 +1,7 @@
 (function() {
     let lastMessage = "";
+    const cancelButtonId = "#button-id-cancelbatch";
+    const runButtonId = "#button-id-runbatch";
 
     /**
      * Starts a task by sending an AJAX request to the provided URL
@@ -36,6 +38,11 @@
             contentType: false,
             success: function(data) {
                 let taskId = data.task_id;
+
+                 $(cancelButtonId).prop("disabled", false);
+                 $(runButtonId).prop("disabled", true);
+                 $(cancelButtonId).data("task-id", taskId); // Store the task ID for canceling
+
                 pollTaskProgress(taskId, progressUrlBase, progressBarId, logTextareaId);
             },
             error: function(error) {
@@ -132,6 +139,42 @@
                 $(logTextareaId).append('Error polling task progress.\n');
             });
     }
+
+    function cancelTask(cancelUrlBase) {
+        const cancelButton = $(cancelButtonId);
+        const taskId = cancelButton.data("task-id");
+
+        if (!taskId) {
+            console.error("No task ID found for cancellation.");
+            return;
+        }
+
+        // Show the confirmation modal (assuming you have a Bootstrap modal)
+        if (!confirm("Are you sure you want to cancel the task?")) {
+            return; // Exit if the user cancels
+        }
+
+        // Send request to cancel the task
+        $.ajax({
+            url: '/celery/cancel/' + taskId + '/',
+            method: 'POST',
+            success: function(response) {
+                console.log("Task canceled successfully:", response);
+
+                // Disable the cancel button and re-enable the run button
+                cancelButton.prop("disabled", true);
+                $(runButtonId).prop("disabled", false);
+                do_alert("Task canceled successfully!", "success");
+            },
+            error: function(error) {
+                console.error("Error canceling task:", error.responseText);
+                do_alert("Error canceling task.", "danger");
+            }
+        });
+    }
+
+    // Expose the cancel function globally
+    window.cancelTask = cancelTask;
 
     /**
      * Scrolls to the bottom of a textarea.

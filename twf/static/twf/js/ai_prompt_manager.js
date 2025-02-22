@@ -156,6 +156,7 @@ $(document).ready(function() {
             alertDiv.remove();
         }, 5000);
     }
+    this.do_alert = do_alert;
 
     function formatDropdown(option) {
         if (!option.id) {
