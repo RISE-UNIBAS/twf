@@ -351,3 +351,21 @@ tr[data-bs-toggle="collapse"]:hover {
 #sidebar-container.collapsed + #content-container {
     width: calc(100% - 50px); /* When sidebar is collapsed */
 }
+
+
+/******* PROGRESS BAR *******************************/
+/* Custom animation for pending state */
+.progress-bar-striped.progress-bar-animated {
+    background-color: #333; /* Dark Grey/Black */
+    background-image: linear-gradient(45deg, rgba(255,255,255,0.15) 25%, transparent 25%,
+                                      transparent 50%, rgba(255,255,255,0.15) 50%,
+                                      rgba(255,255,255,0.15) 75%, transparent 75%, transparent);
+    background-size: 40px 40px;
+    animation: progress-animation 1s linear infinite;
+}
+
+/* Optional: Custom animation speed */
+@keyframes progress-animation {
+    from { background-position: 0 0; }
+    to { background-position: 40px 0; }
+}

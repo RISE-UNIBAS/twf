@@ -79,7 +79,7 @@ class BaseTWFTask(CeleryTask):
             response_dict, elapsed_time = self.prompt_client(item, prompt)
             item.metadata[metadata_field] = response_dict
             item.save(current_user=self.user)
-            self.advance_task(text=f"Processed {self.processed_items}/{self.total_items}")
+            self.advance_task(text=f"Processed {self.processed_items+1}/{self.total_items}")
 
         self.end_task()
 

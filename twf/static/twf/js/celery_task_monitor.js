@@ -1,4 +1,6 @@
 (function() {
+    let lastMessage = "";
+
     /**
      * Starts a task by sending an AJAX request to the provided URL
      * and begins monitoring its progress.
@@ -11,6 +13,7 @@
      */
     function startTask(startUrl, progressUrlBase, progressBarId, logTextareaId, data) {
         const queryString = new URLSearchParams(data).toString();
+        lastMessage = "";
 
         // Clear the log before starting
         $(logTextareaId).text('');
@@ -56,27 +59,52 @@
         fetch(url)
             .then(response => response.json())
             .then(data => {
-                console.log('Task Progress Data:', data); // Debug the full response
                 const progressBar = $(progressBarId);
                 const status = data.status.toUpperCase();
 
-                if (status === 'STARTED' || status === 'PROGRESS' || status === 'PENDING') {
-                    let progress = (data.current / data.total) * 100;
-                    progressBar.css('width', progress + '%');
-                    progressBar.text(progress.toFixed(2) + '%');
-                    $(logTextareaId).append(data.text + '\n');
-                    scrollToBottom(logTextareaId);
+                if (status === 'PENDING' || status === 'STARTED') {
+                    progressBar.css('width', '100%');
+                    progressBar.addClass('bg-dark progress-bar-striped progress-bar-animated');
 
                     setTimeout(function() {
                         pollTaskProgress(taskId, progressUrlBase, progressBarId, logTextareaId);
-                    }, 800); // Adjust the polling interval if needed
+                    }, 800);
+                }
+                else if (status === 'PROGRESS') {
+                    let progress = (data.current / data.total) * 100;
+                    if (isNaN(progress)) {
+                        progress = 0;
+                    }
+                    progressBar.css('width', progress + '%');
+                    progressBar.removeClass('progress-bar-striped progress-bar-animated');
+                    progressBar.text(progress.toFixed(2) + '%');
+
+                    if (data.text) {
+                        const logTextarea = $(logTextareaId);
+                        let currentLog = logTextarea.val().trim();
+                        console.log('New log:', data.text);
+                        console.log('Last message:', lastMessage);
+                        if (data.text === lastMessage) {
+                            // If it's the same message, just append a dot
+                            logTextarea.val(currentLog + ".");
+                        } else {
+                            // New message, add it as a new line
+                            logTextarea.val(currentLog + "\n" + data.text);
+                            lastMessage = data.text; // Update last message
+                        }
+                        scrollToBottom(logTextareaId);
+                    }
+
+                    setTimeout(function() {
+                        pollTaskProgress(taskId, progressUrlBase, progressBarId, logTextareaId);
+                    }, 800);
                 } else if (status === 'SUCCESS') {
                     progressBar.css('width', '100%');
                     progressBar.removeClass('bg-dark'); // Remove the dark color
                     progressBar.addClass('bg-success'); // Change the progress bar color to red
                     progressBar.text('Completed');
-                    $(logTextareaId).append('Task completed\n' + data.result.text + '\n');
-                    console.log('Task completed:', data.result);
+                    $(logTextareaId).append('Task completed\n');
+
                     if (data.result.download_url) {
                         $(logTextareaId).append("Click here to download: " + data.result.download_url + "\n");
 
@@ -87,7 +115,6 @@
                         document.body.appendChild(downloadLink);
                         downloadLink.click();
                         document.body.removeChild(downloadLink);
-                        console.log('Download link clicked');
                     }
 
                     scrollToBottom(logTextareaId);

@@ -110,8 +110,7 @@ class AiApiClient:
                 images.append(image_file)
 
             response = model.generate_content([prompt] + images)
-            message = response.text
-            answer = message
+            answer = response
 
         if self.api == 'anthropic':
             message = self.api_client.messages.create(
@@ -122,10 +121,24 @@ class AiApiClient:
                         "content": prompt,
                     }
                 ],
-                model="claude-3-opus-20240229",
+                model=model,
             )
             answer = message
 
         end_time = time.time()
         elapsed_time = end_time - prompt_start
         return answer, elapsed_time
+
+    def get_model_list(self):
+        """Get the list of available models."""
+        if self.api_client is None:
+            raise ValueError('API client is not initialized.')
+
+        if self.api == 'openai':
+            return self.api_client.models.list()
+
+        if self.api == 'genai':
+            return genai.list_models()
+
+        if self.api == 'anthropic':
+            return self.api_client.models.list()
