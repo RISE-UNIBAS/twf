@@ -130,3 +130,22 @@ class AIFormView(FormView):
         kwargs['data-message'] = self.message
 
         return kwargs
+
+    def get_ai_credentials(self, client_name):
+        """Get the AI credentials."""
+        project = self.get_project()
+        if project is None:
+            return {}
+        return project.get_credentials(client_name)
+
+    def has_ai_credentials(self, client_name):
+        """Check if the AI credentials are set."""
+        creds = self.get_ai_credentials(client_name)
+        if creds is None:
+            return False
+
+        if "api_key" in creds and creds["api_key"]:
+            if "default_model" in creds and creds["default_model"]:
+                return True
+
+        return False

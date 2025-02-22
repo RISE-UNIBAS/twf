@@ -10,6 +10,7 @@ from twf.views.views_base import AIFormView
 
 class TWFDocumentOpenAIBatchView(AIFormView, TWFDocumentView):
     """Ask ChatGPT."""
+
     template_name = 'twf/base/base_ai_batch.html'
     page_title = 'OpenAI Batch'
     form_class = DocumentBatchOpenAIForm
@@ -19,13 +20,17 @@ class TWFDocumentOpenAIBatchView(AIFormView, TWFDocumentView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['ai_heading'] = 'Ask ChatGPT'
-        context['ai_lead'] = 'Ask ChatGPT to generate text based on the provided prompt.'
+        context['ai_heading'] = 'ChatGPT Document Batch'
+        context['ai_lead'] = ('Ask ChatGPT to generate text based on the provided prompt.'
+                              'Your prompt will be expanded with the document text.')
+        context['has_ai_credentials'] = self.has_ai_credentials('openai')
+        context['ai_credentials_url'] = reverse_lazy('twf:project_settings_credentials') + '?tab=openai'
         return context
 
 
 class TWFDocumentGeminiBatchView(AIFormView, TWFDocumentView):
     """Ask Gemini."""
+
     template_name = 'twf/base/base_ai_batch.html'
     page_title = 'Gemini Batch'
     form_class = DocumentBatchGeminiForm
@@ -36,12 +41,16 @@ class TWFDocumentGeminiBatchView(AIFormView, TWFDocumentView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['ai_heading'] = 'Ask Gemini'
-        context['ai_lead'] = 'Ask Gemini to generate text based on the provided prompt.'
+        context['ai_lead'] = ('Ask Gemini to generate text based on the provided prompt.'
+                              'Your prompt will be expanded with the document text.')
+        context['has_ai_credentials'] = self.has_ai_credentials('genai')
+        context['ai_credentials_url'] = reverse_lazy('twf:project_settings_credentials') + '?tab=genai'
         return context
 
 
 class TWFDocumentClaudeBatchView(AIFormView, TWFDocumentView):
     """Ask Claude."""
+
     template_name = 'twf/base/base_ai_batch.html'
     page_title = 'Claude Batch'
     form_class = DocumentBatchClaudeForm
@@ -52,12 +61,16 @@ class TWFDocumentClaudeBatchView(AIFormView, TWFDocumentView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['ai_heading'] = 'Ask Claude'
-        context['ai_lead'] = 'Ask Claude to generate text based on the provided prompt.'
+        context['ai_lead'] = ('Ask Claude to generate text based on the provided prompt.'
+                              'Your prompt will be expanded with the document text.')
+        context['has_ai_credentials'] = self.has_ai_credentials('anthropic')
+        context['ai_credentials_url'] = reverse_lazy('twf:project_settings_credentials') + '?tab=anthropic'
         return context
 
 
 class TWFDocumentOpenAIPageBatchView(AIFormView, TWFDocumentView):
     """Ask ChatGPT."""
+
     template_name = 'twf/base/base_ai_batch.html'
     page_title = 'OpenAI Page Batch'
     form_class = DocumentBatchOpenAIForm
@@ -68,12 +81,16 @@ class TWFDocumentOpenAIPageBatchView(AIFormView, TWFDocumentView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['ai_heading'] = 'Ask ChatGPT'
-        context['ai_lead'] = 'Ask ChatGPT to generate text based on the provided prompt.'
+        context['ai_lead'] = ('Ask ChatGPT to generate text based on the provided prompt.'
+                              'Your prompt will be expanded with the page text.')
+        context['has_ai_credentials'] = self.has_ai_credentials('openai')
+        context['ai_credentials_url'] = reverse_lazy('twf:project_settings_credentials') + '?tab=openai'
         return context
 
 
 class TWFDocumentGeminiPageBatchView(AIFormView, TWFDocumentView):
     """Ask Gemini."""
+
     template_name = 'twf/base/base_ai_batch.html'
     page_title = 'Gemini Batch'
     form_class = DocumentBatchGeminiForm
@@ -84,12 +101,16 @@ class TWFDocumentGeminiPageBatchView(AIFormView, TWFDocumentView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['ai_heading'] = 'Ask Gemini'
-        context['ai_lead'] = 'Ask Gemini to generate text based on the provided prompt.'
+        context['ai_lead'] = ('Ask Gemini to generate text based on the provided prompt.'
+                              'Your prompt will be expanded with the page text.')
+        context['has_ai_credentials'] = self.has_ai_credentials('genai')
+        context['ai_credentials_url'] = reverse_lazy('twf:project_settings_credentials') + '?tab=genai'
         return context
 
 
 class TWFDocumentClaudePageBatchView(AIFormView, TWFDocumentView):
     """Ask Claude."""
+
     template_name = 'twf/base/base_ai_batch.html'
     page_title = 'Claude Batch'
     form_class = DocumentBatchClaudeForm
@@ -100,5 +121,8 @@ class TWFDocumentClaudePageBatchView(AIFormView, TWFDocumentView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['ai_heading'] = 'Ask Claude'
-        context['ai_lead'] = 'Ask Claude to generate text based on the provided prompt.'
+        context['ai_lead'] = ('Ask Claude to generate text based on the provided prompt.'
+                              'Your prompt will be expanded with the page text.')
+        context['has_ai_credentials'] = self.has_ai_credentials('anthropic')
+        context['ai_credentials_url'] = reverse_lazy('twf:project_settings_credentials') + '?tab=anthropic'
         return context

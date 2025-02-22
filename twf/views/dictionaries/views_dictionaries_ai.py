@@ -88,6 +88,8 @@ class TWFDictionaryGeminiBatchView(AIFormView, TWFDictionaryView):
         context = super().get_context_data(**kwargs)
         context['ai_heading'] = 'Gemini'
         context['ai_lead'] = 'Gemini is an AI model that can be used to generate text based on a prompt.'
+        context['has_ai_credentials'] = self.has_ai_credentials('genai')
+        context['ai_credentials_url'] = reverse_lazy('twf:project_settings_credentials') + '?tab=genai'
         return context
 
 
@@ -104,6 +106,8 @@ class TWFDictionaryClaudeBatchView(AIFormView, TWFDictionaryView):
         context = super().get_context_data(**kwargs)
         context['ai_heading'] = 'Claude'
         context['ai_lead'] = 'Claude is an AI model that can be used to generate text based on a prompt.'
+        context['has_ai_credentials'] = self.has_ai_credentials('anthropic')
+        context['ai_credentials_url'] = reverse_lazy('twf:project_settings_credentials') + '?tab=anthropic'
         return context
 
 
@@ -156,6 +160,8 @@ class TWFDictionaryOpenaiRequestView(AIFormView, TWFDictionaryView):
         context = super().get_context_data(**kwargs)
         context['ai_heading'] = 'OpenAI'
         context['ai_lead'] = 'OpenAI is an AI model that can be used to generate text based on a prompt.'
+        context['has_ai_credentials'] = self.has_ai_credentials('openai')
+        context['ai_credentials_url'] = reverse_lazy('twf:project_settings_credentials') + '?tab=openai'
         return context
 
 
@@ -172,6 +178,8 @@ class TWFDictionaryClaudeRequestView(AIFormView, TWFDictionaryView):
         context = super().get_context_data(**kwargs)
         context['ai_heading'] = 'Claude'
         context['ai_lead'] = 'Claude is an AI model that can be used to generate text based on a prompt.'
+        context['has_ai_credentials'] = self.has_ai_credentials('anthropic')
+        context['ai_credentials_url'] = reverse_lazy('twf:project_settings_credentials') + '?tab=anthropic'
         return context
 
 
@@ -188,4 +196,6 @@ class TWFDictionaryGeminiRequestView(AIFormView, TWFDictionaryView):
         context = super().get_context_data(**kwargs)
         context['ai_heading'] = 'Gemini'
         context['ai_lead'] = 'Gemini is an AI model that can be used to generate text based on a prompt.'
+        context['has_ai_credentials'] = self.has_ai_credentials('genai')
+        context['ai_credentials_url'] = reverse_lazy('twf:project_settings_credentials') + '?tab=genai'
         return context

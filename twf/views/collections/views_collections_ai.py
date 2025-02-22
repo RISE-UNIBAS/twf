@@ -18,6 +18,8 @@ class TWFCollectionsOpenaiBatchView(AIFormView, TWFCollectionsView):
         context = super().get_context_data(**kwargs)
         context['ai_heading'] = 'OpenAI Batch Workflow'
         context['ai_lead'] = 'This task will request data from OpenAI.'
+        context['has_ai_credentials'] = self.has_ai_credentials('openai')
+        context['ai_credentials_url'] = reverse_lazy('twf:project_settings_credentials') + '?tab=openai'
         return context
 
 
@@ -33,6 +35,8 @@ class TWFCollectionsGeminiBatchView(AIFormView, TWFCollectionsView):
         context = super().get_context_data(**kwargs)
         context['ai_heading'] = 'Gemini Batch Workflow'
         context['ai_lead'] = 'This task will request data from Gemini.'
+        context['has_ai_credentials'] = self.has_ai_credentials('genai')
+        context['ai_credentials_url'] = reverse_lazy('twf:project_settings_credentials') + '?tab=genai'
         return context
 
 
@@ -48,6 +52,8 @@ class TWFCollectionsClaudeBatchView(AIFormView, TWFCollectionsView):
         context = super().get_context_data(**kwargs)
         context['ai_heading'] = 'Claude Batch Workflow'
         context['ai_lead'] = 'This task will request data from Claude.'
+        context['has_ai_credentials'] = self.has_ai_credentials('anthropic')
+        context['ai_credentials_url'] = reverse_lazy('twf:project_settings_credentials') + '?tab=anthropic'
         return context
 
 
@@ -63,6 +69,8 @@ class TWFCollectionsOpenaiRequestView(AIFormView, TWFCollectionsView):
         context = super().get_context_data(**kwargs)
         context['ai_heading'] = 'OpenAI Request'
         context['ai_lead'] = 'This task will request data from OpenAI.'
+        context['has_ai_credentials'] = self.has_ai_credentials('openai')
+        context['ai_credentials_url'] = reverse_lazy('twf:project_settings_credentials') + '?tab=openai'
         return context
 
 
@@ -78,6 +86,8 @@ class TWFCollectionsGeminiRequestView(AIFormView, TWFCollectionsView):
         context = super().get_context_data(**kwargs)
         context['ai_heading'] = 'Gemini Request'
         context['ai_lead'] = 'This task will request data from Gemini.'
+        context['has_ai_credentials'] = self.has_ai_credentials('genai')
+        context['ai_credentials_url'] = reverse_lazy('twf:project_settings_credentials') + '?tab=genai'
         return context
 
 
@@ -93,4 +103,6 @@ class TWFCollectionsClaudeRequestView(AIFormView, TWFCollectionsView):
         context = super().get_context_data(**kwargs)
         context['ai_heading'] = 'Claude Request'
         context['ai_lead'] = 'This task will request data from Claude.'
+        context['has_ai_credentials'] = self.has_ai_credentials('anthropic')
+        context['ai_credentials_url'] = reverse_lazy('twf:project_settings_credentials') + '?tab=anthropic'
         return context

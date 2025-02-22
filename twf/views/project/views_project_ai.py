@@ -1,8 +1,8 @@
 """ Views for the AI model. """
 from django.urls import reverse_lazy
-from django.views.generic import FormView
 
-from twf.forms.project.project_forms_batches import OpenAIQueryDatabaseForm, GeminiQueryDatabaseForm, ClaudeQueryDatabaseForm
+from twf.forms.project.project_forms_batches import OpenAIQueryDatabaseForm, GeminiQueryDatabaseForm, \
+    ClaudeQueryDatabaseForm
 from twf.views.project.views_project import TWFProjectView
 from twf.views.views_base import AIFormView
 
@@ -18,8 +18,11 @@ class TWFProjectAIQueryView(AIFormView, TWFProjectView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['ai_heading'] = 'AI Query'
-        context['ai_lead'] = 'Query the AI model for predictions.'
+        context['ai_heading'] = 'OpenAI Query'
+        context['ai_lead'] = ('Query the OpenAI model for predictions.'
+                              'Select documents to ask the AI model questions.')
+        context['has_ai_credentials'] = self.has_ai_credentials('openai')
+        context['ai_credentials_url'] = reverse_lazy('twf:project_settings_credentials') + '?tab=openai'
         return context
 
 
@@ -34,7 +37,10 @@ class TWFProjectGeminiQueryView(AIFormView, TWFProjectView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['ai_heading'] = 'Gemini Query'
-        context['ai_lead'] = 'Query the Gemini model for predictions.'
+        context['ai_lead'] = ('Query the Gemini model for predictions.'
+                              'Select documents to ask the AI model questions.')
+        context['has_ai_credentials'] = self.has_ai_credentials('genai')
+        context['ai_credentials_url'] = reverse_lazy('twf:project_settings_credentials') + '?tab=genai'
         return context
 
 
@@ -49,5 +55,8 @@ class TWFProjectClaudeQueryView(AIFormView, TWFProjectView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['ai_heading'] = 'Claude Query'
-        context['ai_lead'] = 'Query the Claude model for predictions.'
+        context['ai_lead'] = ('Query the Claude model for predictions.'
+                              'Select documents to ask the AI model questions.')
+        context['has_ai_credentials'] = self.has_ai_credentials('anthropic')
+        context['ai_credentials_url'] = reverse_lazy('twf:project_settings_credentials') + '?tab=anthropic'
         return context
