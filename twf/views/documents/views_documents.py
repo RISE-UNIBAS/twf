@@ -9,7 +9,7 @@ from django_filters.views import FilterView
 from django_tables2 import SingleTableView
 
 from twf.forms.filters.filters import DocumentFilter
-from twf.forms.documents.documents_forms import DocumentForm
+from twf.forms.documents.documents_forms import DocumentForm, DocumentSearchForm
 from twf.models import Document, Workflow
 from twf.tables.tables_document import DocumentTable
 from twf.views.views_base import TWFView
@@ -27,6 +27,7 @@ class TWFDocumentView(LoginRequiredMixin, TWFView):
                 'options': [
                     {'url': reverse('twf:documents_overview'), 'value': 'Overview'},
                     {'url': reverse('twf:documents_browse'), 'value': 'Browse Documents'},
+                    {'url': reverse('twf:documents_search'), 'value': 'Search Documents'},
                 ]
             },
             {
@@ -139,6 +140,26 @@ class TWFDocumentsBrowseView(SingleTableView, FilterView, TWFDocumentView):
         context = super().get_context_data(**kwargs)
         context['page_title'] = self.page_title
         context['filter'] = self.get_filterset(self.filterset_class)
+        return context
+
+
+class TWFDocumentsSearchView(FormView, TWFDocumentView):
+    """View for searching documents."""
+    template_name = 'twf/documents/search_documents.html'
+    page_title = 'Search Documents'
+    form_class = DocumentSearchForm
+    success_url = reverse_lazy('twf:documents_search')
+
+    def form_valid(self, form):
+        """Handle the form submission."""
+        # Add a success message
+        print("WOULD SEARCH FOR DOCUMENTS HERE") # TODO: Implement search
+        # Redirect to the success URL
+        return super().form_valid(form)
+
+    def get_context_data(self, **kwargs):
+        """Get the context data for the view."""
+        context = super().get_context_data(**kwargs)
         return context
 
 

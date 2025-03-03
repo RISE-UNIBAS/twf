@@ -23,7 +23,7 @@ from twf.views.dictionaries.views_dictionaries_ai import TWFDictionaryGNDBatchVi
 from twf.views.dictionaries.views_crud import remove_dictionary_from_project, add_dictionary_to_project, skip_entry, \
     delete_variation
 from twf.views.documents.views_documents import TWFDocumentsOverviewView, TWFDocumentsBrowseView, \
-    TWFDocumentCreateView, TWFDocumentNameView, TWFDocumentDetailView, TWFDocumentReviewView
+    TWFDocumentCreateView, TWFDocumentNameView, TWFDocumentDetailView, TWFDocumentReviewView, TWFDocumentsSearchView
 from twf.views.documents.views_documents_ai import TWFDocumentOpenAIBatchView, \
     TWFDocumentGeminiBatchView, TWFDocumentClaudeBatchView, TWFDocumentOpenAIPageBatchView, \
     TWFDocumentGeminiPageBatchView, TWFDocumentClaudePageBatchView
@@ -127,6 +127,7 @@ urlpatterns = [
     # DOCUMENTS
     path('documents/', TWFDocumentsOverviewView.as_view(), name='documents_overview'),
     path('documents/browse/', TWFDocumentsBrowseView.as_view(), name='documents_browse'),
+    path('documents/search/', TWFDocumentsSearchView.as_view(), name='documents_search'),
     path('documents/create/', TWFDocumentCreateView.as_view(), name='documents_create'),
     path('documents/review/', TWFDocumentReviewView.as_view(), name='documents_review'),
     path('documents/name/', TWFDocumentNameView.as_view(), name='name_documents'),
