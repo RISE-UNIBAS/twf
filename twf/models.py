@@ -561,7 +561,6 @@ class Page(TimeStampedModel):
 
     def get_annotations(self):
         """Return the annotations of the page."""
-        # print("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX")
         ret_items = []
         anno_types = []
         if 'elements' in self.parsed_data:
@@ -931,7 +930,12 @@ class CollectionItem(TimeStampedModel):
         return f"{self.collection.title}: {self.title}"
 
     def get_text(self):
-        return "TODO" #TODO
+        annotations = self.document_configuration.get('annotations', [])
+        collection_item_text = ""
+        for anno in annotations:
+            if 'text' in anno:
+                collection_item_text += anno['text'] + "\n"
+        return collection_item_text
 
     def split(self, index, user=None):
         """Split the collection item at the given index."""
