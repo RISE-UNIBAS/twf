@@ -1,5 +1,6 @@
 {% extends 'twf/base/base.html' %}
 {% load crispy_forms_tags %}
+{% load twf_renders %}
 
 {% block content %}
 <div class="container mt-3">
@@ -8,23 +9,35 @@
         <p class="lead">View collection item details below.</p>
         
         <div class="row">
-            <!-- Left Column: Annotations -->
+            <!-- Left Column: Tabs for Annotations and Metadata -->
             <div class="col-md-6">
-                <div class="mb-3">
-                    <h5><strong>Annotations</strong></h5>
-                    <ul class="list-unstyled">
-                        {% for annotation in item.document_configuration.annotations %}
-                            <li class="mb-3 border-bottom pb-3">
-                                <img src="{{ annotation.url }}" 
-                                     alt="Annotation Image" 
-                                     class="img-fluid mb-2 annotation-image" 
-                                     style="max-width: 100px; cursor: pointer;"
-                                     data-fullsize-url="{{ annotation.url }}">
-                                <p class="mb-1">{{ annotation.text }}</p>
-                                <small class="text-muted">Type: {{ annotation.type }}</small>
-                            </li>
-                        {% endfor %}
-                    </ul>
+                <ul class="nav nav-tabs" id="itemTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="annotations-tab" data-bs-toggle="tab" data-bs-target="#annotations" type="button" role="tab" aria-controls="annotations" aria-selected="true">Annotations</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="metadata-tab" data-bs-toggle="tab" data-bs-target="#metadata" type="button" role="tab" aria-controls="metadata" aria-selected="false">Metadata</button>
+                    </li>
+                </ul>
+                <div class="tab-content mt-2" id="itemTabsContent">
+                    <div class="tab-pane fade show active" id="annotations" role="tabpanel" aria-labelledby="annotations-tab">
+                        <ul class="list-unstyled">
+                            {% for annotation in item.document_configuration.annotations %}
+                                <li class="mb-3 border-bottom pb-3">
+                                    <img src="{{ annotation.url }}"
+                                         alt="Annotation Image"
+                                         class="img-fluid mb-2 annotation-image"
+                                         style="max-width: 100px; cursor: pointer;"
+                                         data-fullsize-url="{{ annotation.url }}">
+                                    <p class="mb-1">{{ annotation.text }}</p>
+                                    <small class="text-muted">Type: {{ annotation.type }}</small>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    <div class="tab-pane fade" id="metadata" role="tabpanel" aria-labelledby="metadata-tab">
+                        {% render_metadata item.metadata %}
+                    </div>
                 </div>
             </div>
 
@@ -38,7 +51,7 @@
                         <h6><strong>Review Notes:</strong></h6>
                         <p>{{ item.review_notes }}</p>
                     </div>
-                    
+
                     <h5 class="mt-3"><strong>Options</strong></h5>
                     <p><a class="btn btn-dark" href="{% url 'twf:collection_item_edit' item.pk %}">Edit item</a></p>
                     {% if item.document %}
@@ -48,46 +61,7 @@
                     <p><a class="btn btn-dark" href="{% url 'twf:collection_item_download_json' item.pk %}">Download item (json)</a></p>
                 </div>
             </div>
-        
-            <!-- Full-Size Image Container -->
-            <div id="fullsize-image-container" 
-                 class="d-none position-fixed top-0 start-0 w-100 h-100 bg-dark bg-opacity-75 text-center" 
-                 style="z-index: 1050;">
-                <img id="fullsize-image" 
-                     src="" 
-                     alt="Full-Size Annotation Image" 
-                     class="img-fluid h-100" 
-                     style="object-fit: contain; cursor: pointer;">
-            </div>
         </div>
     </div>
 </div>
 {% endblock %}
-
-{% block script %}
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const fullsizeContainer = document.getElementById('fullsize-image-container');
-            const fullsizeImage = document.getElementById('fullsize-image');
-        
-            // Handle clicking on annotation images
-            document.querySelectorAll('.annotation-image').forEach(img => {
-                img.addEventListener('click', function () {
-                    let fullsizeUrl = img.getAttribute('data-fullsize-url');
-                    // Replace 'pct:<number>' with 'full'
-                    fullsizeUrl = fullsizeUrl.replace(/pct:\d{1,3}/, 'full');
-        
-                    fullsizeImage.src = fullsizeUrl;
-                    fullsizeContainer.classList.remove('d-none'); // Show full-size container
-                });
-            });
-        
-            // Handle clicking on the full-size image to close it
-            fullsizeContainer.addEventListener('click', function () {
-                fullsizeContainer.classList.add('d-none'); // Hide full-size container
-                fullsizeImage.src = ''; // Clear the image source
-            });
-        });
-    </script>
-{% endblock %}
-
