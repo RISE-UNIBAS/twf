@@ -7,7 +7,7 @@
             <h1 class="display-6">Manage Permissions for {{ project }}</h1>
 
             <p class="lead">Permissions are set on a per-project basis.
-                You can only change permissions which you have yourself.</p>
+                You can only set roles according to your own status, i.e. you cannot assign a higher role than your own to others.</p>
 
             <form method="post">
                 {% csrf_token %}
@@ -90,7 +90,7 @@
                                     </button>
                                 </td>
                             {% endfor %}
-                            <td>Users can work workflows.</td>
+                            <td>Users can execute workflows.</td>
                         </tr>
 
                     </tbody>
@@ -151,7 +151,7 @@
                 {% endfor %}
 
                 <div class="w-100 text-end">
-                    <button type="submit" class="btn btn-dark">Save Project permission changes</button>
+                    <button type="submit" class="btn btn-dark">Save project permission changes</button>
                 </div>
             </form>
         {% else %}
