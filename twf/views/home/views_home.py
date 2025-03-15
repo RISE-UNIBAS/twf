@@ -1,13 +1,19 @@
 """Views for the home section of the TWF application."""
+import json
+import time
+
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView, PasswordChangeView
+from django.http import JsonResponse, StreamingHttpResponse
 from django.shortcuts import redirect
 from django.urls import reverse, reverse_lazy
 from django.utils.crypto import get_random_string
 from django.utils.timezone import now, timedelta
+from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import FormView
 
+from twf.clients.health_check import check_service_status, TWF_EXTERNAL_SERVICES
 from twf.forms.project.project_forms import CreateProjectForm
 from twf.forms.user_forms import LoginForm, ChangePasswordForm, UserProfileForm, CreateUserForm
 from twf.models import Project, Document, Page, Dictionary, DictionaryEntry, PageTag, Variation, DateVariation, \
@@ -85,6 +91,7 @@ class TWFHomeView(TWFView):
             nav.append({'url': reverse('twf:project_create'), 'value': 'Create Project'})
             nav.append({'url': reverse('twf:project_management'), 'value': 'Project Management'})
             nav.append({'url': reverse('twf:twf_user_management'), 'value': 'User Management'})
+            nav.append({'url': reverse('twf:twf_system_health'), 'value': 'System Health'})
             nav.append({'url': reverse('admin:index'), 'value': 'Admin Interface'})
 
         return nav
@@ -337,3 +344,34 @@ class TWFManageUsersView(LoginRequiredMixin, FormView, TWFHomeView):
         context = super().get_context_data(**kwargs)
         context['users'] = UserProfile.objects.all().order_by('user__username')
         return context
+
+
+class TWFSystemHealthView(LoginRequiredMixin, TWFHomeView):
+    """View to manage the projects."""
+    template_name = 'twf/home/system_health.html'
+    page_title = 'System Health'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['twf_services'] = TWF_EXTERNAL_SERVICES
+        return context
+
+
+@csrf_exempt
+def check_system_health(request):
+    """Check the system health incrementally via SSE."""
+    def event_stream():
+        services = check_service_status()
+        for service, result in services.items():
+            time.sleep(0.5)  # Simulated delay for better visualization
+            yield f"data: {json.dumps({service: result})}\n\n"
+
+        # Send a final "DONE" message before closing the stream
+        yield "data: DONE\n\n"
+
+    response = StreamingHttpResponse(event_stream(), content_type="text/event-stream")
+    response["Cache-Control"] = "no-cache"
+    response["X-Accel-Buffering"] = "no"  # Prevents buffering issues in Nginx
+    return response
+
+

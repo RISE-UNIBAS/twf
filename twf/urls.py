@@ -29,7 +29,8 @@ from twf.views.documents.views_documents_ai import TWFDocumentOpenAIBatchView, \
     TWFDocumentGeminiPageBatchView, TWFDocumentClaudePageBatchView
 from twf.views.export.views_crud import delete_export
 from twf.views.home.views_home import TWFHomeView, TWFHomeLoginView, TWFHomePasswordChangeView, TWFHomeUserOverView, \
-    TWFSelectProjectView, TWFHomeUserProfileView, TWFCreateProjectView, TWFManageProjectsView, TWFManageUsersView
+    TWFSelectProjectView, TWFHomeUserProfileView, TWFCreateProjectView, TWFManageProjectsView, TWFManageUsersView, \
+    TWFSystemHealthView, check_system_health
 from twf.views.metadata.views_metadata_ai import TWFMetadataLoadDataView, TWFMetadataLoadSheetsDataView
 from twf.views.project.views_crud import delete_all_documents, delete_all_tags, delete_all_collections, select_project, \
     delete_project, close_project, delete_prompt
@@ -75,6 +76,8 @@ urlpatterns = [
     path('logout/', auth_views.LogoutView.as_view(next_page='twf:home'), name='logout'),
     path('help/<str:view_name>/', help_content, name='help'),
     path('user/management/', TWFManageUsersView.as_view(), name='twf_user_management'),
+    path('twf/check/system/health/', check_system_health, name='twf_check_system_health'),
+    path('twf/system/health/', TWFSystemHealthView.as_view(), name='twf_system_health'),
 
     # Select Project
     path('project/select/<int:pk>/confirm/', TWFSelectProjectView.as_view(), name='project_select'),
