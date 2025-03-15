@@ -5,6 +5,12 @@ $(document).ready(function() {
     const roleInput = document.querySelector("input[name='role_description']");
     const promptInput = document.querySelector("textarea[name='prompt']");
 
+    // If any critical elements are missing, exit
+    if (!saveButton || !loadButton || !promptSelect || !roleInput || !promptInput) {
+        console.warn("AI Prompt Manager: Required elements not found, skipping initialization.");
+        return;
+    }
+
     $("#id_saved_prompts").select2({
         templateResult: formatDropdown,
         templateSelection: formatDropdown
