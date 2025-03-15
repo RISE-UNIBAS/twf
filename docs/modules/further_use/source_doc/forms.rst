@@ -8,5 +8,10 @@ of the application.
    :maxdepth: 1
    :caption: Forms modules
 
-   forms/documents.rst
+   forms/collections.rst
    forms/dictionaries.rst
+   forms/documents.rst
+   forms/filters.rst
+   forms/metadata.rst
+   forms/project.rst
+   forms/tags.rst

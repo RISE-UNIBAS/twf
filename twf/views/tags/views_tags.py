@@ -16,7 +16,7 @@ from django_filters.views import FilterView
 from django_tables2 import SingleTableMixin
 
 from twf.forms.filters.filters import TagFilter
-from twf.forms.tags.batch_forms import TagsExtractionBatchForm
+from twf.forms.tags.tags_forms_batches import TagsExtractionBatchForm
 from twf.forms.tags.tags_forms import DateNormalizationForm
 from twf.models import PageTag, DateVariation, Dictionary, DictionaryEntry, Variation
 from twf.tables.tables_tags import TagTable

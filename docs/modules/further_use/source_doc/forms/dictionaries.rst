@@ -1,22 +1,17 @@
 Dictionary Forms
 ================
 
-.. automodule:: twf.forms.dictionaries.dictionary_forms
+Basic Dictionary Forms
+----------------------
+
+.. automodule:: twf.forms.dictionaries.dictionaries_forms
    :members:
    :undoc-members:
 
 
 Dictionary Batch Forms
-======================
+----------------------
 
-.. automodule:: twf.forms.dictionaries.batch_forms
-   :members:
-   :undoc-members:
-
-
-Dictionary Request Forms
-========================
-
-.. automodule:: twf.forms.dictionaries.request_forms
+.. automodule:: twf.forms.dictionaries.dictionaries_forms_batches
    :members:
    :undoc-members:

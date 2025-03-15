@@ -7,82 +7,43 @@ configure core project settings, monitor ongoing tasks, and manage saved prompts
 Sections
 --------
 
-Overview
-^^^^^^^^
-Displays a summary of the selected project, including the project name, description, creator, creation date,
-and the last modified timestamp. Key statistics are shown as well, such as the total number of documents,
-pages, and users associated with the project.
+.. list-table:: Sections
+   :header-rows: 1
+   :widths: 30 70
 
-Task Monitor
-^^^^^^^^^^^^
-The **Task Monitor** provides real-time updates on background tasks associated with the project. It allows
-users to track the progress of tasks, such as document processing or metadata extraction, which might take
-considerable time.
-
-Saved Prompts
-^^^^^^^^^^^^^
-The **Saved Prompts** section lets users save commonly used prompts for easy access. These prompts can be
-customized and reused across different parts of the project, enhancing workflow efficiency.
-
-Settings
---------
-
-General Settings
-^^^^^^^^^^^^^^^^
-Configures core settings specific to the project. This may include project-specific metadata fields,
-visibility options, or general configurations that define the structure of the project.
-
-Credential Settings
-^^^^^^^^^^^^^^^^^^^
-Manages API credentials and authentication information necessary for connecting to external services,
-such as Transkribus for OCR processing, AI models, or geographic databases. Credentials are stored securely
-and can be used across multiple tasks.
-
-Task Settings
-^^^^^^^^^^^^^
-Allows configuration of background tasks associated with the project, such as automated workflows, batch
-processes, or other tasks that require periodic execution or specific settings.
-
-Export Settings
-^^^^^^^^^^^^^^^
-Defines settings related to data export, such as the preferred export format, fields to include in export
-files, and options for structuring exported metadata. This enables customization of the data output to suit
-research or analysis needs.
-
-Setup Project
--------------
-
-Request Transkribus Export
-^^^^^^^^^^^^^^^^^^^^^^^^^^
-Initiates an export request to Transkribus, allowing users to extract OCR data or transcriptions from the
-platform directly into the TWF project.
-
-Extract Transkribus Export
-^^^^^^^^^^^^^^^^^^^^^^^^^^
-Handles the extraction of data from a previously requested Transkribus export. This step completes the import
-of OCR data or transcriptions, making it available for analysis and tagging within the project.
-
-Ask Questions
--------------
-
-Query
-^^^^^
-Allows users to formulate specific queries related to the project's data. This tool can be used to retrieve
-targeted information or insights from the dataset, supporting various research questions.
-
-Ask ChatGPT
-^^^^^^^^^^^
-Enables users to interact with ChatGPT directly from the interface, asking questions or requesting insights
-related to the project data or metadata. This feature leverages language model capabilities for enhanced data
-interpretation and support.
-
-Data Counts
------------
-
-The **Data Counts** section provides an overview of statistical information for the project. Typical
-statistics include:
-
-- **Document Count**: Total number of documents within the project.
-- **Page Count**: Total number of pages across all documents.
-- **Average pages per document**: The average number of pages per document, offering insights into document
-  structure and content density.
+   * - Section
+     - Description
+   * - Overview
+     - Summary of the project details and key statistics.
+   * - Task Monitor
+     - Real-time updates on background tasks associated with the project.
+   * - Saved Prompts
+     - Management of saved prompts for easy access and reuse.
+   * - Query Database
+     - Query the project database for specific information.
+   * - Ask ChatGPT
+     - Interact with ChatGPT for insights and analysis related to the project data.
+   * - Ask Gemini
+     - Query the Gemini API for additional information or data related to the project.
+   * - Ask Claude
+     - Access the Claude API for advanced data analysis and visualization.
+   * - General Settings
+     - Configure core project settings, such as metadata fields and visibility options.
+   * - Credential Settings
+     - Manage API credentials and authentication information for external services.
+   * - Task Settings
+     - Configure background tasks associated with the project.
+   * - Export Settings
+     - Define settings for data export, including format and metadata structure.
+   * - Repository Settings
+     - Manage repository settings for the project.
+   * - User Management
+     - Manage users and permissions for the project.
+   * - Request Transkribus Export
+     - Initiate an export request to Transkribus for OCR data or transcriptions.
+   * - Test Export
+     - Test the export settings and preview the output.
+   * - Extract Transkribus Export
+     - Extract data from a Transkribus export for analysis.
+   * - Create Copy of Project
+     - Duplicate the project for testing or backup purposes.
