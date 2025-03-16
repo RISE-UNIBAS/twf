@@ -14,8 +14,7 @@ Contents:
    :caption: Introduction:
 
    modules/introduction/what-is-twf.rst
-   modules/introduction/who-is-twf-for.rst
-   modules/introduction/example-applications.rst
+   modules/introduction/get-started.rst
 
 
 .. toctree::
