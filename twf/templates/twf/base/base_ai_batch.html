@@ -15,4 +15,38 @@
 
          {% crispy form %}
      </div>
+    <div id="ai_result">
+
+    </div>
+{% endblock %}
+
+{% block css %}
+    <style>
+        pre {
+            white-space: pre-wrap;  /* Allows wrapping */
+            word-wrap: break-word;   /* Ensures long words break */
+            overflow-x: auto;        /* Adds horizontal scrolling if necessary */
+            width: 100%;             /* Forces 100% width */
+            max-width: 100%;         /* Prevents overflow */
+        }
+    </style>
+{% endblock %}
+
+{% block script %}
+    <script>
+        function format_ai_result(data) {
+            console.log("Base format_ai_result called", data);
+
+            let formattedJSON = JSON.stringify(data, null, 2);
+            let aiResultHTML = `
+                <div class="card mt-3">
+                    <div class="card-header">AI Result</div>
+                    <div class="card-body">
+                        <pre class="json-output"><code>${formattedJSON}</code></pre>
+                    </div>
+                </div>`;
+
+            $("#ai_result").html(aiResultHTML);
+        }
+    </script>
 {% endblock %}

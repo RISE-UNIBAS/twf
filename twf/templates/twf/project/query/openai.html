@@ -1,0 +1,24 @@
+{% extends 'twf/base/base_ai_batch.html' %}
+
+{% block script %}
+    {{ block.super }} <!-- Keep the base script but override formatting -->
+
+    <script>
+        function format_ai_result(data) {
+            console.log("ChatGPT-specific format_ai_result called", data);
+
+            // OpenAI's response structure typically has choices -> message -> content
+            let text = (data.choices && data.choices[0]?.message?.content) || "No response text.";
+
+            let aiResultHTML = `
+                <div class="card mt-3">
+                    <div class="card-header bg-info text-white">ChatGPT AI Result</div>
+                    <div class="card-body">
+                        <p>${text}</p>
+                    </div>
+                </div>`;
+
+            $("#ai_result").html(aiResultHTML);
+        }
+    </script>
+{% endblock %}

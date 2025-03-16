@@ -97,9 +97,7 @@ def export_documents_task(self, project_id, user_id, **kwargs):
 
     # 4th step: End task and return the download URL
     download_url = export_instance.export_file.url
-    self.end_task()
-
-    return {"download_url": download_url}
+    self.end_task(download_url=download_url)
 
 
 @shared_task(bind=True, base=BaseTWFTask)

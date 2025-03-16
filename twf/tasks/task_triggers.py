@@ -379,28 +379,34 @@ def start_copy_project(request):
 def start_query_project_openai(request):
     prompt = request.POST.get('prompt')
     role_description = request.POST.get('role_description')
+    documents = request.POST.getlist('documents')
 
     return trigger_task(request, query_project_openai,
                         prompt=prompt,
-                        role_description=role_description)
+                        role_description=role_description,
+                        documents=documents)
 
 
 def start_query_project_gemini(request):
     prompt = request.POST.get('prompt')
     role_description = request.POST.get('role_description')
+    documents = request.POST.getlist('documents')
 
     return trigger_task(request, query_project_gemini,
                         prompt=prompt,
-                        role_description=role_description)
+                        role_description=role_description,
+                        documents=documents)
 
 
 def start_query_project_claude(request):
     prompt = request.POST.get('prompt')
     role_description = request.POST.get('role_description')
+    documents = request.POST.getlist('documents')
 
     return trigger_task(request, query_project_claude,
                         prompt=prompt,
-                        role_description=role_description)
+                        role_description=role_description,
+                        documents=documents)
 
 
 def start_export_documents(request):
