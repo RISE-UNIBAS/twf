@@ -2,7 +2,7 @@
 from django.urls import reverse_lazy
 
 from twf.forms.documents.documents_forms_batches import DocumentBatchOpenAIForm, DocumentBatchGeminiForm, \
-    DocumentBatchClaudeForm
+    DocumentBatchClaudeForm, DocumentBatchMistralForm
 from twf.views.documents.views_documents import TWFDocumentView
 from twf.views.views_base import AIFormView
 
@@ -68,6 +68,26 @@ class TWFDocumentClaudeBatchView(AIFormView, TWFDocumentView):
         return context
 
 
+class TWFDocumentMistralBatchView(AIFormView, TWFDocumentView):
+    """Ask Mistral."""
+
+    template_name = 'twf/base/base_ai_batch.html'
+    page_title = 'Mistral Batch'
+    form_class = DocumentBatchMistralForm
+    success_url = reverse_lazy('twf:documents_batch_claude')
+    start_url = reverse_lazy('twf:task_documents_batch_claude')
+    message = "Are you sure you want to start the mistral task?"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['ai_heading'] = 'Ask Mistral'
+        context['ai_lead'] = ('Ask Mistral to generate text based on the provided prompt.'
+                              'Your prompt will be expanded with the document text.')
+        context['has_ai_credentials'] = self.has_ai_credentials('mistral')
+        context['ai_credentials_url'] = reverse_lazy('twf:project_settings_credentials') + '?tab=mistral'
+        return context
+
+
 class TWFDocumentOpenAIPageBatchView(AIFormView, TWFDocumentView):
     """Ask ChatGPT."""
 
@@ -125,4 +145,24 @@ class TWFDocumentClaudePageBatchView(AIFormView, TWFDocumentView):
                               'Your prompt will be expanded with the page text.')
         context['has_ai_credentials'] = self.has_ai_credentials('anthropic')
         context['ai_credentials_url'] = reverse_lazy('twf:project_settings_credentials') + '?tab=anthropic'
+        return context
+
+
+class TWFDocumentMistralPageBatchView(AIFormView, TWFDocumentView):
+    """Ask Mistral."""
+
+    template_name = 'twf/base/base_ai_batch.html'
+    page_title = 'Mistral Batch'
+    form_class = DocumentBatchMistralForm
+    success_url = reverse_lazy('twf:documents_page_batch_mistral')
+    start_url = reverse_lazy('twf:task_documents_page_batch_mistral')
+    message = "Are you sure you want to start the mistral task?"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['ai_heading'] = 'Ask Mistral'
+        context['ai_lead'] = ('Ask Mistral to generate text based on the provided prompt.'
+                              'Your prompt will be expanded with the page text.')
+        context['has_ai_credentials'] = self.has_ai_credentials('mistral')
+        context['ai_credentials_url'] = reverse_lazy('twf:project_settings_credentials') + '?tab=mistral'
         return context

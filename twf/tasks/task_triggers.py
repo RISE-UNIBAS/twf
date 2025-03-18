@@ -9,16 +9,19 @@ from django.http import JsonResponse
 from twf.models import Prompt
 from twf.tasks.collection_tasks import search_openai_for_collection, search_gemini_for_collection, \
     search_claude_for_collection, search_openai_for_collection_item, search_gemini_for_collection_item, \
-    search_claude_for_collection_item
+    search_claude_for_collection_item, search_mistral_for_collection_item
 from twf.tasks.document_tasks import search_openai_for_docs, search_gemini_for_docs, search_claude_for_docs, \
-    search_openai_for_pages, search_gemini_for_pages, search_claude_for_pages
+    search_openai_for_pages, search_gemini_for_pages, search_claude_for_pages, search_mistral_for_docs, \
+    search_mistral_for_pages
 from twf.tasks.structure_tasks import extract_zip_export_task
 from twf.tasks.dictionary_tasks import search_gnd_entries, search_geonames_entries, search_wikidata_entries, \
     search_openai_entries, search_gnd_entry, search_geonames_entry, search_wikidata_entry, search_openai_entry, \
-    search_claude_entries, search_gemini_entries, search_claude_entry, search_gemini_entry
+    search_claude_entries, search_gemini_entries, search_claude_entry, search_gemini_entry, search_mistral_entries, \
+    search_mistral_entry
 from twf.tasks.metadata_tasks import load_sheets_metadata, load_json_metadata
 from twf.tasks.tags_tasks import create_page_tags
-from twf.tasks.project_tasks import copy_project, query_project_openai, query_project_gemini, query_project_claude
+from twf.tasks.project_tasks import copy_project, query_project_openai, query_project_gemini, query_project_claude, \
+    query_project_mistral
 from twf.tasks.export_tasks import export_documents_task, export_collections_task, export_project_task, \
     export_to_zenodo_task
 from twf.views.views_base import TWFView
@@ -135,6 +138,18 @@ def start_dict_gemini_batch(request):
                         role_description=role_description)
 
 
+def start_dict_mistral_batch(request):
+    """Start the Gemini requests as a Celery task."""
+    dictionary_id = request.POST.get('dictionary')
+    prompt = request.POST.get('prompt')
+    role_description = request.POST.get('role_description')
+
+    return trigger_task(request, search_mistral_entries,
+                        dictionary_id=dictionary_id,
+                        prompt=prompt,
+                        role_description=role_description)
+
+
 def start_dict_gnd_request(request):
     dictionary_id = request.GET.get('dictionary_id')
     earliest_birth_year = request.POST.get('earliest_birth_year', None)
@@ -206,6 +221,17 @@ def start_dict_gemini_request(request):
                         role_description=role_description)
 
 
+def start_dict_mistral_request(request):
+    """Start the GND requests as a Celery task."""
+    dictionary_id = request.GET.get('dictionary_id')
+    prompt = request.POST.get('prompt')
+    role_description = request.POST.get('role_description')
+    return trigger_task(request, search_mistral_entry,
+                        dictionary_id=dictionary_id,
+                        prompt=prompt,
+                        role_description=role_description)
+
+
 ##############################
 ## DOCUMENT TASKS
 def start_openai_doc_batch(request):
@@ -238,6 +264,16 @@ def start_claude_doc_batch(request):
                         role_description=role_description)
 
 
+def start_mistral_doc_batch(request):
+    """ Start the Mistral requests as a Celery task."""
+    prompt = request.POST.get('prompt')
+    role_description = request.POST.get('role_description')
+
+    return trigger_task(request, search_mistral_for_docs,
+                        prompt=prompt,
+                        role_description=role_description)
+
+
 def start_openai_page_batch(request):
     """ Start the OpenAI requests as a Celery task."""
     prompt = request.POST.get('prompt')
@@ -264,6 +300,16 @@ def start_claude_page_batch(request):
     role_description = request.POST.get('role_description')
 
     return trigger_task(request, search_claude_for_pages,
+                        prompt=prompt,
+                        role_description=role_description)
+
+
+def start_mistral_page_batch(request):
+    """ Start the Claude requests as a Celery task."""
+    prompt = request.POST.get('prompt')
+    role_description = request.POST.get('role_description')
+
+    return trigger_task(request, search_mistral_for_pages,
                         prompt=prompt,
                         role_description=role_description)
 
@@ -369,6 +415,16 @@ def start_claude_collection_request(request):
                         prompt=prompt,
                         role_description=role_description)
 
+def start_mistral_collection_request(request):
+    collection_id = request.POST.get('collection_id')
+    prompt = request.POST.get('prompt')
+    role_description = request.POST.get('role_description')
+
+    return trigger_task(request, search_mistral_for_collection_item,
+                        collection_id=collection_id,
+                        prompt=prompt,
+                        role_description=role_description)
+
 def start_copy_project(request):
     new_project_name = request.POST.get('new_project_name')
 
@@ -404,6 +460,17 @@ def start_query_project_claude(request):
     documents = request.POST.getlist('documents')
 
     return trigger_task(request, query_project_claude,
+                        prompt=prompt,
+                        role_description=role_description,
+                        documents=documents)
+
+
+def start_query_project_mistral(request):
+    prompt = request.POST.get('prompt')
+    role_description = request.POST.get('role_description')
+    documents = request.POST.getlist('documents')
+
+    return trigger_task(request, query_project_mistral,
                         prompt=prompt,
                         role_description=role_description,
                         documents=documents)

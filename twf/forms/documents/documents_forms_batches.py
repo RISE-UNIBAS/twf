@@ -27,3 +27,11 @@ class DocumentBatchClaudeForm(BaseAIBatchForm):
     def get_button_label(self):
         """Get the label for the submit button."""
         return 'Run Claude Project Batch'
+
+
+class DocumentBatchMistralForm(BaseAIBatchForm):
+    """Form for running a batch of documents through OpenAI."""
+
+    def get_button_label(self):
+        """Get the label for the submit button."""
+        return 'Run Mistral Project Batch'

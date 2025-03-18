@@ -50,6 +50,8 @@ class TWFDictionaryView(LoginRequiredMixin, TWFView):
                      'value': 'Claude', 'permission': 'dictionary_batch_workflow_claude'},
                     {'url': reverse('twf:dictionaries_batch_gemini'),
                      'value': 'Gemini', 'permission': 'dictionary_batch_workflow_gemini'},
+                    {'url': reverse('twf:dictionaries_batch_mistral'),
+                     'value': 'Mistral', 'permission': 'dictionary_batch_workflow_mistral'},
                 ]
             },
             {
@@ -67,6 +69,8 @@ class TWFDictionaryView(LoginRequiredMixin, TWFView):
                      'value': 'Claude', 'permission': 'dictionary_manual_workflow_claude'},
                     {'url': reverse('twf:dictionaries_request_gemini'),
                      'value': 'Gemini', 'permission': 'dictionary_manual_workflow_gemini'},
+                    {'url': reverse('twf:dictionaries_request_mistral'),
+                     'value': 'Mistral', 'permission': 'dictionary_manual_workflow_mistral'},
                 ]
             },
             {

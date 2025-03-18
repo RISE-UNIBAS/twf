@@ -176,3 +176,15 @@ def query_project_claude(self, project_id, user_id, **kwargs):
 
     self.process_single_ai_request(documents, 'anthropic',
                                    kwargs['prompt'], kwargs['role_description'], 'claude')
+
+
+@shared_task(bind=True, base=BaseTWFTask)
+def query_project_mistral(self, project_id, user_id, **kwargs):
+    """Query a project and its related objects."""
+    self.validate_task_parameters(kwargs, ['prompt', 'role_description', 'documents'])
+
+    doc_ids = kwargs.pop('documents')
+    documents = self.project.documents.filter(pk__in=doc_ids)
+
+    self.process_single_ai_request(documents, 'mistral',
+                                   kwargs['prompt'], kwargs['role_description'], 'mistral')
