@@ -60,3 +60,21 @@ class TWFProjectClaudeQueryView(AIFormView, TWFProjectView):
         context['has_ai_credentials'] = self.has_ai_credentials('anthropic')
         context['ai_credentials_url'] = reverse_lazy('twf:project_settings_credentials') + '?tab=anthropic'
         return context
+
+
+class TWFProjectMistralQueryView(AIFormView, TWFProjectView):
+    template_name = 'twf/project/query/mistral.html'
+    page_title = 'Mistral Query'
+    form_class = ClaudeQueryDatabaseForm
+    success_url = reverse_lazy('twf:project_mistral_query')
+    start_url = reverse_lazy('twf:task_project_query_mistral')
+    message = "Are you sure you want to start the mistral task?"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['ai_heading'] = 'Mistral Query'
+        context['ai_lead'] = ('Query the Mistral model for predictions.'
+                              'Select documents to ask the AI model questions.')
+        context['has_ai_credentials'] = self.has_ai_credentials('mistral')
+        context['ai_credentials_url'] = reverse_lazy('twf:project_settings_credentials') + '?tab=mistral'
+        return context

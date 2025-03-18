@@ -55,7 +55,7 @@ from twf.views.project.views_project import TWFProjectQueryView, TWFProjectOverv
     TWFProjectResetView, TWFProjectUserManagementView, TWFProjectRepositorySettingsView, TWFProjectPromptEditView, \
     TWFProjectSetupView, TWFProjectTranskribusExtractView
 from twf.views.project.views_project_ai import TWFProjectAIQueryView, TWFProjectGeminiQueryView, \
-    TWFProjectClaudeQueryView
+    TWFProjectClaudeQueryView, TWFProjectMistralQueryView
 from twf.views.tags.views_tags import TWFProjectTagsView, TWFProjectTagsOpenView, \
     TWFProjectTagsParkedView, TWFProjectTagsResolvedView, TWFProjectTagsIgnoredView, TWFTagsDatesGroupView, \
     TWFTagsGroupView, TWFTagsOverviewView, TWFTagsExtractView, TWFTagsSettingsView
@@ -124,6 +124,7 @@ urlpatterns = [
     path('project/openai/query/', TWFProjectAIQueryView.as_view(), name='project_ai_query'),
     path('project/gemini/query/', TWFProjectGeminiQueryView.as_view(), name='project_gemini_query'),
     path('project/claude/query/', TWFProjectClaudeQueryView.as_view(), name='project_claude_query'),
+    path('project/mistral/query/', TWFProjectMistralQueryView.as_view(), name='project_mistral_query'),
 
 
     #############################
