@@ -1,10 +1,12 @@
 """Simple AI API client for OpenAI, GenAI, and Anthropic."""
 import base64
 import time
+from datetime import datetime, timezone
 
 import google.generativeai as genai
 from openai import OpenAI
 from anthropic import Anthropic
+from mistralai import Mistral
 
 
 class AiApiClient:
@@ -12,7 +14,8 @@ class AiApiClient:
 
     SUPPORTED_APIS = ['openai',
                       'genai',
-                      'anthropic']
+                      'anthropic',
+                      'mistral']
 
     api_client = None
     image_resources = []
@@ -47,6 +50,11 @@ class AiApiClient:
         if self.api == 'anthropic':
             self.api_client = Anthropic(
                 api_key=self.api_key,
+            )
+
+        if self.api == 'mistral':
+            self.api_client = Mistral(
+                api_key=self.api_key
             )
 
     @property
@@ -125,20 +133,54 @@ class AiApiClient:
             )
             answer = message
 
+        if self.api == 'mistral':
+            workload = [
+                {
+                    "content": prompt,
+                    "role": "user",
+                }
+            ]
+
+            message = self.api_client.chat.complete(
+                model=model,
+                messages=workload
+            )
+            answer = message
+
         end_time = time.time()
         elapsed_time = end_time - prompt_start
         return answer, elapsed_time
 
     def get_model_list(self):
         """Get the list of available models."""
-        if self.api_client is None:
+        if not self.api == "genai" and self.api_client is None:
             raise ValueError('API client is not initialized.')
 
+        model_list = []
         if self.api == 'openai':
-            return self.api_client.models.list()
+            raw_list = self.api_client.models.list()
+            for model in raw_list:
+                readable_date = datetime.fromtimestamp(model.created, tz=timezone.utc).strftime('%Y-%m-%d')
+                model_list.append((model.id, readable_date))
 
         if self.api == 'genai':
-            return genai.list_models()
+            raw_list = genai.list_models()
+            for model in raw_list:
+                if model.display_name.startswith("Gemini"):
+                    model_list.append((model.name.lstrip("models/"), None))
 
         if self.api == 'anthropic':
-            return self.api_client.models.list()
+            raw_list = self.api_client.models.list()
+            for model in raw_list:
+                readable_date = datetime.date(model.created_at).strftime('%Y-%m-%d')
+                model_list.append((model.id, readable_date))
+
+        if self.api == 'mistral':
+            raw_list = self.api_client.models.list()
+            for model in raw_list.data:
+                completion = model.capabilities.completion_chat
+                if completion:
+                    readable_date = datetime.fromtimestamp(model.created, tz=timezone.utc).strftime('%Y-%m-%d')
+                    model_list.append((model.id, readable_date))
+
+        return model_list
