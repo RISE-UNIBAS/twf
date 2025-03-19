@@ -90,3 +90,4 @@ redis~=5.0.8
 crispy-bootstrap5~=2024.10
 isort~=5.13.2
 mistralai~=1.5.1
+
