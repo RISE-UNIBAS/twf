@@ -146,6 +146,16 @@ def search_gemini_entries(self, project_id, user_id, **kwargs):
 
 
 @shared_task(bind=True, base=BaseTWFTask)
+def search_mistral_entries(self, project_id, user_id, **kwargs):
+    self.validate_task_parameters(kwargs,
+                                  ['dictionary_id', 'prompt', 'role_description'])
+
+    dictionary = Dictionary.objects.get(id=kwargs.get('dictionary_id'))
+    self.process_ai_request(dictionary.entries.all(), 'mistral',
+                            kwargs['prompt'], kwargs['role_description'], 'mistral')
+
+
+@shared_task(bind=True, base=BaseTWFTask)
 def search_gnd_entry(self, project_id, user_id, **kwargs):
     self.validate_task_parameters(kwargs,
                                   ['entry_id', 'earliest_birth_year', 'latest_birth_year', 'show_empty'])
@@ -245,3 +255,13 @@ def search_gemini_entry(self, project_id, user_id, **kwargs):
     dictionary_entry = DictionaryEntry.objects.get(id=kwargs.get('entry_id'))
     self.process_ai_request([dictionary_entry], 'genai',
                             kwargs['prompt'], kwargs['role_description'], 'gemini')
+
+
+@shared_task(bind=True, base=BaseTWFTask)
+def search_mistral_entry(self, project_id, user_id, **kwargs):
+    self.validate_task_parameters(kwargs,
+                                  ['entry_id', 'prompt', 'role_description'])
+
+    dictionary_entry = DictionaryEntry.objects.get(id=kwargs.get('entry_id'))
+    self.process_ai_request([dictionary_entry], 'mistral',
+                            kwargs['prompt'], kwargs['role_description'], 'mistral')

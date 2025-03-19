@@ -9,7 +9,7 @@ from twf.views.views_base import AIFormView
 
 class TWFProjectAIQueryView(AIFormView, TWFProjectView):
     """View for querying the AI model."""
-    template_name = 'twf/base/base_ai_batch.html'
+    template_name = 'twf/project/query/openai.html'
     page_title = 'OpenAI Query'
     form_class = OpenAIQueryDatabaseForm
     success_url = reverse_lazy('twf:project_ai_query')
@@ -27,7 +27,7 @@ class TWFProjectAIQueryView(AIFormView, TWFProjectView):
 
 
 class TWFProjectGeminiQueryView(AIFormView, TWFProjectView):
-    template_name = 'twf/base/base_ai_batch.html'
+    template_name = 'twf/project/query/gemini.html'
     page_title = 'Gemini Query'
     form_class = GeminiQueryDatabaseForm
     success_url = reverse_lazy('twf:project_gemini_query')
@@ -45,7 +45,7 @@ class TWFProjectGeminiQueryView(AIFormView, TWFProjectView):
 
 
 class TWFProjectClaudeQueryView(AIFormView, TWFProjectView):
-    template_name = 'twf/base/base_ai_batch.html'
+    template_name = 'twf/project/query/claude.html'
     page_title = 'Claude Query'
     form_class = ClaudeQueryDatabaseForm
     success_url = reverse_lazy('twf:project_claude_query')
@@ -59,4 +59,22 @@ class TWFProjectClaudeQueryView(AIFormView, TWFProjectView):
                               'Select documents to ask the AI model questions.')
         context['has_ai_credentials'] = self.has_ai_credentials('anthropic')
         context['ai_credentials_url'] = reverse_lazy('twf:project_settings_credentials') + '?tab=anthropic'
+        return context
+
+
+class TWFProjectMistralQueryView(AIFormView, TWFProjectView):
+    template_name = 'twf/project/query/mistral.html'
+    page_title = 'Mistral Query'
+    form_class = ClaudeQueryDatabaseForm
+    success_url = reverse_lazy('twf:project_mistral_query')
+    start_url = reverse_lazy('twf:task_project_query_mistral')
+    message = "Are you sure you want to start the mistral task?"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['ai_heading'] = 'Mistral Query'
+        context['ai_lead'] = ('Query the Mistral model for predictions.'
+                              'Select documents to ask the AI model questions.')
+        context['has_ai_credentials'] = self.has_ai_credentials('mistral')
+        context['ai_credentials_url'] = reverse_lazy('twf:project_settings_credentials') + '?tab=mistral'
         return context

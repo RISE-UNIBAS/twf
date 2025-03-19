@@ -11,7 +11,7 @@ from twf.views.ajax.views_ajax_transkribus_export import ajax_transkribus_reques
     ajax_transkribus_reset_export, ajax_transkribus_request_export_status
 from twf.views.collections.views_collections_ai import TWFCollectionsOpenaiBatchView, TWFCollectionsGeminiBatchView, \
     TWFCollectionsClaudeBatchView, TWFCollectionsOpenaiRequestView, TWFCollectionsGeminiRequestView, \
-    TWFCollectionsClaudeRequestView
+    TWFCollectionsClaudeRequestView, TWFCollectionsMistralBatchView, TWFCollectionsMistralRequestView
 from twf.views.collections.views_crud import delete_collection, set_col_item_status_open, set_col_item_status_reviewed, \
     set_col_item_status_faulty, split_collection_item, copy_collection_item, delete_collection_item_annotation, \
     delete_collection_item, download_collection_item_txt, download_collection_item_json
@@ -19,17 +19,19 @@ from twf.views.dictionaries.views_dictionaries_ai import TWFDictionaryGNDBatchVi
     TWFDictionaryWikidataBatchView, TWFDictionaryOpenaiBatchView, TWFDictionaryClaudeBatchView, \
     TWFDictionaryGeminiBatchView, TWFDictionaryGNDRequestView, TWFDictionaryGeonamesRequestView, \
     TWFDictionaryWikidataRequestView, TWFDictionaryOpenaiRequestView, TWFDictionaryClaudeRequestView, \
-    TWFDictionaryGeminiRequestView
+    TWFDictionaryGeminiRequestView, TWFDictionaryMistralBatchView, TWFDictionaryMistralRequestView
 from twf.views.dictionaries.views_crud import remove_dictionary_from_project, add_dictionary_to_project, skip_entry, \
     delete_variation
 from twf.views.documents.views_documents import TWFDocumentsOverviewView, TWFDocumentsBrowseView, \
     TWFDocumentCreateView, TWFDocumentNameView, TWFDocumentDetailView, TWFDocumentReviewView, TWFDocumentsSearchView
 from twf.views.documents.views_documents_ai import TWFDocumentOpenAIBatchView, \
     TWFDocumentGeminiBatchView, TWFDocumentClaudeBatchView, TWFDocumentOpenAIPageBatchView, \
-    TWFDocumentGeminiPageBatchView, TWFDocumentClaudePageBatchView
+    TWFDocumentGeminiPageBatchView, TWFDocumentClaudePageBatchView, TWFDocumentMistralBatchView, \
+    TWFDocumentMistralPageBatchView
 from twf.views.export.views_crud import delete_export
 from twf.views.home.views_home import TWFHomeView, TWFHomeLoginView, TWFHomePasswordChangeView, TWFHomeUserOverView, \
-    TWFSelectProjectView, TWFHomeUserProfileView, TWFCreateProjectView, TWFManageProjectsView, TWFManageUsersView
+    TWFSelectProjectView, TWFHomeUserProfileView, TWFCreateProjectView, TWFManageProjectsView, TWFManageUsersView, \
+    TWFSystemHealthView, check_system_health
 from twf.views.metadata.views_metadata_ai import TWFMetadataLoadDataView, TWFMetadataLoadSheetsDataView
 from twf.views.project.views_crud import delete_all_documents, delete_all_tags, delete_all_collections, select_project, \
     delete_project, close_project, delete_prompt
@@ -54,7 +56,7 @@ from twf.views.project.views_project import TWFProjectQueryView, TWFProjectOverv
     TWFProjectResetView, TWFProjectUserManagementView, TWFProjectRepositorySettingsView, TWFProjectPromptEditView, \
     TWFProjectSetupView, TWFProjectTranskribusExtractView
 from twf.views.project.views_project_ai import TWFProjectAIQueryView, TWFProjectGeminiQueryView, \
-    TWFProjectClaudeQueryView
+    TWFProjectClaudeQueryView, TWFProjectMistralQueryView
 from twf.views.tags.views_tags import TWFProjectTagsView, TWFProjectTagsOpenView, \
     TWFProjectTagsParkedView, TWFProjectTagsResolvedView, TWFProjectTagsIgnoredView, TWFTagsDatesGroupView, \
     TWFTagsGroupView, TWFTagsOverviewView, TWFTagsExtractView, TWFTagsSettingsView
@@ -75,6 +77,8 @@ urlpatterns = [
     path('logout/', auth_views.LogoutView.as_view(next_page='twf:home'), name='logout'),
     path('help/<str:view_name>/', help_content, name='help'),
     path('user/management/', TWFManageUsersView.as_view(), name='twf_user_management'),
+    path('twf/check/system/health/', check_system_health, name='twf_check_system_health'),
+    path('twf/system/health/', TWFSystemHealthView.as_view(), name='twf_system_health'),
 
     # Select Project
     path('project/select/<int:pk>/confirm/', TWFSelectProjectView.as_view(), name='project_select'),
@@ -121,6 +125,7 @@ urlpatterns = [
     path('project/openai/query/', TWFProjectAIQueryView.as_view(), name='project_ai_query'),
     path('project/gemini/query/', TWFProjectGeminiQueryView.as_view(), name='project_gemini_query'),
     path('project/claude/query/', TWFProjectClaudeQueryView.as_view(), name='project_claude_query'),
+    path('project/mistral/query/', TWFProjectMistralQueryView.as_view(), name='project_mistral_query'),
 
 
     #############################
@@ -136,12 +141,15 @@ urlpatterns = [
     path('documents/batch/openai/', TWFDocumentOpenAIBatchView.as_view(), name='documents_batch_openai'),
     path('documents/batch/gemini/', TWFDocumentGeminiBatchView.as_view(), name='documents_batch_gemini'),
     path('documents/batch/claude/', TWFDocumentClaudeBatchView.as_view(), name='documents_batch_claude'),
+    path('documents/batch/mistral/', TWFDocumentMistralBatchView.as_view(), name='documents_batch_mistral'),
     path('documents/page/batch/openai/', TWFDocumentOpenAIPageBatchView.as_view(),
          name='documents_page_batch_openai'),
     path('documents/page/batch/gemini/', TWFDocumentGeminiPageBatchView.as_view(),
          name='documents_page_batch_gemini'),
     path('documents/page/batch/claude/', TWFDocumentClaudePageBatchView.as_view(),
          name='documents_page_batch_claude'),
+    path('documents/page/batch/mistral/', TWFDocumentMistralPageBatchView.as_view(),
+         name='documents_page_batch_mistral'),
 
     #############################
     # TAGS
@@ -191,6 +199,8 @@ urlpatterns = [
          name='dictionaries_batch_claude'),
     path('dictionaries/batch/gemini/', TWFDictionaryGeminiBatchView.as_view(),
          name='dictionaries_batch_gemini'),
+    path('dictionaries/batch/mistral/', TWFDictionaryMistralBatchView.as_view(),
+         name='dictionaries_batch_mistral'),
 
     path('dictionaries/request/gnd/', TWFDictionaryGNDRequestView.as_view(), name='dictionaries_request_gnd'),
     path('dictionaries/request/geonames/', TWFDictionaryGeonamesRequestView.as_view(),
@@ -203,6 +213,8 @@ urlpatterns = [
          name='dictionaries_request_claude'),
     path('dictionaries/request/gemini/', TWFDictionaryGeminiRequestView.as_view(),
          name='dictionaries_request_gemini'),
+    path('dictionaries/request/mistral/', TWFDictionaryMistralRequestView.as_view(),
+         name='dictionaries_request_mistral'),
 
     #############################
     # COLLECTIONS
@@ -214,9 +226,11 @@ urlpatterns = [
     path('collections/openai/batch/', TWFCollectionsOpenaiBatchView.as_view(), name='collections_openai_batch'),
     path('collections/gemini/batch/', TWFCollectionsGeminiBatchView.as_view(), name='collections_gemini_batch'),
     path('collections/claude/batch/', TWFCollectionsClaudeBatchView.as_view(), name='collections_claude_batch'),
+    path('collections/mistral/batch/', TWFCollectionsMistralBatchView.as_view(), name='collections_mistral_batch'),
     path('collections/openai/request/', TWFCollectionsOpenaiRequestView.as_view(), name='collections_openai_request'),
     path('collections/gemini/request/', TWFCollectionsGeminiRequestView.as_view(), name='collections_gemini_request'),
     path('collections/claude/request/', TWFCollectionsClaudeRequestView.as_view(), name='collections_claude_request'),
+    path('collections/mistral/request/', TWFCollectionsMistralRequestView.as_view(), name='collections_mistral_request'),
 
     path('collections/delete/<int:collection_id>/', delete_collection, name='collection_delete'),
     path('collections/edit/<int:pk>/', TWFCollectionsEditView.as_view(), name='collection_edit'),
@@ -267,6 +281,7 @@ urlpatterns = [
     path('celery/project/query/openai/', start_query_project_openai, name='task_project_query_openai'),
     path('celery/project/query/gemini/', start_query_project_gemini, name='task_project_query_gemini'),
     path('celery/project/query/claude/', start_query_project_claude, name='task_project_query_claude'),
+    path('celery/project/query/mistral/', start_query_project_mistral, name='task_project_query_mistral'),
 
 
     path('celery/transkribus/tags/extract/', start_tags_creation, name='task_transkribus_extract_tags'),
@@ -277,9 +292,11 @@ urlpatterns = [
     path('celery/documents/batch/openai/', start_openai_doc_batch, name='task_documents_batch_openai'),
     path('celery/documents/batch/gemini/', start_gemini_doc_batch, name='task_documents_batch_gemini'),
     path('celery/documents/batch/claude/', start_claude_doc_batch, name='task_documents_batch_claude'),
+    path('celery/documents/batch/mistral/', start_mistral_doc_batch, name='task_documents_batch_mistral'),
     path('celery/documents/page/batch/openai/', start_openai_page_batch, name='task_documents_page_batch_openai'),
     path('celery/documents/page/batch/gemini/', start_gemini_page_batch, name='task_documents_page_batch_gemini'),
     path('celery/documents/page/batch/claude/', start_claude_page_batch, name='task_documents_page_batch_claude'),
+    path('celery/documents/page/batch/mistral/', start_mistral_page_batch, name='task_documents_page_batch_mistral'),
 
     path('celery/dictionaries/batch/gnd/', start_dict_gnd_batch, name='task_dictionaries_batch_gnd'),
     path('celery/dictionaries/batch/geonames/', start_dict_geonames_batch, name='task_dictionaries_batch_geonames'),
@@ -287,6 +304,7 @@ urlpatterns = [
     path('celery/dictionaries/batch/openai/', start_dict_openai_batch, name='task_dictionaries_batch_openai'),
     path('celery/dictionaries/batch/claude/', start_dict_claude_batch, name='task_dictionaries_batch_claude'),
     path('celery/dictionaries/batch/gemini/', start_dict_gemini_batch, name='task_dictionaries_batch_gemini'),
+    path('celery/dictionaries/batch/mistral/', start_dict_mistral_batch, name='task_dictionaries_batch_mistral'),
 
     path('celery/dictionaries/request/gnd/', start_dict_gnd_request, name='task_dictionaries_request_gnd'),
     path('celery/dictionaries/request/geonames/', start_dict_geonames_request, name='task_dictionaries_request_geonames'),
@@ -294,6 +312,7 @@ urlpatterns = [
     path('celery/dictionaries/request/openai/', start_dict_openai_request, name='task_dictionaries_request_openai'),
     path('celery/dictionaries/request/claude/', start_dict_claude_request, name='task_dictionaries_request_claude'),
     path('celery/dictionaries/request/gemini/', start_dict_gemini_request, name='task_dictionaries_request_gemini'),
+    path('celery/dictionaries/request/mistral/', start_dict_mistral_request, name='task_dictionaries_request_mistral'),
 
     path('celery/collections/batch/openai/', start_openai_collection_batch, name='task_collection_batch_openai'),
     path('celery/collections/batch/gemini/', start_gemini_collection_batch, name='task_collection_batch_gemini'),
@@ -301,6 +320,7 @@ urlpatterns = [
     path('celery/collections/request/openai/', start_openai_collection_request, name='task_collection_request_openai'),
     path('celery/collections/request/gemini/', start_gemini_collection_request, name='task_collection_request_gemini'),
     path('celery/collections/request/claude/', start_claude_collection_request, name='task_collection_request_claude'),
+    path('celery/collections/request/mistral/', start_mistral_collection_request, name='task_collection_request_mistral'),
 
     path('celery/export/documents/', start_export_documents, name='task_export_documents'),
     path('celery/export/collections/', start_export_collections, name='task_export_collections'),

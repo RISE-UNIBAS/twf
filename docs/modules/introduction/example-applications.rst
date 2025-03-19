@@ -1,3 +1,0 @@
-Example Applications
-====================
-d.

@@ -50,6 +50,8 @@ class TWFCollectionsView(LoginRequiredMixin, TWFView):
                      "value": "Gemini", "permission": "collection_gemini_batch"},
                     {"url": reverse('twf:collections_claude_batch'),
                      "value": "Claude", "permission": "collection_claude_batch"},
+                    {"url": reverse('twf:collections_mistral_batch'),
+                     "value": "Mistral", "permission": "collection_mistral_batch"},
                 ]
             },
             {
@@ -62,6 +64,8 @@ class TWFCollectionsView(LoginRequiredMixin, TWFView):
                      "value": "Gemini", "permission": "collection_gemini_workflow"},
                     {"url": reverse('twf:collections_claude_request'),
                      "value": "Claude", "permission": "collection_claude_workflow"},
+                    {"url": reverse('twf:collections_mistral_request'),
+                     "value": "Mistral", "permission": "collection_mistral_workflow"},
                 ]
             },
             {

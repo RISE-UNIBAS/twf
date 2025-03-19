@@ -307,7 +307,7 @@ tr[data-bs-toggle="collapse"]:hover {
     display: flex;
     align-items: center;
     justify-content: center;
-    background-color: #dc3545; /* Bootstrap danger color */
+    background-color: #343a40; /* Bootstrap danger color */
     border: none;
     color: white;
     border-radius: 50%; /* Make it round */
@@ -317,7 +317,7 @@ tr[data-bs-toggle="collapse"]:hover {
 }
 
 .close-help:hover {
-     background-color: #c82333; /* Darker red on hover */
+     background-color: #1d2124; /* Darker red on hover */
 }
 
 /* Show overlay */

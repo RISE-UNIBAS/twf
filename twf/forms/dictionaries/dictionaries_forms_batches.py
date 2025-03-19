@@ -78,6 +78,14 @@ class DictionariesClaudeBatchForm(DictionaryAIBatchForm):
         return 'Start Claude Batch'
 
 
+class DictionariesMistralBatchForm(DictionaryAIBatchForm):
+    """Form for batch processing Geonames data."""
+
+    def get_button_label(self):
+        """Get the label for the submit button."""
+        return 'Start Mistral Batch'
+
+
 class GeonamesBatchForm(DictionaryBatchForm):
     """Form for batch processing Geonames data."""
 

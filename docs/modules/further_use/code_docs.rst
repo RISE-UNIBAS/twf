@@ -10,7 +10,6 @@ This is the source code documentation for the TWF project.
    source_doc/models.rst
    source_doc/urls.rst
    source_doc/admin.rst
-   source_doc/filters.rst
 
    source_doc/clients.rst
    source_doc/forms.rst

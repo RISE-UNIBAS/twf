@@ -14,22 +14,14 @@ Contents:
    :caption: Introduction:
 
    modules/introduction/what-is-twf.rst
-   modules/introduction/who-is-twf-for.rst
-   modules/introduction/example-applications.rst
-
+   modules/introduction/get-started.rst
 
 .. toctree::
    :maxdepth: 2
    :caption: Core Parts:
 
-   modules/parts/project.rst
-   modules/parts/documents.rst
-   modules/parts/tags.rst
-   modules/parts/metadata.rst
-   modules/parts/dictionaries.rst
-   modules/parts/collections.rst
-   modules/parts/export.rst
-
+   modules/parts/settings.rst
+   modules/parts/batch-workflows.rst
 
 .. toctree::
    :maxdepth: 2

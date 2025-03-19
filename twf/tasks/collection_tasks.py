@@ -78,3 +78,14 @@ def search_claude_for_collection_item(self, project_id, user_id, **kwargs):
     item = CollectionItem.objects.get(id=kwargs.get('item_id'))
     self.process_ai_request([item], 'anthropic',
                             kwargs['prompt'], kwargs['role_description'], 'claude')
+
+
+@shared_task(bind=True, base=BaseTWFTask)
+def search_mistral_for_collection_item(self, project_id, user_id, **kwargs):
+    """ Search for information using the Claude API for a collection """
+    self.validate_task_parameters(kwargs,
+                                  ['item_id', 'prompt', 'role_description'])
+
+    item = CollectionItem.objects.get(id=kwargs.get('item_id'))
+    self.process_ai_request([item], 'mistral',
+                            kwargs['prompt'], kwargs['role_description'], 'mistral')

@@ -1,5 +1,5 @@
-What is TWF - Transkribus Workflow
-==================================
+TWF - Transkribus Workflow
+==========================
 
 TWF, or Transkribus Workflow, is a web service designed to streamline
 the process of working with data from Transkribus, an OCR service, and other digital
@@ -8,49 +8,47 @@ to focus on data analysis rather than data management.
 
 The TWF workflow includes the following steps:
 
-1. **Connect to Transkribus**:
-   TWF establishes a secure connection to Transkribus using your stored credentials
-   and triggers an export for a selected collection.
+1. **Setup Project**
+    - *Connect to Transkribus*
+    - *Download a Collection to the TWF server*
+    - *Unpack and structure the data into a database*
 
-2. **Download the Result**:
-   The exported data is automatically downloaded and prepared for further processing.
+2. **Review Project**
+    - *Search and filter documents*
+    - *Query AI models for document analysis*
 
-3. **Data Preparation**:
+3. **Manage Metadata and Dictionaries**
+    - *Create and manage metadata for documents and pages*
+    - *Create and manage dictionaries for tag normalization*
+    - *Use external services for metadata enrichment*
 
-   - **Unpacking**:
-     The downloaded files are unpacked and saved to the filesystem, making them
-     accessible for parsing and further processing.
+4. **Create and Review Collections**
+    - *Create collections of documents, pages, annotations*
+    - *Review and manage collections*
 
-   - **Parsing Files**:
-     TWF uses the ``simple-alto-parser`` library to extract structured information
-     from ALTO XML or Page XML files, saving this information in the database.
+5. **Export Data**
+    - *Export data in various formats*
+    - *Export data to external services*
+    - *Export data to FAIr Repositories*
 
-4. **Tag Extraction**:
-   Tags marked in Transkribus are extracted and stored in the database. TWF enables
-   tags to be categorized by type and organized within dictionary entries.
+Target Audience
+---------------
+The primary users of TWF are:
 
-5. **Metadata and Dictionary Management**:
+1. **Research Groups**: TWF is designed to make it easier for research groups to work with
+   Transkribus data. By automating several steps in the export process, TWF allows research
+   groups to focus more on their research and less on the logistics of obtaining and preparing data.
 
-   - **Dictionary Entries**:
-     Entries can be created, grouped, and enriched with metadata, which is stored
-     in the database. Dictionaries can contain various references and metadata types,
-     allowing for nuanced organization.
+2. **University Infrastructure Service Groups**: TWF needs to be installed on a machine in the
+   internet to utilize its multi-user capabilities. As such, it is also aimed at university
+   infrastructure service groups, such as digital humanities labs, who can host the service.
 
-   - **Metadata Handling**:
-     TWF also supports custom metadata for both documents and pages, which can be
-     loaded from JSON files or directly through the interface.
+In summary, TWF serves a dual role: it is hosted by university infrastructure service groups and
+used by research groups for their projects. This collaboration allows for efficient use of resources
+and enhances the research capabilities of the groups involved.
 
-6. **Export and Analysis**:
-
-   - **Customizable Exports**:
-     Users can export data in various formats, such as JSON, CSV, or Excel. Export
-     configurations are customizable, allowing for tailored data outputs to meet
-     specific project requirements.
-
-   - **Automated Enrichment**:
-     TWF includes automated workflows for cross-referencing and enriching data with
-     external sources (e.g., GND, Wikidata, Geonames, and OpenAI).
-
-This end-to-end automation within TWF reduces manual steps, minimizes error potential,
-and ensures data is consistently structured and ready for further analysis. With TWF,
-researchers can focus on deriving insights from their data rather than managing it.
+Disclaimer
+----------
+TWF is not affiliated with Transkribus or any other of the services it connects to. It is an
+independent project developed by RISE, the Research & Infrastructure Support for the Humanities
+at the University of Basel.

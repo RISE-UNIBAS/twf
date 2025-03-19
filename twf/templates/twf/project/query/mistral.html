@@ -1,0 +1,22 @@
+{% extends 'twf/base/base_ai_batch.html' %}
+
+{% block script %}
+    {{ block.super }} <!-- Keep base script but override formatting -->
+
+    <script>
+        function format_ai_result(data) {
+            console.log("Mistral-specific format_ai_result called", data);
+
+            let text = data?.content?.[0]?.text || "No response text.";
+            let aiResultHTML = `
+                <div class="card mt-3">
+                    <div class="card-header">Mistral AI Result</div>
+                    <div class="card-body">
+                        <blockquote class="blockquote">${text}</blockquote>
+                    </div>
+                </div>`;
+
+            $("#ai_result").html(aiResultHTML);
+        }
+    </script>
+{% endblock %}

@@ -3,7 +3,7 @@ from django.urls import reverse_lazy
 from django.views.generic import FormView
 
 from twf.forms.dictionaries.dictionaries_forms_batches import GeonamesBatchForm, GNDBatchForm, WikidataBatchForm, \
-    DictionariesOpenAIBatchForm, DictionariesGeminiBatchForm, DictionariesClaudeBatchForm
+    DictionariesOpenAIBatchForm, DictionariesGeminiBatchForm, DictionariesClaudeBatchForm, DictionariesMistralBatchForm
 from twf.views.dictionaries.views_dictionaries import TWFDictionaryView
 from twf.views.views_base import AIFormView
 
@@ -111,6 +111,24 @@ class TWFDictionaryClaudeBatchView(AIFormView, TWFDictionaryView):
         return context
 
 
+class TWFDictionaryMistralBatchView(AIFormView, TWFDictionaryView):
+    """Normalization Data Wizard."""
+    template_name = 'twf/base/base_ai_batch.html'
+    page_title = 'Mistral Batch'
+    form_class = DictionariesMistralBatchForm
+    success_url = reverse_lazy('twf:dictionaries_batch_mistral')
+    start_url = reverse_lazy('twf:task_dictionaries_batch_mistral')
+    message = "Are you sure you want to start the mistral task?"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['ai_heading'] = 'Mistral'
+        context['ai_lead'] = 'Mistral is an AI model that can be used to generate text based on a prompt.'
+        context['has_ai_credentials'] = self.has_ai_credentials('mistral')
+        context['ai_credentials_url'] = reverse_lazy('twf:project_settings_credentials') + '?tab=mistral'
+        return context
+
+
 class TWFDictionaryGeonamesRequestView(FormView, TWFDictionaryView):
     """Normalization Data Wizard."""
     template_name = 'twf/dictionaries/requests/geonames.html'
@@ -198,4 +216,22 @@ class TWFDictionaryGeminiRequestView(AIFormView, TWFDictionaryView):
         context['ai_lead'] = 'Gemini is an AI model that can be used to generate text based on a prompt.'
         context['has_ai_credentials'] = self.has_ai_credentials('genai')
         context['ai_credentials_url'] = reverse_lazy('twf:project_settings_credentials') + '?tab=genai'
+        return context
+
+
+class TWFDictionaryMistralRequestView(AIFormView, TWFDictionaryView):
+    """Normalization Data Wizard."""
+    template_name = 'twf/base/base_ai_batch.html'
+    page_title = 'Mistral Request'
+    form_class = DictionariesMistralBatchForm
+    success_url = reverse_lazy('twf:dictionaries_request_mistral')
+    start_url = reverse_lazy('twf:task_dictionaries_request_mistral')
+    message = "Are you sure you want to start the mistral task?"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['ai_heading'] = 'Mistral'
+        context['ai_lead'] = 'Mistral is an AI model that can be used to generate text based on a prompt.'
+        context['has_ai_credentials'] = self.has_ai_credentials('mistral')
+        context['ai_credentials_url'] = reverse_lazy('twf:project_settings_credentials') + '?tab=mistral'
         return context

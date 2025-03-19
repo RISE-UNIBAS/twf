@@ -1,0 +1,22 @@
+{% extends 'twf/base/base_ai_batch.html' %}
+
+{% block script %}
+    {{ block.super }}
+
+    <script>
+        function format_ai_result(data) {
+            console.log("Gemini-specific format_ai_result called", data);
+
+            let text = data?.candidates?.[0]?.content?.parts?.[0]?.text || "No response text.";
+            let aiResultHTML = `
+                <div class="card mt-3">
+                    <div class="card-header bg-primary text-white">Gemini AI Result</div>
+                    <div class="card-body">
+                        <p>${text}</p>
+                    </div>
+                </div>`;
+
+            $("#ai_result").html(aiResultHTML);
+        }
+    </script>
+{% endblock %}

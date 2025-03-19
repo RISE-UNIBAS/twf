@@ -24,6 +24,11 @@ def search_claude_for_docs(self, project_id, user_id, **kwargs):
     self.process_ai_request(self.project.documents.all(), 'anthropic',
                             kwargs['prompt'], kwargs['role_description'], 'claude')
 
+@shared_task(bind=True, base=BaseTWFTask)
+def search_mistral_for_docs(self, project_id, user_id, **kwargs):
+    self.validate_task_parameters(kwargs, ['prompt', 'role_description'])
+    self.process_ai_request(self.project.documents.all(), 'mistral',
+                            kwargs['prompt'], kwargs['role_description'], 'mistral')
 
 @shared_task(bind=True, base=BaseTWFTask)
 def search_openai_for_pages(self, project_id, user_id, **kwargs):
@@ -44,3 +49,10 @@ def search_claude_for_pages(self, project_id, user_id, **kwargs):
     self.validate_task_parameters(kwargs, ['prompt', 'role_description'])
     pages = Page.objects.filter(document__project=self.project, is_ignored=False)
     self.process_ai_request(pages, 'anthropic', kwargs['prompt'], kwargs['role_description'], 'claude')
+
+
+@shared_task(bind=True, base=BaseTWFTask)
+def search_mistral_for_pages(self, project_id, user_id, **kwargs):
+    self.validate_task_parameters(kwargs, ['prompt', 'role_description'])
+    pages = Page.objects.filter(document__project=self.project, is_ignored=False)
+    self.process_ai_request(pages, 'mistral', kwargs['prompt'], kwargs['role_description'], 'mistral')

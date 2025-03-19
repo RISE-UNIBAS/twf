@@ -57,3 +57,10 @@ class CollectionClaudeBatchForm(CollectionBatchForm):
         """Get the label for the submit button."""
         return 'Start Claude Batch'
 
+
+class CollectionMistralBatchForm(CollectionBatchForm):
+    """Form for batch processing Geonames data."""
+
+    def get_button_label(self):
+        """Get the label for the submit button."""
+        return 'Start Mistral Batch'

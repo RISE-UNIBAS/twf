@@ -83,10 +83,29 @@ class BaseTWFTask(CeleryTask):
 
         self.end_task()
 
-    def end_task(self, status="SUCCESS"):
+    def process_single_ai_request(self, items, client_name, prompt, role_description, metadata_field):
+        self.set_total_items(1)
+        self.create_configured_client(client_name, role_description)
+
+        context_text = ""
+        for item in items:
+            context_text += item.get_text() + "\n"
+
+        prompt = prompt + "\n\n" + "Context:\n" + context_text
+        response, elapsed_time = self.client.prompt(model=self.credentials['default_model'],
+                                                    prompt=prompt)
+        response_dict = response.to_dict()
+
+        self.end_task(ai_result=response_dict)
+
+    def end_task(self, status="SUCCESS", **kwargs):
         """Mark the task as completed or failed."""
         if self.twf_task:
-            self.update_state(state=status)
+            meta = {'current': 100, 'total': 100, 'text': 'Task finished'}
+            if kwargs:
+                meta.update(kwargs)
+            self.update_state(state=status, meta=meta)
+
             self.twf_task.end_time = timezone.now()
             self.twf_task.status = status
             self.twf_task.save(update_fields=["status"])
@@ -105,54 +124,3 @@ class BaseTWFTask(CeleryTask):
                                                     prompt=prompt)
         response_dict = response.to_dict()
         return response_dict, elapsed_time
-
-
-def end_task(broker, task, text, description=None, meta=None):
-    """End the task. Update the Task object and update the state of the Celery broker.
-    :param broker: Celery broker
-    :param task: Task object
-    :param text: Task text
-    :param description: Task description
-    :param meta: Task metadata"""
-
-    task.status = 'SUCCESS'
-    task.text = text
-    if description:
-        task.description = description
-    task.end_time = timezone.now()
-    if meta:
-        task.meta = meta
-    else:
-        task.meta = {}
-    task.save()
-
-    task_meta = {'current': 100, 'total': 100, 'text': text}
-    if "download_url" in task.meta:
-        task_meta["download_url"] = task.meta["download_url"]
-
-    broker.update_state(state='SUCCESS', meta=task_meta)
-
-
-def fail_task(broker, task, text, exception, meta=None):
-    """Fail the task and update the task state."""
-    task.status = 'FAILURE'
-    task.text = text
-    task.end_time = timezone.now()
-    if meta is None:
-        meta = {}
-
-    # Add exception details to metadata
-    meta.update({
-        'current': 100,
-        'total': 100,
-        'text': text,
-        'exc_type': type(exception).__name__,
-        'message': str(exception),
-        'traceback': "".join(traceback.format_exception(type(exception), exception, exception.__traceback__)),
-    })
-
-    # Save task state and update broker
-    task.meta = meta
-    task.save()
-    broker.update_state(state='FAILURE', meta=meta)
-    return task

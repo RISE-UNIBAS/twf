@@ -39,6 +39,8 @@ class TWFDocumentView(LoginRequiredMixin, TWFView):
                      'value': 'Gemini', 'permission': 'document_batch_workflow_gemini'},
                     {'url': reverse('twf:documents_batch_claude'),
                      'value': 'Claude', 'permission': 'document_batch_workflow_claude'},
+                    {'url': reverse('twf:documents_batch_mistral'),
+                     'value': 'Mistral', 'permission': 'document_batch_workflow_mistral'},
                 ]
             },
             {
@@ -50,6 +52,8 @@ class TWFDocumentView(LoginRequiredMixin, TWFView):
                      'value': 'Gemini', 'permission': 'document_page_batch_workflow_gemini'},
                     {'url': reverse('twf:documents_page_batch_claude'),
                      'value': 'Claude', 'permission': 'document_page_batch_workflow_claude'},
+                    {'url': reverse('twf:documents_page_batch_mistral'),
+                     'value': 'Mistral', 'permission': 'document_page_batch_workflow_mistral'},
                 ]
             },
             {

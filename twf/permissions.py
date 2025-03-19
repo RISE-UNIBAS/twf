@@ -164,6 +164,12 @@ def get_available_actions(project=None, profile=None, for_group=None):
             "description": "User is allowed to start a Claude batch workflow.",
             "default_for": ["manager"]
         },
+        "document_batch_workflow_mistral": {
+            "group": "document",
+            "label": "Mistral Batch Workflow",
+            "description": "User is allowed to start a Mistral batch workflow.",
+            "default_for": ["manager"]
+        },
         "document_page_batch_workflow_openai": {
             "group": "document",
             "label": "OpenAI Page Batch Workflow",
@@ -180,6 +186,12 @@ def get_available_actions(project=None, profile=None, for_group=None):
             "group": "document",
             "label": "Claude Page Batch Workflow",
             "description": "User is allowed to start a Claude page batch workflow.",
+            "default_for": ["manager"]
+        },
+        "document_page_batch_workflow_mistral": {
+            "group": "document",
+            "label": "Mistral Page Batch Workflow",
+            "description": "User is allowed to start a Mistral page batch workflow.",
             "default_for": ["manager"]
         },
         "document_task_review": {
@@ -278,6 +290,24 @@ def get_available_actions(project=None, profile=None, for_group=None):
             "description": "User is allowed to start an OpenAI batch workflow.",
             "default_for": ["manager"]
         },
+        "dictionary_batch_workflow_gemini": {
+            "group": "dictionary",
+            "label": "Gemini Batch Workflow",
+            "description": "User is allowed to start a Gemini batch workflow.",
+            "default_for": ["manager"]
+        },
+        "dictionary_batch_workflow_claude": {
+            "group": "dictionary",
+            "label": "Claude Batch Workflow",
+            "description": "User is allowed to start a Claude batch workflow.",
+            "default_for": ["manager"]
+        },
+        "dictionary_batch_workflow_mistral": {
+            "group": "dictionary",
+            "label": "Mistral Batch Workflow",
+            "description": "User is allowed to start a Mistral batch workflow.",
+            "default_for": ["manager"]
+        },
         "dictionary_batch_workflow_geonames": {
             "group": "dictionary",
             "label": "Geonames Batch Workflow",
@@ -300,6 +330,24 @@ def get_available_actions(project=None, profile=None, for_group=None):
             "group": "dictionary",
             "label": "OpenAI Manual Workflow",
             "description": "User is allowed to start an OpenAI manual workflow.",
+            "default_for": ["manager", "user"]
+        },
+        "dictionary_manual_workflow_gemini": {
+            "group": "dictionary",
+            "label": "Gemini Manual Workflow",
+            "description": "User is allowed to start a Gemini manual workflow.",
+            "default_for": ["manager", "user"]
+        },
+        "dictionary_manual_workflow_claude": {
+            "group": "dictionary",
+            "label": "Claude Manual Workflow",
+            "description": "User is allowed to start a Claude manual workflow.",
+            "default_for": ["manager", "user"]
+        },
+        "dictionary_manual_workflow_mistral": {
+            "group": "dictionary",
+            "label": "Mistral Manual Workflow",
+            "description": "User is allowed to start a Mistral manual workflow.",
             "default_for": ["manager", "user"]
         },
         "dictionary_manual_workflow_geonames": {
@@ -388,6 +436,12 @@ def get_available_actions(project=None, profile=None, for_group=None):
             "description": "User is allowed to start a Claude batch.",
             "default_for": ["manager"]
         },
+        "collection_mistral_batch": {
+            "group": "collection",
+            "label": "Mistral Batch",
+            "description": "User is allowed to start a Mistral batch.",
+            "default_for": ["manager"]
+        },
         "collection_openai_workflow":   {
             "group": "collection",
             "label": "OpenAI Workflow",
@@ -404,6 +458,12 @@ def get_available_actions(project=None, profile=None, for_group=None):
             "group": "collection",
             "label": "Claude Workflow",
             "description": "User is allowed to start a Claude workflow.",
+            "default_for": ["manager", "user"]
+        },
+        "collection_mistral_workflow":   {
+            "group": "collection",
+            "label": "Mistral Workflow",
+            "description": "User is allowed to start a Mistral workflow.",
             "default_for": ["manager", "user"]
         },
         "collection_item_naming_workflow": {

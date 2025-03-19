@@ -1,0 +1,89 @@
+{% extends 'twf/base/base.html' %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+    <div class="border rounded bg-light mt-0 p-3">
+        <h1 class="display-6">System Health</h1>
+        <p class="lead">Check which services are available and their status.</p>
+
+        <ul id="health-results" class="list-group">
+            {% for service, url in twf_services.items %}
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <span><strong>{{ service }}</strong></span>
+                    <span class="text-small">{{ url }}</span>
+                    <span class="badge bg-warning text-dark">Unknown</span>
+                </li>
+            {% endfor %}
+        </ul>
+
+        <!-- Re-Check Button -->
+        <div class="text-end">
+            <button id="recheck-button" class="btn btn-dark mt-3">Re-Check</button>
+        </div>
+    </div>
+{% endblock %}
+
+{% block script %}
+    <script>
+        function startHealthCheck() {
+            const eventSource = new EventSource("{% url 'twf:twf_check_system_health' %}");
+
+            eventSource.onmessage = function(event) {
+                if (event.data === "DONE") {
+                    console.log("System Health Check: Completed.");
+                    eventSource.close();
+                    return;
+                }
+
+                const data = JSON.parse(event.data);
+                for (const [service, result] of Object.entries(data)) {
+                    let statusClass = result.status.includes("✅") ? "success" :
+                                      result.status.includes("⚠️") ? "warning" : "danger";
+
+                    // Find the corresponding list item by service name
+                    let listItem = [...document.querySelectorAll("#health-results li")].find(
+                        li => li.textContent.includes(service)
+                    );
+
+                    if (listItem) {
+                        let badge = listItem.querySelector(".badge");
+                        badge.className = `badge bg-${statusClass}`;
+                        badge.textContent = result.status;
+
+                        if (result.error) {
+                            let errorText = document.createElement("small");
+                            errorText.className = "text-muted ms-2";
+                            errorText.innerText = `(${result.error})`;
+                            badge.appendChild(errorText);
+                        }
+                    }
+                }
+            };
+
+            eventSource.onerror = function() {
+                console.warn("System Health Check: Connection lost. Reconnecting...");
+                eventSource.close();
+
+                // Reconnect after a delay
+                setTimeout(startHealthCheck, 3000);
+            };
+        }
+
+        document.addEventListener("DOMContentLoaded", function () {
+            startHealthCheck();
+
+            // Re-Check button functionality
+            document.getElementById("recheck-button").addEventListener("click", function() {
+                // Reset all statuses to "Unknown"
+                document.querySelectorAll("#health-results li .badge").forEach(badge => {
+                    badge.className = "badge bg-warning text-dark";
+                    badge.textContent = "Unknown";
+                });
+
+                // Restart the health check
+                startHealthCheck();
+            });
+        });
+    </script>
+{% endblock %}
+

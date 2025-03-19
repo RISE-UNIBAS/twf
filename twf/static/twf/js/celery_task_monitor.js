@@ -108,20 +108,26 @@
                 } else if (status === 'SUCCESS') {
                     progressBar.css('width', '100%');
                     progressBar.removeClass('bg-dark'); // Remove the dark color
-                    progressBar.addClass('bg-success'); // Change the progress bar color to red
+                    progressBar.removeClass("progress-bar-animated")
+                    progressBar.addClass('bg-success'); // Change the progress bar color to green
                     progressBar.text('Completed');
                     $(logTextareaId).append('Task completed\n');
+                    console.log(data.result);
+                    if (data.result) {
+                        if (data.result.download_url) {
+                            $(logTextareaId).append("Click here to download: " + data.result.download_url + "\n");
 
-                    if (data.result.download_url) {
-                        $(logTextareaId).append("Click here to download: " + data.result.download_url + "\n");
-
-                        // Automatically trigger file download
-                        const downloadLink = document.createElement("a");
-                        downloadLink.href = data.result.download_url;
-                        downloadLink.download = "exported_documents.zip"; // Default name
-                        document.body.appendChild(downloadLink);
-                        downloadLink.click();
-                        document.body.removeChild(downloadLink);
+                            // Automatically trigger file download
+                            const downloadLink = document.createElement("a");
+                            downloadLink.href = data.result.download_url;
+                            downloadLink.download = "exported_documents.zip"; // Default name
+                            document.body.appendChild(downloadLink);
+                            downloadLink.click();
+                            document.body.removeChild(downloadLink);
+                        }
+                        if (data.result.ai_result) {
+                            format_ai_result(data.result.ai_result);
+                        }
                     }
 
                     scrollToBottom(logTextareaId);

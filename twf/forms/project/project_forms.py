@@ -121,13 +121,17 @@ class CredentialsForm(forms.ModelForm):
     openai_default_model = forms.CharField(required=False,
                                            widget=TextInput(attrs={'placeholder': 'OpenAI Default Model'}))
 
-    genai_api_key = forms.CharField(required=False, widget=TextInput(attrs={'placeholder': 'GenAI API Key'}))
+    genai_api_key = forms.CharField(required=False, widget=TextInput(attrs={'placeholder': 'Google API Key'}))
     genai_default_model = forms.CharField(required=False,
-                                          widget=TextInput(attrs={'placeholder': 'GenAI Default Model'}))
+                                          widget=TextInput(attrs={'placeholder': 'Google Default Model'}))
 
     anthropic_api_key = forms.CharField(required=False, widget=TextInput(attrs={'placeholder': 'Anthropic API Key'}))
     anthropic_default_model = forms.CharField(required=False,
                                               widget=TextInput(attrs={'placeholder': 'Anthropic Default Model'}))
+
+    mistral_api_key = forms.CharField(required=False, widget=TextInput(attrs={'placeholder': 'Mistral API Key'}))
+    mistral_default_model = forms.CharField(required=False,
+                                            widget=TextInput(attrs={'placeholder': 'Mistral Default Model'}))
 
     transkribus_username = forms.CharField(required=False,
                                            widget=TextInput(attrs={'placeholder': 'Transkribus Username'}))
@@ -156,6 +160,9 @@ class CredentialsForm(forms.ModelForm):
         self.fields['anthropic_api_key'].initial = conf_credentials.get('anthropic', {}).get('api_key', '')
         self.fields['anthropic_default_model'].initial = conf_credentials.get('anthropic', {}).get('default_model', '')
 
+        self.fields['mistral_api_key'].initial = conf_credentials.get('mistral', {}).get('api_key', '')
+        self.fields['mistral_default_model'].initial = conf_credentials.get('mistral', {}).get('default_model', '')
+
         self.fields['transkribus_username'].initial = conf_credentials.get('transkribus', {}).get('username', '')
         self.fields['transkribus_password'].initial = conf_credentials.get('transkribus', {}).get('password', '')
 
@@ -182,7 +189,7 @@ class CredentialsForm(forms.ModelForm):
                     css_id='openai'
                 ),
                 Tab(
-                    'GenAI',
+                    'Google',
                     Row(Column('genai_api_key', css_class='col-12')),
                     Row(Column('genai_default_model', css_class='col-12')),
                     css_id='genai'
@@ -191,6 +198,12 @@ class CredentialsForm(forms.ModelForm):
                     'Anthropic',
                     Row(Column('anthropic_api_key', css_class='col-12')),
                     Row(Column('anthropic_default_model', css_class='col-12')),
+                    css_id='anthropic'
+                ),
+                Tab(
+                    'Mistral',
+                    Row(Column('mistral_api_key', css_class='col-12')),
+                    Row(Column('mistral_default_model', css_class='col-12')),
                     css_id='anthropic'
                 ),
                 Tab(
@@ -221,6 +234,8 @@ class CredentialsForm(forms.ModelForm):
                       'default_model': cleaned_data.get('genai_default_model')},
             'anthropic': {'api_key': cleaned_data.get('anthropic_api_key'),
                           'default_model': cleaned_data.get('anthropic_default_model')},
+            'mistral': {'api_key': cleaned_data.get('mistral_api_key'),
+                        'default_model': cleaned_data.get('mistral_default_model')},
             'transkribus': {
                 'username': cleaned_data.get('transkribus_username'),
                 'password': cleaned_data.get('transkribus_password')
