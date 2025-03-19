@@ -204,7 +204,7 @@ class CredentialsForm(forms.ModelForm):
                     'Mistral',
                     Row(Column('mistral_api_key', css_class='col-12')),
                     Row(Column('mistral_default_model', css_class='col-12')),
-                    css_id='anthropic'
+                    css_id='mistral'
                 ),
                 Tab(
                     'Geonames',
