@@ -645,7 +645,7 @@ class DictionaryEntry(TimeStampedModel):
         The dictionary this entry belongs to.
     label : CharField
         The label of the entry.
-    authorization_data : JSONField
+    metadata : JSONField
         Authorization data for the entry.
     notes : TextField
         Notes for the entry.
@@ -658,7 +658,7 @@ class DictionaryEntry(TimeStampedModel):
     """The label of the entry."""
 
     metadata = models.JSONField(default=dict, blank=True)
-    """Authorization data for the entry."""
+    """Metadata data for the entry."""
 
     notes = models.TextField(blank=True, default='')
     """Notes for the entry."""

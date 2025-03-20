@@ -321,7 +321,7 @@ class TWFDictionaryNormDataView(TWFDictionaryView):
     def get_next_unenriched_entry(self, selected_dict):
         """Get the next unenriched entry."""
         dictionary = self.get_project().selected_dictionaries.get(type=selected_dict)
-        entry = dictionary.entries.filter(authorization_data={}).order_by('modified_at').first()
+        entry = dictionary.entries.filter(metadata={}).order_by('modified_at').first()
         return entry
 
 
@@ -363,9 +363,9 @@ class TWFDictionaryMergeEntriesView(TWFDictionaryView):
 
         # Step 3: Merge notes and authorization data
         remaining_entry.notes += f"\nMerged Notes:\n{merge_entry.notes}"
-        for key, value in merge_entry.authorization_data.items():
-            if key not in remaining_entry.authorization_data:
-                remaining_entry.authorization_data[key] = value
+        for key, value in merge_entry.metadata.items():
+            if key not in remaining_entry.metadata:
+                remaining_entry.metadata[key] = value
 
         remaining_entry.save()
 

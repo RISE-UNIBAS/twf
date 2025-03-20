@@ -44,7 +44,7 @@ class DictionaryAddTable(DictionaryTable):
 class DictionaryEntryTable(tables.Table):
     """Table for displaying dictionary entries."""
     variations = tables.Column(verbose_name="Variations", orderable=False)
-    authorization_data = tables.Column(verbose_name="Norm Data", orderable=False)
+    metadata = tables.Column(verbose_name="Norm Data", orderable=False)
     options = tables.TemplateColumn(template_name='twf/tables/dictionary_entry_table_options.html',
                                     verbose_name="Options", orderable=False, attrs={"td": {"width": "10%"}})
 
