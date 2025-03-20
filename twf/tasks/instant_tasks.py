@@ -9,7 +9,7 @@ def generated_task_id():
 
     while True:
         random_id = str(uuid.uuid4())  # Generate a UUID
-        if not Task.objects.filter(task_id=random_id).exists():
+        if not Task.objects.filter(celery_task_id=random_id).exists():
             return random_id
         security_break += 1
         if security_break > 100:
@@ -25,7 +25,7 @@ def save_instant_task(project, user, title, description, text):
                 text=text,
                 description=description,
                 end_time=timezone.now(),
-                task_id=generated_task_id())
+                celery_task_id=generated_task_id())
     task.save()
 
 
@@ -86,6 +86,6 @@ def start_related_task(project, user, title, description, text):
                 title=title,
                 text=text,
                 description=description,
-                task_id=generated_task_id())
+                celery_task_id=generated_task_id())
     task.save()
     return task
