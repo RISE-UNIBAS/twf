@@ -80,19 +80,20 @@ def delete_project(request, pk):
 
 def close_project(request, pk):
     """Close a project."""
+    try:
+        project = Project.objects.get(pk=pk)
 
-    if check_permission(request.user,
-                        "close_project",
-                        object_id=pk):
-        try:
-            project = Project.objects.get(pk=pk)
-            project.is_closed = True
+        if check_permission(request.user,
+                            "close_project",
+                            project):
+            project.status = 'closed'
             project.save(current_user=request.user)
             messages.success(request, 'Project has been closed.')
-        except Project.DoesNotExist:
-            messages.error(request, 'Project does not exist.')
-    else:
-        messages.error(request, 'You do not have the required permissions to close this project.')
+        else:
+            messages.error(request, 'You do not have the required permissions to close this project.')
+
+    except Project.DoesNotExist:
+        messages.error(request, 'Project does not exist.')
 
     return redirect('twf:project_management')
 

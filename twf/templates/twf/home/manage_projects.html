@@ -26,7 +26,7 @@
                     {% user_has_permission user.profile 'close_project' p as close_permission_check %}
                     {% if p.status == 'open' and close_permission_check %}
                         <button class="btn btn-sm btn-warning show-confirm-modal"
-                                data-start-url="{% url 'twf:project_do_close' p.id %}"
+                                data-redirect-url="{% url 'twf:project_do_close' p.id %}"
                                 data-message="Are you sure you want to close this project? It can no longer be edited."
                                 >Close Project</button>
                     {% endif %}
