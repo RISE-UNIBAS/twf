@@ -108,7 +108,7 @@ class TWFProjectTaskMonitorView(TWFProjectView):
         tasks = self.get_project().tasks.all()
 
         # Handle filtering
-        filter_form = TaskFilterForm(self.request.GET or None)
+        filter_form = TaskFilterForm(self.request.GET or None, project=self.get_project())
         if filter_form.is_valid():
             if filter_form.cleaned_data['started_by']:
                 tasks = tasks.filter(user=filter_form.cleaned_data['started_by'])

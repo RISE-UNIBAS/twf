@@ -11,6 +11,7 @@ import json
 from django.conf import settings
 from django.db import models
 from django.contrib.auth import get_user_model
+from django.db.models import Q
 from django.utils import timezone
 
 from twf.templatetags.tk_tags import tk_iiif_url, tk_bounding_box
@@ -259,6 +260,12 @@ class Project(TimeStampedModel):
     project_doi = models.CharField(max_length=255, blank=True, null=True,
                                   verbose_name='Project DOI',
                                   help_text='The DOI of the project.')
+
+    def get_project_members(self):
+        """Return the project members plus the project's owner."""
+        return UserProfile.objects.filter(
+            Q(id=self.owner_id) | Q(id__in=self.members.values_list("id", flat=True))
+        ).order_by('user__username')
 
     def get_credentials(self, service):
         """Return the credentials for a service.
