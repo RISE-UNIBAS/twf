@@ -1,8 +1,7 @@
 {% extends 'twf/base/base.html' %}
 
 {% block content %}
-        <h1>Reset Project Functions</h1>
-        <p class="lead">This is dangerous!</p>
+    <p class="lead">This is dangerous!</p>
         
     <form action="{% url 'twf:project_reset' %}" method="post">
       {% csrf_token %}

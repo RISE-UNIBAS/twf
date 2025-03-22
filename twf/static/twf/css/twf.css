@@ -50,6 +50,21 @@ h1::after {
   border-bottom: 1px solid #ccc;
 }
 
+h2 {
+    margin-top: 1rem;
+    color: #454545;
+    font: 1.5em "Raleway", sans-serif;
+    letter-spacing: 2px;
+}
+
+h2::after {
+  content: '';
+  display: block;
+  margin-top: 0.25rem;
+  margin-right: 50px;
+  border-bottom: 1px solid #ccc;
+}
+
 .lead {
     font-style: italic;
 }

@@ -1,8 +1,11 @@
 {% extends 'twf/base/base.html' %}
 {% load twf_permissions %}
 
-{% block content %}
+{% block page_title %}
     <h1>Manage Projects</h1>
+{% endblock %}
+
+{% block content %}
     <p class="lead">This view allows you to delete and close your projects.</p>
     {% if projects %}
          {% for p in projects %}

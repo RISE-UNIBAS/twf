@@ -1,12 +1,6 @@
 {% extends 'twf/base/info_card.html' %}
 
-{% block title %}
-    {{ project.title }}
-{% endblock %}
-
 {% block info_text %}
-     This section allows you to manage your project's core settings, configure setup options, 
-     and handle project-specific batches and tasks.<br/>
      <u>Description:</u> <i>{% if project.description %}{{ project.description }}{% else %}&lt;no description&gt;{% endif %}</i><br/>
      <u>Transkribus Collection ID:</u> {{ project.collection_id }}<br/><br/>
     

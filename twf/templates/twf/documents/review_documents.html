@@ -2,53 +2,48 @@
 {% load crispy_forms_tags %}
 
 {% block content %}
+    {% if has_active_workflow %}
+        <p class="lead">You have an active workflow. You are working on
+            Document <strong>{{ workflow.current_item_index|add:1 }} of {{ workflow.item_count }}</strong></p>
+        <div>
+            {% if document %}
+                <p><strong>Document ID:</strong> {{ document.id }}</p>
+                <p><strong>Title:</strong> {{ document.title }}</p>
 
-        <div class="container mt-4">
-            <h1 class="display-6">Review Documents</h1>
-            {% if has_active_workflow %}
-                <p class="lead">You have an active workflow. You are working on 
-                    Document <strong>{{ workflow.current_item_index|add:1 }} of {{ workflow.item_count }}</strong></p>
-                <div>
-                    {% if document %}
-                        <p><strong>Document ID:</strong> {{ document.id }}</p>
-                        <p><strong>Title:</strong> {{ document.title }}</p>
-                        
-                        <form method="post">
-                            {% csrf_token %}
-                            <input type="hidden" name="document_id" value="{{ document.id }}">
-                            <button data-bs-toggle="tooltip" data-bs-placement="bottom" title="Document is marked as parked for further review"
-                                    type="submit" class="btn btn-secondary" name="action" value="set_parked">Mark as Parked</button>
-                            <button data-bs-toggle="tooltip" data-bs-placement="bottom" title="Document is marked as irrelevant to the project"
-                                    type="submit" class="btn btn-warning" name="action" value="set_needs_work">Needs Work on Transkribus</button>
-                            <button data-bs-toggle="tooltip" data-bs-placement="bottom" title="Document is marked to be edited in Transkribus"
-                                    type="submit" class="btn btn-warning" name="action" value="set_irrelevant">Mark as Irrelevant</button>
-                            <button data-bs-toggle="tooltip" data-bs-placement="bottom" title="Document is marked as correct and relevant to the project"
-                                    type="submit" class="btn btn-success" name="action" value="set_reviewed">Mark as Correct</button>
-                            
-                        </form>
-                    {% else %}
-                        <p>All documents have been reviewed.</p>
-                        <button
-                          type="button"
-                          class="btn btn-dark show-confirm-modal"
-                          data-message="Do you really want to start a Review workflow?"
-                          data-redirect-url="{% url 'twf:start_review_document_workflow' %}">
-                          Start New Document Review Workflow
-                        </button>
-                    {% endif %}
-                </div>
+                <form method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="document_id" value="{{ document.id }}">
+                    <button data-bs-toggle="tooltip" data-bs-placement="bottom" title="Document is marked as parked for further review"
+                            type="submit" class="btn btn-secondary" name="action" value="set_parked">Mark as Parked</button>
+                    <button data-bs-toggle="tooltip" data-bs-placement="bottom" title="Document is marked as irrelevant to the project"
+                            type="submit" class="btn btn-warning" name="action" value="set_needs_work">Needs Work on Transkribus</button>
+                    <button data-bs-toggle="tooltip" data-bs-placement="bottom" title="Document is marked to be edited in Transkribus"
+                            type="submit" class="btn btn-warning" name="action" value="set_irrelevant">Mark as Irrelevant</button>
+                    <button data-bs-toggle="tooltip" data-bs-placement="bottom" title="Document is marked as correct and relevant to the project"
+                            type="submit" class="btn btn-success" name="action" value="set_reviewed">Mark as Correct</button>
+
+                </form>
             {% else %}
-                 <p>There is no active Review Documents Workflow for user {{ request.user }}.</p>
+                <p>All documents have been reviewed.</p>
                 <button
                   type="button"
                   class="btn btn-dark show-confirm-modal"
                   data-message="Do you really want to start a Review workflow?"
                   data-redirect-url="{% url 'twf:start_review_document_workflow' %}">
-                  Start Document Review Workflow
+                  Start New Document Review Workflow
                 </button>
             {% endif %}
         </div>
-
+    {% else %}
+         <p>There is no active Review Documents Workflow for user {{ request.user }}.</p>
+        <button
+          type="button"
+          class="btn btn-dark show-confirm-modal"
+          data-message="Do you really want to start a Review workflow?"
+          data-redirect-url="{% url 'twf:start_review_document_workflow' %}">
+          Start Document Review Workflow
+        </button>
+    {% endif %}
 {% endblock %}
 
 {% block script %}

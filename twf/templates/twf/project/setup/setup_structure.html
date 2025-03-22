@@ -1,21 +1,24 @@
 {% extends 'twf/base/base.html' %}
 {% load crispy_forms_tags %}
 
+{% block page_title %}
+    <h1>Structure downloaded data</h1>
+{% endblock %}
+
 {% block content %}
-        <h1>Structure downloaded data</h1>
-        <p class="lead">This page allows you to extract the downloaded data 
-            from Transkribus and create database objects from it.</p>
+    <p class="lead">This page allows you to extract the downloaded data
+        from Transkribus and create database objects from it.</p>
 
-        {% if not project.job_download_url %}
-            <div class="alert alert-warning" role="alert">
-                <h4 class="alert-heading">There is no export</h4>
-                <p>
-                    You need to request an export and download it first.
-                    Please go to the <a href="{% url 'twf:project_tk_export' %}">TK Export</a> page and
-                    start an export.
-                </p>
-            </div>
-        {% endif %}
+    {% if not project.job_download_url %}
+        <div class="alert alert-warning" role="alert">
+            <h4 class="alert-heading">There is no export</h4>
+            <p>
+                You need to request an export and download it first.
+                Please go to the <a href="{% url 'twf:project_tk_export' %}">TK Export</a> page and
+                start an export.
+            </p>
+        </div>
+    {% endif %}
 
-        {% crispy form %}
+    {% crispy form %}
 {% endblock %}

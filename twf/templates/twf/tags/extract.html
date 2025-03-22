@@ -2,22 +2,22 @@
 {% load static %}
 {% load crispy_forms_tags %}
 
+{% block page_title %}
+    <h1>Extract Tags from Transkribus Documents</h1>
+{% endblock %}
+
 {% block content %}
-     <div class="border rounded bg-light mt-0 p-3">
-        <h1 class="display-6">Extract Tags from Transkribus Documents</h1>
-        <p class="lead">This page allows you to extract tags from the parsed data of the downloaded documents from Transkribus.</p>
+    <p class="lead">This page allows you to extract tags from the parsed data of the downloaded documents from Transkribus.</p>
 
-         {% if project.documents.all.count == 0 %}
-             <div class="alert alert-warning" role="alert">
-                <h4 class="alert-heading">There are no documents</h4>
-                <p>
-                    You need to extract the downloaded data first. Please go to the <a href="{% url 'twf:project_tk_structure' %}">TK Structure</a> page and
-                    extract the downloaded data.
-                </p>
-            </div>
-         {% endif %}
+     {% if project.documents.all.count == 0 %}
+         <div class="alert alert-warning" role="alert">
+            <h4 class="alert-heading">There are no documents</h4>
+            <p>
+                You need to extract the downloaded data first. Please go to the <a href="{% url 'twf:project_tk_structure' %}">TK Structure</a> page and
+                extract the downloaded data.
+            </p>
+        </div>
+     {% endif %}
 
-        {% crispy form %}
-
-     </div>
+    {% crispy form %}
 {% endblock %}

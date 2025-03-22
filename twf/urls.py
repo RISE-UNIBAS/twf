@@ -93,8 +93,6 @@ urlpatterns = [
     #############################
     # PROJECT
     path('project/overview/', TWFProjectOverviewView.as_view(), name='project_overview'),
-    path('project/setup/', TWFProjectSetupView.as_view(template_name='twf/project/setup/setup.html',
-                                                       page_title='Project Setup'), name='project_setup'),
     path('project/setup/tk/export/',
          TWFProjectSetupView.as_view(template_name='twf/project/setup/setup_export.html',
                                      page_title='Project TK Export'), name='project_tk_export'),

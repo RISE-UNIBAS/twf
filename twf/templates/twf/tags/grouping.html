@@ -2,123 +2,117 @@
 {% load nav_tags %}
 
 {% block content %}
-     <div class="border rounded bg-light mt-0 p-3">
-        <h1 class="display-6">Match that batch!</h1>
-     
-        {% include 'twf/tags/tag_types.html' %}
-        {%  if dictionary %}
-            {% if tag %}
-                <div class="my-3 p-3 border rounded" style="background-color: khaki">
-                    <p class="text-center" style="color: #7c7c7c">Try to group:
-                        <a href="{% url 'twf:tags_park' tag.id %}" class="btn btn-secondary float-end">Park</a></p>
-                    <p class="display-6 text-center">{{ tag.variation }}</p>
-                </div>
-                
-                <div class="my-3 p-3 border rounded">
-                    <form method="post">
-                        {% csrf_token %}
-                        <!-- always include the tag_id and dictionary_id -->
-                        <input type="hidden" name="tag_id" value="{{ tag.id }}"/>
-                        <input type="hidden" name="dictionary_id" value="{{ dictionary.id }}"/>
-                        
-                        <!-- display the closest entries -->
-                        {% if closest %}
-                            {% for close in closest %}
-                                <div class="row border">
-                                    <div class="col-1">
-                                        <span class="badge" style="background-color: {% value_to_color close.1 %}">{{ close.1 }}</span>
-                                    </div>
-                                    <div class="col-3">
-                                       {{ close.0.entry }}
-                                    </div>
-                                    <div class="col-5 small">
-                                        {% for var in close.0.entry.variations.all %}
-                                            {% if var.variation == close.0.variation %}
-                                                <b>{{ var.variation }}</b>
-                                            {% else %}
-                                                {{ var.variation }}
-                                            {% endif %}<br/>
-                                        {% endfor %}
-                                    </div>
-                                    <div class="col-3">
-                                        <input type="submit" name="add_to_{{ close.0.entry.id }}" value="Add To '{{ close.0.entry }}'" class="btn btn-dark" style="width: 100%;" />
-                                    </div>
-                                </div>
-                            {% endfor %}
-                        {% else %}
-                            <div class="alert alert-info">
-                                There are no similar entries. Create a new one below
-                            </div>
-                        {% endif %}
-                        
-                        <!-- Create a new entry from the tag -->
-                        <div class="row border">
-                            <div class="col-1">
-                                <span class="badge bg-dark mt-2">New</span>
-                            </div>
-                            <div class="col-3">
-                                <input type="text" name="new_entry_label" class="form-control" value="{{ tag.variation }}"/>
-                            </div>
-                            <div class="col-5 small mt-2">
-                                Create entry and add: "<i>{{ tag.variation }}</i>"
-                            </div>
-                            <div class="col-3">
-                                <input type="submit" name="create_new" value="Create New Entry" class="btn btn-dark" style="width: 100%;" />
-                            </div>
-                        </div>
-                    
-                        <!-- Add the tag to an existing entry -->
-                        <div class="row border">
-                            <div class="col-1">
-                                <span class="badge bg-dark mt-2">Add</span>
-                            </div>
-                            <div class="col-3">
-                               <select name="selected_entry" class="form-control select2" aria-label="Selected Entry">
-                                    <option value="">Select Entry</option>
-                                    {% for option in dict_entries %}
-                                        <option value="{{ option.id }}">{{ option }}</option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-                            <div class="col-5 small">
-                                [existing variations] + {{ tag.variation }}
-                            </div>
-                            <div class="col-3">
-                                <input type="submit" name="add_to_existing" value="Add To Selected Entry" class="btn btn-dark" style="width: 100%;" />
-                            </div>
-                        </div>
-                        <div class="row border">
-                            <div class="col-1"></div>
-                            <div class="col-3">
-                                <div class="mb-2">
-                                    <label for="NotesOnEntry" class="form-label small mb-0">Notes on Entry</label>
-                                    <textarea id="NotesOnEntry" name="notes_on_entry" class="form-control"></textarea>
-                                    <div id="NotesOnEntryHelp" class="form-text">Add notes to the dictionary entry.</div>
-                                </div>
-                            </div>
-                            <div class="col-3">
-                                <div class="mb-2">
-                                    <label for="NotesOnVariation" class="form-label small mb-0">Notes on Variation</label>
-                                    <textarea id="NotesOnVariation" name="notes_on_variation" class="form-control"></textarea>
-                                    <div id="NotesOnEntryHelp" class="form-text">Add notes to the page tag variation.</div>
-                                </div>
-                            </div>
-                        </div>
-                    </form>
-                </div>
-            {% else %}
-                <div class="alert alert-success mt-3">
-                    There are no more tags of this type.
-                </div>
-            {% endif %}
-     {% else %}
-            <div class="alert alert-danger mt-3">
-                There is no dictionary for the selected tag type "{{ selected_dict_type }}".
+    {% include 'twf/tags/tag_types.html' %}
+    {%  if dictionary %}
+        {% if tag %}
+            <div class="my-3 p-3 border rounded" style="background-color: khaki">
+                <p class="text-center" style="color: #7c7c7c">Try to group:
+                    <a href="{% url 'twf:tags_park' tag.id %}" class="btn btn-secondary float-end">Park</a></p>
+                <p class="display-6 text-center">{{ tag.variation }}</p>
             </div>
-     {% endif %}
-        
-     
-     </div>
+
+            <div class="my-3 p-3 border rounded">
+                <form method="post">
+                    {% csrf_token %}
+                    <!-- always include the tag_id and dictionary_id -->
+                    <input type="hidden" name="tag_id" value="{{ tag.id }}"/>
+                    <input type="hidden" name="dictionary_id" value="{{ dictionary.id }}"/>
+
+                    <!-- display the closest entries -->
+                    {% if closest %}
+                        {% for close in closest %}
+                            <div class="row border">
+                                <div class="col-1">
+                                    <span class="badge" style="background-color: {% value_to_color close.1 %}">{{ close.1 }}</span>
+                                </div>
+                                <div class="col-3">
+                                   {{ close.0.entry }}
+                                </div>
+                                <div class="col-5 small">
+                                    {% for var in close.0.entry.variations.all %}
+                                        {% if var.variation == close.0.variation %}
+                                            <b>{{ var.variation }}</b>
+                                        {% else %}
+                                            {{ var.variation }}
+                                        {% endif %}<br/>
+                                    {% endfor %}
+                                </div>
+                                <div class="col-3">
+                                    <input type="submit" name="add_to_{{ close.0.entry.id }}" value="Add To '{{ close.0.entry }}'" class="btn btn-dark" style="width: 100%;" />
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="alert alert-info">
+                            There are no similar entries. Create a new one below
+                        </div>
+                    {% endif %}
+
+                    <!-- Create a new entry from the tag -->
+                    <div class="row border">
+                        <div class="col-1">
+                            <span class="badge bg-dark mt-2">New</span>
+                        </div>
+                        <div class="col-3">
+                            <input type="text" name="new_entry_label" class="form-control" value="{{ tag.variation }}"/>
+                        </div>
+                        <div class="col-5 small mt-2">
+                            Create entry and add: "<i>{{ tag.variation }}</i>"
+                        </div>
+                        <div class="col-3">
+                            <input type="submit" name="create_new" value="Create New Entry" class="btn btn-dark" style="width: 100%;" />
+                        </div>
+                    </div>
+
+                    <!-- Add the tag to an existing entry -->
+                    <div class="row border">
+                        <div class="col-1">
+                            <span class="badge bg-dark mt-2">Add</span>
+                        </div>
+                        <div class="col-3">
+                           <select name="selected_entry" class="form-control select2" aria-label="Selected Entry">
+                                <option value="">Select Entry</option>
+                                {% for option in dict_entries %}
+                                    <option value="{{ option.id }}">{{ option }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-5 small">
+                            [existing variations] + {{ tag.variation }}
+                        </div>
+                        <div class="col-3">
+                            <input type="submit" name="add_to_existing" value="Add To Selected Entry" class="btn btn-dark" style="width: 100%;" />
+                        </div>
+                    </div>
+                    <div class="row border">
+                        <div class="col-1"></div>
+                        <div class="col-3">
+                            <div class="mb-2">
+                                <label for="NotesOnEntry" class="form-label small mb-0">Notes on Entry</label>
+                                <textarea id="NotesOnEntry" name="notes_on_entry" class="form-control"></textarea>
+                                <div id="NotesOnEntryHelp" class="form-text">Add notes to the dictionary entry.</div>
+                            </div>
+                        </div>
+                        <div class="col-3">
+                            <div class="mb-2">
+                                <label for="NotesOnVariation" class="form-label small mb-0">Notes on Variation</label>
+                                <textarea id="NotesOnVariation" name="notes_on_variation" class="form-control"></textarea>
+                                <div id="NotesOnEntryHelp" class="form-text">Add notes to the page tag variation.</div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        {% else %}
+            <div class="alert alert-success mt-3">
+                There are no more tags of this type.
+            </div>
+        {% endif %}
+ {% else %}
+        <div class="alert alert-danger mt-3">
+            There is no dictionary for the selected tag type "{{ selected_dict_type }}".
+        </div>
+ {% endif %}
 {% endblock %}
 
 {% block script %}

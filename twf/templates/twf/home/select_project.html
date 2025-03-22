@@ -1,7 +1,10 @@
 {% extends 'twf/base/base.html' %}
 
-{% block content %}
+{% block page_title %}
     <h1>Work on "{{ project_to_select.title }}"</h1>
+{% endblock %}
+
+{% block content %}
     <p class="lead">Your role in this project: <strong>{{ user_role }}</strong></p>
 
      <form method="post" action="{% url 'twf:project_do_select' project_to_select.pk %}">

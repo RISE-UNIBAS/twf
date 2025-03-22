@@ -3,9 +3,8 @@
 {% load crispy_forms_tags %}
 
 {% block content %}
-        <h1>Search Wikidata</h1>
-         <p class="lead">Wikidata is a database with many different information types. You need to specify what you're looking for.</p>
-         {% include 'twf/dictionaries/batches/notice.html' %}
-         
-         {% crispy form %}
+     <p class="lead">Wikidata is a database with many different information types. You need to specify what you're looking for.</p>
+     {% include 'twf/dictionaries/batches/notice.html' %}
+
+     {% crispy form %}
 {% endblock %}

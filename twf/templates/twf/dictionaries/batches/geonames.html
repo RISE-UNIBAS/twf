@@ -3,9 +3,8 @@
 {% load crispy_forms_tags %}
 
 {% block content %}
-        <h1>Search Geonames</h1>
-         <p class="lead">Geonames is a geo-database and used for locations.</p>
-         {% include 'twf/dictionaries/batches/notice.html' %}
-         
-         {% crispy form %}
+     <p class="lead">Geonames is a geo-database and used for locations.</p>
+     {% include 'twf/dictionaries/batches/notice.html' %}
+
+     {% crispy form %}
 {% endblock %}

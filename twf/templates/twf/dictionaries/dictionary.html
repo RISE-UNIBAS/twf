@@ -1,12 +1,11 @@
 {% extends 'twf/base/base.html' %}
 {% load django_tables2 %}
 
+{% block title %}
+    <h1>Dictionary: {{ dictionary.label }}</h1>
+{% endblock %}
 
 {% block content %}
-        <h1>
-            Dictionary: {{ dictionary.label }}
-            <a href="{% url 'twf:dictionaries_edit' dictionary.pk %}" class="mt-2 me-2 btn btn-dark float-end">Edit</a>
-        </h1>
-        {% include 'twf/tables/filter.html' %}
-        {% render_table table %}
+    {% include 'twf/tables/filter.html' %}
+    {% render_table table %}
 {% endblock %}

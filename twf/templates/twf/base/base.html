@@ -80,6 +80,9 @@
                         {% endif %}
                     </div>
                     <div class="border rounded bg-light mt-0 ms-0 me-2 p-3">
+                        {% block page_title %}
+                            <h1>{{ page_title }}</h1>
+                        {% endblock %}
                         {% block content %}
                         {% endblock %}
                     </div>

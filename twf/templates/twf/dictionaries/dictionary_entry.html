@@ -1,12 +1,11 @@
 {% extends 'twf/base/base.html' %}
 {% load django_tables2 %}
 
+{% block page_title %}
+    <h1>View "{{ entry.label }}"</h1>
+{% endblock %}
+
 {% block content %}
-        <h1>
-            View "{{ entry.label }}"
-           
-        </h1>
-        <hr/>
-        <p class="lead">Text. </p>
-        {% render_table table %}
+    <p class="lead">Text. </p>
+    {% render_table table %}
 {% endblock %}
