@@ -14,8 +14,6 @@
                         <small class="text-muted">Created: {{ col.created_at }} by {{ col.created_by }}, Items: {{ col.items.all.count }}</small>
                     </p>
                     <a href="{% url 'twf:collections_view' col.id %}" class="btn btn-dark float-end ms-2">View</a>
-                    
-                    
                 </div>
             </div>
         </div>
