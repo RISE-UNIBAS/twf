@@ -2,69 +2,67 @@
 {% load crispy_forms_tags %}
 
 {% block content %}
-     <div class="border rounded bg-light mt-0 p-3">
-        <h1 class="display-6">Manage Users</h1>
-        <p class="lead">
-            Manage users and their permissions. Create new users, reset passwords, deactivate users, and delete users.
-            This might affect the permissions of projects and other data.
-        </p>
+    <h1>Manage Users</h1>
+    <p class="lead">
+        Manage users and their permissions. Create new users, reset passwords, deactivate users, and delete users.
+        This might affect the permissions of projects and other data.
+    </p>
 
-        <h3>Create New User</h3>
-        {% crispy form %}
+    <h3>Create New User</h3>
+    {% crispy form %}
 
-        <h3>Existing User</h3>
-        {% if users %}
-             {% for profile in users %}
-                <div class="border rounded bg-white mt-3 p-3">
-                    {{ profile }}
-                    {% if not profile.user.is_active %}
-                        <span class="badge bg-dark small">inactive</span>
-                    {% elif profile.user.is_superuser %}
-                        <span class="badge bg-success small">admin</span>
-                    {% elif profile.user.is_staff %}
-                        <span class="badge bg-success small">staff</span>
-                    {% endif %}
-                    {% if profile.user == request.user %}
-                        <span class="badge bg-info">You</span>
-                    {% else %}
-                        <div class="float-end d-flex gap-2">
+    <h3>Existing User</h3>
+    {% if users %}
+         {% for profile in users %}
+            <div class="border rounded bg-white mt-3 p-3">
+                {{ profile }}
+                {% if not profile.user.is_active %}
+                    <span class="badge bg-dark small">inactive</span>
+                {% elif profile.user.is_superuser %}
+                    <span class="badge bg-success small">admin</span>
+                {% elif profile.user.is_staff %}
+                    <span class="badge bg-success small">staff</span>
+                {% endif %}
+                {% if profile.user == request.user %}
+                    <span class="badge bg-info">You</span>
+                {% else %}
+                    <div class="float-end d-flex gap-2">
+                        <form action="{% url 'twf:twf_user_management' %}" method="post">
+                            {% csrf_token %}
+                            <input type="hidden" name="existing_user_id" value="{{ profile.user.id }}">
+                            <input type="hidden" name="action" value="pw_reset">
+                            <button type="submit" class="btn btn-dark btn-sm show-confirm-modal"
+                                    data-message="This sends an email message to the user with a new password.">Reset Password</button>
+                        </form>
+                        {% if profile.user.is_active %}
                             <form action="{% url 'twf:twf_user_management' %}" method="post">
                                 {% csrf_token %}
                                 <input type="hidden" name="existing_user_id" value="{{ profile.user.id }}">
-                                <input type="hidden" name="action" value="pw_reset">
+                                <input type="hidden" name="action" value="user_deactivate">
                                 <button type="submit" class="btn btn-dark btn-sm show-confirm-modal"
-                                        data-message="This sends an email message to the user with a new password.">Reset Password</button>
+                                        data-message="Inactive users can no longer log in. All project permissions will be removed.">Deactivate</button>
                             </form>
-                            {% if profile.user.is_active %}
-                                <form action="{% url 'twf:twf_user_management' %}" method="post">
-                                    {% csrf_token %}
-                                    <input type="hidden" name="existing_user_id" value="{{ profile.user.id }}">
-                                    <input type="hidden" name="action" value="user_deactivate">
-                                    <button type="submit" class="btn btn-dark btn-sm show-confirm-modal"
-                                            data-message="Inactive users can no longer log in. All project permissions will be removed.">Deactivate</button>
-                                </form>
-                            {% else %}
-                                <form action="{% url 'twf:twf_user_management' %}" method="post">
-                                    {% csrf_token %}
-                                    <input type="hidden" name="existing_user_id" value="{{ profile.user.id }}">
-                                    <input type="hidden" name="action" value="user_activate">
-                                    <button type="submit" class="btn btn-dark btn-sm show-confirm-modal"
-                                            data-message="This user can login again. Permissions must be set.">Activate</button>
-                                </form>
-                            {% endif %}
+                        {% else %}
                             <form action="{% url 'twf:twf_user_management' %}" method="post">
                                 {% csrf_token %}
                                 <input type="hidden" name="existing_user_id" value="{{ profile.user.id }}">
-                                <input type="hidden" name="action" value="user_delete">
-                                <button type="submit" class="btn btn-danger btn-sm show-danger-modal"
-                                        data-message="This deletes the user and removes all user-related information. <strong class='text-danger'>This cannot be undone.</span>">Delete</button>
+                                <input type="hidden" name="action" value="user_activate">
+                                <button type="submit" class="btn btn-dark btn-sm show-confirm-modal"
+                                        data-message="This user can login again. Permissions must be set.">Activate</button>
                             </form>
-                        </div>
-                     {% endif %}
-                </div>
-            {% endfor %}
-        {% else %}
-            <p class="lead">There are no users.</p>
-        {% endif %}
-     </div>
+                        {% endif %}
+                        <form action="{% url 'twf:twf_user_management' %}" method="post">
+                            {% csrf_token %}
+                            <input type="hidden" name="existing_user_id" value="{{ profile.user.id }}">
+                            <input type="hidden" name="action" value="user_delete">
+                            <button type="submit" class="btn btn-danger btn-sm show-danger-modal"
+                                    data-message="This deletes the user and removes all user-related information. <strong class='text-danger'>This cannot be undone.</span>">Delete</button>
+                        </form>
+                    </div>
+                 {% endif %}
+            </div>
+        {% endfor %}
+    {% else %}
+        <p class="lead">There are no users.</p>
+    {% endif %}
 {% endblock %}

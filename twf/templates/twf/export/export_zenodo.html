@@ -2,10 +2,8 @@
 {% load crispy_forms_tags %}
 
 {% block content %}
-     <div class="border rounded bg-light mt-0 p-3">
-         <h1 class="display-6">Export Project</h1>
-         <p class="lead">Upload your project to Zenodo. You can choose to create a new repository
-         or create a new version for an existing one.</p>
-         {% crispy form %}
-     </div>
+     <h1>Export Project</h1>
+     <p class="lead">Upload your project to Zenodo. You can choose to create a new repository
+     or create a new version for an existing one.</p>
+     {% crispy form %}
 {% endblock %}

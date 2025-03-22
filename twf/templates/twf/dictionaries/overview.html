@@ -2,7 +2,6 @@
 {% load nav_tags %}
 
 {% block content %}
-     <div class="border rounded bg-light mt-0 p-3">
          {% include 'twf/dictionaries/info_card_dictionaries.html' %}
          
          {% for dtype, entries in dict_stats.top_entries_per_type.items %}
@@ -68,5 +67,4 @@
                 </div>
             </div>
          {% endfor %}
-     </div>
 {% endblock %}

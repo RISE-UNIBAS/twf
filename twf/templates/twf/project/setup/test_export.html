@@ -2,9 +2,8 @@
 {% load static %}
 
 {% block content %}
-    <div class="border rounded bg-light mt-0 p-3">
     {% include 'twf/base/niy_notice.html' %}
-        <h1 class="display-6">Test Transkribus Export</h1>
+        <h1>Test Transkribus Export</h1>
         <p class="lead">Request a single page from your collection and review parsing results.</p>
         
         <div class="row">
@@ -15,7 +14,6 @@
                 <div class="col-12 border text-center" id="requestJobStatus">Unknown</div>
             </div>
         </div>
-    </div>
 {% endblock %}
 
 {% block script %}

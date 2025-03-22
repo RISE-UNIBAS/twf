@@ -2,24 +2,22 @@
 {% load crispy_forms_tags %}
 
 {% block content %}
-    <div class="border rounded bg-light mt-0 p-3">
-        <h1 class="display-6">System Health</h1>
-        <p class="lead">Check which services are available and their status.</p>
+    <h1>System Health</h1>
+    <p class="lead">Check which services are available and their status.</p>
 
-        <ul id="health-results" class="list-group">
-            {% for service, url in twf_services.items %}
-                <li class="list-group-item d-flex justify-content-between align-items-center">
-                    <span><strong>{{ service }}</strong></span>
-                    <span class="text-small">{{ url }}</span>
-                    <span class="badge bg-warning text-dark">Unknown</span>
-                </li>
-            {% endfor %}
-        </ul>
+    <ul id="health-results" class="list-group">
+        {% for service, url in twf_services.items %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                <span><strong>{{ service }}</strong></span>
+                <span class="text-small">{{ url }}</span>
+                <span class="badge bg-warning text-dark">Unknown</span>
+            </li>
+        {% endfor %}
+    </ul>
 
-        <!-- Re-Check Button -->
-        <div class="text-end">
-            <button id="recheck-button" class="btn btn-dark mt-3">Re-Check</button>
-        </div>
+    <!-- Re-Check Button -->
+    <div class="text-end">
+        <button id="recheck-button" class="btn btn-dark mt-3">Re-Check</button>
     </div>
 {% endblock %}
 

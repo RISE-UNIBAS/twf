@@ -60,7 +60,7 @@ class TWFView(TemplateView, ABC):
         breadcrumbs = [
             {'url': reverse('twf:home'), 'value': '<i class="fas fa-home"></i>'},
         ]
-        if len(self.get_navigation_items()) > self.get_navigation_index():
+        if len(self.get_navigation_items()) > self.get_navigation_index() > 0:
             breadcrumbs.append(self.get_navigation_items()[self.get_navigation_index()])
 
         # Only add current page if it has a `page_title` and isn't already part of the nav

@@ -3,24 +3,22 @@
 {% load nav_tags %}
 
 {% block content %}
-     <div class="border rounded bg-light mt-0 p-3">
-        <h1 class="display-6">Metadata</h1>
-        <p class="lead">Review Page Metadata</p>
-        <div class="row">
-            <div class="col-6">
-                {% crispy form %}
-            </div>
-            <div class="col-6">
-                <img src="{{ page.parsed_data.file.imgUrl }}" class="img-fluid" alt="Page image">
-                {{ page.document.document_id }}, {{ page.tk_page_number }}
-            </div>
+    <h1>Metadata</h1>
+    <p class="lead">Review Page Metadata</p>
+    <div class="row">
+        <div class="col-6">
+            {% crispy form %}
         </div>
-        <div class="row">
-            <div class="col-12">
-                Raw data:<br/> <code>{{ page.metadata|pretty_json }}</code>
-            </div>
+        <div class="col-6">
+            <img src="{{ page.parsed_data.file.imgUrl }}" class="img-fluid" alt="Page image">
+            {{ page.document.document_id }}, {{ page.tk_page_number }}
         </div>
-     </div>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            Raw data:<br/> <code>{{ page.metadata|pretty_json }}</code>
+        </div>
+    </div>
 {% endblock %}
 
 {% block script %}

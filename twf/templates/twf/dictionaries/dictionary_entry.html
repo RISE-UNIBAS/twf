@@ -2,14 +2,11 @@
 {% load django_tables2 %}
 
 {% block content %}
-    <div class="border rounded bg-light mt-0 p-3">
-        <h1 class="display-6">
+        <h1>
             View "{{ entry.label }}"
            
         </h1>
         <hr/>
         <p class="lead">Text. </p>
         {% render_table table %}
-        
-    </div>
 {% endblock %}

@@ -33,7 +33,7 @@ from twf.views.documents.views_documents_ai import TWFDocumentOpenAIBatchView, \
 from twf.views.export.views_crud import delete_export
 from twf.views.home.views_home import TWFHomeView, TWFHomeLoginView, TWFHomePasswordChangeView, TWFHomeUserOverView, \
     TWFSelectProjectView, TWFHomeUserProfileView, TWFCreateProjectView, TWFManageProjectsView, TWFManageUsersView, \
-    TWFSystemHealthView, check_system_health
+    TWFSystemHealthView, check_system_health, TWFHomeIndexView, TWFHomeAboutView
 from twf.views.metadata.views_metadata_ai import TWFMetadataLoadDataView, TWFMetadataLoadSheetsDataView
 from twf.views.project.views_crud import delete_all_documents, delete_all_tags, delete_all_collections, select_project, \
     delete_project, close_project, delete_prompt
@@ -68,9 +68,8 @@ from twf.workflows.document_workflows import start_review_document_workflow
 urlpatterns = [
     #############################
     # FRAMEWORK (HOME)
-    path('', TWFHomeView.as_view(), name='home'),
-    path('about/', TWFHomeView.as_view(template_name='twf/home/about.html',
-                                       page_title='About'), name='about'),
+    path('', TWFHomeIndexView.as_view(), name='home'),
+    path('about/', TWFHomeAboutView.as_view(), name='about'),
     path('login/', TWFHomeLoginView.as_view(), name='login'),
     path('logout/confirm/',
          TWFHomeView.as_view(page_title='Logout', template_name='twf/home/users/logout.html'), name='user_logout'),

@@ -37,9 +37,21 @@ main {
 }
 
 h1 {
-    font-size: 1.4em;
     margin-top: .3rem;
-    color: #c7c7c7;
+    color: #454545;
+    font: 1.7em "Raleway", sans-serif;
+    letter-spacing: 2px;
+}
+
+h1::after {
+  content: '';
+  display: block;
+  margin-top: 0.25rem;
+  border-bottom: 1px solid #ccc;
+}
+
+.lead {
+    font-style: italic;
 }
 
 .text-small {

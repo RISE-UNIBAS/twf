@@ -29,7 +29,7 @@ class TWFHomeView(TWFView):
     project_required = False
 
     """Base view for the home view."""
-    template_name = 'twf/home/home.html'
+    template_name = None
 
     def get_sub_navigation(self):
         """Get the sub navigation for the home pages."""
@@ -109,6 +109,24 @@ class TWFHomeView(TWFView):
         if self.page_title is None:
             self.page_title = kwargs.get('page_title', 'Home View')
 
+
+class TWFHomeIndexView(TWFHomeView):
+    """View for the home page."""
+    template_name = 'twf/home/home.html'
+    page_title = 'Home'
+
+    def get_breadcrumbs(self):
+        """Get the breadcrumbs."""
+        breadcrumbs = [
+            {'url': reverse('twf:home'), 'value': '<i class="fas fa-home"></i>'},
+        ]
+        return breadcrumbs
+
+
+class TWFHomeAboutView(TWFHomeView):
+    """View for the about page."""
+    template_name = 'twf/home/about.html'
+    page_title = 'About'
 
 class TWFHomeLoginView(TWFHomeView, LoginView):
     """View to log in the user."""

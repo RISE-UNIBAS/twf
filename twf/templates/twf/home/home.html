@@ -2,17 +2,17 @@
 
 
 {% block content %}
-        <h1 class="display-6">Welcome to TWF</h1>
-        {% if request.user.is_authenticated %}
-            <div class="alert alert-info d-flex align-items-center" role="alert">
-                <i class="fas fa-info-circle fa-2x me-3"></i>
+        <h1>Welcome to TWF</h1>
+
+    {% if request.user.is_authenticated %}
+
                 {% if project_set %}
-                    You're ready to start working on your project:&nbsp; <strong>{{ project }}</strong>.
+                    <p class="lead">You're ready to start working on your project:&nbsp; <strong>{{ project }}</strong>.</p>
                 {% else %}
-                    Select a project from the menu to get started. If you have no projects assigend,
-                    please contact your project manager.
+                    <p>Select a project from the menu to get started. If you have no projects assigned,
+                        please contact your project manager.</p>
                 {% endif %}
-            </div>
+
             <div>
                 <p>
                     TWF (Transkribus Work Flow) is a tool designed for managing and enriching document-based projects.

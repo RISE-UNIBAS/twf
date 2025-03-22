@@ -1,9 +1,7 @@
 {% extends 'twf/base/base.html' %}
 
 {% block content %}
-    <div class="border rounded bg-light mt-0 p-3">
-        <h1 class="display-6">Export Dictionaries</h1>
-        <hr/>
+        <h1>Export Dictionaries</h1>
 
         {% for dictionary in project.selected_dictionaries.all %}
             <div class="card mt-2">

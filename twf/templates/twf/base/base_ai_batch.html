@@ -3,18 +3,18 @@
 {% load crispy_forms_tags %}
 
 {% block content %}
-     <div class="border rounded bg-light mt-0 p-3">
-        <h1 class="display-6">{{ ai_heading }}</h1>
-         <p class="lead">{{ ai_lead }}</p>
-         {% if not has_ai_credentials %}
-                <div class="alert alert-warning" role="alert">
-                    <strong>Warning!</strong> You have not set up AI credentials yet.
-                    Please <a href="{{ ai_credentials_url }}">set up AI credentials</a> before using this feature.
-                </div>
-         {% endif %}
 
-         {% crispy form %}
-     </div>
+    <h1>{{ ai_heading }}</h1>
+    <p class="lead">{{ ai_lead }}</p>
+    {% if not has_ai_credentials %}
+            <div class="alert alert-warning" role="alert">
+                <strong>Warning!</strong> You have not set up AI credentials yet.
+                Please <a href="{{ ai_credentials_url }}">set up AI credentials</a> before using this feature.
+            </div>
+     {% endif %}
+
+     {% crispy form %}
+
     <div id="ai_result">
 
     </div>
