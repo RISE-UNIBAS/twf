@@ -2,7 +2,6 @@
 
 
 {% block content %}
-    <div class="border rounded bg-light mt-0 p-3">
         <h1 class="display-6">Welcome to TWF</h1>
         {% if request.user.is_authenticated %}
             <div class="alert alert-info d-flex align-items-center" role="alert">
@@ -35,5 +34,4 @@
                 <a href="https://unibas.ch" target="_blank">University of Basel</a>,
             </p>
         {% endif %}
-    </div>
 {% endblock %}

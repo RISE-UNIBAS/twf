@@ -1,3 +1,6 @@
+/*** TWF CSS ***/
+
+/* HTML, BODY, BASIC STYLES */
 html, body {
   height: 100%;
   margin: 0;
@@ -9,14 +12,29 @@ body {
   min-height: 100vh;
 }
 
-main {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    overflow: auto;
+/* Main center container */
+#layout {
+  display: flex;
+  flex-direction: row;
+  flex: 1;
+  height: 100%;
 }
 
+#layout, .container-fluid, .d-flex {
+  flex: 1;
+  align-items: stretch;
+}
 
+main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.content {
+  flex: 1;  /* This makes the content expand to fill available space, pushing the footer down */
+}
 
 h1 {
     font-size: 1.4em;
@@ -28,23 +46,16 @@ h1 {
     font-size: 0.75em;  /* Adjust this value as needed */
 }
 
-.content {
-  flex: 1;  /* This makes the content expand to fill available space, pushing the footer down */
+.nav-link {
+    font-size: 0.9em;
 }
 
-.l-inactive {
-    transition: background-color .3s ease;
-    color: #3a3a3a !important;
+.side-item:hover {
+    background-color: #848484; !important;
 }
 
-.l-inactive:hover {
-    background-color: #3d603d;
-    color: #ffffff;
-}
-
-.l-active {
-    background-color: #3d603d;
-    color: #ffffff !important;
+.top-item:hover .nav-link {
+    text-decoration: underline;
 }
 
 /******************************************************************************/
@@ -102,17 +113,15 @@ nav > ul.pagination {
     font-size: small;
 }
 
-.footer {
-    flex-shrink: 0;
-    background-color: #f8f9fa;
-    padding: 10px 0;
-    box-shadow: 0 -4px 6px rgba(0, 0, 0, 0.2); /* Top shadow */
-}
-
-.container-fluid {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
+footer.footer {
+  position: fixed;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  background-color: #f8f9fa;
+  padding: 10px 0;
+  box-shadow: 0 -4px 6px rgba(0, 0, 0, 0.2);
+  z-index: 1000;
 }
 
 .text-right {
@@ -325,26 +334,45 @@ tr[data-bs-toggle="collapse"]:hover {
     right: 0;
 }
 
+/*** SIDEBAR STYLING ***/
+.sidebarToggle button {
+    background-color: #343a40;
+    color: white;
+    padding: 0px 5px;
+    margin: 0 10px 0 0;
+    cursor: pointer;
+}
+
 /* Sidebar Default Width */
 #sidebar-container {
-    width: 250px; /* Default expanded width */
-    min-width: 250px;
-    max-width: 250px;
+    width: 200px;
+    min-width: 200px;
+    max-width: 200px;
     transition: width 0.3s ease-in-out;
     overflow: hidden;
+
+    height: auto; /* reset if previously 100% */
+    min-height: 100%;
+    display: flex;
+    flex-direction: column;
+    background-color: #212529;
 }
 
 /* Sidebar Collapsed */
 #sidebar-container.collapsed {
-    width: 50px; /* Smaller width when collapsed */
-    min-width: 50px;
-    max-width: 50px;
+    width: 0;
+    min-width: 0;
+    max-width: 0;
+    padding: 0;
+    margin: 0;
+    border: none;
 }
 
 /* Content Container (Main Content) */
 #content-container {
+    flex-grow: 1;
     transition: margin-left 0.3s ease-in-out;
-    width: calc(100% - 250px); /* Default state with sidebar expanded */
+    overflow-x: hidden;
 }
 
 /* Adjust Content When Sidebar is Collapsed */
@@ -369,3 +397,21 @@ tr[data-bs-toggle="collapse"]:hover {
     from { background-position: 0 0; }
     to { background-position: 40px 0; }
 }
+
+
+/* TWF BreadCrumb */
+.breadcrumb {
+    padding: 0.75rem 1rem;
+    margin-bottom: 0.5rem;
+    margin-left: 0;
+}
+
+.breadcrumb-item a {
+    color: whitesmoke;
+    text-decoration: none;
+}
+
+.breadcrumb-item a:hover {
+    text-decoration: underline;
+}
+

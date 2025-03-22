@@ -1,7 +1,6 @@
 """Urls for the twf app."""
 from django.urls import path
 from django.contrib.auth import views as auth_views
-from huggingface_hub import update_collection_item
 
 from twf.tasks.task_status import task_status_view, task_cancel_view, task_remove_view
 from twf.tasks.task_triggers import *
@@ -70,7 +69,8 @@ urlpatterns = [
     #############################
     # FRAMEWORK (HOME)
     path('', TWFHomeView.as_view(), name='home'),
-    path('about/', TWFHomeView.as_view(template_name='twf/home/about.html'), name='about'),
+    path('about/', TWFHomeView.as_view(template_name='twf/home/about.html',
+                                       page_title='About'), name='about'),
     path('login/', TWFHomeLoginView.as_view(), name='login'),
     path('logout/confirm/',
          TWFHomeView.as_view(page_title='Logout', template_name='twf/home/users/logout.html'), name='user_logout'),
