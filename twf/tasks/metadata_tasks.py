@@ -22,7 +22,8 @@ def store_metadata(project, doc_id, metadata, user):
 @shared_task(bind=True, base=BaseTWFTask)
 def load_json_metadata(self, project_id, user_id, **kwargs):
     """This function loads metadata from a JSON file."""
-    self.validate_task_parameters(kwargs, ['data_file_path', 'match_to_field'])
+    self.validate_task_parameters(kwargs, ['data_file_path', 'match_to_field',
+                                           'data_target_type', ])
 
     data_file_path = kwargs.get('data_file_path')
     match_to_field = kwargs.get('match_to_field')

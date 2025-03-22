@@ -342,7 +342,7 @@ def start_json_metadata(request):
         return JsonResponse({'status': 'error', 'message': 'No file uploaded'}, status=400)
 
     return trigger_task(request, load_json_metadata,
-                        file_path=file_path,
+                        data_file_path=file_path,
                         data_target_type=data_target_type,
                         json_data_key=json_data_key,
                         match_to_field=match_to_field)

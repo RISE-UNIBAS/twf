@@ -1,6 +1,7 @@
 """Urls for the twf app."""
 from django.urls import path
 from django.contrib.auth import views as auth_views
+from huggingface_hub import update_collection_item
 
 from twf.tasks.task_status import task_status_view, task_cancel_view, task_remove_view
 from twf.tasks.task_triggers import *
@@ -14,7 +15,8 @@ from twf.views.collections.views_collections_ai import TWFCollectionsOpenaiBatch
     TWFCollectionsClaudeRequestView, TWFCollectionsMistralBatchView, TWFCollectionsMistralRequestView
 from twf.views.collections.views_crud import delete_collection, set_col_item_status_open, set_col_item_status_reviewed, \
     set_col_item_status_faulty, split_collection_item, copy_collection_item, delete_collection_item_annotation, \
-    delete_collection_item, download_collection_item_txt, download_collection_item_json
+    delete_collection_item, download_collection_item_txt, download_collection_item_json, \
+    update_collection_item_metadata, delete_collection_item_metadata
 from twf.views.dictionaries.views_dictionaries_ai import TWFDictionaryGNDBatchView, TWFDictionaryGeonamesBatchView, \
     TWFDictionaryWikidataBatchView, TWFDictionaryOpenaiBatchView, TWFDictionaryClaudeBatchView, \
     TWFDictionaryGeminiBatchView, TWFDictionaryGNDRequestView, TWFDictionaryGeonamesRequestView, \
@@ -22,6 +24,7 @@ from twf.views.dictionaries.views_dictionaries_ai import TWFDictionaryGNDBatchVi
     TWFDictionaryGeminiRequestView, TWFDictionaryMistralBatchView, TWFDictionaryMistralRequestView
 from twf.views.dictionaries.views_crud import remove_dictionary_from_project, add_dictionary_to_project, skip_entry, \
     delete_variation
+from twf.views.documents.views_crud import update_document_metadata, delete_document_metadata
 from twf.views.documents.views_documents import TWFDocumentsOverviewView, TWFDocumentsBrowseView, \
     TWFDocumentCreateView, TWFDocumentNameView, TWFDocumentDetailView, TWFDocumentReviewView, TWFDocumentsSearchView
 from twf.views.documents.views_documents_ai import TWFDocumentOpenAIBatchView, \
@@ -346,6 +349,7 @@ urlpatterns = [
     path('ajax/load/prompt/', load_prompt, name='ajax_load_prompt'),
     path('ajax/save/prompt/', save_prompt, name='ajax_save_prompt'),
     path('ajax/get/prompts/', get_prompts, name='ajax_get_prompts'),
+
     #############################
     # METADATA
     path('metadata/overview/', TWFMetadataOverviewView.as_view(), name='metadata_overview'),
@@ -357,6 +361,12 @@ urlpatterns = [
 
     path('metadata/review/documents/', TWFMetadataReviewDocumentsView.as_view(), name='metadata_review_documents'),
     path('metadata/review/pages/', TWFMetadataReviewPagesView.as_view(), name='metadata_review_pages'),
+
+    path('metadata/update/document/<int:pk>/<str:base_key>/', update_document_metadata, name='update_document_metadata'),
+    path('metadata/update/collection-item/<int:pk>/<str:base_key>/', update_collection_item_metadata, name='update_collection_item_metadata'),
+
+    path('metadata/delete/document/<int:pk>/<str:base_key>/', delete_document_metadata, name='update_document_metadata'),
+    path('metadata/delete/collection-item/<int:pk>/<str:base_key>/', delete_collection_item_metadata, name='update_collection_item_metadata'),
 
     path('validate_page_field/', validate_page_field, name='validate_page_field'),
     path('validate_page_field/', validate_document_field, name='validate_document_field'),

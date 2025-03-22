@@ -23,6 +23,7 @@ class LoadMetadataForm(BaseBatchForm):
         required=True,
         help_text='Upload a JSON file with the metadata to load. It must be a list of objects or an object with keys '
                   'that match yor document or page ids.',
+        widget=forms.ClearableFileInput(attrs={'accept': '.json'})
     )
 
     json_data_key = forms.CharField(
