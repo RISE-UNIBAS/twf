@@ -4,36 +4,10 @@ import json
 
 import markdown as md
 from django import template
-from django.urls import reverse
 from django.utils.html import conditional_escape
 from django.utils.safestring import mark_safe
 
 register = template.Library()
-
-
-@register.simple_tag(takes_context=True)
-def active(context, url_name, pk_to_compare=None, by_path=False):
-    """Returns 'l-active' if the current view is the one specified by url_name, otherwise 'l-inactive'."""
-    request = context['request']
-
-    if by_path:
-        path = reverse(url_name)
-        return "l-active" if request.path == path else "l-inactive"
-
-    if pk_to_compare is not None:
-        try:
-            pk = request.resolver_match.kwargs['pk']
-        except KeyError:
-            pk = None
-
-        if pk == pk_to_compare:
-            ret = "l-active" if request.resolver_match.url_name == url_name else "l-inactive"
-            return ret
-        else:
-            return "l-inactive"
-
-    return "l-active" if request.resolver_match.url_name == url_name else "l-inactive"
-
 
 @register.simple_tag
 def value_to_color(value):
