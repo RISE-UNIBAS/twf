@@ -1,0 +1,29 @@
+<nav id="sidebarMenu" class="sidebar">
+    {% for group in context_nav.groups %}
+        {% if group.options %}
+            <div class="border rounded mt-0 my-4" style="background-color: #e6e4e4; color: #4d4d4d;">
+                <p class="ps-2 pb-0 mb-0" style="font-weight: bold; font-size: 0.8em;">
+                    {% if group.icon %}
+                        <i class="fas fa-{{ group.icon }}" style="font-size: 0.6em"></i>
+                    {% else %}
+                        <i class="fas fa-diamond" style="font-size: 0.6em"></i>
+                    {% endif %}
+                    {{ group.name }}
+                </p>
+                <ul class="nav flex-column">
+                    {% for option in group.options %}
+                        {% if option.url == request.path or option.url == navigation_anchor %}
+                            <li class="nav-item small border rounded mx-1 mb-1 bg-dark">
+                                <a class="nav-link px-2 py-1 text-light" href="{{ option.url }}">{{ option.value }}</a>
+                            </li>
+                        {% else %}
+                            <li class="nav-item side-item small border rounded mx-1 mb-1">
+                                <a class="nav-link px-2 py-1 text-dark" href="{{ option.url }}">{{ option.value }}</a>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
+    {% endfor %}
+</nav>
