@@ -25,6 +25,23 @@ body {
   align-items: stretch;
 }
 
+.btn-ext {
+    background-color: #848484;
+    color: white;
+}
+
+.btn-ext::before {
+  content: ""; /* nothing by default */
+}
+
+.btn-ext:hover::before {
+  content: "\f35d"; /* Unicode for FontAwesome icon (here: fa-search) */
+  font-family: "Font Awesome 6 Free";  /* or "Font Awesome 5 Free", depending on your setup */
+  font-weight: 900; /* 400 for regular, 900 for solid icons */
+  margin-right: 0.5em;
+  color: #aaa;
+}
+
 main {
   flex: 1;
   display: flex;
@@ -86,59 +103,40 @@ h2::after {
 }
 
 /******************************************************************************/
-
-.pagination li a {
-    padding: 6px 12px;
-    border: 1px solid #a8a8a8;
-    margin-left: -1px; /* Overlap borders to prevent double borders */
+/* Default page links */
+/* Default page links */
+.pagination .page-link {
+  color: #212529; /* Bootstrap dark */
+  background-color: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 0; /* Optional: square look */
+  padding: 0.4em 0.75em;
 }
 
-.pagination li.active a {
-    background-color: #007bff; /* Bootstrap primary blue */
-    color: white; /* White text color */
-    border-color: #007bff; /* Matching border color */
+/* Hover effect */
+.pagination .page-link:hover {
+  background-color: #e9ecef;
+  color: #000;
 }
 
-.pagination li:first-child a {
-    border-top-left-radius: 0.25rem;
-    border-bottom-left-radius: 0.25rem;
+/* Active page */
+.pagination .page-item.active .page-link {
+  background-color: #212529; /* dark */
+  color: white;
+  border-color: #212529;
+  font-weight: 600;
 }
 
-.pagination li:last-child a {
-    border-top-right-radius: 0.25rem;
-    border-bottom-right-radius: 0.25rem;
+/* Disabled pages */
+.pagination .page-item.disabled .page-link {
+  color: #6c757d;
+  background-color: #f1f3f5;
+  border-color: #dee2e6;
 }
 
-.pagination li a:hover,
-.pagination li a:focus {
-    background-color: #c7c7c7; /* Light gray for hover */
-    color: #495057; /* Darker text color for hover */
-    text-decoration: none; /* No underline */
-}
 
-.pagination li.active a:hover,
-.pagination li.active a:focus {
-    background-color: #0056b3; /* Darker blue for active link hover */
-    color: white;
-}
 
-nav[aria-label="Table navigation"] {
-    display: flex;
-    justify-content: center;
-    margin-top: 20px;  /* Adds vertical spacing, adjust as needed */
-}
-
-/* Alternatively, if you are sure only pagination uses <nav> like this: */
-nav > ul.pagination {
-    display: flex;
-    justify-content: center;
-}
-.form-group {
-    font-size: small;
-}
-.form-control {
-    font-size: small;
-}
+/* Footer */
 
 footer.footer {
   position: fixed;
@@ -440,5 +438,16 @@ tr[data-bs-toggle="collapse"]:hover {
 
 .breadcrumb-item a:hover {
     text-decoration: underline;
+}
+
+.badge-table {
+  font-size: 0.65rem;
+  font-weight: 500;
+  padding: 0.15em 0.4em;
+  background-color: #e6e6e6;
+  color: #444;
+  border-radius: 0.25rem;
+  margin-right: 0.25rem;
+  white-space: nowrap;
 }
 

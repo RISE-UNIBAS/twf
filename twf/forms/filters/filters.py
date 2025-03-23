@@ -1,7 +1,7 @@
 """Filter classes for the twf app."""
 import django_filters
 from django.forms import CheckboxInput
-from twf.models import Document, DictionaryEntry, PageTag, CollectionItem
+from twf.models import Document, DictionaryEntry, PageTag, CollectionItem, Task, Prompt
 
 
 class TagFilter(django_filters.FilterSet):
@@ -57,6 +57,27 @@ class DocumentFilter(django_filters.FilterSet):
             'document_id': ['icontains'],
             'title': ['icontains'],
             'is_parked': ['exact'],
+        }
+
+
+class TaskFilter(django_filters.FilterSet):
+    """Filter for the tasks table."""
+
+    class Meta:
+        """Meta class for the task filter."""
+        model = Task
+        fields = {
+            'status': ['icontains'],
+        }
+
+class PromptFilter(django_filters.FilterSet):
+    """Filter for the prompts table."""
+
+    class Meta:
+        """Meta class for the prompt filter."""
+        model = Prompt
+        fields = {
+            'system_role': ['icontains'],
         }
 
 

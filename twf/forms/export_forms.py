@@ -60,7 +60,10 @@ class ExportZenodoForm(BaseBatchForm):
         super().__init__(*args, **kwargs)
 
         existing_zenodo_uploads = get_zenodo_uploads(self.project)
-        existing_repositories = [(upload['id'], upload['metadata']['title']) for upload in existing_zenodo_uploads]
+        if existing_zenodo_uploads:
+            existing_repositories = [(upload['id'], upload['metadata']['title']) for upload in existing_zenodo_uploads]
+        else:
+            existing_repositories = []
         self.fields['choose_repository'].choices += existing_repositories
 
         self.fields['choose_export'].queryset = self.project.export_set.all()

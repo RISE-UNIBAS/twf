@@ -16,6 +16,7 @@ class TWFView(TemplateView, ABC):
     """Base view for all views."""
     project_required = True
     page_title = None
+    navigation_anchor = None
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -117,6 +118,7 @@ class TWFView(TemplateView, ABC):
                 'context_nav': {
                     'groups': self.get_sub_navigation()
                 },
+                'navigation_anchor': self.navigation_anchor,
                 'version': settings.TWF_VERSION
             }
         )
