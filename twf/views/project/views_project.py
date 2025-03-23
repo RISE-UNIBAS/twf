@@ -359,7 +359,7 @@ class TWFProjectOverviewView(TWFProjectView):
     """View for the project overview."""
 
     template_name = 'twf/project/overview.html'
-    page_title = 'Project Overview'
+    page_title = 'Project'
 
     def get_context_data(self, **kwargs):
         """Get the context data."""
@@ -382,6 +382,10 @@ class TWFProjectOverviewView(TWFProjectView):
             'transkribus_tags_extracted': PageTag.objects.filter(page__document__project=project).count() > 0,
             'dictionaries_connected': project.selected_dictionaries.all().count() > 0,
         }
+
+        all_are_true = all(context['steps'].values())
+        context['steps']['all_steps_complete'] = all_are_true
+
         return context
 
 

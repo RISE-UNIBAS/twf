@@ -15,7 +15,7 @@ from twf.views.views_base import TWFView
 class TWFMetadataView(LoginRequiredMixin, TWFView):
     """Base view for all project views."""
     template_name = 'twf/metadata/overview.html'
-    page_title = 'Metadata Overview'
+    page_title = None
 
     def get_context_data(self, **kwargs):
         """Get the context data."""
@@ -62,7 +62,7 @@ class TWFMetadataView(LoginRequiredMixin, TWFView):
 class TWFMetadataOverviewView(TWFMetadataView):
     """View for the metadata overview."""
     template_name = 'twf/metadata/overview.html'
-    page_title = 'Metadata Overview'
+    page_title = 'Metadata'
 
     def get_context_data(self, **kwargs):
         """Get the context data."""

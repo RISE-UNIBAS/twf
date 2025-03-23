@@ -109,7 +109,7 @@ class TWFDictionaryOverviewView(TWFDictionaryView):
     """View for the dictionary overview."""
 
     template_name = 'twf/dictionaries/overview.html'
-    page_title = 'Dictionaries Overview'
+    page_title = 'Dictionaries'
 
     def get_context_data(self, **kwargs):
         """Get the context data."""
