@@ -6,12 +6,16 @@ from django.shortcuts import redirect
 from django.urls import reverse_lazy
 from django.http import JsonResponse, HttpResponse
 from django.views.generic import FormView
+from django_filters.views import FilterView
+from django_tables2 import SingleTableView
 
 from twf.clients.zenodo_client import get_zenodo_uploads
 from twf.forms.dictionaries.dictionaries_forms import DictionaryImportForm
 from twf.forms.export_forms import ExportDocumentsForm, ExportCollectionsForm, ExportProjectForm, ExportZenodoForm
+from twf.forms.filters.filters import ExportFilter
 from twf.forms.project.project_forms import ExportSettingsForm
 from twf.models import Export
+from twf.tables.tables_export import ExportTable
 from twf.utils.create_export_utils import create_data, flatten_dict_keys
 from twf.utils.export_utils import get_dictionary_json_data, get_dictionary_csv_data, get_tags_json_data, \
     get_tags_csv_data
@@ -43,6 +47,8 @@ class TWFExportView(LoginRequiredMixin, TWFView):
                 'options': [
                     {'url': reverse_lazy('twf:import_dictionaries'),
                      'value': 'Import Dictionaries', 'permission': 'import_dictionaries'},
+                    {'url': reverse_lazy('twf:import_dictionaries'),
+                     'value': 'Import Project', 'permission': 'import_dictionaries'},
                 ]
             },
             {
@@ -87,16 +93,32 @@ class TWFExportOverviewView(TWFExportView):
         return context
 
 
-class TWFExportListView(TWFExportView):
+class TWFExportListView(SingleTableView, FilterView, TWFExportView):
     """View for the export overview."""
 
     template_name = "twf/export/export_list.html"
     page_title = 'Export Overview'
+    table_class = ExportTable
+    filterset_class = ExportFilter
+    paginate_by = 10
+    model = Export
+
+    def get_queryset(self):
+        """Get the queryset for the view."""
+        queryset = Export.objects.filter(project_id=self.request.session.get('project_id')).order_by('-created_at')
+        self.filterset = self.filterset_class(self.request.GET, queryset=queryset)
+        return self.filterset.qs
+
+    def get(self, request, *args, **kwargs):
+        """Get the view."""
+        self.object_list = self.get_queryset()
+        context = self.get_context_data()
+        return self.render_to_response(context)
 
     def get_context_data(self, **kwargs):
         """Get the context data for the view."""
         context = super().get_context_data(**kwargs)
-        context['exports'] = Export.objects.all().order_by('-created_at')
+        context['filter'] = self.get_filterset(self.filterset_class)
         return context
 
 

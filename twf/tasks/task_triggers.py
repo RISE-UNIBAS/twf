@@ -488,7 +488,11 @@ def start_export_collections(request):
     return trigger_task(request, export_collections_task)
 
 def start_export_project(request):
-    return trigger_task(request, export_project_task)
+    include_dictionaries = request.POST.get('include_dictionaries', False)
+    include_media_files = request.POST.get('include_media_files', False)
+    return trigger_task(request, export_project_task,
+                        include_dictionaries=include_dictionaries,
+                        include_media_files=include_media_files)
 
 def start_export_to_zenodo(request):
     return trigger_task(request, export_to_zenodo_task)

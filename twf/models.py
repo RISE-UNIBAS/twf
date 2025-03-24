@@ -1138,6 +1138,7 @@ class Export(TimeStampedModel):
         ("documents", "Documents"),
         ("pages", "Pages"),
         ("collection", "Collection"),
+        ("project", "Project"),
     ]
 
     project = models.ForeignKey(Project, on_delete=models.CASCADE)

@@ -49,6 +49,14 @@ class ExportCollectionsForm(BaseBatchForm):
 
 class ExportProjectForm(BaseBatchForm):
 
+    include_dictionaries = forms.BooleanField(label='Include Dictionaries',
+                                              required=False,
+                                              help_text='Include dictionaries in the export')
+
+    include_media_files = forms.BooleanField(label='Include Media Files',
+                                                required=False,
+                                                help_text='Include media files in the export')
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -56,7 +64,13 @@ class ExportProjectForm(BaseBatchForm):
         return 'Export Project'
 
     def get_dynamic_fields(self):
-        return []
+        return [
+            Row(
+                Column('include_dictionaries', css_class='form-group col-6 mb-0'),
+                Column('include_media_files', css_class='form-group col-6 mb-0'),
+                css_class='row form-row'
+            )
+        ]
 
 
 class ExportZenodoForm(BaseBatchForm):

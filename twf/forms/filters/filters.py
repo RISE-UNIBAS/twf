@@ -2,7 +2,7 @@
 import django_filters
 from django.forms import CheckboxInput
 from django.contrib.auth import get_user_model
-from twf.models import Document, DictionaryEntry, PageTag, CollectionItem, Task, Prompt, Project
+from twf.models import Document, DictionaryEntry, PageTag, CollectionItem, Task, Prompt, Project, Export
 
 User = get_user_model()
 
@@ -132,3 +132,13 @@ class UserFilter(django_filters.FilterSet):
     class Meta:
         model = User
         fields = ["username", "email", "is_active", "is_superuser"]
+
+
+class ExportFilter(django_filters.FilterSet):
+    export_type = django_filters.CharFilter(lookup_expr='icontains', label="Type")
+    created_by__username = django_filters.CharFilter(lookup_expr='icontains', label="Created by")
+    created = django_filters.DateFromToRangeFilter(label="Created between")
+
+    class Meta:
+        model = Export
+        fields = ["export_type", "created_by__username", "created"]
