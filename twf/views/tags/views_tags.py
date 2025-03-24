@@ -349,7 +349,6 @@ class TWFProjectTagsView(SingleTableMixin, FilterView, TWFTagsView):
     table_class = TagTable
     paginate_by = 20
     model = PageTag
-    filterset = None
 
     def post(self, request, *args, **kwargs):
         """Handle the post request."""

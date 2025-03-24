@@ -1,7 +1,6 @@
 import django_tables2 as tables
 from twf.models import Task, Prompt
 from django.utils.html import format_html
-from django.utils.timezone import localtime
 
 class TaskTable(tables.Table):
     title = tables.Column(verbose_name="Task")
@@ -36,9 +35,9 @@ class TaskTable(tables.Table):
 
     def render_actions(self, record):
         return format_html(
-            '<a href="#" class="btn btn-sm btn-outline-dark me-1" title="View"><i class="fa fa-eye"></i></a>'
-            '<a href="#" class="btn btn-sm btn-outline-danger me-1" title="Cancel"><i class="fa fa-ban"></i></a>'
-            '<a href="#" class="btn btn-sm btn-outline-secondary" title="Remove"><i class="fa fa-trash"></i></a>'
+            '<a href="#" class="btn btn-sm btn-dark me-1" title="View"><i class="fa fa-eye"></i></a>'
+            '<a href="#" class="btn btn-sm btn-danger me-1" title="Cancel"><i class="fa fa-ban"></i></a>'
+            '<a href="#" class="btn btn-sm btn-secondary" title="Remove"><i class="fa fa-trash"></i></a>'
         )
 
     class Meta:
@@ -69,10 +68,11 @@ class PromptTable(tables.Table):
 
     def render_actions(self, record):
         return format_html(
-            '<a href="{}" class="btn btn-sm btn-outline-dark me-1" title="View"><i class="fa fa-eye"></i></a>'
-            '<a href="{}" class="btn btn-sm btn-outline-secondary me-1" title="Edit"><i class="fa fa-edit"></i></a>'
-            '<a href="{}" class="btn btn-sm btn-outline-danger" title="Delete"><i class="fa fa-trash"></i></a>',
+            '<a href="{}" class="btn btn-sm btn-dark me-1" title="View"><i class="fa fa-eye"></i></a>'
+            '<a href="{}" class="btn btn-sm btn-secondary me-1" title="Edit"><i class="fa fa-edit"></i></a>'
+            '<a href="{}" class="btn btn-sm btn-danger" title="Delete"><i class="fa fa-trash"></i></a>',
             f"/prompt/{record.pk}/view",
             f"/prompt/{record.pk}/edit",
             f"/prompt/{record.pk}/delete",
         )
+

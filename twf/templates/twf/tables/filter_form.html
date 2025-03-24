@@ -1,12 +1,23 @@
 {% load twf_filters %}
-<form class="inline-form d-flex align-items-center" method="get">
+<form class="row w-100 g-2 align-items-end mb-3" method="get">
     {% for field in filter.form.visible_fields %}
-        <div class="form-group me-3">
-            {{ field.label_tag }}
-            {{ field|add_class:"form-control" }}
+        <div class="col">
+            <div class="form-group mb-1">
+                <label class="form-label text-small mb-0">{{ field.label }}</label>
+                {{ field|add_class:"form-control form-control-sm" }}
+            </div>
         </div>
     {% endfor %}
-    <div class="submit-group">
-        <button type="submit" class="btn btn-dark">Filter</button>
+    <div class="col-auto">
+        <button type="submit" class="btn btn-dark btn-sm mb-1"
+                data-bs-toggle="tooltip" data-bs-placement="top" title="Filter">
+            <i class="fa fa-filter"></i>
+        </button>
+    </div>
+    <div class="col-auto">
+        <a href="." class="btn btn-secondary btn-sm mb-1"
+           data-bs-toggle="tooltip" data-bs-placement="top" title="Clear filters">
+            <i class="fa fa-times"></i>
+        </a>
     </div>
 </form>

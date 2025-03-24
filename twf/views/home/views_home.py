@@ -5,20 +5,24 @@ import time
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView, PasswordChangeView
-from django.http import JsonResponse, StreamingHttpResponse
+from django.http import StreamingHttpResponse
 from django.shortcuts import redirect
 from django.urls import reverse, reverse_lazy
 from django.utils.crypto import get_random_string
 from django.utils.timezone import now, timedelta
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import FormView
+from django_filters.views import FilterView
+from django_tables2 import SingleTableView
 
 from twf.clients.health_check import check_service_status, TWF_EXTERNAL_SERVICES
+from twf.forms.filters.filters import ProjectFilter, UserFilter
 from twf.forms.project.project_forms import CreateProjectForm
 from twf.forms.user_forms import LoginForm, ChangePasswordForm, UserProfileForm, CreateUserForm
 from twf.models import Project, Document, Page, Dictionary, DictionaryEntry, PageTag, Variation, DateVariation, \
     UserProfile, User
 from twf.permissions import get_available_actions
+from twf.tables.tables_home import ProjectManagementTable, UserManagementTable
 from twf.tasks.instant_tasks import save_instant_task_create_project
 from twf.utils.mail_utils import send_welcome_email, send_reset_email
 from twf.views.views_base import TWFView
@@ -300,23 +304,56 @@ class TWFCreateProjectView(LoginRequiredMixin, FormView, TWFHomeView):
         return context
 
 
-class TWFManageProjectsView(LoginRequiredMixin, TWFHomeView):
+class TWFManageProjectsView(SingleTableView, FilterView, LoginRequiredMixin, TWFHomeView):
     """View to manage the projects."""
     template_name = 'twf/home/manage_projects.html'
     page_title = 'Project Management'
+    table_class = ProjectManagementTable
+    filterset_class = ProjectFilter
+    paginate_by = 10
+    model = Project
+
+    def get_queryset(self):
+        """Get the queryset for the view."""
+        queryset = Project.objects.all()
+        self.filterset = self.filterset_class(self.request.GET, queryset=queryset)
+        return self.filterset.qs
+
+    def get(self, request, *args, **kwargs):
+        """Get the view."""
+        self.object_list = self.get_queryset()
+        context = self.get_context_data()
+        return self.render_to_response(context)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['projects'] = Project.objects.all()
+        context['filter'] = self.get_filterset(self.filterset_class)
         return context
 
 
-class TWFManageUsersView(LoginRequiredMixin, FormView, TWFHomeView):
+class TWFManageUsersView(SingleTableView, FilterView, LoginRequiredMixin, FormView, TWFHomeView):
     """View to manage the projects."""
     template_name = 'twf/home/manage_users.html'
     page_title = 'User Management'
     form_class = CreateUserForm
     success_url = reverse_lazy('twf:twf_user_management')
+    table_class = UserManagementTable
+    filterset_class = UserFilter
+    paginate_by = 10
+    model = User
+
+    def get_queryset(self):
+        """Get the queryset for the view."""
+        queryset = User.objects.all()
+        self.filterset = self.filterset_class(self.request.GET, queryset=queryset)
+        return self.filterset.qs
+
+    def get(self, request, *args, **kwargs):
+        """Get the view."""
+        self.object_list = self.get_queryset()
+        context = self.get_context_data()
+        return self.render_to_response(context)
 
     def post(self, request, *args, **kwargs):
         if 'existing_user_id' in request.POST:
@@ -360,7 +397,7 @@ class TWFManageUsersView(LoginRequiredMixin, FormView, TWFHomeView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['users'] = UserProfile.objects.all().order_by('user__username')
+        context['filter'] = self.get_filterset(self.filterset_class)
         return context
 
 

@@ -175,20 +175,7 @@ class TWFProjectPromptsView(SingleTableView, FilterView, TWFProjectView):
 
     def get_context_data(self, **kwargs):
         """Get the context data."""
-
         context = super().get_context_data(**kwargs)
-        prompts = self.get_project().prompts.all()
-
-        # Handle filtering
-        filter_form = PromptFilterForm(self.request.GET or None)
-        if filter_form.is_valid():
-            if filter_form.cleaned_data['system_role']:
-                prompts = prompts.filter(system_role__icontains=filter_form.cleaned_data['system_role'])
-            if filter_form.cleaned_data['prompt']:
-                prompts = prompts.filter(prompt__icontains=filter_form.cleaned_data['prompt'])
-
-        context['prompts'] = prompts
-        context['filter_form'] = filter_form
         context['filter'] = self.get_filterset(self.filterset_class)
         return context
 

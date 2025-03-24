@@ -1,7 +1,10 @@
 """Filter classes for the twf app."""
 import django_filters
 from django.forms import CheckboxInput
-from twf.models import Document, DictionaryEntry, PageTag, CollectionItem, Task, Prompt
+from django.contrib.auth import get_user_model
+from twf.models import Document, DictionaryEntry, PageTag, CollectionItem, Task, Prompt, Project
+
+User = get_user_model()
 
 
 class TagFilter(django_filters.FilterSet):
@@ -81,6 +84,18 @@ class PromptFilter(django_filters.FilterSet):
         }
 
 
+class ProjectFilter(django_filters.FilterSet):
+    """Filter for the projects table."""
+
+    title = django_filters.CharFilter(lookup_expr='icontains', label="Title contains")
+    status = django_filters.ChoiceFilter(choices=Project.STATUS_CHOICES)
+    owner__user__username = django_filters.CharFilter(lookup_expr='icontains', label="Owner username")
+
+    class Meta:
+        model = Project
+        fields = ['title', 'status', 'owner__user__username']
+
+
 class DictionaryEntryFilter(django_filters.FilterSet):
     """Filter for the dictionary entry table."""
 
@@ -106,3 +121,14 @@ class CollectionItemFilter(django_filters.FilterSet):
         """Meta class for the collection item filter."""
         model = CollectionItem
         fields = ["document_id", "title", "document_title"]
+
+
+class UserFilter(django_filters.FilterSet):
+    username = django_filters.CharFilter(lookup_expr="icontains", label="Username contains")
+    email = django_filters.CharFilter(lookup_expr="icontains", label="Email contains")
+    is_active = django_filters.BooleanFilter(label="Is Active")
+    is_superuser = django_filters.BooleanFilter(label="Is Admin")
+
+    class Meta:
+        model = User
+        fields = ["username", "email", "is_active", "is_superuser"]
