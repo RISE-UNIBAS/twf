@@ -18,6 +18,7 @@ from twf.utils.create_export_utils import create_data
 
 @shared_task(bind=True, base=BaseTWFTask)
 def export_documents_task(self, project_id, user_id, **kwargs):
+    print(kwargs)
     self.validate_task_parameters(kwargs, ['export_type', 'export_single_file'])
 
     docs_to_export = self.project.documents.all()

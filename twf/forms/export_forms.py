@@ -10,6 +10,15 @@ from twf.forms.base_batch_forms import BaseBatchForm
 
 class ExportDocumentsForm(BaseBatchForm):
 
+    export_type = forms.ChoiceField(choices=[('documents', 'Documents'), ('pages', 'Pages')],
+                                    label='Export Type',
+                                    widget=Select2Widget(attrs={'style': 'width: 100%;'}),
+                                    required=True)
+
+    export_single_file = forms.BooleanField(label='Export as Single File',
+                                            required=False,
+                                            help_text='Export each document/page as a separate file')
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -17,7 +26,13 @@ class ExportDocumentsForm(BaseBatchForm):
         return 'Export Documents'
 
     def get_dynamic_fields(self):
-        return []
+        return [
+            Row(
+                Column('export_type', css_class='form-group col-6 mb-0'),
+                Column('export_single_file', css_class='form-group col-6 mb-0'),
+                css_class='row form-row'
+            )
+        ]
 
 
 class ExportCollectionsForm(BaseBatchForm):

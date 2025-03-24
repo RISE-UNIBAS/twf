@@ -477,7 +477,12 @@ def start_query_project_mistral(request):
 
 
 def start_export_documents(request):
-    return trigger_task(request, export_documents_task)
+    export_type = request.POST.get('export_type')
+    export_single_file = request.POST.get('export_single_file')
+
+    return trigger_task(request, export_documents_task,
+                        export_type=export_type,
+                        export_single_file=export_single_file)
 
 def start_export_collections(request):
     return trigger_task(request, export_collections_task)
