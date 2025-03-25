@@ -5,6 +5,7 @@ TWF_EXTERNAL_SERVICES = {
     "OpenAI": "https://api.openai.com/v1/models",
     "Anthropic": "https://api.anthropic.com/v1/models",
     "Google AI": "https://generativelanguage.googleapis.com/v1/models",
+    "Mistral": "https://api.mistral.ai/v1/models",
     "Wikidata": "https://www.wikidata.org/w/api.php",
     "GND": "https://services.dnb.de/sru/authorities",
     "Geonames": "http://api.geonames.org",

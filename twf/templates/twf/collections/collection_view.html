@@ -4,10 +4,9 @@
 {% load twf_filters %}
 
 {% block content %}
-<div class="border rounded bg-light mt-0 p-3">
     <div class="row">
         <div class="col-8">
-            <h1 class="display-6">Collection: {{ collection.title }}</h1>
+            <h1>Collection: {{ collection.title }}</h1>
             <p class="lead">Your collection has <strong>{{ table.paginator.count }}</strong> items.</p>
         </div>
         <div class="col-4">
@@ -22,7 +21,6 @@
     <div class="table-responsive">
         {% render_table table %}
     </div>
-</div>
 {% endblock %}
 
 {% block css %}

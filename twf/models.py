@@ -11,6 +11,7 @@ import json
 from django.conf import settings
 from django.db import models
 from django.contrib.auth import get_user_model
+from django.db.models import Q
 from django.utils import timezone
 
 from twf.templatetags.tk_tags import tk_iiif_url, tk_bounding_box
@@ -259,6 +260,12 @@ class Project(TimeStampedModel):
     project_doi = models.CharField(max_length=255, blank=True, null=True,
                                   verbose_name='Project DOI',
                                   help_text='The DOI of the project.')
+
+    def get_project_members(self):
+        """Return the project members plus the project's owner."""
+        return UserProfile.objects.filter(
+            Q(id=self.owner_id) | Q(id__in=self.members.values_list("id", flat=True))
+        ).order_by('user__username')
 
     def get_credentials(self, service):
         """Return the credentials for a service.
@@ -645,7 +652,7 @@ class DictionaryEntry(TimeStampedModel):
         The dictionary this entry belongs to.
     label : CharField
         The label of the entry.
-    authorization_data : JSONField
+    metadata : JSONField
         Authorization data for the entry.
     notes : TextField
         Notes for the entry.
@@ -658,7 +665,7 @@ class DictionaryEntry(TimeStampedModel):
     """The label of the entry."""
 
     metadata = models.JSONField(default=dict, blank=True)
-    """Authorization data for the entry."""
+    """Metadata data for the entry."""
 
     notes = models.TextField(blank=True, default='')
     """Notes for the entry."""
@@ -1131,6 +1138,7 @@ class Export(TimeStampedModel):
         ("documents", "Documents"),
         ("pages", "Pages"),
         ("collection", "Collection"),
+        ("project", "Project"),
     ]
 
     project = models.ForeignKey(Project, on_delete=models.CASCADE)

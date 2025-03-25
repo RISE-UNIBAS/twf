@@ -53,7 +53,7 @@ def get_dictionary_csv_data(pk, include_metadata=True, include_uses=False):
 
         # Add metadata
         if include_metadata:
-            csv_line += f';{json.dumps(entry.authorization_data)}'
+            csv_line += f';{json.dumps(entry.metadata)}'
 
         # Add uses
         if include_uses:

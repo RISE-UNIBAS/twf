@@ -2,18 +2,15 @@
 {% load static %}
 
 {% block content %}
-    <div class="border rounded bg-light mt-0 p-3">
     {% include 'twf/base/niy_notice.html' %}
-        <h1 class="display-6">Test Transkribus Export</h1>
-        <p class="lead">Request a single page from your collection and review parsing results.</p>
-        
-        <div class="row">
-            <div class="col-4">
-                <input id="transkribusTestExport" type="button" role="button" class="btn btn-dark w-100 mb-3" 
-                       value="Request Test Page" onclick="start_test_export()">
-                <div class="col-12 border text-center">Current status:</div>
-                <div class="col-12 border text-center" id="requestJobStatus">Unknown</div>
-            </div>
+    <p class="lead">Request a single page from your collection and review parsing results.</p>
+
+    <div class="row">
+        <div class="col-4">
+            <input id="transkribusTestExport" type="button" role="button" class="btn btn-dark w-100 mb-3"
+                   value="Request Test Page" onclick="start_test_export()">
+            <div class="col-12 border text-center">Current status:</div>
+            <div class="col-12 border text-center" id="requestJobStatus">Unknown</div>
         </div>
     </div>
 {% endblock %}

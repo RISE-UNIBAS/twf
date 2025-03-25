@@ -14,7 +14,8 @@ from twf.views.collections.views_collections_ai import TWFCollectionsOpenaiBatch
     TWFCollectionsClaudeRequestView, TWFCollectionsMistralBatchView, TWFCollectionsMistralRequestView
 from twf.views.collections.views_crud import delete_collection, set_col_item_status_open, set_col_item_status_reviewed, \
     set_col_item_status_faulty, split_collection_item, copy_collection_item, delete_collection_item_annotation, \
-    delete_collection_item, download_collection_item_txt, download_collection_item_json
+    delete_collection_item, download_collection_item_txt, download_collection_item_json, \
+    update_collection_item_metadata, delete_collection_item_metadata
 from twf.views.dictionaries.views_dictionaries_ai import TWFDictionaryGNDBatchView, TWFDictionaryGeonamesBatchView, \
     TWFDictionaryWikidataBatchView, TWFDictionaryOpenaiBatchView, TWFDictionaryClaudeBatchView, \
     TWFDictionaryGeminiBatchView, TWFDictionaryGNDRequestView, TWFDictionaryGeonamesRequestView, \
@@ -22,6 +23,7 @@ from twf.views.dictionaries.views_dictionaries_ai import TWFDictionaryGNDBatchVi
     TWFDictionaryGeminiRequestView, TWFDictionaryMistralBatchView, TWFDictionaryMistralRequestView
 from twf.views.dictionaries.views_crud import remove_dictionary_from_project, add_dictionary_to_project, skip_entry, \
     delete_variation
+from twf.views.documents.views_crud import update_document_metadata, delete_document_metadata
 from twf.views.documents.views_documents import TWFDocumentsOverviewView, TWFDocumentsBrowseView, \
     TWFDocumentCreateView, TWFDocumentNameView, TWFDocumentDetailView, TWFDocumentReviewView, TWFDocumentsSearchView
 from twf.views.documents.views_documents_ai import TWFDocumentOpenAIBatchView, \
@@ -31,7 +33,7 @@ from twf.views.documents.views_documents_ai import TWFDocumentOpenAIBatchView, \
 from twf.views.export.views_crud import delete_export
 from twf.views.home.views_home import TWFHomeView, TWFHomeLoginView, TWFHomePasswordChangeView, TWFHomeUserOverView, \
     TWFSelectProjectView, TWFHomeUserProfileView, TWFCreateProjectView, TWFManageProjectsView, TWFManageUsersView, \
-    TWFSystemHealthView, check_system_health
+    TWFSystemHealthView, check_system_health, TWFHomeIndexView, TWFHomeAboutView
 from twf.views.metadata.views_metadata_ai import TWFMetadataLoadDataView, TWFMetadataLoadSheetsDataView
 from twf.views.project.views_crud import delete_all_documents, delete_all_tags, delete_all_collections, select_project, \
     delete_project, close_project, delete_prompt
@@ -66,8 +68,8 @@ from twf.workflows.document_workflows import start_review_document_workflow
 urlpatterns = [
     #############################
     # FRAMEWORK (HOME)
-    path('', TWFHomeView.as_view(), name='home'),
-    path('about/', TWFHomeView.as_view(template_name='twf/home/about.html'), name='about'),
+    path('', TWFHomeIndexView.as_view(), name='home'),
+    path('about/', TWFHomeAboutView.as_view(), name='about'),
     path('login/', TWFHomeLoginView.as_view(), name='login'),
     path('logout/confirm/',
          TWFHomeView.as_view(page_title='Logout', template_name='twf/home/users/logout.html'), name='user_logout'),
@@ -91,8 +93,6 @@ urlpatterns = [
     #############################
     # PROJECT
     path('project/overview/', TWFProjectOverviewView.as_view(), name='project_overview'),
-    path('project/setup/', TWFProjectSetupView.as_view(template_name='twf/project/setup/setup.html',
-                                                       page_title='Project Setup'), name='project_setup'),
     path('project/setup/tk/export/',
          TWFProjectSetupView.as_view(template_name='twf/project/setup/setup_export.html',
                                      page_title='Project TK Export'), name='project_tk_export'),
@@ -346,6 +346,7 @@ urlpatterns = [
     path('ajax/load/prompt/', load_prompt, name='ajax_load_prompt'),
     path('ajax/save/prompt/', save_prompt, name='ajax_save_prompt'),
     path('ajax/get/prompts/', get_prompts, name='ajax_get_prompts'),
+
     #############################
     # METADATA
     path('metadata/overview/', TWFMetadataOverviewView.as_view(), name='metadata_overview'),
@@ -357,6 +358,12 @@ urlpatterns = [
 
     path('metadata/review/documents/', TWFMetadataReviewDocumentsView.as_view(), name='metadata_review_documents'),
     path('metadata/review/pages/', TWFMetadataReviewPagesView.as_view(), name='metadata_review_pages'),
+
+    path('metadata/update/document/<int:pk>/<str:base_key>/', update_document_metadata, name='update_document_metadata'),
+    path('metadata/update/collection-item/<int:pk>/<str:base_key>/', update_collection_item_metadata, name='update_collection_item_metadata'),
+
+    path('metadata/delete/document/<int:pk>/<str:base_key>/', delete_document_metadata, name='update_document_metadata'),
+    path('metadata/delete/collection-item/<int:pk>/<str:base_key>/', delete_collection_item_metadata, name='update_collection_item_metadata'),
 
     path('validate_page_field/', validate_page_field, name='validate_page_field'),
     path('validate_page_field/', validate_document_field, name='validate_document_field'),

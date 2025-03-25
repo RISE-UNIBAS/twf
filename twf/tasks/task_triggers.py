@@ -342,7 +342,7 @@ def start_json_metadata(request):
         return JsonResponse({'status': 'error', 'message': 'No file uploaded'}, status=400)
 
     return trigger_task(request, load_json_metadata,
-                        file_path=file_path,
+                        data_file_path=file_path,
                         data_target_type=data_target_type,
                         json_data_key=json_data_key,
                         match_to_field=match_to_field)
@@ -477,13 +477,22 @@ def start_query_project_mistral(request):
 
 
 def start_export_documents(request):
-    return trigger_task(request, export_documents_task)
+    export_type = request.POST.get('export_type')
+    export_single_file = request.POST.get('export_single_file')
+
+    return trigger_task(request, export_documents_task,
+                        export_type=export_type,
+                        export_single_file=export_single_file)
 
 def start_export_collections(request):
     return trigger_task(request, export_collections_task)
 
 def start_export_project(request):
-    return trigger_task(request, export_project_task)
+    include_dictionaries = request.POST.get('include_dictionaries', False)
+    include_media_files = request.POST.get('include_media_files', False)
+    return trigger_task(request, export_project_task,
+                        include_dictionaries=include_dictionaries,
+                        include_media_files=include_media_files)
 
 def start_export_to_zenodo(request):
     return trigger_task(request, export_to_zenodo_task)

@@ -1,82 +1,77 @@
 {% extends 'twf/base/base.html' %}
 
 {% block content %}
-    <div class="border rounded bg-light mt-0 p-3">
-        <h1 class="display-6">Export Dictionaries</h1>
-        <hr/>
-
-        {% for dictionary in project.selected_dictionaries.all %}
-            <div class="card mt-2">
-                <div class="card-body">
-                    <h5 class="card-title">{{ dictionary.label }}</h5>
-                    <p class="card-text">{{ dictionary.description }}</p>
-                    <p class="card-text">Number of entries: {{ dictionary.entries.count }}</p>
-                    <form method="post">
-                        {% csrf_token %}
-                        <table class="table table-borderless">
-                            <tbody>
-                                <tr>
-                                    <td>
-                                        <div class="d-flex justify-content-between">
-                                            <input type="submit" class="btn btn-dark flex-fill" value="Export as JSON" name="export_json">
-                                        </div>
-                                    </td>
-                                    <td>
-                                        This will export the dictionary as a JSON file. This format 
-                                        can be used to import the dictionary into another TWF instance
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <div class="d-flex justify-content-between">
-                                            <input type="submit" class="btn btn-dark flex-fill" value="Export as JSON with usages" name="export_json_w_uses">
-                                        </div>
-                                    </td>
-                                    <td>
-                                        This will export the dictionary as a JSON file. This is the most complete export format 
-                                        and contains all metadata and usage information.
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <div class="d-flex justify-content-between">
-                                            <input type="submit" class="btn btn-dark flex-fill" value="Export Simple CSV" name="export_simple_csv">
-                                        </div>
-                                    </td>
-                                    <td>
-                                        This will export the dictionary as a CSV file. It contains only the
-                                        entries and their variants.
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <div class="d-flex justify-content-between">
-                                            <input type="submit" class="btn btn-dark flex-fill" value="Export CSV with Metadata" name="export_csv">
-                                        </div>
-                                    </td>
-                                    <td>
-                                        This will export the dictionary as a CSV file. It contains all metadata
-                                        for each entry as a JSON-String.    
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <div class="d-flex justify-content-between">
-                                            <input type="submit" class="btn btn-dark flex-fill" value="Export CSV with Metadata and Usage" name="export_csv_w_uses">
-                                        </div>
-                                    </td>
-                                    <td>
-                                        This will export the dictionary as a CSV file. It contains all metadata
-                                        for each entry as a JSON-String and a list of document and collection ids
-                                        where the entry is used.
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                        <input type="hidden" name="dictionary_id" value="{{ dictionary.pk }}">
-                    </form>
-                </div>
+    {% for dictionary in project.selected_dictionaries.all %}
+        <div class="card mt-2">
+            <div class="card-body">
+                <h5 class="card-title">{{ dictionary.label }}</h5>
+                <p class="card-text">{{ dictionary.description }}</p>
+                <p class="card-text">Number of entries: {{ dictionary.entries.count }}</p>
+                <form method="post">
+                    {% csrf_token %}
+                    <table class="table table-borderless">
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <div class="d-flex justify-content-between">
+                                        <input type="submit" class="btn btn-dark flex-fill" value="Export as JSON" name="export_json">
+                                    </div>
+                                </td>
+                                <td>
+                                    This will export the dictionary as a JSON file. This format
+                                    can be used to import the dictionary into another TWF instance
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="d-flex justify-content-between">
+                                        <input type="submit" class="btn btn-dark flex-fill" value="Export as JSON with usages" name="export_json_w_uses">
+                                    </div>
+                                </td>
+                                <td>
+                                    This will export the dictionary as a JSON file. This is the most complete export format
+                                    and contains all metadata and usage information.
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="d-flex justify-content-between">
+                                        <input type="submit" class="btn btn-dark flex-fill" value="Export Simple CSV" name="export_simple_csv">
+                                    </div>
+                                </td>
+                                <td>
+                                    This will export the dictionary as a CSV file. It contains only the
+                                    entries and their variants.
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="d-flex justify-content-between">
+                                        <input type="submit" class="btn btn-dark flex-fill" value="Export CSV with Metadata" name="export_csv">
+                                    </div>
+                                </td>
+                                <td>
+                                    This will export the dictionary as a CSV file. It contains all metadata
+                                    for each entry as a JSON-String.
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="d-flex justify-content-between">
+                                        <input type="submit" class="btn btn-dark flex-fill" value="Export CSV with Metadata and Usage" name="export_csv_w_uses">
+                                    </div>
+                                </td>
+                                <td>
+                                    This will export the dictionary as a CSV file. It contains all metadata
+                                    for each entry as a JSON-String and a list of document and collection ids
+                                    where the entry is used.
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <input type="hidden" name="dictionary_id" value="{{ dictionary.pk }}">
+                </form>
             </div>
-        {% endfor %}
-    </div>
+        </div>
+    {% endfor %}
 {% endblock %}

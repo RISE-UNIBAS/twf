@@ -16,6 +16,7 @@ class TWFView(TemplateView, ABC):
     """Base view for all views."""
     project_required = True
     page_title = None
+    navigation_anchor = None
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -55,6 +56,23 @@ class TWFView(TemplateView, ABC):
                 request.session['project_id'] = None
         return project
 
+    def get_breadcrumbs(self):
+        """Get the breadcrumbs."""
+        breadcrumbs = [
+            {'url': reverse('twf:home'), 'value': '<i class="fas fa-home"></i>'},
+        ]
+        if len(self.get_navigation_items()) > self.get_navigation_index() > 0:
+            breadcrumbs.append(self.get_navigation_items()[self.get_navigation_index()])
+
+        # Only add current page if it has a `page_title` and isn't already part of the nav
+        if hasattr(self, 'page_title') and self.page_title != breadcrumbs[-1]["value"]:
+            breadcrumbs.append({
+                "value": self.page_title,
+                "url": self.request.path,
+            })
+
+        return breadcrumbs
+
     def get_navigation_items(self):
         """Get the navigation items."""
         if not self.is_project_set():
@@ -93,12 +111,14 @@ class TWFView(TemplateView, ABC):
                 'page_title': self.page_title,
                 'project_set': self.is_project_set(),
                 'project': self.get_project(),
+                'breadcrumbs': self.get_breadcrumbs(),
                 'navigation': {
                     'items': self.get_navigation_items(),
                 },
                 'context_nav': {
                     'groups': self.get_sub_navigation()
                 },
+                'navigation_anchor': self.navigation_anchor,
                 'version': settings.TWF_VERSION
             }
         )

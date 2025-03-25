@@ -1,45 +1,28 @@
 {% extends 'twf/base/base.html' %}
+{% load render_table from django_tables2 %}
 {% load twf_filters %}
 
+{% block page_title %}
+    <div class="d-flex justify-content-between align-items-center pb-1 mb-3">
+      <h1 class="mb-0" style="width: 100%;">Prompts</h1>
+      <a href="#" class="btn btn-sm btn-dark"
+         data-bs-toggle="tooltip" data-bs-placement="top" title="Add a new prompt">
+        <i class="fa fa-plus"></i>
+      </a>
+    </div>
+{% endblock %}
+
 {% block content %}
-    <div class="border rounded bg-light mt-0 p-3">
-        <h1 class="display-6">Saved Prompts</h1>
-        <p class="lead">All prompts from your project are listed here.</p>
+    <p class="lead">All prompts from your project are listed here.</p>
 
-        <!-- Filter Form -->
-        <form method="get" class="mb-4">
-            <div class="row g-3 align-items-end">
-                <div class="col-md-4">
-                    {{ filter_form.system_role.label_tag }}
-                    {{ filter_form.system_role|add_class:"form-control" }}
-                </div>
-                <div class="col-md-4">
-                    {{ filter_form.prompt.label_tag }}
-                    {{ filter_form.prompt|add_class:"form-control" }}
-                </div>
-                <div class="col-md-auto ms-auto">
-                    <button type="submit" class="btn btn-dark">Filter</button>
-                </div>
+    {% twf_filter filter %}
+
+    <div class="table-responsive-sm mt-3">
+        <div class="card">
+            <div class="card-body p-0">
+                {% render_table table %}
             </div>
-        </form>
-
-        <!-- Prompt List -->
-        <div>
-            {% for prompt in prompts %}
-                <div class="card mb-3">
-                    <div class="card-body">
-                        <h5 class="card-title">{{ prompt.system_role }}</h5>
-                        <p class="card-text">{{ prompt.prompt }}</p>
-                    </div>
-                    <div class="card-footer text-end">
-                        <button class="btn btn-sm btn-danger show-danger-modal"
-                                data-redirect-url="{% url 'twf:project_delete_prompt' prompt.id %}"
-                                data-title="Delete Prompt"
-                                data-message="Are you sure you want to delete this prompt?">Delete</button>
-                        <a href="{% url 'twf:project_edit_prompt' prompt.id %}" class="btn btn-sm btn-dark">Edit</a>
-                    </div>
-                </div>
-            {% endfor %}
         </div>
     </div>
+
 {% endblock %}

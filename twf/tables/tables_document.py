@@ -1,90 +1,78 @@
 # pylint: disable=too-few-public-methods
 """This module contains the tables for displaying documents and dictionary entries."""
 import django_tables2 as tables
+from django.utils.html import format_html_join, format_html
 from django.utils.safestring import mark_safe
-
 from twf.models import Document
 
-
 class DocumentTable(tables.Table):
-    """Table for displaying documents."""
-    document_id = tables.Column(verbose_name="Document", attrs={"td": {"class": "align-middle", "width": "50%"}})
-    pages = tables.Column(verbose_name="Pages", attrs={"td": {"class": "align-middle"}})
-    options = tables.TemplateColumn(template_name='twf/tables/document_table_options.html',
-                                    verbose_name="Options",
-                                    attrs={"td": {"class": "align-middle text-center", "width": "7%"}},
-                                    orderable=False)
-    dates = tables.Column(accessor='created_at', verbose_name="Dates", attrs={"width": "7%"})
+    id = tables.Column(accessor='document_id', verbose_name="ID", orderable=True)
+    num_pages = tables.Column(verbose_name="Pages", empty_values=[])
+    num_tags = tables.Column(verbose_name="Tags", empty_values=[])
+    num_blocks = tables.Column(verbose_name="Blocks", empty_values=[])
+    title_metadata = tables.Column(verbose_name="Title / Metadata", orderable=False, empty_values=[])
+    actions = tables.TemplateColumn(
+        verbose_name='Options',
+        template_code="""
+        <a href="{% url 'twf:view_document' record.pk %}" class="btn btn-sm btn-dark" data-bs-toggle="tooltip" data-bs-placement="bottom" title="View Document Details"><i class="fa-solid fa-eye"></i></a>
+        <a href="{% url 'twf:view_document' record.pk %}" class="btn btn-sm btn-dark" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Edit Document"><i class="fa-solid fa-pen-to-square"></i></a>
+        <a href="{{ record.get_transkribus_url }}" class="btn btn-sm btn-ext" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom" title="View Document on Transkribus"><i class="fa-solid fa-scroll"></i></a>
+        <a href="{% url 'twf:view_document' record.pk %}" class="btn btn-sm btn-danger" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Delete Document"><i class="fa-solid fa-trash-can"></i></a>
+        """,
+        orderable=False
+    )
+
+    def render_num_pages(self, record):
+        return record.pages.count()
+
+    def render_num_tags(self, record):
+        tag_types = set()
+        for page in record.pages.all():
+            for tag in page.tags.all():
+                if tag.variation_type:
+                    tag_types.add(tag.variation_type)
+
+        badges = format_html_join(
+            '',
+            '<span class="badge-table">{}</span>',
+            ((tt,) for tt in sorted(tag_types))
+        )
+
+        tag_count = sum(p.num_tags for p in record.pages.all())
+        return format_html('<strong>{}</strong><br>{}', tag_count, badges)
+
+    def render_num_blocks(self, record):
+        structure_types = set()
+        for p in record.pages.all():
+            elements = p.parsed_data.get('elements', [])
+            for element in elements:
+                if "structure" in element['element_data']['custom_structure']:
+                    if "type" in element['element_data']['custom_structure']['structure']:
+                        structure_types.add(element['element_data']['custom_structure']['structure']['type'])
+
+        badges = format_html_join(
+            '',
+            '<span class="badge-table">{}</span>',
+            ((st,) for st in sorted(structure_types))
+        )
+
+        block_count = sum(len(p.parsed_data.get('elements', [])) for p in record.pages.all())
+        return format_html('<strong>{}</strong><br>{}', block_count, badges)
+
+    def render_title_metadata(self, record):
+        title = record.title or "N/A"
+
+        metadata_keys = record.metadata.keys() if isinstance(record.metadata, dict) else []
+
+        badges = format_html_join(
+            '',
+            '<span class="badge-table">{}</span>',
+            ((key,) for key in metadata_keys)
+        )
+
+        return format_html("<strong>{}</strong><br>{}", title, badges)
 
     class Meta:
-        """Meta class for the DocumentTable."""
         model = Document
-        template_name = "django_tables2/bootstrap4.html"  # Updated for Bootstrap 4
-        fields = ("document_id", )
-
-    def render_document_id(self, value, record):
-        """Renders the document_id column with the title and metadata of the document."""
-        html = f"<strong>{value}: {record.title}</strong><br/><span class='small text-muted'>Metadata:</span> "
-        html += ', '.join(f'<code>{item[0]}</code>' for item in record.metadata.items())
-        if record.status == 'reviewed':
-            html += f'<br/><span class="badge bg-success">reviewed</span>'
-        elif record.status == 'needs_tk_work' or record.status == 'irrelevant':
-            html += f'<br/><span class="badge bg-warning">needs TK work</span>'
-        if record.is_parked:
-            html += f'<br/><span class="badge bg-info">parked</span>'
-        if record.is_reserved:
-            html += f'<br/><span class="badge bg-info">in workflow</span>'
-
-        return mark_safe(html)
-
-    def render_pages(self, record):
-        """Renders the pages column with detailed page information."""
-        html = '<div class="container-fluid">'
-        html += '<div class="row fw-bold text-secondary small">'
-        html += self.get_col("ID", 3)
-        html += self.get_col("Page", 3)
-        html += self.get_col("Blocks", 3)
-        html += self.get_col("Tags", 3)
-        html += '</div>'
-
-        for page in record.pages.all().order_by('tk_page_number'):
-            html += '<div class="row">'
-            html += self.get_col(page.tk_page_id, 3, ignored=page.is_ignored)
-            html += self.get_col(page.tk_page_number, 3, ignored=page.is_ignored)
-            html += self.get_col(len(page.parsed_data.get("elements", [])) if page.parsed_data else 0,
-                                 3, ignored=page.is_ignored)
-            html += self.get_col(f"{page.tags.count()} / {page.tags.filter(dictionary_entry=None).count()}",
-                                 3, ignored=page.is_ignored)
-            html += '</div>'
-        html += '</div>'
-
-        return mark_safe(html)
-
-    def render_dates(self, record):
-        """Renders the dates column with detailed date information."""
-
-        created_at = record.created_at.strftime("%Y-%m-%d %H:%M:%S") if record.created_at else "N/A"
-        modified_at = record.modified_at.strftime("%Y-%m-%d %H:%M:%S") if record.modified_at else "N/A"
-        created_by = record.created_by.username if record.created_by else "Unknown"
-        modified_by = record.modified_by.username if record.modified_by else "Unknown"
-
-        html = f'''
-                <div class="container-fluid">
-                    <div class="row fw-bold text-secondary small">
-                        <div>Created: {created_at} by {created_by}</div>
-                        <div>Modified: {modified_at} by {modified_by}</div>
-                    </div>
-                </div>
-                '''
-        return mark_safe(html)
-
-    @staticmethod
-    def get_col(value, size, ignored=False):
-        """Returns a styled column div with the given value and size. Strikes out text if ignored."""
-        html = f'<div class="col-{size} border small">'
-        if ignored:
-            html += f'<s class="text-muted" style="text-decoration-style: wavy">{value}</s>'
-        else:
-            html += f'{value}'
-        html += '</div>'
-        return html
+        template_name = "django_tables2/bootstrap4.html"
+        fields = ("id", "title_metadata", "num_pages", "num_tags", "num_blocks", "actions")

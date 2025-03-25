@@ -2,64 +2,61 @@
 {% load static %}
 
 {% block content %}
-    <div class="border rounded bg-light mt-0 p-3">
-        <h1 class="display-6">Transkribus Export</h1>
-        <p class="lead">
-            This page allows you to set up your project. 
-            Your Transkribus collection id is <strong>{{ project.collection_id }}</strong>
-        </p>
-        
-        {% if not transkribus_username or not transkribus_password %}
-            <div class="alert alert-warning" role="alert">
-                <h4 class="alert-heading">Set up authentication data</h4>
-                <p>
-                    You need to set up your Transkribus authentication data in order to use the export functionality.
-                    Please go to the <a href="{% url 'twf:project_settings_credentials' %}">project settings</a> page and
-                    enter your Transkribus username and password.
-                </p>
-            </div>
-        {% endif %}
-        
-        <div class="row">
-            <div class="col-4">
-                <input id="transkribusExport" type="button" role="button" class="btn btn-dark w-100 mb-3" 
-                       value="Start Export Job" onclick="start_export_job({{ project.pk }})">
-                <div class="col-12 border text-center">Current status:</div>
-                <div class="col-12 border text-center" id="requestJobStatus">Unknown</div>
-            </div>
-            <div class="col-4">
-                <input id="transkribusExportStatus" type="button" role="button" class="btn btn-dark w-100 mb-3" 
-                       value="Check Export Status" onclick="check_export_status({{ project.pk }})">
-                <div class="col-12 border text-center">Current status:</div>
-                <div class="col-12 border text-center"><span id="jobStatus">Unknown</span></div>
-            </div>
-            <div class="col-4">
-                <input id="transkribusDownload" type="button"  role="button" class="btn btn-dark w-100 mb-3" 
-                       value="Download Export">
-                <div class="col-12 border text-center">Download status:</div>
-                <div class="progress mt-2">
-                    <div class="progress-bar bg-dark" role="progressbar" 
-                         style="width:0;" id="progressBar" aria-valuenow="0" 
-                         aria-valuemin="0" aria-valuemax="100">0%</div>
-                </div>
+    <p class="lead">
+        This page allows you to set up your project.
+        Your Transkribus collection id is <strong>{{ project.collection_id }}</strong>
+    </p>
+
+    {% if not transkribus_username or not transkribus_password %}
+        <div class="alert alert-warning" role="alert">
+            <h4 class="alert-heading">Set up authentication data</h4>
+            <p>
+                You need to set up your Transkribus authentication data in order to use the export functionality.
+                Please go to the <a href="{% url 'twf:project_settings_credentials' %}">project settings</a> page and
+                enter your Transkribus username and password.
+            </p>
+        </div>
+    {% endif %}
+
+    <div class="row">
+        <div class="col-4">
+            <input id="transkribusExport" type="button" role="button" class="btn btn-dark w-100 mb-3"
+                   value="Start Export Job" onclick="start_export_job({{ project.pk }})">
+            <div class="col-12 border text-center">Current status:</div>
+            <div class="col-12 border text-center" id="requestJobStatus">Unknown</div>
+        </div>
+        <div class="col-4">
+            <input id="transkribusExportStatus" type="button" role="button" class="btn btn-dark w-100 mb-3"
+                   value="Check Export Status" onclick="check_export_status({{ project.pk }})">
+            <div class="col-12 border text-center">Current status:</div>
+            <div class="col-12 border text-center"><span id="jobStatus">Unknown</span></div>
+        </div>
+        <div class="col-4">
+            <input id="transkribusDownload" type="button"  role="button" class="btn btn-dark w-100 mb-3"
+                   value="Download Export">
+            <div class="col-12 border text-center">Download status:</div>
+            <div class="progress mt-2">
+                <div class="progress-bar bg-dark" role="progressbar"
+                     style="width:0;" id="progressBar" aria-valuenow="0"
+                     aria-valuemin="0" aria-valuemax="100">0%</div>
             </div>
         </div>
-        <div class="row mt-5">
-            <div class="col-12">
-                <div class="border w-100">
-                    {% if project.downloaded_zip_file %}
-                        <div class="alert alert-warning" role="alert">
-                            <h4 class="alert-heading">Restart Import Process</h4>
-                            <p>
-                                You have a downloaded file. You can reset the process and start a new export job.
-                                This will delete the current export file, and you can start a new export job.
-                                This will not overwrite any other information than the export file. 
-                            </p>
-                            <input id="restartExport" type="button" role="button" class="btn btn-dark mb-3" 
-                                   value="Restart Export Job" onclick="restart_export_job({{ project.pk }})">
-                        </div>
-                    {% endif %}
-                </div>
+    </div>
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="border w-100">
+                {% if project.downloaded_zip_file %}
+                    <div class="alert alert-warning" role="alert">
+                        <h4 class="alert-heading">Restart Import Process</h4>
+                        <p>
+                            You have a downloaded file. You can reset the process and start a new export job.
+                            This will delete the current export file, and you can start a new export job.
+                            This will not overwrite any other information than the export file.
+                        </p>
+                        <input id="restartExport" type="button" role="button" class="btn btn-dark mb-3"
+                               value="Restart Export Job" onclick="restart_export_job({{ project.pk }})">
+                    </div>
+                {% endif %}
             </div>
         </div>
     </div>

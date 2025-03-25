@@ -7,7 +7,7 @@ class TaskFilterForm(forms.Form):
     """Form for filtering tasks."""
 
     started_by = forms.ModelChoiceField(
-        queryset=User.objects.all(),
+        queryset=User.objects.none(),
         required=False,
         label="Started by",
     )
@@ -26,6 +26,12 @@ class TaskFilterForm(forms.Form):
         required=False,
         label="Date Range",
     )
+
+    def __init__(self, *args, project=None, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        if project:
+            self.fields["started_by"].queryset = project.get_project_members()
 
 
 class PromptFilterForm(forms.Form):

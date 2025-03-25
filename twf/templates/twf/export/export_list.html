@@ -1,36 +1,16 @@
 {% extends 'twf/base/base.html' %}
-
+{% load twf_filters %}
+{% load render_table from django_tables2 %}
 
 {% block content %}
-     <div class="border rounded bg-light mt-0 p-3">
-        <h1 class="display-6">Existing Exports</h1>
-        <p class="lead">See and download the existing exports.</p>
-        {% if exports %}
-            {% for item in exports %}
-                <div class="border rounded bg-light mt-0 p-3">
-                    {% if item.export_type == 'documents' %}
-                        <h2>Document Export</h2>
-                    {% elif item.export_type == 'pages' %}
-                        <h2>Page Export</h2>
-                    {% elif item.export_type == 'collection' %}
-                        <h2>Collection Export</h2>
-                    {% else %}
-                        <h2>Unknown export type</h2>
-                    {% endif %}
-                    <p>
-                        This export has been created on {{ item.created_at }} by {{ item.created_by }}.
-                    </p>
-                    <a href="{{ item.export_file.url }}" class="btn btn-sm btn-primary">Download</a>
-                    <button type="button" class="btn btn-sm btn-danger show-danger-modal"
-                            data-message="Are you sure you want to delete this export? <strong>This action cannot be undone.</strong>"
-                            data-redirect-url="{% url 'twf:export_exports_delete' item.pk %}">
-                        Delete Export
-                    </button>
-                </div>
-                {{ item }}
-            {% endfor %}
-        {% else %}
-            <p>No exports found.</p>
-        {% endif %}
-     </div>
+    <p class="lead">See and download the existing exports.</p>
+    {% twf_filter filter %}
+
+    <div class="table-responsive-sm mt-3">
+        <div class="card">
+            <div class="card-body p-0">
+                {% render_table table %}
+            </div>
+        </div>
+    </div>
 {% endblock %}

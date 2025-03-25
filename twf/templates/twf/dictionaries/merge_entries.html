@@ -2,41 +2,38 @@
 {% load static %}
 
 {% block content %}
-    <div class="border rounded bg-light mt-0 p-3">
-        <h1 class="display-6">Merge Dictionary Entries</h1>
-        <p class="lead">Select the dictionary entries to merge. The left entry will remain, and the right entry will be merged into it.</p>
-    
-        <form method="post">
-            {% csrf_token %}
-            <div class="row">
-                <!-- Left Column: Remaining Entry -->
-                <div class="col-md-6">
-                    <label for="remainingEntry" class="form-label">Remaining Entry</label>
-                    <select name="remaining_entry" id="remainingEntry" class="form-control select2" required>
-                        <option value="">Select Remaining Entry</option>
-                        {% for entry in entries %}
-                            <option value="{{ entry.id }}">{{ entry.label }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-    
-                <!-- Right Column: Merge Entry -->
-                <div class="col-md-6">
-                    <label for="mergeEntry" class="form-label">Entry to Merge</label>
-                    <select name="merge_entry" id="mergeEntry" class="form-control select2" required>
-                        <option value="">Select Entry to Merge</option>
-                        {% for entry in entries %}
-                            <option value="{{ entry.id }}">{{ entry.label }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
+    <p class="lead">Select the dictionary entries to merge. The left entry will remain, and the right entry will be merged into it.</p>
+
+    <form method="post">
+        {% csrf_token %}
+        <div class="row">
+            <!-- Left Column: Remaining Entry -->
+            <div class="col-md-6">
+                <label for="remainingEntry" class="form-label">Remaining Entry</label>
+                <select name="remaining_entry" id="remainingEntry" class="form-control select2" required>
+                    <option value="">Select Remaining Entry</option>
+                    {% for entry in entries %}
+                        <option value="{{ entry.id }}">{{ entry.label }}</option>
+                    {% endfor %}
+                </select>
             </div>
-    
-            <div class="mt-4">
-                <button type="submit" class="btn btn-dark">Merge Entries</button>
+
+            <!-- Right Column: Merge Entry -->
+            <div class="col-md-6">
+                <label for="mergeEntry" class="form-label">Entry to Merge</label>
+                <select name="merge_entry" id="mergeEntry" class="form-control select2" required>
+                    <option value="">Select Entry to Merge</option>
+                    {% for entry in entries %}
+                        <option value="{{ entry.id }}">{{ entry.label }}</option>
+                    {% endfor %}
+                </select>
             </div>
-        </form>
-    </div>
+        </div>
+
+        <div class="mt-4">
+            <button type="submit" class="btn btn-dark">Merge Entries</button>
+        </div>
+    </form>
 {% endblock %}
 
 {% block js %}

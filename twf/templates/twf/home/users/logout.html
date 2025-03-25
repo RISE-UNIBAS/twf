@@ -1,15 +1,18 @@
 {% extends 'twf/base/base.html' %}
 {% load crispy_forms_tags %}
 
+{% block page_title %}
+    {% if user.is_authenticated %}
+       <h1>Goodbye, {{ request.user.username }}</h1>
+    {% endif %}
+{% endblock %}
+
 {% block content %}
-    <div class="border rounded bg-light mt-0 p-3">
-       {% if user.is_authenticated %}
-           <h1 class="display-6">Goodbye, {{ request.user.username }}</h1>
-           <p>You are about to log out of your account. Do you wish to proceed?</p>
-            <form method="post" action="{% url 'twf:logout' %}">
-                {% csrf_token %}
-                <button type="submit" class="btn btn-dark">Log out</button>
-            </form>
-        {% endif %}
-    </div>
+    {% if user.is_authenticated %}
+       <p class="lead">You are about to log out of your account. Do you wish to proceed?</p>
+        <form method="post" action="{% url 'twf:logout' %}">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-dark">Log out</button>
+        </form>
+    {% endif %}
 {% endblock %}

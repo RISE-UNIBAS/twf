@@ -21,7 +21,7 @@ class TWFCollectionsView(LoginRequiredMixin, TWFView):
     """ View for the project collections page. """
 
     template_name = None
-    page_title = 'Project Collections'
+    page_title = None
 
     def get_context_data(self, **kwargs):
         """Get the context data for the view."""
@@ -90,7 +90,7 @@ class TWFCollectionOverviewView(TWFCollectionsView):
     """ View for the collection overview page. """
 
     template_name = 'twf/collections/collections_overview.html'
-    page_title = 'Collection Overview'
+    page_title = 'Collections'
 
     def post(self, request, *args, **kwargs):
         """Handle the post request."""

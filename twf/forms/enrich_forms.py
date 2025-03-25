@@ -10,20 +10,20 @@ from twf.models import DictionaryEntry
 class EnrichEntryManualForm(forms.ModelForm):
     """Form for manually enriching a dictionary"""
 
-    authorization_data = forms.CharField(widget=JSONEditor(attrs={
+    metadata = forms.CharField(widget=JSONEditor(attrs={
         'style': 'min-height: 400px;'
     }))
 
     class Meta:
         model = DictionaryEntry
-        fields = ['authorization_data']
+        fields = ['metadata']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.helper = FormHelper()
         self.helper.layout = Layout(
             Row(
-                Column('authorization_data', css_class='form-group col-md-12 mb-0'),
+                Column('metadata', css_class='form-group col-md-12 mb-0'),
             ),
             Div(
                 Submit('submit', 'Save Data', css_class='btn btn-dark'),

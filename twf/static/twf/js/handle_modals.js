@@ -40,16 +40,39 @@ $(document).ready(function () {
       taskFunction = () => (window.location.href = redirectUrl); // Redirect to the specified URL
     }
     if (startTaskUrl) {
-      const progressUrlBase = button.data('progress-url-base');
-      const progressBarId = button.data('progress-bar-id');
-      const logTextareaId = button.data('log-textarea-id');
+      // Delete the metadata key from entry
+      if(button.data('delete-md-key')) {
+        const key = button.data('delete-md-key');
 
-      let formData = new FormData(form[0]); // Keep FormData intact
+        taskFunction = () => {
+          fetch(startTaskUrl, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-CSRFToken': getCsrfToken(),
+            },
+            body: JSON.stringify({ key: key }),
+          })
+          .then(response => response.json())
+          .then(() => {
+            const entry = document.getElementById('metadata-' + key);
+            if (entry) entry.remove();
+          });
+        };
+      }
+      // Start the Celery task
+      else {
+        const progressUrlBase = button.data('progress-url-base');
+        const progressBarId = button.data('progress-bar-id');
+        const logTextareaId = button.data('log-textarea-id');
 
-      taskFunction = () => {
-        console.log("Starting Celery task at:", startTaskUrl, "with data:", formData);
-        startTask(startTaskUrl, progressUrlBase, progressBarId, logTextareaId, formData);
-      };
+        let formData = new FormData(form[0]); // Keep FormData intact
+
+        taskFunction = () => {
+          console.log("Starting Celery task at:", startTaskUrl, "with data:", formData);
+          startTask(startTaskUrl, progressUrlBase, progressBarId, logTextareaId, formData);
+        };
+      }
     }
     if (cancelTaskUrl) {
       taskFunction = () => cancelTask(cancelTaskUrl, button.attr('id')); // Cancel the task

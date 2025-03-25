@@ -2,9 +2,5 @@
 {% load crispy_forms_tags %}
 
 {% block content %}
-     <div class="border rounded bg-light mt-0 p-3">
-        <h1 class="display-6">Create a new dictionary</h1>
-        <hr/> 
-        {% crispy form %}
-     </div>
+    {% crispy form %}
 {% endblock %}

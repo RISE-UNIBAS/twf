@@ -1,13 +1,16 @@
 """Views for CRUD operations on collections. These views do not render
 HTML pages, but redirect to the appropriate URL after the operation is
 completed."""
+import json
+
 from django.contrib import messages
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import redirect
 from django.urls import reverse_lazy
 from django.utils.safestring import mark_safe
+from django.views.decorators.csrf import csrf_exempt
 
-from twf.models import Collection, CollectionItem, Workflow
+from twf.models import Collection, CollectionItem, Workflow, Document
 from twf.permissions import check_permission
 
 def delete_collection_item_annotation(request, pk, index):
@@ -224,3 +227,26 @@ def clean_annotation(annotation):
     if 'text' not in cleaned_annotation:
         cleaned_annotation['text'] = ''
     return cleaned_annotation
+
+
+@csrf_exempt
+def update_collection_item_metadata(request, pk):
+    if request.method == "POST":
+        data = json.loads(request.body)
+        key = data.get("key")
+        value = data.get("value")
+
+        # TODO - Implement
+
+        return JsonResponse({"new_value": value})
+
+
+@csrf_exempt
+def delete_collection_item_metadata(request, pk):
+    if request.method == "POST":
+        data = json.loads(request.body)
+        key = data.get("key")
+
+        # TODO - Implement
+
+        return JsonResponse({"success": True})

@@ -1,3 +1,6 @@
+/*** TWF CSS ***/
+
+/* HTML, BODY, BASIC STYLES */
 html, body {
   height: 100%;
   margin: 0;
@@ -9,110 +12,141 @@ body {
   min-height: 100vh;
 }
 
+/* Main center container */
+#layout {
+  display: flex;
+  flex-direction: row;
+  flex: 1;
+  height: 100%;
+}
+
+#layout, .container-fluid, .d-flex {
+  flex: 1;
+  align-items: stretch;
+}
+
+.btn-ext {
+    background-color: #848484;
+    color: white;
+}
+
+.btn-ext::before {
+  content: ""; /* nothing by default */
+}
+
+.btn-ext:hover::before {
+  content: "\f35d"; /* Unicode for FontAwesome icon (here: fa-search) */
+  font-family: "Font Awesome 6 Free";  /* or "Font Awesome 5 Free", depending on your setup */
+  font-weight: 900; /* 400 for regular, 900 for solid icons */
+  margin-right: 0.5em;
+  color: #aaa;
+}
+
 main {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    overflow: auto;
-}
-
-
-
-h1 {
-    font-size: 1.4em;
-    margin-top: .3rem;
-    color: #c7c7c7;
-}
-
-.text-small {
-    font-size: 0.75em;  /* Adjust this value as needed */
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
 }
 
 .content {
   flex: 1;  /* This makes the content expand to fill available space, pushing the footer down */
 }
 
-.l-inactive {
-    transition: background-color .3s ease;
-    color: #3a3a3a !important;
+h1 {
+    margin-top: .3rem;
+    color: #454545;
+    font: 1.7em "Raleway", sans-serif;
+    letter-spacing: 2px;
 }
 
-.l-inactive:hover {
-    background-color: #3d603d;
-    color: #ffffff;
+h1::after {
+  content: '';
+  display: block;
+  margin-top: 0.25rem;
+  border-bottom: 1px solid #ccc;
 }
 
-.l-active {
-    background-color: #3d603d;
-    color: #ffffff !important;
+h2 {
+    margin-top: 1rem;
+    color: #454545;
+    font: 1.5em "Raleway", sans-serif;
+    letter-spacing: 2px;
+}
+
+h2::after {
+  content: '';
+  display: block;
+  margin-top: 0.25rem;
+  margin-right: 50px;
+  border-bottom: 1px solid #ccc;
+}
+
+.lead {
+    font-style: italic;
+}
+
+.text-small {
+    font-size: 0.75em;  /* Adjust this value as needed */
+}
+
+.nav-link {
+    font-size: 0.9em;
+}
+
+.side-item:hover {
+    background-color: #848484; !important;
+}
+
+.top-item:hover .nav-link {
+    text-decoration: underline;
 }
 
 /******************************************************************************/
-
-.pagination li a {
-    padding: 6px 12px;
-    border: 1px solid #a8a8a8;
-    margin-left: -1px; /* Overlap borders to prevent double borders */
+/* Default page links */
+/* Default page links */
+.pagination .page-link {
+  color: #212529; /* Bootstrap dark */
+  background-color: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 0; /* Optional: square look */
+  padding: 0.4em 0.75em;
 }
 
-.pagination li.active a {
-    background-color: #007bff; /* Bootstrap primary blue */
-    color: white; /* White text color */
-    border-color: #007bff; /* Matching border color */
+/* Hover effect */
+.pagination .page-link:hover {
+  background-color: #e9ecef;
+  color: #000;
 }
 
-.pagination li:first-child a {
-    border-top-left-radius: 0.25rem;
-    border-bottom-left-radius: 0.25rem;
+/* Active page */
+.pagination .page-item.active .page-link {
+  background-color: #212529; /* dark */
+  color: white;
+  border-color: #212529;
+  font-weight: 600;
 }
 
-.pagination li:last-child a {
-    border-top-right-radius: 0.25rem;
-    border-bottom-right-radius: 0.25rem;
+/* Disabled pages */
+.pagination .page-item.disabled .page-link {
+  color: #6c757d;
+  background-color: #f1f3f5;
+  border-color: #dee2e6;
 }
 
-.pagination li a:hover,
-.pagination li a:focus {
-    background-color: #c7c7c7; /* Light gray for hover */
-    color: #495057; /* Darker text color for hover */
-    text-decoration: none; /* No underline */
-}
 
-.pagination li.active a:hover,
-.pagination li.active a:focus {
-    background-color: #0056b3; /* Darker blue for active link hover */
-    color: white;
-}
 
-nav[aria-label="Table navigation"] {
-    display: flex;
-    justify-content: center;
-    margin-top: 20px;  /* Adds vertical spacing, adjust as needed */
-}
+/* Footer */
 
-/* Alternatively, if you are sure only pagination uses <nav> like this: */
-nav > ul.pagination {
-    display: flex;
-    justify-content: center;
-}
-.form-group {
-    font-size: small;
-}
-.form-control {
-    font-size: small;
-}
-
-.footer {
-    flex-shrink: 0;
-    background-color: #f8f9fa;
-    padding: 10px 0;
-    box-shadow: 0 -4px 6px rgba(0, 0, 0, 0.2); /* Top shadow */
-}
-
-.container-fluid {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
+footer.footer {
+  position: fixed;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  background-color: #f8f9fa;
+  padding: 10px 0;
+  box-shadow: 0 -4px 6px rgba(0, 0, 0, 0.2);
+  z-index: 1000;
 }
 
 .text-right {
@@ -325,26 +359,45 @@ tr[data-bs-toggle="collapse"]:hover {
     right: 0;
 }
 
+/*** SIDEBAR STYLING ***/
+.sidebarToggle button {
+    background-color: #343a40;
+    color: white;
+    padding: 0px 5px;
+    margin: 0 10px 0 0;
+    cursor: pointer;
+}
+
 /* Sidebar Default Width */
 #sidebar-container {
-    width: 250px; /* Default expanded width */
-    min-width: 250px;
-    max-width: 250px;
+    width: 200px;
+    min-width: 200px;
+    max-width: 200px;
     transition: width 0.3s ease-in-out;
     overflow: hidden;
+
+    height: auto; /* reset if previously 100% */
+    min-height: 100%;
+    display: flex;
+    flex-direction: column;
+    background-color: #212529;
 }
 
 /* Sidebar Collapsed */
 #sidebar-container.collapsed {
-    width: 50px; /* Smaller width when collapsed */
-    min-width: 50px;
-    max-width: 50px;
+    width: 0;
+    min-width: 0;
+    max-width: 0;
+    padding: 0;
+    margin: 0;
+    border: none;
 }
 
 /* Content Container (Main Content) */
 #content-container {
+    flex-grow: 1;
     transition: margin-left 0.3s ease-in-out;
-    width: calc(100% - 250px); /* Default state with sidebar expanded */
+    overflow-x: hidden;
 }
 
 /* Adjust Content When Sidebar is Collapsed */
@@ -369,3 +422,32 @@ tr[data-bs-toggle="collapse"]:hover {
     from { background-position: 0 0; }
     to { background-position: 40px 0; }
 }
+
+
+/* TWF BreadCrumb */
+.breadcrumb {
+    padding: 0.75rem 1rem;
+    margin-bottom: 0.5rem;
+    margin-left: 0;
+}
+
+.breadcrumb-item a {
+    color: whitesmoke;
+    text-decoration: none;
+}
+
+.breadcrumb-item a:hover {
+    text-decoration: underline;
+}
+
+.badge-table {
+  font-size: 0.65rem;
+  font-weight: 500;
+  padding: 0.15em 0.4em;
+  background-color: #e6e6e6;
+  color: #444;
+  border-radius: 0.25rem;
+  margin-right: 0.25rem;
+  white-space: nowrap;
+}
+

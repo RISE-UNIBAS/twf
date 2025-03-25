@@ -2,22 +2,30 @@
 {% load static %}
 {% load crispy_forms_tags %}
 
-{% block content %}
-     <div class="border rounded bg-light mt-0 p-3">
-        <h1 class="display-6">{{ ai_heading }}</h1>
-         <p class="lead">{{ ai_lead }}</p>
-         {% if not has_ai_credentials %}
-                <div class="alert alert-warning" role="alert">
-                    <strong>Warning!</strong> You have not set up AI credentials yet.
-                    Please <a href="{{ ai_credentials_url }}">set up AI credentials</a> before using this feature.
-                </div>
-         {% endif %}
-
-         {% crispy form %}
-     </div>
-    <div id="ai_result">
-
+{% block page_title %}
+    <div class="d-flex justify-content-between align-items-center pb-1 mb-3">
+      <h1 class="mb-0" style="width: 100%;">{{ page_title }}</h1>
+      <a href="{{ ai_credentials_url }}" class="btn btn-sm btn-dark"
+         data-bs-toggle="tooltip" data-bs-placement="top" title="Go to credential settings">
+        <i class="fa fa-gear"></i>
+      </a>
     </div>
+{% endblock %}
+
+{% block content %}
+
+    <p class="lead">{{ ai_lead }}</p>
+    {% if not has_ai_credentials %}
+            <div class="alert alert-warning" role="alert">
+                <strong>Warning!</strong> You have not set up AI credentials yet.
+                Please <a href="{{ ai_credentials_url }}">set up AI credentials</a> before using this feature.
+            </div>
+    {% else %}
+        {% crispy form %}
+        <div id="ai_result">
+        </div>
+    {% endif %}
+
 {% endblock %}
 
 {% block css %}

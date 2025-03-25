@@ -1,59 +1,56 @@
 {% extends 'twf/base/base.html' %}
 
 {% block content %}
-    <div class="border rounded bg-light mt-0 p-3">
-        <h1 class="display-6">Enhance at a Glance</h1>
-        <p class="lead">Enrich the dictionary entries with metadata. </p>
-    
-        {% include 'twf/dictionaries/dict_types.html' %}
+    <p class="lead">Enrich the dictionary entries with metadata. </p>
 
-        {%  if next_unenriched_entry %}
-            <div class="my-3 p-3 border rounded" style="background-color: khaki">
-                <p class="text-center" style="color: #7c7c7c">Try to enrich with metadata:
-                    <a href="{% url 'twf:dictionaries_entry_skip' next_unenriched_entry.id %}" class="btn btn-secondary float-end">Skip</a></p>
-                <p class="display-6 text-center">{{ next_unenriched_entry.label }}</p>
+    {% include 'twf/dictionaries/dict_types.html' %}
+
+    {%  if next_unenriched_entry %}
+        <div class="my-3 p-3 border rounded" style="background-color: khaki">
+            <p class="text-center" style="color: #7c7c7c">Try to enrich with metadata:
+                <a href="{% url 'twf:dictionaries_entry_skip' next_unenriched_entry.id %}" class="btn btn-secondary float-end">Skip</a></p>
+            <p class="display-6 text-center">{{ next_unenriched_entry.label }}</p>
+        </div>
+        <div class="container mt-5">
+            <!-- Tabs navs -->
+            <ul class="nav nav-tabs" id="myTab" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <a class="nav-link active" id="manual-tab" href="#tab-manual"
+                       data-bs-toggle="tab" role="tab" aria-controls="manual" aria-selected="true">Enter Data</a>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <a class="nav-link" id="geonames-tab" href="#tab-geonames"
+                       data-bs-toggle="tab" role="tab" aria-controls="geonames">Search Geonames</a>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <a class="nav-link" id="gnd-tab" href="#tab-gnd"
+                       data-bs-toggle="tab" role="tab" aria-controls="gnd">Search GND</a>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <a class="nav-link" id="wikidata-tab" href="#tab-wikidata"
+                       data-bs-toggle="tab" role="tab" aria-controls="gnd">Search Wikidata</a>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <a class="nav-link" id="openai-tab" href="#tab-openai"
+                       data-bs-toggle="tab" role="tab" aria-controls="openai">Ask OpenAI</a>
+                </li>
+            </ul>
+            <!-- Tabs navs -->
+
+            <!-- Tabs content -->
+            <div class="tab-content border border-top-0 p-3 bg-light" id="myTabContent">
+                {% include 'twf/dictionaries/norm_wizard/tab_manual.html' %}
+                {% include 'twf/dictionaries/norm_wizard/tab_geonames.html' %}
+                {% include 'twf/dictionaries/norm_wizard/tab_gnd.html' %}
+                {% include 'twf/dictionaries/norm_wizard/tab_wikidata.html' %}
+                {# include 'twf/dictionaries/norm_wizard/tab_openai.html' #}
             </div>
-            <div class="container mt-5">
-                <!-- Tabs navs -->
-                <ul class="nav nav-tabs" id="myTab" role="tablist">
-                    <li class="nav-item" role="presentation">
-                        <a class="nav-link active" id="manual-tab" href="#tab-manual"
-                           data-bs-toggle="tab" role="tab" aria-controls="manual" aria-selected="true">Enter Data</a>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                        <a class="nav-link" id="geonames-tab" href="#tab-geonames"
-                           data-bs-toggle="tab" role="tab" aria-controls="geonames">Search Geonames</a>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                        <a class="nav-link" id="gnd-tab" href="#tab-gnd"
-                           data-bs-toggle="tab" role="tab" aria-controls="gnd">Search GND</a>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                        <a class="nav-link" id="wikidata-tab" href="#tab-wikidata"
-                           data-bs-toggle="tab" role="tab" aria-controls="gnd">Search Wikidata</a>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                        <a class="nav-link" id="openai-tab" href="#tab-openai"
-                           data-bs-toggle="tab" role="tab" aria-controls="openai">Ask OpenAI</a>
-                    </li>
-                </ul>
-                <!-- Tabs navs -->
-            
-                <!-- Tabs content -->
-                <div class="tab-content border border-top-0 p-3 bg-light" id="myTabContent">
-                    {% include 'twf/dictionaries/norm_wizard/tab_manual.html' %}
-                    {% include 'twf/dictionaries/norm_wizard/tab_geonames.html' %}
-                    {% include 'twf/dictionaries/norm_wizard/tab_gnd.html' %}
-                    {% include 'twf/dictionaries/norm_wizard/tab_wikidata.html' %}
-                    {# include 'twf/dictionaries/norm_wizard/tab_openai.html' #}
-                </div>
-                <!-- Tabs content -->
-            </div>
-        {% else %}
-            <div class="alert alert-success mt-3">
-                    There are no more tags of this type.
-            </div>
-        {% endif %}
-     
-    </div>
+            <!-- Tabs content -->
+        </div>
+    {% else %}
+        <div class="alert alert-success mt-3">
+                There are no more tags of this type.
+        </div>
+    {% endif %}
+
 {% endblock %}

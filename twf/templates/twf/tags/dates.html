@@ -2,21 +2,18 @@
 {% load crispy_forms_tags %}
 
 {% block content %}
-     <div class="border rounded bg-light mt-0 p-3">
-        <h1 class="display-6">Wanna date?</h1>
-        <p class="lead">Normalize your date strings to EDTF format.</p>
-        {% include 'twf/base/alert_info.html' %}
-        
-        {% if has_next_tag %}
-            <div class="row">
-                <div class="col-12">
-                    {% crispy form %}
-                </div>
+    <p class="lead">Normalize your date strings to EDTF format.</p>
+    {% include 'twf/base/alert_info.html' %}
+
+    {% if has_next_tag %}
+        <div class="row">
+            <div class="col-12">
+                {% crispy form %}
             </div>
-        {% else %}$
-            <div class="alert alert-info">
-                There are no more dates to normalize
-            </div>
-        {% endif %}
-     </div>
+        </div>
+    {% else %}$
+        <div class="alert alert-info">
+            There are no more dates to normalize
+        </div>
+    {% endif %}
 {% endblock %}

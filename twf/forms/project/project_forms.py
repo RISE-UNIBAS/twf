@@ -204,7 +204,7 @@ class CredentialsForm(forms.ModelForm):
                     'Mistral',
                     Row(Column('mistral_api_key', css_class='col-12')),
                     Row(Column('mistral_default_model', css_class='col-12')),
-                    css_id='anthropic'
+                    css_id='mistral'
                 ),
                 Tab(
                     'Geonames',
@@ -273,7 +273,11 @@ class TaskSettingsForm(forms.ModelForm):
     document_metadata_review = forms.CharField(required=False, widget=forms.Textarea(attrs={'rows': 5}))
 
     # Define the fields for the form: Date normalization settings
-    date_input_format = forms.CharField(required=False, widget=TextInput(attrs={'placeholder': 'Date Input Format'}))
+    date_input_format = forms.ChoiceField(required=False,
+                                          choices=[('', 'Select Date Format'),
+                                                   ('auto', 'Auto Detect'),
+                                                   ('DMY', 'DMY'), ('YMD', 'YMD')],
+                                          widget=Select2Widget(attrs={'style': 'width: 100%;'}))
     resolve_to_date = forms.CharField(required=False, widget=TextInput(attrs={'placeholder': 'Resolve to Precision'}))
 
     # Define the fields for the form: Tag Type Settings

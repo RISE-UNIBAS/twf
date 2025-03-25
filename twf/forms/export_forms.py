@@ -10,6 +10,15 @@ from twf.forms.base_batch_forms import BaseBatchForm
 
 class ExportDocumentsForm(BaseBatchForm):
 
+    export_type = forms.ChoiceField(choices=[('documents', 'Documents'), ('pages', 'Pages')],
+                                    label='Export Type',
+                                    widget=Select2Widget(attrs={'style': 'width: 100%;'}),
+                                    required=True)
+
+    export_single_file = forms.BooleanField(label='Export as Single File',
+                                            required=False,
+                                            help_text='Export each document/page as a separate file')
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -17,7 +26,13 @@ class ExportDocumentsForm(BaseBatchForm):
         return 'Export Documents'
 
     def get_dynamic_fields(self):
-        return []
+        return [
+            Row(
+                Column('export_type', css_class='form-group col-6 mb-0'),
+                Column('export_single_file', css_class='form-group col-6 mb-0'),
+                css_class='row form-row'
+            )
+        ]
 
 
 class ExportCollectionsForm(BaseBatchForm):
@@ -34,6 +49,14 @@ class ExportCollectionsForm(BaseBatchForm):
 
 class ExportProjectForm(BaseBatchForm):
 
+    include_dictionaries = forms.BooleanField(label='Include Dictionaries',
+                                              required=False,
+                                              help_text='Include dictionaries in the export')
+
+    include_media_files = forms.BooleanField(label='Include Media Files',
+                                                required=False,
+                                                help_text='Include media files in the export')
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -41,7 +64,13 @@ class ExportProjectForm(BaseBatchForm):
         return 'Export Project'
 
     def get_dynamic_fields(self):
-        return []
+        return [
+            Row(
+                Column('include_dictionaries', css_class='form-group col-6 mb-0'),
+                Column('include_media_files', css_class='form-group col-6 mb-0'),
+                css_class='row form-row'
+            )
+        ]
 
 
 class ExportZenodoForm(BaseBatchForm):
@@ -60,7 +89,10 @@ class ExportZenodoForm(BaseBatchForm):
         super().__init__(*args, **kwargs)
 
         existing_zenodo_uploads = get_zenodo_uploads(self.project)
-        existing_repositories = [(upload['id'], upload['metadata']['title']) for upload in existing_zenodo_uploads]
+        if existing_zenodo_uploads:
+            existing_repositories = [(upload['id'], upload['metadata']['title']) for upload in existing_zenodo_uploads]
+        else:
+            existing_repositories = []
         self.fields['choose_repository'].choices += existing_repositories
 
         self.fields['choose_export'].queryset = self.project.export_set.all()

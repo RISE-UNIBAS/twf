@@ -82,7 +82,7 @@ class TWFDocumentView(LoginRequiredMixin, TWFView):
 class TWFDocumentsOverviewView(TWFDocumentView):
     """View for the project documents overview."""
     template_name = 'twf/documents/overview.html'
-    page_title = 'Project Documents Overview'
+    page_title = 'Documents'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -121,7 +121,7 @@ class TWFDocumentsOverviewView(TWFDocumentView):
 class TWFDocumentsBrowseView(SingleTableView, FilterView, TWFDocumentView):
     """View for displaying project documents."""
     template_name = 'twf/documents/documents.html'
-    page_title = 'Project Documents'
+    page_title = 'Browse Documents'
     table_class = DocumentTable
     filterset_class = DocumentFilter
     paginate_by = 10
@@ -195,11 +195,18 @@ class TWFDocumentDetailView(TWFDocumentView):
     """View for displaying a document."""
     template_name = 'twf/documents/document.html'
     page_title = 'Document Detail'
+    navigation_anchor = reverse_lazy("twf:documents_browse")
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["document"] = Document.objects.get(pk=self.kwargs.get('pk'))
         return context
+
+    def get_breadcrumbs(self):
+        """Get the breadcrumbs for the view."""
+        breadcrumbs = super().get_breadcrumbs()
+        breadcrumbs.insert(-1, {'url': reverse('twf:documents_browse'), 'value': 'Browse Documents'})
+        return breadcrumbs
 
 
 class TWFDocumentNameView(TWFDocumentView):

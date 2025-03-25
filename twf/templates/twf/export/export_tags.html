@@ -1,10 +1,8 @@
 {% extends 'twf/base/base.html' %}
 
 {% block content %}
-    <div class="border rounded bg-light mt-0 p-3">
-        <h1 class="display-6">Export Page Tags</h1>
         <p class="lead">Export all page tags in the project.</p>
-        <hr/>
+
         <form method="post">
             {% csrf_token %}
             <table class="table table-borderless">

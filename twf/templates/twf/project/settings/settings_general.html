@@ -2,11 +2,8 @@
 {% load crispy_forms_tags %}
 
 {% block content %}
-     <div class="border rounded bg-light mt-0 p-3">
-        <h1 class="display-6">General Settings</h1>
-        <p class="lead">Change the general settings of the project.</p>
-        {% crispy form %}
-     </div>
+    <p class="lead">Change the general settings of the project.</p>
+    {% crispy form %}
 {% endblock %}
 
 {% block script %}

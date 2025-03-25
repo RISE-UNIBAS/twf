@@ -115,7 +115,7 @@ class TWFTagsExtractView(FormView, TWFTagsView):
 class TWFTagsOverviewView(TWFTagsView):
     """View for the tags overview."""
     template_name = 'twf/tags/overview.html'
-    page_title = 'Tags Overview'
+    page_title = 'Tags'
 
     def get_context_data(self, **kwargs):
         """Get the context data."""
@@ -349,7 +349,6 @@ class TWFProjectTagsView(SingleTableMixin, FilterView, TWFTagsView):
     table_class = TagTable
     paginate_by = 20
     model = PageTag
-    filterset = None
 
     def post(self, request, *args, **kwargs):
         """Handle the post request."""

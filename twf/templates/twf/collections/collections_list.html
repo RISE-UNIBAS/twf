@@ -1,7 +1,6 @@
 {% extends 'twf/base/base.html' %}
 
 {% block content %}
-     <div class="border rounded bg-light mt-0 p-3">
         
      {% for col in collections %}
          <div class="container p-0 m-0 mt-3">
@@ -15,11 +14,8 @@
                         <small class="text-muted">Created: {{ col.created_at }} by {{ col.created_by }}, Items: {{ col.items.all.count }}</small>
                     </p>
                     <a href="{% url 'twf:collections_view' col.id %}" class="btn btn-dark float-end ms-2">View</a>
-                    
-                    
                 </div>
             </div>
         </div>
      {% endfor %}
-     </div>
 {% endblock %}
