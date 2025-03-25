@@ -57,6 +57,10 @@ class ProjectAIBaseForm(BaseAIBatchForm):
             ),
         ]
 
+    def get_cancel_button_label(self):
+        """Get the label for the submit button."""
+        return 'Cancel'
+
 
 
 class OpenAIQueryDatabaseForm(ProjectAIBaseForm):

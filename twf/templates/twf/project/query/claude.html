@@ -3,16 +3,16 @@
 {% block script %}
     {{ block.super }} <!-- Keep base script but override formatting -->
 
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script>
         function format_ai_result(data) {
-            console.log("Claude-specific format_ai_result called", data);
-
             let text = data?.content?.[0]?.text || "No response text.";
+
             let aiResultHTML = `
+                <h2>Claude AI Result</h2>
                 <div class="card mt-3">
-                    <div class="card-header">Claude AI Result</div>
                     <div class="card-body">
-                        <blockquote class="blockquote">${text}</blockquote>
+                        <div>${marked.parse(text)}</div>
                     </div>
                 </div>`;
 

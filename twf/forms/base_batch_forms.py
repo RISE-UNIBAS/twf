@@ -68,13 +68,17 @@ class BaseBatchForm(forms.Form):
                 css_class='row form-row'
             ),
             Div(
-                Button('cancelBatch', "Cancel Batch", **cancel_kwargs),
+                Button('cancelBatch', self.get_cancel_button_label(), **cancel_kwargs),
                 Button('startBatch', self.get_button_label(), **filtered_kwargs),
                 css_class='text-end pt-3'
             )
         )
 
     def get_button_label(self):
+        """Get the label for the submit button."""
+        return 'Start Batch'
+
+    def get_cancel_button_label(self):
         """Get the label for the submit button."""
         return 'Start Batch'
 

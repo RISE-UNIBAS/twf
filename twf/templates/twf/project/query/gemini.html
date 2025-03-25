@@ -3,16 +3,16 @@
 {% block script %}
     {{ block.super }}
 
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script>
         function format_ai_result(data) {
-            console.log("Gemini-specific format_ai_result called", data);
-
             let text = data?.candidates?.[0]?.content?.parts?.[0]?.text || "No response text.";
+
             let aiResultHTML = `
+                <h2>Gemini AI Result</h2>
                 <div class="card mt-3">
-                    <div class="card-header bg-primary text-white">Gemini AI Result</div>
                     <div class="card-body">
-                        <p>${text}</p>
+                        <div>${marked.parse(text)}</div>
                     </div>
                 </div>`;
 
