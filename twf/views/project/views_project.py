@@ -521,7 +521,7 @@ class TWFProjectSetupView(TWFProjectView):
 class TWFProjectTranskribusExtractView(FormView, TWFProjectView):
     """View for the project setup."""
     template_name = 'twf/project/setup/setup_structure.html'
-    page_title = 'Project TK Structure'
+    page_title = 'Extract Transkribus Export'
     form_class = DocumentExtractionBatchForm
     success_url = reverse_lazy('twf:project_tk_structure')
 
