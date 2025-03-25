@@ -19,8 +19,7 @@ class TWFProjectAIQueryView(AIFormView, TWFProjectView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['ai_heading'] = self.page_title
-        context['ai_lead'] = ('Query the OpenAI model for predictions.'
-                              'Select documents to ask the AI model questions.')
+        context['ai_lead'] = 'Use ChatGPT to answer questions about your documents.'
         context['has_ai_credentials'] = self.has_ai_credentials('openai')
         context['ai_credentials_url'] = reverse_lazy('twf:project_settings_credentials') + '?tab=openai'
         return context
