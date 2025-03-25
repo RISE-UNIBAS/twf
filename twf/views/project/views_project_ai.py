@@ -14,7 +14,7 @@ class TWFProjectAIQueryView(AIFormView, TWFProjectView):
     form_class = OpenAIQueryDatabaseForm
     success_url = reverse_lazy('twf:project_ai_query')
     start_url = reverse_lazy('twf:task_project_query_openai')
-    message = "Are you sure you want to start the openai task?"
+    message = "Do you want to go ahead and ask ChatGPT this question?"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
