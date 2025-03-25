@@ -492,7 +492,7 @@ class Document(TimeStampedModel):
         if self.title:
             return self.title
 
-        return f"Document for {self.project.title}"
+        return f"Document {self.document_id}"
 
 
 def page_directory_path(instance, filename):

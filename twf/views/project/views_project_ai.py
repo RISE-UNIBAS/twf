@@ -10,7 +10,7 @@ from twf.views.views_base import AIFormView
 class TWFProjectAIQueryView(AIFormView, TWFProjectView):
     """View for querying the AI model."""
     template_name = 'twf/project/query/openai.html'
-    page_title = 'OpenAI Query'
+    page_title = 'Ask ChatGPT'
     form_class = OpenAIQueryDatabaseForm
     success_url = reverse_lazy('twf:project_ai_query')
     start_url = reverse_lazy('twf:task_project_query_openai')
@@ -18,7 +18,7 @@ class TWFProjectAIQueryView(AIFormView, TWFProjectView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['ai_heading'] = 'OpenAI Query'
+        context['ai_heading'] = self.page_title
         context['ai_lead'] = ('Query the OpenAI model for predictions.'
                               'Select documents to ask the AI model questions.')
         context['has_ai_credentials'] = self.has_ai_credentials('openai')
@@ -28,7 +28,7 @@ class TWFProjectAIQueryView(AIFormView, TWFProjectView):
 
 class TWFProjectGeminiQueryView(AIFormView, TWFProjectView):
     template_name = 'twf/project/query/gemini.html'
-    page_title = 'Gemini Query'
+    page_title = 'Ask Gemini'
     form_class = GeminiQueryDatabaseForm
     success_url = reverse_lazy('twf:project_gemini_query')
     start_url = reverse_lazy('twf:task_project_query_gemini')
@@ -36,7 +36,7 @@ class TWFProjectGeminiQueryView(AIFormView, TWFProjectView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['ai_heading'] = 'Gemini Query'
+        context['ai_heading'] = self.page_title
         context['ai_lead'] = ('Query the Gemini model for predictions.'
                               'Select documents to ask the AI model questions.')
         context['has_ai_credentials'] = self.has_ai_credentials('genai')
@@ -46,7 +46,7 @@ class TWFProjectGeminiQueryView(AIFormView, TWFProjectView):
 
 class TWFProjectClaudeQueryView(AIFormView, TWFProjectView):
     template_name = 'twf/project/query/claude.html'
-    page_title = 'Claude Query'
+    page_title = 'Ask Claude'
     form_class = ClaudeQueryDatabaseForm
     success_url = reverse_lazy('twf:project_claude_query')
     start_url = reverse_lazy('twf:task_project_query_claude')
@@ -54,7 +54,7 @@ class TWFProjectClaudeQueryView(AIFormView, TWFProjectView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['ai_heading'] = 'Claude Query'
+        context['ai_heading'] = self.page_title
         context['ai_lead'] = ('Query the Claude model for predictions.'
                               'Select documents to ask the AI model questions.')
         context['has_ai_credentials'] = self.has_ai_credentials('anthropic')
@@ -64,7 +64,7 @@ class TWFProjectClaudeQueryView(AIFormView, TWFProjectView):
 
 class TWFProjectMistralQueryView(AIFormView, TWFProjectView):
     template_name = 'twf/project/query/mistral.html'
-    page_title = 'Mistral Query'
+    page_title = 'Ask Mistral'
     form_class = ClaudeQueryDatabaseForm
     success_url = reverse_lazy('twf:project_mistral_query')
     start_url = reverse_lazy('twf:task_project_query_mistral')
@@ -72,7 +72,7 @@ class TWFProjectMistralQueryView(AIFormView, TWFProjectView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['ai_heading'] = 'Mistral Query'
+        context['ai_heading'] = self.page_title
         context['ai_lead'] = ('Query the Mistral model for predictions.'
                               'Select documents to ask the AI model questions.')
         context['has_ai_credentials'] = self.has_ai_credentials('mistral')
