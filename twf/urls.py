@@ -95,7 +95,7 @@ urlpatterns = [
     path('project/overview/', TWFProjectOverviewView.as_view(), name='project_overview'),
     path('project/setup/tk/export/',
          TWFProjectSetupView.as_view(template_name='twf/project/setup/setup_export.html',
-                                     page_title='Project TK Export'), name='project_tk_export'),
+                                     page_title='Request Transkribus Export'), name='project_tk_export'),
     path('project/setup/tk/structure/', TWFProjectTranskribusExtractView.as_view(), name='project_tk_structure'),
     path('project/setup/tk/test/', TWFProjectSetupView.as_view(template_name='twf/project/setup/test_export.html',
                                                                page_title='Test Transkribus Export'),
