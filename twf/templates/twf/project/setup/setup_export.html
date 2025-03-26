@@ -47,11 +47,11 @@
             <div class="border w-100">
                 {% if project.downloaded_zip_file %}
                     <div class="alert alert-warning" role="alert">
-                        <h4 class="alert-heading">Restart Import Process</h4>
+                        <h4 class="alert-heading">Restart Export Process</h4>
                         <p>
-                            You have a downloaded file. You can reset the process and start a new export job.
-                            This will delete the current export file, and you can start a new export job.
-                            This will not overwrite any other information than the export file.
+                            You have already downloaded an export file from Transkribus.
+                            You can reset the export process and start a new job.
+                            This will delete the current export file but not affect any other data in your project.
                         </p>
                         <input id="restartExport" type="button" role="button" class="btn btn-dark mb-3"
                                value="Restart Export Job" onclick="restart_export_job({{ project.pk }})">
