@@ -1,6 +1,7 @@
 """This module contains the views for triggering the Celery tasks."""
 import os
 import uuid
+from pathlib import Path
 
 from django.conf import settings
 from django.core.files.storage import default_storage
@@ -328,10 +329,10 @@ def start_json_metadata(request):
     if data_file:
         # Generate a unique filename
         file_name = f"metadata_upload_{uuid.uuid4().hex}.json"
-        file_path = os.path.join(settings.MEDIA_ROOT, "temp", file_name)
+        file_path = Path(settings.MEDIA_ROOT) / "temp" / file_name
 
         # Ensure the temp directory exists
-        os.makedirs(os.path.dirname(file_path), exist_ok=True)
+        file_path.parent.mkdir(parents=True, exist_ok=True)
 
         # Save the file
         with default_storage.open(file_path, 'wb') as destination:

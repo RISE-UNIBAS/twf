@@ -3,6 +3,7 @@ import logging
 import os
 import uuid
 import zipfile
+from pathlib import Path
 
 from celery import shared_task
 from django.core.files.storage import FileSystemStorage
@@ -73,7 +74,7 @@ def extract_files_from_zip(zip_file, extract_to_path, project, celery_task):
         for i, file_info in enumerate(valid_files, start=1):
             with zip_ref.open(file_info) as file_data:
                 new_filename = generate_new_filename(file_info, project)
-                new_filepath = os.path.join(extract_to_path, new_filename)
+                new_filepath = Path(extract_to_path) / new_filename
                 with open(new_filepath, 'wb') as new_file:
                     new_file.write(file_data.read())
                     copied_files.append(new_filepath)

@@ -6,6 +6,7 @@ import shutil
 import tempfile
 import zipfile
 from io import BytesIO
+from pathlib import Path
 
 import pandas as pd
 from celery import shared_task
@@ -46,7 +47,7 @@ def export_documents_task(self, project_id, user_id, **kwargs):
 
                 if export_single_file:
                     export_filename = f"document_{doc.document_id}.json"
-                    export_filepath = os.path.join(temp_dir, export_filename)
+                    export_filepath = Path(temp_dir) / export_filename
                     with open(export_filepath, "w", encoding="utf8") as sf:
                         json.dump(export_doc_data, sf, indent=4)
                 else:
@@ -73,17 +74,18 @@ def export_documents_task(self, project_id, user_id, **kwargs):
             result_filepath = zip_filepath
         else:
             export_filename = f"export_{self.project.id}.json"
-            export_filepath = os.path.join(temp_dir, export_filename)
+            export_filepath = Path(temp_dir) / export_filename
             with open(export_filepath, "w", encoding="utf8") as sf:
                 json.dump(export_data_list, sf, indent=4)
             result_filepath = export_filepath
 
         # Move to a persistent storage location for download
-        relative_export_path = f"exports/{os.path.basename(result_filepath)}"
-        final_result_path = os.path.join(settings.MEDIA_ROOT, relative_export_path)
+        result_filename = Path(result_filepath).name
+        relative_export_path = f"exports/{result_filename}"
+        final_result_path = Path(settings.MEDIA_ROOT) / relative_export_path
 
         # Ensure the directory exists
-        os.makedirs(os.path.dirname(final_result_path), exist_ok=True)
+        final_result_path.parent.mkdir(parents=True, exist_ok=True)
 
         with open(result_filepath, "rb") as f:
             saved_filename = default_storage.save(relative_export_path, File(f))
