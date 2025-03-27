@@ -1,0 +1,35 @@
+{% load twf_help %}
+<h1>Context Help: Export Configuration</h1>
+<p>
+    The Export Configuration page allows you to set up and manage global export settings for your project. These settings will be applied to all exports created within the project.
+</p>
+
+<h2>Configuration Options</h2>
+<p>
+    On this page, you can configure:
+</p>
+<ul>
+    <li><strong>Default Export Formats:</strong> Define the preferred formats for different types of content (documents, collections, etc.).</li>
+    <li><strong>Metadata Fields:</strong> Specify which metadata fields should be included in exports.</li>
+    <li><strong>File Structure:</strong> Configure how exported files should be organized and structured.</li>
+    <li><strong>Output Templates:</strong> Define templates for formatting the exported content.</li>
+</ul>
+
+<h2>Global vs. Individual Export Settings</h2>
+<p>
+    Settings configured here apply project-wide but can be overridden for individual exports when needed. This allows for consistent exports across the project while maintaining flexibility for special cases.
+</p>
+
+<h2>Tips for Export Configuration</h2>
+<ul>
+    <li>Consider the needs of your target audience when selecting export formats.</li>
+    <li>Include only essential metadata to keep exports clean and focused.</li>
+    <li>Save common export configurations as templates if you perform similar exports regularly.</li>
+    <li>Test your export configuration with a small sample before exporting large datasets.</li>
+</ul>
+
+<h1>Related Topics</h1>
+<ul>
+    <li><a href="{% help_url 'modules/workflows/export.html' %}" target="_blank" class="help-link">Export Workflows Documentation</a></li>
+    <li><a href="{% help_url 'modules/parts/settings.html' %}" target="_blank" class="help-link">Project Settings</a></li>
+</ul>

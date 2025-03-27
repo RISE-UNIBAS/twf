@@ -1,0 +1,45 @@
+{% load twf_help %}
+<h1>Context Help: Export Documents</h1>
+<p>
+    The Export Documents page allows you to export documents from your project in various formats. You can select specific documents to export or filter them based on criteria.
+</p>
+
+<h2>Export Process</h2>
+<ol>
+    <li><strong>Select Documents:</strong> Use the table to select which documents to include in the export.</li>
+    <li><strong>Choose Format:</strong> Select the desired export format (JSON, XML, CSV, TXT, etc.).</li>
+    <li><strong>Configure Options:</strong> Set specific options for the selected format, such as:
+        <ul>
+            <li>Including page content</li>
+            <li>Including metadata</li>
+            <li>Including tags</li>
+            <li>Formatting options</li>
+        </ul>
+    </li>
+    <li><strong>Start Export:</strong> Click the export button to begin the export process.</li>
+</ol>
+
+<h2>Supported Formats</h2>
+<p>
+    Depending on your project configuration, you may export documents in various formats:
+</p>
+<ul>
+    <li><strong>JSON:</strong> Best for preserving all data structures and metadata.</li>
+    <li><strong>XML:</strong> Good for interoperability with other systems.</li>
+    <li><strong>TXT/CSV:</strong> Simplified formats for text content and basic metadata.</li>
+    <li><strong>PDF:</strong> For human-readable document exports.</li>
+    <li><strong>Custom formats:</strong> Defined in your project's export configuration.</li>
+</ul>
+
+<h2>Document Selection Tips</h2>
+<ul>
+    <li>Use filters to quickly find documents based on metadata, tags, or other criteria.</li>
+    <li>You can sort the document table by any column to organize your selection.</li>
+    <li>Select all documents that match your current filter with the "Select All" checkbox.</li>
+</ul>
+
+<h1>Related Topics</h1>
+<ul>
+    <li><a href="{% help_url 'modules/workflows/export.html' %}" target="_blank" class="help-link">Export Workflows Documentation</a></li>
+    <li><a href="{% help_url 'modules/workflows/documents.html' %}" target="_blank" class="help-link">Document Workflows</a></li>
+</ul>

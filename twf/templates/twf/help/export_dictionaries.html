@@ -1,0 +1,47 @@
+{% load twf_help %}
+<h1>Context Help: Export Dictionaries</h1>
+<p>
+    The Export Dictionaries page allows you to export dictionaries from your project. Dictionaries are collections of terms, definitions, and normalized values that help standardize tags and terms across your project.
+</p>
+
+<h2>Export Process</h2>
+<ol>
+    <li><strong>Select Dictionaries:</strong> Choose which dictionaries to include in the export.</li>
+    <li><strong>Choose Format:</strong> Select the desired export format (JSON, CSV, Excel, etc.).</li>
+    <li><strong>Configure Options:</strong> Set specific options for the selected format, such as:
+        <ul>
+            <li>Including dictionary metadata</li>
+            <li>Including variations and normalized forms</li>
+            <li>Including external references</li>
+            <li>Field mapping options</li>
+        </ul>
+    </li>
+    <li><strong>Start Export:</strong> Click the export button to begin the export process.</li>
+</ol>
+
+<h2>Dictionary Content</h2>
+<p>
+    When exporting dictionaries, you can choose to include:
+</p>
+<ul>
+    <li><strong>Dictionary Metadata:</strong> Information about the dictionary itself, such as type, description, and creation date.</li>
+    <li><strong>Dictionary Entries:</strong> All entries contained in the dictionary.</li>
+    <li><strong>Variations:</strong> Different forms or spellings of each entry.</li>
+    <li><strong>Normalized Values:</strong> The standardized form for each entry.</li>
+    <li><strong>External References:</strong> Links to external authorities like GND, Wikidata, or Geonames.</li>
+    <li><strong>Usage Statistics:</strong> Information about how frequently entries appear in your documents.</li>
+</ul>
+
+<h2>Use Cases for Dictionary Exports</h2>
+<ul>
+    <li><strong>Data Sharing:</strong> Share standardized terminology with colleagues or other projects.</li>
+    <li><strong>Backup:</strong> Create backups of your dictionaries.</li>
+    <li><strong>External Enrichment:</strong> Export to enrich the data elsewhere before re-importing.</li>
+    <li><strong>Publication:</strong> Include standardized dictionaries as part of your research data publication.</li>
+</ul>
+
+<h1>Related Topics</h1>
+<ul>
+    <li><a href="{% help_url 'modules/workflows/export.html' %}" target="_blank" class="help-link">Export Workflows Documentation</a></li>
+    <li><a href="{% help_url 'modules/workflows/dictionaries.html' %}" target="_blank" class="help-link">Dictionary Workflows</a></li>
+</ul>

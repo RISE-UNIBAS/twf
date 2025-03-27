@@ -1,0 +1,48 @@
+{% load twf_help %}
+<h1>Context Help: Export Collections</h1>
+<p>
+    The Export Collections page allows you to export collections from your project in various formats. Collections organize related documents, pages, or annotations that you've grouped together.
+</p>
+
+<h2>Export Process</h2>
+<ol>
+    <li><strong>Select Collections:</strong> Use the table to select which collections to include in the export.</li>
+    <li><strong>Choose Format:</strong> Select the desired export format (JSON, XML, CSV, TXT, etc.).</li>
+    <li><strong>Configure Options:</strong> Set specific options for the selected format, such as:
+        <ul>
+            <li>Including collection items' content</li>
+            <li>Including metadata and annotations</li>
+            <li>Formatting options</li>
+            <li>File organization preferences</li>
+        </ul>
+    </li>
+    <li><strong>Start Export:</strong> Click the export button to begin the export process.</li>
+</ol>
+
+<h2>Collection Content Options</h2>
+<p>
+    When exporting collections, you can choose to include:
+</p>
+<ul>
+    <li><strong>Collection Metadata:</strong> Information about the collection itself, such as title, description, and creation date.</li>
+    <li><strong>Item Metadata:</strong> Metadata associated with each item in the collection.</li>
+    <li><strong>Item Content:</strong> The actual content of documents, pages, or annotations in the collection.</li>
+    <li><strong>Annotations:</strong> Any annotations or notes added to collection items.</li>
+    <li><strong>Relationships:</strong> Connections between items in the collection.</li>
+</ul>
+
+<h2>Export Format Considerations</h2>
+<p>
+    Different formats offer different advantages:
+</p>
+<ul>
+    <li><strong>JSON:</strong> Preserves collection structure, relationships, and all metadata.</li>
+    <li><strong>XML:</strong> Good for interoperability with other systems while maintaining structure.</li>
+    <li><strong>CSV/TXT:</strong> Simplified formats, useful for basic data analysis or text review.</li>
+</ul>
+
+<h1>Related Topics</h1>
+<ul>
+    <li><a href="{% help_url 'modules/workflows/export.html' %}" target="_blank" class="help-link">Export Workflows Documentation</a></li>
+    <li><a href="{% help_url 'modules/workflows/collections.html' %}" target="_blank" class="help-link">Collection Workflows</a></li>
+</ul>
