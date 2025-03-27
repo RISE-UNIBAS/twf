@@ -1,11 +1,65 @@
 {% load twf_help %}
+<h1>Context Help: AI Query</h1>
 <p>
-    You can query an AI model to get predictions on your data.
-    Querying data <strong>will not</strong> change your data.
-    You need to set your API key and model on the <a href="{% url 'twf:project_settings_credentials' %}">settings</a> page to use this feature.
+    The AI Query feature allows you to ask questions about your project data and receive intelligent responses from AI language models. This is useful for exploring your data, generating summaries, extracting insights, or getting assistance with analysis.
 </p>
+
+<h2>How AI Querying Works</h2>
+<p>
+    When you use this feature:
+</p>
+<ul>
+    <li>Your prompt and selected data are sent securely to the AI service (OpenAI, Claude, or Gemini).</li>
+    <li>The AI processes your query and returns a response based on the provided data.</li>
+    <li>Results are displayed in the interface and can be saved for future reference.</li>
+    <li><strong>Important:</strong> Querying data <strong>will not</strong> change your project data in any way.</li>
+</ul>
+
+<h2>Configuration Requirements</h2>
+<p>
+    To use this feature, you need to:
+</p>
+<ul>
+    <li>Have valid API credentials configured in your <a href="{% url 'twf:project_settings_credentials' %}">project settings</a>.</li>
+    <li>Select an appropriate AI model from the available options.</li>
+    <li>Have necessary permissions within your project.</li>
+</ul>
+
+<h2>Writing Effective Prompts</h2>
+<p>
+    For best results:
+</p>
+<ul>
+    <li>Be specific about what you want the AI to analyze or explain.</li>
+    <li>Provide context about your data when needed.</li>
+    <li>Break complex questions into simpler parts.</li>
+    <li>Use the "Save Prompt" feature to store useful prompts for reuse.</li>
+</ul>
+
+<h2>Data Selection</h2>
+<p>
+    You can query different types of project data:
+</p>
+<ul>
+    <li>Documents (full text or specific pages)</li>
+    <li>Collections</li>
+    <li>Tags and annotations</li>
+    <li>Dictionary entries</li>
+    <li>Project metadata</li>
+</ul>
+
+<h2>Privacy & Security</h2>
+<p>
+    Please be aware that:
+</p>
+<ul>
+    <li>Data sent to AI services is governed by their privacy policies.</li>
+    <li>Sensitive information should be handled with appropriate caution.</li>
+    <li>API keys should be kept secure and not shared.</li>
+</ul>
 
 <h1>Related Topics</h1>
 <ul>
-    <li><a href="{% help_url '' %}" target="_blank" class="help-link">Querying AI systems</a></li>
+    <li><a href="{% help_url 'modules/parts/settings.html' %}" target="_blank" class="help-link">Project Settings</a></li>
+    <li><a href="{% help_url 'modules/workflows/project.html' %}" target="_blank" class="help-link">Project Workflows</a></li>
 </ul>
