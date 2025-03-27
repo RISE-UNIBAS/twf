@@ -1,0 +1,75 @@
+{% load twf_help %}
+
+<div class="help-content">
+    <h2>Load Metadata from Google Sheets</h2>
+    <p>
+        This page allows you to load metadata directly from a Google Sheets document and apply it to the documents 
+        or pages in your project. This feature is especially useful when your metadata is maintained in collaborative 
+        spreadsheets or undergoes frequent updates.
+    </p>
+
+    <h3>Prerequisites</h3>
+    <p>
+        Before using this feature, you need:
+    </p>
+    <ul>
+        <li>A valid Google API key configured in your project settings</li>
+        <li>A published Google Sheets document with appropriate sharing settings</li>
+        <li>A properly formatted spreadsheet with headers in the first row</li>
+        <li>At least one column containing document or page identifiers</li>
+    </ul>
+
+    <h3>Google Sheets Format</h3>
+    <p>
+        Your Google Sheets document should follow these guidelines:
+    </p>
+    <ul>
+        <li>First row must contain column headers that will map to metadata fields</li>
+        <li>Each row should represent a single document or page</li>
+        <li>Include a column with unique identifiers (document ID, filename, etc.)</li>
+        <li>Use consistent data formats, especially for dates and numerical values</li>
+        <li>Avoid merged cells, formulas, or complex formatting</li>
+    </ul>
+
+    <h3>Connection Process</h3>
+    <p>
+        To load metadata from Google Sheets:
+    </p>
+    <ol>
+        <li>Enter the Google Sheets document URL or ID</li>
+        <li>Specify which worksheet to use (if the document has multiple sheets)</li>
+        <li>Select the data range to import (if not using the entire sheet)</li>
+        <li>Choose the document or page identifier column for matching</li>
+        <li>Map Google Sheets columns to your project's metadata fields</li>
+        <li>Preview the data before finalizing the import</li>
+    </ol>
+
+    <h3>Matching and Mapping</h3>
+    <p>
+        After connecting to your Google Sheet, you'll need to:
+    </p>
+    <ul>
+        <li>Specify which column contains your document identifiers</li>
+        <li>Map each column from your spreadsheet to the appropriate metadata field in your project</li>
+        <li>Configure how to handle missing or conflicting data</li>
+        <li>Review the matching results before confirming</li>
+    </ul>
+
+    <h3>Best Practices</h3>
+    <ul>
+        <li>Use descriptive column headers that clearly indicate the data content</li>
+        <li>Maintain consistent data formats across your spreadsheet</li>
+        <li>Consider using data validation in Google Sheets to enforce consistency</li>
+        <li>Back up your project before importing metadata from external sources</li>
+        <li>Keep your Google Sheets document properly secured with appropriate sharing settings</li>
+        <li>Consider freezing the first row in Google Sheets to keep headers visible</li>
+    </ul>
+
+    <h3>Related Topics</h3>
+    <ul>
+        <li>{% help_url 'metadata_load_metadata' 'Loading Metadata from JSON Files' %}</li>
+        <li>{% help_url 'metadata_extract' 'Extracting Metadata' %}</li>
+        <li>{% help_url 'metadata_review_document' 'Reviewing Document Metadata' %}</li>
+        <li>{% help_url 'project_settings_credentials' 'Configuring API Credentials' %}</li>
+    </ul>
+</div>

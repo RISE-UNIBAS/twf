@@ -1,0 +1,66 @@
+{% load twf_help %}
+
+<div class="help-content">
+    <h2>Ignored Tags</h2>
+    <p>
+        This page shows all tags that have been marked as "ignored" - meaning they have been deliberately excluded from further 
+        processing. Ignored tags are those that you've determined are not relevant to your project's needs.
+    </p>
+
+    <h3>What are Ignored Tags?</h3>
+    <p>
+        Ignored tags typically include:
+    </p>
+    <ul>
+        <li>False positives from automatic tag extraction</li>
+        <li>Tags that fall outside your project's scope</li>
+        <li>Duplicates or variations that are better handled elsewhere</li>
+        <li>Elements that were incorrectly identified as tags</li>
+        <li>Tags that don't require normalization or dictionary assignment</li>
+    </ul>
+    
+    <h3>Working with Ignored Tags</h3>
+    <p>
+        In this view, you can:
+    </p>
+    <ul>
+        <li><strong>View details</strong> of ignored tags</li>
+        <li><strong>Filter tags</strong> by various criteria including type, document, and more</li>
+        <li><strong>Unignore tags</strong> if you later decide they should be processed</li>
+        <li><strong>Review why</strong> certain tags were ignored</li>
+        <li><strong>View tag context</strong> to see where the tag appears in the document</li>
+    </ul>
+
+    <h3>Tag Information</h3>
+    <p>
+        For each ignored tag, you can see:
+    </p>
+    <ul>
+        <li><strong>Tag Text</strong>: The actual text content of the tag</li>
+        <li><strong>Type</strong>: The category of the tag (person, place, etc.)</li>
+        <li><strong>Document</strong>: The document containing this tag</li>
+        <li><strong>Page</strong>: The page number where the tag appears</li>
+        <li><strong>Actions</strong>: Options to manage this tag</li>
+    </ul>
+
+    <h3>When to Ignore Tags</h3>
+    <p>
+        Consider ignoring tags when:
+    </p>
+    <ul>
+        <li>The tag was incorrectly identified by automated processes</li>
+        <li>The tag is irrelevant to your research questions</li>
+        <li>The tag represents common words that don't need special handling</li>
+        <li>The tag would create unnecessary noise in your data analysis</li>
+        <li>The tag refers to entities outside your project's temporal or geographic scope</li>
+    </ul>
+
+    <h3>Related Topics</h3>
+    <ul>
+        <li>{% help_url 'tags_overview' 'Tag Management Overview' %}</li>
+        <li>{% help_url 'tags_view_open' 'Open Tags' %}</li>
+        <li>{% help_url 'tags_view_parked' 'Parked Tags' %}</li>
+        <li>{% help_url 'tags_view_resolved' 'Resolved Tags' %}</li>
+        <li>{% help_url 'tags_settings' 'Tag Settings' %}</li>
+    </ul>
+</div>

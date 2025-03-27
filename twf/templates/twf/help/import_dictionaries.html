@@ -1,0 +1,102 @@
+{% load twf_help %}
+
+<div class="help-content">
+    <h2>Import Dictionaries</h2>
+    <p>
+        This page allows you to import dictionary data from external files into your project. Dictionary imports
+        help you quickly populate your dictionaries with pre-existing data, saving time and ensuring consistency.
+    </p>
+
+    <h3>Import Sources</h3>
+    <p>
+        You can import dictionary data from:
+    </p>
+    <ul>
+        <li>JSON files exported from another Transkribus Workflow project</li>
+        <li>CSV files with properly formatted dictionary entries</li>
+        <li>Excel files with structured dictionary data</li>
+        <li>Standard dictionary exchange formats</li>
+    </ul>
+
+    <h3>Import Process</h3>
+    <p>
+        The dictionary import process involves several steps:
+    </p>
+    <ol>
+        <li>Select the file format and source file</li>
+        <li>Configure how to map fields from the source to your dictionary structure</li>
+        <li>Specify handling for duplicates and conflicts</li>
+        <li>Preview the import results</li>
+        <li>Confirm and process the import</li>
+        <li>Review the imported entries</li>
+    </ol>
+
+    <h3>File Format Requirements</h3>
+    <p>
+        Depending on the file format you're importing, there are specific requirements:
+    </p>
+    
+    <h4>JSON Format</h4>
+    <p>
+        For JSON imports, the file should contain a structured array of dictionary entries, with each entry including:
+    </p>
+    <ul>
+        <li>Required fields for your dictionary type (label, type, etc.)</li>
+        <li>Optional metadata and additional properties</li>
+        <li>Properly formatted nested structures if applicable</li>
+    </ul>
+    <p>
+        JSON exported from another Transkribus Workflow project will already have the correct structure.
+    </p>
+
+    <h4>CSV/Excel Format</h4>
+    <p>
+        For tabular formats, your file should:
+    </p>
+    <ul>
+        <li>Include a header row with column names</li>
+        <li>Contain the required fields for dictionary entries</li>
+        <li>Use consistent formatting for all entries</li>
+        <li>Use a standard delimiter (comma or tab)</li>
+    </ul>
+
+    <h3>Handling Duplicates</h3>
+    <p>
+        When importing, you can choose how to handle duplicate entries:
+    </p>
+    <ul>
+        <li><strong>Skip:</strong> Keep the existing entry and ignore the imported one</li>
+        <li><strong>Replace:</strong> Overwrite the existing entry with the imported one</li>
+        <li><strong>Merge:</strong> Combine information from both entries</li>
+        <li><strong>Create New:</strong> Add the imported entry as a new entry (possibly with a modified label)</li>
+    </ul>
+
+    <h3>Mapping Fields</h3>
+    <p>
+        The import tool allows you to map fields from your source file to the appropriate dictionary fields:
+    </p>
+    <ul>
+        <li>Match source columns/fields to dictionary fields</li>
+        <li>Configure transformations for field values if needed</li>
+        <li>Set default values for missing fields</li>
+        <li>Handle special fields like normalized forms or external IDs</li>
+    </ul>
+
+    <h3>Best Practices</h3>
+    <ul>
+        <li>Prepare your import file carefully, ensuring consistency and completeness</li>
+        <li>Start with a small test import to verify your configuration</li>
+        <li>Back up your project before large imports</li>
+        <li>Document your import process and sources for future reference</li>
+        <li>Review imported entries to ensure quality and consistency</li>
+        <li>Use consistent naming conventions across imported dictionaries</li>
+    </ul>
+
+    <h3>Related Topics</h3>
+    <ul>
+        <li>{% help_url 'dictionaries_overview' 'Dictionary Management Overview' %}</li>
+        <li>{% help_url 'dictionaries_add' 'Adding Dictionaries' %}</li>
+        <li>{% help_url 'dictionary_create' 'Creating New Dictionaries' %}</li>
+        <li>{% help_url 'export_dictionaries' 'Exporting Dictionaries' %}</li>
+    </ul>
+</div>

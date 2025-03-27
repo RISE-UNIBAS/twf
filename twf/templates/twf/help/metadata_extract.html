@@ -1,0 +1,82 @@
+{% load twf_help %}
+
+<div class="help-content">
+    <h2>Extract Metadata</h2>
+    <p>
+        This page allows you to automatically extract metadata from your document content using AI-powered analysis.
+        The extraction process can identify key information from document text and create structured metadata entries.
+    </p>
+
+    <h3>What Can Be Extracted?</h3>
+    <p>
+        Depending on your document content, the AI can typically extract:
+    </p>
+    <ul>
+        <li>Document titles and subtitles</li>
+        <li>Author information and contributor names</li>
+        <li>Creation and publication dates</li>
+        <li>Location information</li>
+        <li>Document type and classification</li>
+        <li>Subject matter and keywords</li>
+        <li>Organizational or institutional affiliations</li>
+        <li>Other contextual information present in the text</li>
+    </ul>
+
+    <h3>Extraction Process</h3>
+    <p>
+        The metadata extraction works in the following way:
+    </p>
+    <ol>
+        <li>Select the documents from which you want to extract metadata</li>
+        <li>Choose which metadata fields you want to extract</li>
+        <li>Configure the AI extraction settings and parameters</li>
+        <li>Initiate the extraction process</li>
+        <li>Review and refine the extracted metadata</li>
+        <li>Confirm and save the results to your documents</li>
+    </ol>
+
+    <h3>AI Service Options</h3>
+    <p>
+        The system supports multiple AI services for metadata extraction:
+    </p>
+    <ul>
+        <li><strong>OpenAI:</strong> Uses advanced language models to identify and extract metadata</li>
+        <li><strong>Claude:</strong> Anthropic's AI assistant with strong natural language understanding</li>
+        <li><strong>Gemini:</strong> Google's AI system with capabilities for analyzing document content</li>
+    </ul>
+    <p>
+        Each service has different strengths and may perform better with certain document types.
+        You'll need to have the appropriate API credentials configured in your project settings.
+    </p>
+
+    <h3>Extraction Settings</h3>
+    <p>
+        You can customize the extraction process by:
+    </p>
+    <ul>
+        <li>Setting confidence thresholds for extracted information</li>
+        <li>Defining extraction patterns or templates for specific document types</li>
+        <li>Configuring how to handle uncertain or conflicting data</li>
+        <li>Specifying preferred formats for extracted dates, names, or other fields</li>
+        <li>Setting limits on the amount of text analyzed per document</li>
+    </ul>
+
+    <h3>Best Practices</h3>
+    <ul>
+        <li>Start with a small batch of documents to test extraction accuracy</li>
+        <li>Review AI-extracted metadata carefully before bulk importing</li>
+        <li>Use extraction on documents with clear, well-structured content for best results</li>
+        <li>Combine AI extraction with manual review for optimal quality</li>
+        <li>Consider document language when selecting AI services (some perform better with specific languages)</li>
+        <li>Save extraction templates for future use with similar document collections</li>
+    </ul>
+
+    <h3>Related Topics</h3>
+    <ul>
+        <li>{% help_url 'metadata_load_metadata' 'Loading Metadata from Files' %}</li>
+        <li>{% help_url 'metadata_load_sheets_data' 'Loading Metadata from Google Sheets' %}</li>
+        <li>{% help_url 'metadata_review_document' 'Reviewing Document Metadata' %}</li>
+        <li>{% help_url 'project_settings_credentials' 'Configuring AI API Credentials' %}</li>
+        <li>{% help_url 'project_prompts' 'Managing AI Prompts' %}</li>
+    </ul>
+</div>

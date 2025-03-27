@@ -1,0 +1,89 @@
+{% load twf_help %}
+
+<div class="help-content">
+    <h2>Name Collection Items</h2>
+    <p>
+        This feature allows you to automatically generate or update titles for collection items based on document 
+        metadata or content. Properly named collection items improve organization, searchability, and usability
+        of your collections.
+    </p>
+
+    <h3>Naming Collection Items</h3>
+    <p>
+        Collection item naming is useful when:
+    </p>
+    <ul>
+        <li>You've imported documents in bulk and need meaningful titles</li>
+        <li>You want to standardize naming conventions across your collection</li>
+        <li>You need to generate titles based on document metadata</li>
+        <li>You want to reflect document content in item titles</li>
+        <li>You're preparing collections for sharing or publication</li>
+    </ul>
+
+    <h3>Naming Options</h3>
+    <p>
+        The system offers several approaches to naming collection items:
+    </p>
+    <ul>
+        <li><strong>Metadata-based naming:</strong> Generate titles from document metadata fields</li>
+        <li><strong>Content-based naming:</strong> Create titles based on document content analysis</li>
+        <li><strong>Pattern-based naming:</strong> Apply a consistent pattern with variables</li>
+        <li><strong>Sequential naming:</strong> Add sequential numbers to a base name</li>
+        <li><strong>Date-based naming:</strong> Incorporate document dates into titles</li>
+    </ul>
+
+    <h3>Naming Process</h3>
+    <p>
+        To name your collection items:
+    </p>
+    <ol>
+        <li>Select the collection containing the items you want to name</li>
+        <li>Choose a naming method and configure its parameters</li>
+        <li>Preview the generated names</li>
+        <li>Make any manual adjustments needed</li>
+        <li>Apply the naming changes to your collection</li>
+    </ol>
+
+    <h3>Metadata-Based Naming</h3>
+    <p>
+        When using metadata for naming, you can:
+    </p>
+    <ul>
+        <li>Select which metadata fields to include in the title</li>
+        <li>Define the order and formatting of field values</li>
+        <li>Specify separators between field values</li>
+        <li>Set fallback values for missing metadata</li>
+        <li>Apply transformations to field values (uppercase, lowercase, etc.)</li>
+    </ul>
+
+    <h3>Pattern Examples</h3>
+    <p>
+        Some common naming patterns include:
+    </p>
+    <ul>
+        <li><code>{author} - {title} ({year})</code></li>
+        <li><code>Document {sequence_number}: {title}</code></li>
+        <li><code>{collection_name}: {document_type} - {date}</code></li>
+        <li><code>{category}/{subcategory}/{document_id}</code></li>
+    </ul>
+
+    <h3>Best Practices</h3>
+    <ul>
+        <li>Use consistent naming patterns across related collections</li>
+        <li>Include the most important identifying information in titles</li>
+        <li>Keep titles concise but descriptive</li>
+        <li>Consider how titles will be used in exports and displays</li>
+        <li>Avoid special characters that might cause issues in file systems</li>
+        <li>Include date information in a standardized format</li>
+        <li>Back up your collection before applying bulk naming changes</li>
+    </ul>
+
+    <h3>Related Topics</h3>
+    <ul>
+        <li>{% help_url 'collections_overview' 'Collections Overview' %}</li>
+        <li>{% help_url 'name_documents' 'Naming Documents' %}</li>
+        <li>{% help_url 'collections_view' 'Viewing Collections' %}</li>
+        <li>{% help_url 'collection_item_view' 'Viewing Collection Items' %}</li>
+        <li>{% help_url 'collection_edit' 'Editing Collections' %}</li>
+    </ul>
+</div>
