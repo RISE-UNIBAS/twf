@@ -1,48 +1,194 @@
 {% load twf_help %}
-<h1>Context Help: Export Collections</h1>
-<p>
-    The Export Collections page allows you to export collections from your project in various formats. Collections organize related documents, pages, or annotations that you've grouped together.
-</p>
 
-<h2>Export Process</h2>
-<ol>
-    <li><strong>Select Collections:</strong> Use the table to select which collections to include in the export.</li>
-    <li><strong>Choose Format:</strong> Select the desired export format (JSON, XML, CSV, TXT, etc.).</li>
-    <li><strong>Configure Options:</strong> Set specific options for the selected format, such as:
-        <ul>
-            <li>Including collection items' content</li>
-            <li>Including metadata and annotations</li>
-            <li>Formatting options</li>
-            <li>File organization preferences</li>
-        </ul>
-    </li>
-    <li><strong>Start Export:</strong> Click the export button to begin the export process.</li>
-</ol>
+<div class="help-content">
+    <h2>Export Collections</h2>
+    <p>
+        The Export Collections page allows you to export collections from your project in various formats. 
+        Collections organize related documents, pages, or annotations into meaningful groups that share common 
+        characteristics, research purposes, or project workflows.
+    </p>
 
-<h2>Collection Content Options</h2>
-<p>
-    When exporting collections, you can choose to include:
-</p>
-<ul>
-    <li><strong>Collection Metadata:</strong> Information about the collection itself, such as title, description, and creation date.</li>
-    <li><strong>Item Metadata:</strong> Metadata associated with each item in the collection.</li>
-    <li><strong>Item Content:</strong> The actual content of documents, pages, or annotations in the collection.</li>
-    <li><strong>Annotations:</strong> Any annotations or notes added to collection items.</li>
-    <li><strong>Relationships:</strong> Connections between items in the collection.</li>
-</ul>
+    <h3>Export Process</h3>
+    <ol>
+        <li><strong>Select Collections:</strong> Choose which collections to include in the export:
+            <ul>
+                <li>Select individual collections or multiple collections</li>
+                <li>Filter collections by creation date, author, or status</li>
+                <li>Filter by collection size or content type</li>
+                <li>Include/exclude collection hierarchies</li>
+                <li>Set inclusion depth for nested collections</li>
+            </ul>
+        </li>
+        <li><strong>Choose Format:</strong> Select the desired export format:
+            <ul>
+                <li>JSON (comprehensive format with full structure preservation)</li>
+                <li>XML (structured format with schema options)</li>
+                <li>CSV (tabular format for collection metadata)</li>
+                <li>ZIP (bundled archive of collection contents)</li>
+                <li>TEI (Text Encoding Initiative format for scholarly use)</li>
+                <li>PDF (human-readable document format)</li>
+                <li>Custom formats configured in project settings</li>
+            </ul>
+        </li>
+        <li><strong>Configure Options:</strong> Set specific options for the selected format:
+            <ul>
+                <li>Include/exclude collection items' full content</li>
+                <li>Include/exclude metadata at collection and item levels</li>
+                <li>Include/exclude annotations and tags</li>
+                <li>Configure document content representation</li>
+                <li>Set file organization and naming patterns</li>
+                <li>Configure character encoding and special character handling</li>
+                <li>Set levels of detail for included components</li>
+                <li>Configure export of related dictionaries and tags</li>
+            </ul>
+        </li>
+        <li><strong>Preview:</strong> Generate a sample of the export format to verify settings</li>
+        <li><strong>Start Export:</strong> Click the export button to begin the export process</li>
+        <li><strong>Monitor Progress:</strong> For large collections, track the export progress</li>
+        <li><strong>Download:</strong> Save the completed export to your local system or server</li>
+    </ol>
 
-<h2>Export Format Considerations</h2>
-<p>
-    Different formats offer different advantages:
-</p>
-<ul>
-    <li><strong>JSON:</strong> Preserves collection structure, relationships, and all metadata.</li>
-    <li><strong>XML:</strong> Good for interoperability with other systems while maintaining structure.</li>
-    <li><strong>CSV/TXT:</strong> Simplified formats, useful for basic data analysis or text review.</li>
-</ul>
+    <h3>Collection Content Components</h3>
+    <p>
+        When exporting collections, you can include various components:
+    </p>
+    <ul>
+        <li><strong>Collection Metadata:</strong> Information about the collection itself
+            <ul>
+                <li>Title and description</li>
+                <li>Creation and modification dates</li>
+                <li>Creator and contributor information</li>
+                <li>Purpose and scope statements</li>
+                <li>Classification and categorization</li>
+                <li>Project association</li>
+                <li>Version information</li>
+                <li>Access rights and permissions</li>
+            </ul>
+        </li>
+        <li><strong>Collection Structure:</strong> Organization of the collection
+            <ul>
+                <li>Hierarchical structure</li>
+                <li>Item ordering and sequence information</li>
+                <li>Grouping and sub-collection information</li>
+                <li>Relationships between collection items</li>
+            </ul>
+        </li>
+        <li><strong>Collection Items:</strong> Content included in the collection
+            <ul>
+                <li>Document references or complete content</li>
+                <li>Page references or complete content</li>
+                <li>Item-specific metadata</li>
+                <li>Status and workflow information</li>
+                <li>Item annotations and notes</li>
+            </ul>
+        </li>
+        <li><strong>Document Content:</strong> Actual document data
+            <ul>
+                <li>Full text transcriptions</li>
+                <li>Page images (with configurable resolution)</li>
+                <li>Structural markup</li>
+                <li>Formatting information</li>
+            </ul>
+        </li>
+        <li><strong>Tags and Annotations:</strong> Markup within collection items
+            <ul>
+                <li>Entity tags (people, places, etc.)</li>
+                <li>Structural annotations</li>
+                <li>Commentary and notes</li>
+                <li>Links to dictionary entries</li>
+                <li>Tag status information</li>
+            </ul>
+        </li>
+        <li><strong>Workflow Information:</strong> Processing state and history
+            <ul>
+                <li>Current workflow stage</li>
+                <li>Processing history</li>
+                <li>Review comments and notes</li>
+                <li>Task assignments</li>
+            </ul>
+        </li>
+    </ul>
 
-<h1>Related Topics</h1>
-<ul>
-    <li><a href="{% help_url 'modules/workflows/export.html' %}" target="_blank" class="help-link">Export Workflows Documentation</a></li>
-    <li><a href="{% help_url 'modules/workflows/collections.html' %}" target="_blank" class="help-link">Collection Workflows</a></li>
-</ul>
+    <h3>Export Format Considerations</h3>
+    <p>
+        Different formats offer different advantages:
+    </p>
+    <ul>
+        <li><strong>JSON:</strong>
+            <ul>
+                <li>Preserves collection structure, relationships, and all metadata</li>
+                <li>Maintains hierarchical organization</li>
+                <li>Suitable for programmatic processing</li>
+                <li>Good for complete collection backup and transfer</li>
+                <li>Compatible with web APIs and services</li>
+            </ul>
+        </li>
+        <li><strong>XML/TEI:</strong>
+            <ul>
+                <li>Highly structured with schema validation</li>
+                <li>Excellent for scholarly interchange and publication</li>
+                <li>Good for detailed structural representation</li>
+                <li>Compatible with digital humanities tools and workflows</li>
+                <li>Supports detailed markup and annotation representation</li>
+            </ul>
+        </li>
+        <li><strong>CSV:</strong>
+            <ul>
+                <li>Simplified tabular format for collection metadata</li>
+                <li>Easily imported into spreadsheet applications</li>
+                <li>Good for overview and statistical analysis</li>
+                <li>Limited in representing complex structures</li>
+            </ul>
+        </li>
+        <li><strong>ZIP/Archive:</strong>
+            <ul>
+                <li>Bundles complete collection with full content and structure</li>
+                <li>Preserves original document formats</li>
+                <li>Maintains folder structure for organization</li>
+                <li>Includes metadata files alongside content</li>
+            </ul>
+        </li>
+        <li><strong>PDF:</strong>
+            <ul>
+                <li>Creates human-readable presentation</li>
+                <li>Good for publication and sharing</li>
+                <li>Maintains visual representation of documents</li>
+                <li>Limited machine processability</li>
+            </ul>
+        </li>
+    </ul>
+
+    <h3>Use Cases for Collection Exports</h3>
+    <ul>
+        <li><strong>Publication:</strong> Prepare collections for scholarly publication</li>
+        <li><strong>Exhibition:</strong> Create digital exhibitions from curated collections</li>
+        <li><strong>Archiving:</strong> Preserve collections as complete units for long-term storage</li>
+        <li><strong>Sharing:</strong> Distribute collections to colleagues or other researchers</li>
+        <li><strong>Analysis:</strong> Export collections for specialized analytical tools</li>
+        <li><strong>Teaching:</strong> Create educational resources from collection materials</li>
+        <li><strong>Migration:</strong> Move collections between different systems or platforms</li>
+        <li><strong>Backup:</strong> Create comprehensive backups of important collection data</li>
+        <li><strong>Portfolio:</strong> Showcase representative examples of your research materials</li>
+    </ul>
+
+    <h3>Best Practices</h3>
+    <ul>
+        <li>Select the appropriate export format based on your intended use</li>
+        <li>Include sufficient metadata to provide context for your collection</li>
+        <li>Consider creating a README file explaining the collection's purpose and structure</li>
+        <li>Test your export with a small collection before exporting large ones</li>
+        <li>Verify that document relationships are properly maintained in the export</li>
+        <li>Document any special features or conventions in your collection structure</li>
+        <li>Include collection documentation and description for others to understand your organization</li>
+        <li>Consider file size limitations when exporting collections with many images</li>
+    </ul>
+
+    <h3>Related Topics</h3>
+    <ul>
+        <li>{% help_url 'export_overview' 'Export Overview' %}</li>
+        <li>{% help_url 'export_configure' 'Configure Export Formats' %}</li>
+        <li>{% help_url 'collections_overview' 'Collections Overview' %}</li>
+        <li>{% help_url 'collections_view' 'Viewing Collections' %}</li>
+        <li>{% help_url 'export_documents' 'Export Documents' %}</li>
+    </ul>
+</div>
