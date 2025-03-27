@@ -1,69 +1,121 @@
 {% load twf_help %}
-<h1>Context Help: Export Project</h1>
-<p>
-    The Export Project page allows you to create a comprehensive export of your entire project, including all documents, collections, dictionaries, and metadata. This is useful for project backup, archiving, publication, or transferring to another system.
-</p>
 
-<h2>Export Process</h2>
-<ol>
-    <li><strong>Configure Project Export:</strong> 
-        <ul>
-            <li>Choose which components to include (documents, collections, dictionaries, etc.)</li>
-            <li>Set metadata fields to include</li>
-            <li>Configure export format and structure</li>
-        </ul>
-    </li>
-    <li><strong>Format Options:</strong> Select from available export formats:
-        <ul>
-            <li>JSON (comprehensive data preservation)</li>
-            <li>ZIP (bundled file collection)</li>
-            <li>Custom formats configured in project settings</li>
-        </ul>
-    </li>
-    <li><strong>Data Selection:</strong> Refine what specific content should be included:
-        <ul>
-            <li>All project data or selective content</li>
-            <li>Include/exclude specific document types</li>
-            <li>Include/exclude system metadata</li>
-        </ul>
-    </li>
-    <li><strong>Start Export:</strong> Begin the export process with your selected configuration.</li>
-</ol>
+<div class="help-content">
+    <h2>Export Project</h2>
+    <p>
+        The Export Project page allows you to create a comprehensive export of your entire project, including all 
+        documents, collections, dictionaries, tags, and metadata. This is useful for project backup, archiving, 
+        publication, sharing with collaborators, or transferring to another system.
+    </p>
 
-<h2>Project Export Content</h2>
-<p>
-    A comprehensive project export typically includes:
-</p>
-<ul>
-    <li><strong>Project Metadata:</strong> Title, description, owners, settings, etc.</li>
-    <li><strong>Documents:</strong> All document content, structure, and metadata.</li>
-    <li><strong>Pages:</strong> Page content, images, and transcriptions.</li>
-    <li><strong>Collections:</strong> All collections and their items.</li>
-    <li><strong>Dictionaries:</strong> All dictionaries and their entries.</li>
-    <li><strong>Tags:</strong> All tag data across the project.</li>
-    <li><strong>Workflows:</strong> Information about established workflows.</li>
-    <li><strong>User Data:</strong> Relevant user information (limited for privacy).</li>
-</ul>
+    <h3>Export Process</h3>
+    <ol>
+        <li><strong>Configure Project Export:</strong> 
+            <ul>
+                <li>Choose which components to include (documents, collections, dictionaries, tags, etc.)</li>
+                <li>Set metadata fields to include in the export</li>
+                <li>Configure export format and structure</li>
+                <li>Set up file naming conventions</li>
+                <li>Configure inclusion of related data</li>
+            </ul>
+        </li>
+        <li><strong>Format Options:</strong> Select from available export formats:
+            <ul>
+                <li>JSON (comprehensive data preservation with full structure)</li>
+                <li>XML (structured format with good interoperability)</li>
+                <li>CSV (tabular data for dictionaries and metadata)</li>
+                <li>PDF (human-readable documents and reports)</li>
+                <li>ZIP (bundled file collection with preserved directory structure)</li>
+                <li>TEI (Text Encoding Initiative format for scholarly texts)</li>
+                <li>Custom formats configured in project settings</li>
+            </ul>
+        </li>
+        <li><strong>Data Selection:</strong> Refine what specific content should be included:
+            <ul>
+                <li>All project data or selective content</li>
+                <li>Include/exclude specific document types</li>
+                <li>Filter by dates, metadata values, or other criteria</li>
+                <li>Include/exclude system metadata</li>
+                <li>Set depth of related content inclusion</li>
+                <li>Configure handling of unresolved tags or incomplete entries</li>
+            </ul>
+        </li>
+        <li><strong>Output Configuration:</strong>
+            <ul>
+                <li>Set file organization structure</li>
+                <li>Configure file naming patterns</li>
+                <li>Add supplementary files (README, data dictionary, etc.)</li>
+                <li>Include project configuration for migration purposes</li>
+                <li>Add version information and export timestamp</li>
+            </ul>
+        </li>
+        <li><strong>Start Export:</strong> Begin the export process with your selected configuration.</li>
+        <li><strong>Monitor Progress:</strong> For large projects, you can track the export progress.</li>
+        <li><strong>Download or Share:</strong> Once complete, download the export or share it directly.</li>
+    </ol>
 
-<h2>When to Use Project Export</h2>
-<ul>
-    <li><strong>Project Backup:</strong> Create comprehensive backups of your project.</li>
-    <li><strong>Project Archiving:</strong> Prepare your project for long-term storage.</li>
-    <li><strong>Data Publication:</strong> Export project data for formal publication.</li>
-    <li><strong>System Migration:</strong> Move your project to a different TWF instance.</li>
-    <li><strong>Data Preservation:</strong> Ensure long-term access to your research data.</li>
-</ul>
+    <h3>Project Export Content</h3>
+    <p>
+        A comprehensive project export typically includes:
+    </p>
+    <ul>
+        <li><strong>Project Metadata:</strong> Title, description, owners, settings, version, keywords, license information</li>
+        <li><strong>Documents:</strong> All document content, structure, transcriptions, and metadata</li>
+        <li><strong>Pages:</strong> Page content, images, transcriptions, and page-specific metadata</li>
+        <li><strong>Collections:</strong> All collections, their structure, items, and metadata</li>
+        <li><strong>Dictionaries:</strong> All dictionaries, entries, normalization data, and related metadata</li>
+        <li><strong>Tags:</strong> All tag data across the project, including status and relationships</li>
+        <li><strong>Workflows:</strong> Information about established workflows and their configurations</li>
+        <li><strong>User Data:</strong> Relevant user information (limited for privacy considerations)</li>
+        <li><strong>Export Configuration:</strong> Details about how the export was generated</li>
+        <li><strong>Relationships:</strong> Connections between different data objects</li>
+    </ul>
 
-<h2>Important Considerations</h2>
-<ul>
-    <li>Project exports may be large and take time to process.</li>
-    <li>Consider privacy and data protection when exporting user-related information.</li>
-    <li>For very large projects, consider breaking exports into smaller components.</li>
-    <li>Test your export configuration with a small project before exporting large datasets.</li>
-</ul>
+    <h3>When to Use Project Export</h3>
+    <ul>
+        <li><strong>Project Backup:</strong> Create comprehensive backups of your project at key milestones</li>
+        <li><strong>Project Archiving:</strong> Prepare your project for long-term storage and preservation</li>
+        <li><strong>Data Publication:</strong> Export project data for formal academic publication</li>
+        <li><strong>System Migration:</strong> Move your project to a different TWF instance or system</li>
+        <li><strong>Data Preservation:</strong> Ensure long-term access to your research data</li>
+        <li><strong>Collaboration:</strong> Share project data with researchers using different systems</li>
+        <li><strong>Analysis:</strong> Export data for processing in specialized analytical tools</li>
+        <li><strong>Reporting:</strong> Generate comprehensive project documentation and reports</li>
+    </ul>
 
-<h1>Related Topics</h1>
-<ul>
-    <li><a href="{% help_url 'modules/workflows/export.html' %}" target="_blank" class="help-link">Export Workflows Documentation</a></li>
-    <li><a href="{% help_url 'modules/parts/settings.html' %}" target="_blank" class="help-link">Project Settings</a></li>
-</ul>
+    <h3>Export Types</h3>
+    <p>
+        The system supports several export profiles:
+    </p>
+    <ul>
+        <li><strong>Full Project:</strong> Complete export of all project components</li>
+        <li><strong>Research Data:</strong> Focused on content and metadata for research use</li>
+        <li><strong>Migration:</strong> Optimized for transferring to another TWF instance</li>
+        <li><strong>Publication:</strong> Structured for academic publication requirements</li>
+        <li><strong>Archival:</strong> Configured for long-term preservation</li>
+        <li><strong>Custom:</strong> User-defined export configurations</li>
+    </ul>
+
+    <h3>Important Considerations</h3>
+    <ul>
+        <li>Project exports may be large and take significant time to process</li>
+        <li>Consider privacy and data protection when exporting user-related information</li>
+        <li>For very large projects, consider breaking exports into smaller logical components</li>
+        <li>Test your export configuration with a small project before exporting large datasets</li>
+        <li>Document your export configuration for reproducibility</li>
+        <li>Consider storage requirements for the exported files</li>
+        <li>Verify export integrity after completion</li>
+        <li>For migration purposes, ensure version compatibility</li>
+    </ul>
+
+    <h3>Related Topics</h3>
+    <ul>
+        <li>{% help_url 'export_overview' 'Export Overview' %}</li>
+        <li>{% help_url 'export_configure' 'Configure Export Formats' %}</li>
+        <li>{% help_url 'export_documents' 'Export Documents' %}</li>
+        <li>{% help_url 'export_collections' 'Export Collections' %}</li>
+        <li>{% help_url 'export_dictionaries' 'Export Dictionaries' %}</li>
+        <li>{% help_url 'export_tags' 'Export Tags' %}</li>
+        <li>{% help_url 'export_to_zenodo' 'Export to Zenodo' %}</li>
+    </ul>
+</div>

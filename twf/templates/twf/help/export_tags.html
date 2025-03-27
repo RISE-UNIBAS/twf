@@ -1,55 +1,143 @@
 {% load twf_help %}
-<h1>Context Help: Export Tags</h1>
-<p>
-    The Export Tags page allows you to export tag data from your project in various formats. Tags represent annotations and markup present in your documents, often linked to dictionary entries for standardization.
-</p>
 
-<h2>Export Process</h2>
-<ol>
-    <li><strong>Select Tags:</strong> Choose which tags to include in your export:
-        <ul>
-            <li>Filter by tag type (person, place, date, etc.)</li>
-            <li>Filter by status (resolved, open, parked, ignored)</li>
-            <li>Filter by dictionary association</li>
-        </ul>
-    </li>
-    <li><strong>Choose Format:</strong> Select the format for your export (JSON, CSV, XML, etc.).</li>
-    <li><strong>Configure Options:</strong> Set specific export settings:
-        <ul>
-            <li>Include tag context (surrounding text)</li>
-            <li>Include document/page references</li>
-            <li>Include dictionary information</li>
-            <li>Include normalized forms</li>
-        </ul>
-    </li>
-    <li><strong>Start Export:</strong> Click the export button to begin the process.</li>
-</ol>
+<div class="help-content">
+    <h2>Export Tags</h2>
+    <p>
+        The Export Tags page allows you to export tag data from your project in various formats. Tags represent 
+        annotations and markup present in your documents, including entities such as people, places, dates, events, 
+        and other elements that have been identified and potentially linked to dictionary entries for standardization.
+    </p>
 
-<h2>Tag Data Options</h2>
-<p>
-    When exporting tags, you can include:
-</p>
-<ul>
-    <li><strong>Tag Text:</strong> The actual text content of each tag.</li>
-    <li><strong>Tag Type:</strong> The category or type classification of each tag.</li>
-    <li><strong>Context:</strong> Text surrounding the tag for context.</li>
-    <li><strong>Location:</strong> Document and page where each tag appears.</li>
-    <li><strong>Position:</strong> Precise coordinates or positions within documents.</li>
-    <li><strong>Normalization:</strong> Standardized forms linked through dictionaries.</li>
-    <li><strong>Metadata:</strong> Additional information associated with tags.</li>
-</ul>
+    <h3>Export Process</h3>
+    <ol>
+        <li><strong>Select Tags:</strong> Choose which tags to include in your export:
+            <ul>
+                <li>Filter by tag type (person, place, date, organization, event, etc.)</li>
+                <li>Filter by status (resolved, open, parked, ignored)</li>
+                <li>Filter by dictionary association (linked, unlinked, specific dictionaries)</li>
+                <li>Filter by document or collection</li>
+                <li>Filter by date range of creation or modification</li>
+                <li>Filter by text content or pattern matching</li>
+                <li>Filter by normalization status</li>
+            </ul>
+        </li>
+        <li><strong>Choose Format:</strong> Select the format for your export:
+            <ul>
+                <li>JSON (comprehensive, preserves relationships)</li>
+                <li>CSV (tabular format for spreadsheet analysis)</li>
+                <li>XML (structured format with schema options)</li>
+                <li>TEI (Text Encoding Initiative format for scholarly encoding)</li>
+                <li>RDF (Resource Description Framework for linked data)</li>
+                <li>Custom formats configured in project settings</li>
+            </ul>
+        </li>
+        <li><strong>Configure Options:</strong> Set specific export settings:
+            <ul>
+                <li>Include tag context (surrounding text with configurable window size)</li>
+                <li>Include document/page references with detail level options</li>
+                <li>Include dictionary information and normalization data</li>
+                <li>Include relationship data between tags</li>
+                <li>Configure character encoding and special character handling</li>
+                <li>Set hierarchical structure for nested tags</li>
+                <li>Configure metadata fields to include</li>
+            </ul>
+        </li>
+        <li><strong>Preview:</strong> Generate a sample of the export for verification</li>
+        <li><strong>Start Export:</strong> Click the export button to begin the process</li>
+        <li><strong>Monitor Progress:</strong> For large tag exports, track the progress</li>
+        <li><strong>Download:</strong> Save the completed export to your local system or server location</li>
+    </ol>
 
-<h2>Export Use Cases</h2>
-<ul>
-    <li><strong>Data Analysis:</strong> Export tags for statistical analysis in external tools.</li>
-    <li><strong>Visualization:</strong> Create visual representations of tag distributions.</li>
-    <li><strong>Entity Networks:</strong> Build relationship networks between tagged entities.</li>
-    <li><strong>Quality Control:</strong> Review tag consistency and accuracy.</li>
-    <li><strong>Publication:</strong> Include structured tag data in research publications.</li>
-</ul>
+    <h3>Tag Data Options</h3>
+    <p>
+        When exporting tags, you can include various data components:
+    </p>
+    <ul>
+        <li><strong>Tag Text:</strong> The actual text content of each tag in the document</li>
+        <li><strong>Tag Type:</strong> The category or type classification of each tag</li>
+        <li><strong>Context:</strong> Text surrounding the tag for contextual understanding</li>
+        <li><strong>Location:</strong> Document, page, and position where each tag appears</li>
+        <li><strong>Coordinates:</strong> Precise coordinates or positions within documents</li>
+        <li><strong>Normalization:</strong> Standardized forms linked through dictionaries</li>
+        <li><strong>Dictionary Links:</strong> Connections to dictionary entries</li>
+        <li><strong>External Identifiers:</strong> Links to external authority records (GND, Wikidata, etc.)</li>
+        <li><strong>Metadata:</strong> Additional information associated with tags</li>
+        <li><strong>Creation Info:</strong> When and by whom the tag was created</li>
+        <li><strong>Modification History:</strong> Changes made to tags over time</li>
+        <li><strong>Relationships:</strong> Connections between tags (co-occurrence, hierarchy, etc.)</li>
+        <li><strong>Status Information:</strong> Current workflow status and processing state</li>
+    </ul>
 
-<h1>Related Topics</h1>
-<ul>
-    <li><a href="{% help_url 'modules/workflows/export.html' %}" target="_blank" class="help-link">Export Workflows Documentation</a></li>
-    <li><a href="{% help_url 'modules/workflows/tags.html' %}" target="_blank" class="help-link">Tag Workflows</a></li>
-</ul>
+    <h3>Export Format Details</h3>
+    <p>
+        Different export formats offer various capabilities:
+    </p>
+    <ul>
+        <li><strong>JSON:</strong>
+            <ul>
+                <li>Preserves complex relationships and hierarchies</li>
+                <li>Good for programmatic processing</li>
+                <li>Maintains all metadata and structure</li>
+                <li>Easily parsed by most programming languages</li>
+            </ul>
+        </li>
+        <li><strong>CSV:</strong>
+            <ul>
+                <li>Ideal for tabular data analysis</li>
+                <li>Compatible with spreadsheet applications</li>
+                <li>Good for statistical processing</li>
+                <li>Limitations with complex hierarchical data</li>
+            </ul>
+        </li>
+        <li><strong>XML/TEI:</strong>
+            <ul>
+                <li>Structured representation with schema validation</li>
+                <li>Good for scholarly interchange</li>
+                <li>Supports complex tag hierarchies</li>
+                <li>Compatible with digital humanities tools</li>
+            </ul>
+        </li>
+        <li><strong>RDF:</strong>
+            <ul>
+                <li>Supports semantic web applications</li>
+                <li>Enables sophisticated linked data representations</li>
+                <li>Good for integration with knowledge graphs</li>
+                <li>Supports standardized ontologies and vocabularies</li>
+            </ul>
+        </li>
+    </ul>
+
+    <h3>Export Use Cases</h3>
+    <ul>
+        <li><strong>Data Analysis:</strong> Export tags for statistical analysis in external tools</li>
+        <li><strong>Visualization:</strong> Create visual representations of tag distributions and networks</li>
+        <li><strong>Entity Networks:</strong> Build relationship networks between tagged entities</li>
+        <li><strong>Quality Control:</strong> Review tag consistency and accuracy across documents</li>
+        <li><strong>Publication:</strong> Include structured tag data in research publications</li>
+        <li><strong>Machine Learning:</strong> Create training data for NLP and other ML applications</li>
+        <li><strong>Integration:</strong> Connect tag data with external databases and systems</li>
+        <li><strong>Corpus Building:</strong> Contribute to larger annotated text corpora</li>
+        <li><strong>Collaborative Research:</strong> Share standardized entity data with colleagues</li>
+        <li><strong>Knowledge Base Creation:</strong> Build specialized domain knowledge bases</li>
+    </ul>
+
+    <h3>Best Practices</h3>
+    <ul>
+        <li>Define clear selection criteria before exporting to ensure data relevance</li>
+        <li>Choose export formats based on your intended downstream use</li>
+        <li>Include sufficient contextual information for tags to be meaningful</li>
+        <li>Document your export parameters for reproducibility</li>
+        <li>Consider file size limitations when exporting large tag collections</li>
+        <li>Verify a sample of exported data to ensure quality and completeness</li>
+        <li>Include relevant metadata to maintain the provenance of your tag data</li>
+    </ul>
+
+    <h3>Related Topics</h3>
+    <ul>
+        <li>{% help_url 'export_overview' 'Export Overview' %}</li>
+        <li>{% help_url 'export_configure' 'Configure Export Formats' %}</li>
+        <li>{% help_url 'tags_overview' 'Tag Management Overview' %}</li>
+        <li>{% help_url 'dictionaries_overview' 'Dictionary Management' %}</li>
+        <li>{% help_url 'tags_view_resolved' 'Resolved Tags' %}</li>
+    </ul>
+</div>

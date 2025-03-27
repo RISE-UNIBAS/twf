@@ -1,52 +1,119 @@
 {% load twf_help %}
-<h1>Context Help: Export to Zenodo</h1>
-<p>
-    The Export to Zenodo page allows you to publish your project data to Zenodo, an open-access repository operated by CERN. This feature helps make your research data openly available, citable, and compliant with FAIR principles.
-</p>
 
-<h2>What is Zenodo?</h2>
-<p>
-    Zenodo is a general-purpose open repository that allows researchers to deposit research papers, data sets, research software, reports, and any other research-related digital artifacts. It assigns a DOI (Digital Object Identifier) to all publicly available uploads, making your data citable.
-</p>
+<div class="help-content">
+    <h2>Export to Zenodo</h2>
+    <p>
+        The Export to Zenodo page allows you to publish your project data to Zenodo, an open-access repository 
+        operated by CERN. This feature helps make your research data openly available, citable, and compliant 
+        with FAIR principles (Findable, Accessible, Interoperable, and Reusable).
+    </p>
 
-<h2>Export Process</h2>
-<ol>
-    <li><strong>Configure Metadata:</strong> 
-        <ul>
-            <li>Title and description of your dataset</li>
-            <li>Authors and contributors</li>
-            <li>Keywords, subjects, and related information</li>
-            <li>Choose an appropriate license</li>
-        </ul>
-    </li>
-    <li><strong>Select Content:</strong> Choose what to include in your Zenodo publication:
-        <ul>
-            <li>Documents</li>
-            <li>Collections</li>
-            <li>Dictionaries</li>
-            <li>Project metadata</li>
-        </ul>
-    </li>
-    <li><strong>Export Format:</strong> Select how your data should be formatted for Zenodo.</li>
-    <li><strong>Publication Type:</strong> Choose whether to create a new publication or update an existing one.</li>
-    <li><strong>Review and Submit:</strong> Verify your export settings before publishing to Zenodo.</li>
-</ol>
+    <h3>What is Zenodo?</h3>
+    <p>
+        Zenodo is a general-purpose open repository that allows researchers to deposit research papers, data sets, 
+        research software, reports, and any other research-related digital artifacts. It offers several key benefits:
+    </p>
+    <ul>
+        <li>Assigns a DOI (Digital Object Identifier) to all publicly available uploads, making your data citable</li>
+        <li>Provides long-term preservation of your research data</li>
+        <li>Enables version control of your datasets</li>
+        <li>Supports various access levels from open access to restricted</li>
+        <li>Integrates with research workflows and other scholarly platforms</li>
+        <li>Complies with funding agency requirements for open data</li>
+    </ul>
 
-<h2>Zenodo API Credentials</h2>
-<p>
-    To use this feature, you need to have Zenodo API credentials configured in your project settings. If you don't see these options, please check your project's credential settings or contact your project administrator.
-</p>
+    <h3>Export Process</h3>
+    <ol>
+        <li><strong>Configure Metadata:</strong> 
+            <ul>
+                <li>Title and description of your dataset</li>
+                <li>Authors and contributors with affiliations and ORCID IDs</li>
+                <li>Keywords, subjects, and related information</li>
+                <li>Choose an appropriate license</li>
+                <li>Set publication date and version information</li>
+                <li>Add funding information if applicable</li>
+            </ul>
+        </li>
+        <li><strong>Select Content:</strong> Choose what to include in your Zenodo publication:
+            <ul>
+                <li>Documents (full texts or selected documents)</li>
+                <li>Collections (entire collections or specific items)</li>
+                <li>Dictionaries (all or selected dictionaries)</li>
+                <li>Project metadata and configuration</li>
+                <li>Tags and annotations</li>
+                <li>Export format configurations</li>
+            </ul>
+        </li>
+        <li><strong>Export Format:</strong> Select how your data should be formatted for Zenodo:
+            <ul>
+                <li>JSON for machine-readable data</li>
+                <li>XML for structured data exchange</li>
+                <li>CSV for tabular data</li>
+                <li>PDF for human-readable documents</li>
+                <li>Combined packages with multiple formats</li>
+            </ul>
+        </li>
+        <li><strong>Publication Type:</strong> 
+            <ul>
+                <li>Create a new publication (new DOI)</li>
+                <li>Update an existing publication (same DOI, new version)</li>
+                <li>Create a draft for review before publishing</li>
+            </ul>
+        </li>
+        <li><strong>Access Rights:</strong> 
+            <ul>
+                <li>Open Access - freely available to all</li>
+                <li>Embargoed - released after a specified date</li>
+                <li>Restricted - limited to specified users</li>
+                <li>Closed - metadata visible but files not accessible</li>
+            </ul>
+        </li>
+        <li><strong>Review and Submit:</strong> Verify your export settings before publishing to Zenodo.</li>
+    </ol>
 
-<h2>Publication Tips</h2>
-<ul>
-    <li>Provide thorough metadata to make your dataset more discoverable.</li>
-    <li>Choose an appropriate license that reflects how you want others to use your data.</li>
-    <li>Consider creating a README file to include with your export that explains the dataset structure.</li>
-    <li>You can publish to Zenodo Sandbox for testing before doing a final publication.</li>
-</ul>
+    <h3>Zenodo API Credentials</h3>
+    <p>
+        To use this feature, you need to have Zenodo API credentials configured in your project settings:
+    </p>
+    <ol>
+        <li>Create a Zenodo account at <a href="https://zenodo.org" target="_blank">zenodo.org</a> (or use the Sandbox environment at <a href="https://sandbox.zenodo.org" target="_blank">sandbox.zenodo.org</a> for testing)</li>
+        <li>Generate an API token in your Zenodo account settings</li>
+        <li>Add this token to your project's credential settings</li>
+        <li>Test the connection before attempting a full publication</li>
+    </ol>
+    <p>
+        If you don't see these options, please check your project's credential settings or contact your project administrator.
+    </p>
 
-<h1>Related Topics</h1>
-<ul>
-    <li><a href="{% help_url 'modules/workflows/export.html' %}" target="_blank" class="help-link">Export Workflows Documentation</a></li>
-    <li><a href="{% help_url 'modules/parts/settings.html' %}" target="_blank" class="help-link">Project Settings</a></li>
-</ul>
+    <h3>Publication Tips</h3>
+    <ul>
+        <li>Provide thorough metadata to make your dataset more discoverable</li>
+        <li>Use standardized keywords and subject classifications when possible</li>
+        <li>Choose an appropriate license that reflects how you want others to use your data</li>
+        <li>Include a README file with your export that explains the dataset structure and contents</li>
+        <li>Consider adding a data dictionary that explains variables and their values</li>
+        <li>Use the Zenodo Sandbox environment for testing before doing a final publication</li>
+        <li>Ensure all authors and contributors are properly credited with accurate information</li>
+        <li>Link your dataset to related publications, if applicable</li>
+        <li>Add your ORCID ID to ensure proper attribution</li>
+    </ul>
+
+    <h3>Version Control</h3>
+    <p>
+        Zenodo supports versioning of datasets:
+    </p>
+    <ul>
+        <li>Each version receives its own DOI, but Zenodo maintains a concept DOI that always points to the latest version</li>
+        <li>Previous versions remain accessible and citable</li>
+        <li>Versioning helps track the evolution of your dataset over time</li>
+        <li>Consider adding version notes explaining what changed between versions</li>
+    </ul>
+
+    <h3>Related Topics</h3>
+    <ul>
+        <li>{% help_url 'export_overview' 'Export Overview' %}</li>
+        <li>{% help_url 'export_configure' 'Configure Export Formats' %}</li>
+        <li>{% help_url 'project_settings_credentials' 'API Credential Settings' %}</li>
+        <li>{% help_url 'project_settings_repository' 'Repository Settings' %}</li>
+    </ul>
+</div>
