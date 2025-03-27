@@ -56,7 +56,7 @@ from twf.views.project.views_project import TWFProjectQueryView, TWFProjectOverv
     TWFProjectTaskMonitorView, TWFProjectGeneralSettingsView, TWFProjectCredentialsSettingsView, \
     TWFProjectPromptsView, TWFProjectTaskSettingsView, TWFProjectExportSettingsView, TWFProjectCopyView, \
     TWFProjectResetView, TWFProjectUserManagementView, TWFProjectRepositorySettingsView, TWFProjectPromptEditView, \
-    TWFProjectSetupView, TWFProjectTranskribusExtractView
+    TWFProjectSetupView, TWFProjectTranskribusExtractView, TWFProjectNotesView
 from twf.views.project.views_project_ai import TWFProjectAIQueryView, TWFProjectGeminiQueryView, \
     TWFProjectClaudeQueryView, TWFProjectMistralQueryView
 from twf.views.tags.views_tags import TWFProjectTagsView, TWFProjectTagsOpenView, \
@@ -108,6 +108,7 @@ urlpatterns = [
 
     path('project/task/monitor/', TWFProjectTaskMonitorView.as_view(), name='project_task_monitor'),
     path('project/prompts/', TWFProjectPromptsView.as_view(), name='project_prompts'),
+    path('project/notes/', TWFProjectNotesView.as_view(), name='project_notes'),
     path('project/prompts/delete/<int:pk>/', delete_prompt, name='project_delete_prompt'),
     path('project/prompts/edit/<int:pk>/', TWFProjectPromptEditView.as_view(), name='project_edit_prompt'),
 

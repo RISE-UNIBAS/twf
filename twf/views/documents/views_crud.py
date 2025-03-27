@@ -8,6 +8,8 @@ from django.shortcuts import get_object_or_404, redirect
 from django.views.decorators.csrf import csrf_exempt
 
 from twf.models import Document
+from twf.utils.metadata_utils import delete_nested_key, set_nested_value
+
 
 @login_required
 def delete_document(request, pk, doc_pk):
@@ -35,7 +37,9 @@ def update_document_metadata(request, pk, base_key):
 
         try:
             doc = Document.objects.get(pk=pk)
-            doc.metadata[base_key][key] = value
+            base = doc.metadata.get(base_key, {})
+            set_nested_value(base, key, value)
+            doc.metadata[base_key] = base
             doc.save(current_user=request.user)
         except Document.DoesNotExist:
             return JsonResponse({"error": "Document does not exist."}, status=404)
@@ -51,7 +55,9 @@ def delete_document_metadata(request, pk, base_key):
 
         try:
             doc = Document.objects.get(pk=pk)
-            del doc.metadata[base_key][key]
+            base = doc.metadata.get(base_key, {})
+            delete_nested_key(base, key)
+            doc.metadata[base_key] = base
             doc.save(current_user=request.user)
         except Document.DoesNotExist:
             return JsonResponse({"error": "Document does not exist."}, status=404)

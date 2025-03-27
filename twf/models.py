@@ -1147,3 +1147,13 @@ class Export(TimeStampedModel):
 
     def __str__(self):
         return f"Export - {self.export_type} - {self.created_by}"
+
+
+class Note(TimeStampedModel):
+
+    project = models.ForeignKey(Project, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
+    note = models.TextField()
+
+    def __str__(self):
+        return f"Note - {self.created_by}"

@@ -106,8 +106,10 @@ class BaseAIBatchForm(BaseBatchForm):
         """Get the dynamic fields for the form."""
         button_html = """
          <div class="mt-4">
-            <button type="button" id="loadPrompt" class="btn btn-sm btn-dark">Load Prompt</button>
-            <button type="button" id="savePrompt" class="btn btn-sm btn-dark">Save Prompt</button>
+            <button type="button" id="loadPrompt" class="btn btn-sm btn-dark"
+             data-bs-toggle="tooltip" title="Load the selected saved prompt. Unsaved edits are lost.">Load Prompt</button>
+            <button type="button" id="savePrompt" class="btn btn-sm btn-dark"
+             data-bs-toggle="tooltip" title="Overwrite selected prompt or save as new if no prompt selected.">Save Prompt</button>
         </div>"""
 
         fields = super().get_dynamic_fields() or []

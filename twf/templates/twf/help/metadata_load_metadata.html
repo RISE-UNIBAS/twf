@@ -1,15 +1,35 @@
-<h1>Context Help</h1>
-<p>
-    This page allows you to load metadata from a file and match it to the documents or pages in your project.
-</p>
-<h2>Metadata File:</h2>
-The file must be a json file and adhere one of the following formats:
+{% load twf_help %}
 
+<div class="help-content">
+    <h2>Load Metadata</h2>
+    <p>
+        This page allows you to load metadata from a JSON file and match it to the documents or pages in your project.
+        Metadata provides additional information about your documents that isn't contained within the document text itself.
+    </p>
 
-<p>
-    <strong>List format:</strong> A list of dictionaries, where each dictionary represents a document or page and
-    contains metadata keys and values. Each object in the list must have a unique identifier pointing to the
-    document or page.
+    <h3>What is Metadata?</h3>
+    <p>
+        Metadata is structured information that describes, explains, or locates your documents. Common examples include:
+    </p>
+    <ul>
+        <li>Title, author, and date information</li>
+        <li>Source repository or archive details</li>
+        <li>Classification or cataloging information</li>
+        <li>Document type and format specifications</li>
+        <li>Rights and permissions information</li>
+        <li>Contextual or provenance details</li>
+    </ul>
+
+    <h3>Metadata File Requirements</h3>
+    <p>
+        Your metadata file must be in JSON format and adhere to one of the following structures:
+    </p>
+
+    <h4>List Format</h4>
+    <p>
+        A list of dictionaries, where each dictionary represents a document or page and contains metadata keys and values. 
+        Each object in the list must have a unique identifier pointing to the document or page.
+    </p>
     <pre class="bg-light border p-3">
         <code>
 [
@@ -17,33 +37,64 @@ The file must be a json file and adhere one of the following formats:
       "some_doc_id": "123456",
       "title": "Example Document",
       "author": "John Doe",
+      "date": "1850-04-12"
     },
     {
       "some_doc_id": "123457",
       "title": "Another Document",
       "author": "Jane Doe",
+      "date": "1872-09-30"
     }
 ]
         </code>
     </pre>
-<p>
 
-<p>
-    <strong>Dictionary format:</strong> A dictionary of dictionaries, where each dictionary represents a document or
-    page and contains metadata keys and values. The keys of the outer dictionary must be unique identifiers pointing
-    to the document or page.
+    <h4>Dictionary Format</h4>
+    <p>
+        A dictionary of dictionaries, where each dictionary represents a document or page and contains metadata keys and values. 
+        The keys of the outer dictionary must be unique identifiers pointing to the document or page.
+    </p>
     <pre class="bg-light border p-3">
         <code>
 {
     "123456": {
         "title": "Example Document",
         "author": "John Doe",
+        "date": "1850-04-12"
     },
     "123457": {
         "title": "Another Document",
         "author": "Jane Doe",
+        "date": "1872-09-30"
     }
 }
         </code>
     </pre>
-</p>
+
+    <h3>Matching Process</h3>
+    <p>
+        After uploading your metadata file, you'll need to:
+    </p>
+    <ol>
+        <li>Select the document or page identifier field that will be used for matching</li>
+        <li>Map fields from your metadata to fields in your Transkribus Workflow project</li>
+        <li>Review the matching results before confirming the import</li>
+    </ol>
+
+    <h3>Best Practices</h3>
+    <ul>
+        <li>Ensure your metadata file is well-formed and validates as proper JSON</li>
+        <li>Use consistent identifiers across your metadata and document collection</li>
+        <li>Include as much relevant metadata as available for richer document context</li>
+        <li>Consider normalizing dates and names for better consistency</li>
+        <li>Back up your project before large metadata imports</li>
+    </ul>
+
+    <h3>Related Topics</h3>
+    <ul>
+        <li>{% help_url 'metadata_extract' 'Extracting Metadata' %}</li>
+        <li>{% help_url 'metadata_load_sheets_data' 'Loading Metadata from Google Sheets' %}</li>
+        <li>{% help_url 'metadata_review_document' 'Reviewing Document Metadata' %}</li>
+        <li>{% help_url 'metadata_review_page' 'Reviewing Page Metadata' %}</li>
+    </ul>
+</div>

@@ -13,14 +13,14 @@ from django_filters.views import FilterView
 from django_tables2 import SingleTableView
 
 from twf.forms.dynamic_forms import DynamicForm
-from twf.forms.filters.filters import TaskFilter, PromptFilter
+from twf.forms.filters.filters import TaskFilter, PromptFilter, NoteFilter
 from twf.forms.filters.project_filter_forms import TaskFilterForm, PromptFilterForm
 from twf.forms.project.project_forms_batches import ProjectCopyBatchForm, DocumentExtractionBatchForm
 from twf.forms.project.project_forms import QueryDatabaseForm, GeneralSettingsForm, CredentialsForm, \
     TaskSettingsForm, ExportSettingsForm, RepositorySettingsForm, PromptForm
-from twf.models import Page, PageTag, Project, Prompt, Task
+from twf.models import Page, PageTag, Project, Prompt, Task, Note
 from twf.permissions import check_permission, get_actions_grouped_by_category, get_available_actions
-from twf.tables.tables_project import TaskTable, PromptTable
+from twf.tables.tables_project import TaskTable, PromptTable, NoteTable
 from twf.utils.project_statistics import get_document_statistics
 from twf.views.views_base import TWFView
 
@@ -38,6 +38,7 @@ class TWFProjectView(LoginRequiredMixin, TWFView):
                     {'url': reverse('twf:project_overview'), 'value': 'Overview'},
                     {'url': reverse('twf:project_task_monitor'), 'value': 'Task Monitor'},
                     {'url': reverse('twf:project_prompts'), 'value': 'Saved Prompts'},
+                    {'url': reverse('twf:project_notes'), 'value': 'Project Notes'},
                 ]
             },
             {
@@ -179,6 +180,34 @@ class TWFProjectPromptsView(SingleTableView, FilterView, TWFProjectView):
         context['filter'] = self.get_filterset(self.filterset_class)
         return context
 
+
+class TWFProjectNotesView(SingleTableView, FilterView, TWFProjectView):
+    """View for the project prompts."""
+
+    template_name = 'twf/project/notes.html'
+    page_title = 'Notes'
+    table_class = NoteTable
+    filterset_class = NoteFilter
+    paginate_by = 10
+    model = Note
+
+    def get_queryset(self):
+        """Get the queryset for the view."""
+        queryset = Note.objects.filter(project_id=self.request.session.get('project_id'))
+        self.filterset = self.filterset_class(self.request.GET, queryset=queryset)
+        return self.filterset.qs
+
+    def get(self, request, *args, **kwargs):
+        """Get the view."""
+        self.object_list = self.get_queryset()
+        context = self.get_context_data()
+        return self.render_to_response(context)
+
+    def get_context_data(self, **kwargs):
+        """Get the context data."""
+        context = super().get_context_data(**kwargs)
+        context['filter'] = self.get_filterset(self.filterset_class)
+        return context
 
 class TWFProjectPromptEditView(FormView, TWFProjectView):
     """View for the project prompts."""

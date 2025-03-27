@@ -1,7 +1,7 @@
 (function() {
     let lastMessage = "";
+    const startButtonId = "#button-id-startbatch";
     const cancelButtonId = "#button-id-cancelbatch";
-    const runButtonId = "#button-id-runbatch";
 
     /**
      * Starts a task by sending an AJAX request to the provided URL
@@ -23,11 +23,9 @@
         // Reset the progress bar
         const progressBar = $(progressBarId);
         progressBar.css('width', '0%');
+        progressBar.text('Running...');
         progressBar.removeClass('bg-success bg-danger'); // Remove any existing colors
-        progressBar.addClass('bg-dark');
-
-        console.log('Task URL:', startUrl);
-        console.log('Task Data:', data);
+        progressBar.addClass('bg-dark'); // Add a dark color
 
         // Send AJAX request to start the task
         $.ajax({
@@ -40,14 +38,14 @@
                 let taskId = data.task_id;
 
                  $(cancelButtonId).prop("disabled", false);
-                 $(runButtonId).prop("disabled", true);
+                 $(startButtonId).prop("disabled", true);
                  $(cancelButtonId).data("task-id", taskId); // Store the task ID for canceling
 
                 pollTaskProgress(taskId, progressUrlBase, progressBarId, logTextareaId);
             },
             error: function(error) {
-                console.error("Error starting task:", error.responseText);
                 $(logTextareaId).append('Error starting task.\n');
+                $(logTextareaId).append(error.responseText + '\n');
             }
         });
     }
@@ -89,8 +87,7 @@
                     if (data.text) {
                         const logTextarea = $(logTextareaId);
                         let currentLog = logTextarea.val().trim();
-                        console.log('New log:', data.text);
-                        console.log('Last message:', lastMessage);
+
                         if (data.text === lastMessage) {
                             // If it's the same message, just append a dot
                             logTextarea.val(currentLog + ".");
@@ -112,7 +109,10 @@
                     progressBar.addClass('bg-success'); // Change the progress bar color to green
                     progressBar.text('Completed');
                     $(logTextareaId).append('Task completed\n');
-                    console.log(data.result);
+
+                    $(cancelButtonId).prop("disabled", true);
+                    $(startButtonId).prop("disabled", false);
+
                     if (data.result) {
                         if (data.result.download_url) {
                             $(logTextareaId).append("Click here to download: " + data.result.download_url + "\n");

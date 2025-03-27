@@ -1,5 +1,5 @@
 import django_tables2 as tables
-from twf.models import Task, Prompt
+from twf.models import Task, Prompt, Note
 from django.utils.html import format_html
 
 class TaskTable(tables.Table):
@@ -76,3 +76,29 @@ class PromptTable(tables.Table):
             f"/prompt/{record.pk}/delete",
         )
 
+
+class NoteTable(tables.Table):
+    note = tables.Column(verbose_name="Note")
+    created_at = tables.DateTimeColumn(format="Y-m-d H:i", verbose_name="Created")
+    modified_at = tables.DateTimeColumn(format="Y-m-d H:i", verbose_name="Modified")
+
+    actions = tables.Column(empty_values=(), verbose_name="Options")
+
+    class Meta:
+        model = Note
+        fields = ("note", "created_at", "modified_at")
+        attrs = {"class": "table table-striped table-hover table-sm"}
+
+    def render_note(self, record):
+        return format_html('<span>{}</span>',
+                           record.prompt[:80] + "..." if len(record.prompt) > 80 else record.prompt)
+
+    def render_actions(self, record):
+        return format_html(
+            '<a href="{}" class="btn btn-sm btn-dark me-1" title="View"><i class="fa fa-eye"></i></a>'
+            '<a href="{}" class="btn btn-sm btn-secondary me-1" title="Edit"><i class="fa fa-edit"></i></a>'
+            '<a href="{}" class="btn btn-sm btn-danger" title="Delete"><i class="fa fa-trash"></i></a>',
+            f"/prompt/{record.pk}/view",
+            f"/prompt/{record.pk}/edit",
+            f"/prompt/{record.pk}/delete",
+        )

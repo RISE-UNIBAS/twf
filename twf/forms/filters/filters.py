@@ -2,7 +2,7 @@
 import django_filters
 from django.forms import CheckboxInput
 from django.contrib.auth import get_user_model
-from twf.models import Document, DictionaryEntry, PageTag, CollectionItem, Task, Prompt, Project, Export
+from twf.models import Document, DictionaryEntry, PageTag, CollectionItem, Task, Prompt, Project, Export, Note
 
 User = get_user_model()
 
@@ -83,6 +83,16 @@ class PromptFilter(django_filters.FilterSet):
             'system_role': ['icontains'],
         }
 
+
+class NoteFilter(django_filters.FilterSet):
+    """Filter for the prompts table."""
+
+    class Meta:
+        """Meta class for the prompt filter."""
+        model = Note
+        fields = {
+            'note': ['icontains'],
+        }
 
 class ProjectFilter(django_filters.FilterSet):
     """Filter for the projects table."""

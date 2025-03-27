@@ -58,12 +58,17 @@ def render_metadata_content(base_key, obj_type, obj_id, metadata, parent_key=Non
     if isinstance(metadata, dict):
         html_render = "<ul class='metadata-list'>"
         for key, value in metadata.items():
+            edit_button = ""
             full_key = f"{parent_key}.{key}" if parent_key else key
+
+            if  not isinstance(value, dict) and not isinstance(value, list):
+                edit_button = f"""<button class='btn btn-sm btn-circle btn-edit' onclick='editMetadata("{base_key}", "{obj_type}", "{obj_id}", "{full_key}")' title='Edit'>
+                    <i class="fas fa-edit"></i>
+                </button>"""
+
             html_render += f"""
             <li id='metadata-{full_key}' class='metadata-item'>
-                <button class='btn btn-sm btn-circle btn-edit' onclick='editMetadata("{base_key}", "{obj_type}", "{obj_id}", "{full_key}")' title='Edit'>
-                    <i class="fas fa-edit"></i>
-                </button>
+                {edit_button}
                 <button class="btn btn-sm btn-circle btn-delete show-danger-modal"
                         data-message="Are you sure you want to delete the key '{full_key}'?"
                         data-start-url="/metadata/delete/{obj_type}/{obj_id}/{base_key}/"
