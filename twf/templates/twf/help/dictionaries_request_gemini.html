@@ -1,0 +1,103 @@
+{% load twf_help %}
+
+<div class="help-content">
+    <h2>Dictionary Enrichment with Gemini (Supervised)</h2>
+    <p>
+        This feature allows you to leverage Google's Gemini AI to assist with dictionary entry 
+        enrichment while maintaining direct supervision over the process. Supervised enrichment gives you 
+        control over how Gemini's suggestions are applied to your dictionaries.
+    </p>
+
+    <h3>What is Supervised Dictionary Enrichment?</h3>
+    <p>
+        Unlike batch processing which runs automatically, supervised dictionary enrichment with Gemini:
+    </p>
+    <ul>
+        <li>Processes one dictionary entry at a time</li>
+        <li>Gives you the ability to review and modify Gemini's suggestions</li>
+        <li>Allows interactive refinement of the AI analysis</li>
+        <li>Provides immediate feedback on the results</li>
+        <li>Lets you adjust prompts based on initial responses</li>
+        <li>Gives you complete control over which suggestions to accept</li>
+    </ul>
+
+    <h3>Prerequisites</h3>
+    <p>
+        Before using this feature, you need:
+    </p>
+    <ul>
+        <li>A valid Google AI Studio API key configured in your project settings</li>
+        <li>Dictionary entries that need enrichment</li>
+        <li>Defined prompts that specify what Gemini should analyze or suggest</li>
+    </ul>
+
+    <h3>Supervised Enrichment Steps</h3>
+    <ol>
+        <li>Select the dictionary entry you want to enrich</li>
+        <li>Choose or create a prompt template</li>
+        <li>Configure processing parameters (model, temperature, etc.)</li>
+        <li>Submit your request to Gemini</li>
+        <li>Review the AI's enrichment suggestions</li>
+        <li>Accept, modify, or reject the suggestions</li>
+        <li>Save the final results to your dictionary entry</li>
+    </ol>
+
+    <h3>Types of Dictionary Enrichment</h3>
+    <p>
+        Gemini can help with various aspects of dictionary enrichment:
+    </p>
+    <ul>
+        <li><strong>Entity disambiguation:</strong> Clarifying ambiguous entries</li>
+        <li><strong>Metadata enhancement:</strong> Adding descriptive information</li>
+        <li><strong>Variant identification:</strong> Suggesting alternative forms</li>
+        <li><strong>Authority record matching:</strong> Finding corresponding records in external systems</li>
+        <li><strong>Multilingual information:</strong> Adding translations or variants in other languages</li>
+        <li><strong>Contextual information:</strong> Adding historical or background details</li>
+        <li><strong>Relationship suggestions:</strong> Identifying connections to other entities</li>
+    </ul>
+
+    <h3>Gemini's Strengths for Dictionary Work</h3>
+    <p>
+        Gemini offers specific advantages for dictionary enrichment:
+    </p>
+    <ul>
+        <li>Strong multilingual capabilities for diverse language entries</li>
+        <li>Knowledge of diverse cultural and geographic contexts</li>
+        <li>Structured data understanding for authority record integration</li>
+        <li>Ability to process and suggest connections to multimodal information</li>
+        <li>Effective handling of technical and specialized terminology</li>
+    </ul>
+
+    <h3>Configuration Options</h3>
+    <p>
+        When setting up a supervised Gemini process, you can configure:
+    </p>
+    <ul>
+        <li><strong>Model:</strong> Select which Gemini model to use</li>
+        <li><strong>Temperature:</strong> Control creativity vs. determinism (0.0-1.0)</li>
+        <li><strong>Top P/Top K:</strong> Parameters that influence output variety</li>
+        <li><strong>Max Output Tokens:</strong> Limit the length of AI responses</li>
+        <li><strong>Enrichment Focus:</strong> Specify which aspects of the entry to enrich</li>
+        <li><strong>Result Format:</strong> How Gemini should structure its response</li>
+    </ul>
+
+    <h3>Best Practices</h3>
+    <ul>
+        <li>Review the dictionary entry thoroughly before processing</li>
+        <li>Start with clear, specific instructions in your prompt</li>
+        <li>Be explicit about the format and type of enrichment you want</li>
+        <li>Take advantage of Gemini's multilingual capabilities for diverse entries</li>
+        <li>Use the interactive interface to refine suggestions if needed</li>
+        <li>Save particularly effective prompts to your project's prompt library</li>
+        <li>Verify factual information suggested by Gemini</li>
+    </ul>
+
+    <h3>Related Topics</h3>
+    <ul>
+        <li>{% help_url 'dictionaries_batch_gemini' 'Dictionary Batch Processing with Gemini' %}</li>
+        <li>{% help_url 'dictionaries_request_claude' 'Dictionary Enrichment with Claude (Supervised)' %}</li>
+        <li>{% help_url 'dictionaries_request_openai' 'Dictionary Enrichment with ChatGPT (Supervised)' %}</li>
+        <li>{% help_url 'dictionaries_entry_edit' 'Editing Dictionary Entries' %}</li>
+        <li>{% help_url 'project_settings_credentials' 'API Credential Settings' %}</li>
+    </ul>
+</div>

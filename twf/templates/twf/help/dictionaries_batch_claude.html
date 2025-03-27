@@ -1,0 +1,104 @@
+{% load twf_help %}
+
+<div class="help-content">
+    <h2>Dictionary Batch Processing with Claude</h2>
+    <p>
+        This feature allows you to process multiple dictionary entries at once using Anthropic's Claude AI models.
+        Batch processing with Claude can significantly speed up dictionary enrichment, normalization, and
+        enhancement tasks.
+    </p>
+
+    <h3>What is Dictionary Batch Processing?</h3>
+    <p>
+        Dictionary batch processing with Claude enables you to:
+    </p>
+    <ul>
+        <li>Process multiple dictionary entries in an automated way</li>
+        <li>Apply consistent AI analysis across your dictionaries</li>
+        <li>Enrich entries with additional metadata and information</li>
+        <li>Identify and suggest entity normalization</li>
+        <li>Find connections between related entities</li>
+        <li>Standardize entry formats and content</li>
+    </ul>
+
+    <h3>Prerequisites</h3>
+    <p>
+        Before using this feature, you need:
+    </p>
+    <ul>
+        <li>A valid Anthropic API key configured in your project settings</li>
+        <li>Dictionary entries that need processing</li>
+        <li>Defined prompts that specify what Claude should analyze or enhance</li>
+        <li>Sufficient API quota for your batch size</li>
+    </ul>
+
+    <h3>Batch Processing Steps</h3>
+    <ol>
+        <li>Select the dictionary and entries you want to process</li>
+        <li>Choose or create a prompt template</li>
+        <li>Configure processing parameters (model, temperature, etc.)</li>
+        <li>Specify which aspects of the entries to enhance</li>
+        <li>Start the batch process</li>
+        <li>Monitor progress and review results</li>
+    </ol>
+
+    <h3>Claude's Dictionary Processing Capabilities</h3>
+    <p>
+        Claude can enhance dictionary entries in several ways:
+    </p>
+    <ul>
+        <li><strong>Entity identification:</strong> Recognize and categorize entity types</li>
+        <li><strong>Metadata enrichment:</strong> Add descriptions, dates, locations, etc.</li>
+        <li><strong>Normalization:</strong> Suggest standardized forms and identifiers</li>
+        <li><strong>Variant detection:</strong> Identify alternative names or spellings</li>
+        <li><strong>Context analysis:</strong> Provide historical or background information</li>
+        <li><strong>Relationship mapping:</strong> Suggest connections between entities</li>
+        <li><strong>Authority matching:</strong> Link to external authority records</li>
+    </ul>
+
+    <h3>Configuration Options</h3>
+    <p>
+        When setting up a Claude batch process for dictionaries, you can configure:
+    </p>
+    <ul>
+        <li><strong>Model:</strong> Select which Claude model to use</li>
+        <li><strong>Temperature:</strong> Control creativity vs. determinism (0.0-1.0)</li>
+        <li><strong>Max Tokens:</strong> Limit the length of AI responses</li>
+        <li><strong>Enrichment Focus:</strong> Specify which aspects of entries to enhance</li>
+        <li><strong>Confidence Threshold:</strong> Set minimum confidence for accepting suggestions</li>
+        <li><strong>Processing Priority:</strong> Set batch job priority</li>
+    </ul>
+
+    <h3>Batch Strategy Options</h3>
+    <p>
+        Different approaches to batch processing include:
+    </p>
+    <ul>
+        <li><strong>Full dictionary:</strong> Process all entries in a dictionary</li>
+        <li><strong>Selected entries:</strong> Process only specific entries</li>
+        <li><strong>By entity type:</strong> Process entries of a particular type</li>
+        <li><strong>Incomplete entries:</strong> Focus on entries lacking specific metadata</li>
+        <li><strong>Recently added:</strong> Process only new or recently modified entries</li>
+    </ul>
+
+    <h3>Best Practices</h3>
+    <ul>
+        <li>Start with a small test batch to validate your prompt and settings</li>
+        <li>Use clear, specific instructions in your prompts</li>
+        <li>Request structured output formats for easier post-processing</li>
+        <li>Review a sample of results to ensure quality</li>
+        <li>Adjust confidence thresholds based on your accuracy needs</li>
+        <li>Consider dictionary type when crafting prompts (people, places, concepts, etc.)</li>
+        <li>Save successful prompts in your project's prompt library</li>
+        <li>Plan for post-processing review of critical entries</li>
+    </ul>
+
+    <h3>Related Topics</h3>
+    <ul>
+        <li>{% help_url 'dictionaries_batch_openai' 'Dictionary Batch Processing with ChatGPT' %}</li>
+        <li>{% help_url 'dictionaries_batch_gemini' 'Dictionary Batch Processing with Gemini' %}</li>
+        <li>{% help_url 'dictionaries_request_claude' 'Dictionary Enrichment with Claude (Supervised)' %}</li>
+        <li>{% help_url 'project_prompts' 'Managing AI Prompts' %}</li>
+        <li>{% help_url 'project_settings_credentials' 'API Credential Settings' %}</li>
+    </ul>
+</div>

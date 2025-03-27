@@ -1,0 +1,116 @@
+{% load twf_help %}
+
+<div class="help-content">
+    <h2>Page Batch Processing with Claude</h2>
+    <p>
+        This feature allows you to process individual pages within documents using Anthropic's Claude AI models.
+        Page-level batch processing is particularly useful when you need to analyze or extract information at
+        a more granular level than entire documents.
+    </p>
+
+    <h3>What is Page Batch Processing?</h3>
+    <p>
+        Unlike document batch processing which treats each document as a unit, page batch processing:
+    </p>
+    <ul>
+        <li>Treats individual pages as the processing unit</li>
+        <li>Allows more focused analysis of specific document sections</li>
+        <li>Provides finer control over which content is processed</li>
+        <li>Is ideal for documents with distinct page-specific information</li>
+        <li>Enables more detailed metadata extraction at the page level</li>
+        <li>Works well with documents that have varying content types across pages</li>
+    </ul>
+
+    <h3>Prerequisites</h3>
+    <p>
+        Before using this feature, you need:
+    </p>
+    <ul>
+        <li>A valid Anthropic API key configured in your project settings</li>
+        <li>Documents with page-level content that need processing</li>
+        <li>Defined prompts that specify what Claude should analyze or extract</li>
+        <li>Sufficient API quota for your batch size</li>
+    </ul>
+
+    <h3>Batch Processing Steps</h3>
+    <ol>
+        <li>Select the documents containing pages you want to process</li>
+        <li>Specify which pages to include (all, range, or specific pages)</li>
+        <li>Choose or create a prompt template</li>
+        <li>Configure processing parameters (model, temperature, etc.)</li>
+        <li>Specify where to store the results</li>
+        <li>Start the batch process</li>
+        <li>Monitor progress and review results</li>
+    </ol>
+
+    <h3>When to Use Page Batch Processing</h3>
+    <p>
+        Page batch processing is particularly valuable when:
+    </p>
+    <ul>
+        <li>Documents contain distinct sections with different information types</li>
+        <li>Only specific pages within documents need analysis</li>
+        <li>You need to extract page-specific metadata</li>
+        <li>Working with large documents that exceed context limits when processed whole</li>
+        <li>Different analysis approaches are needed for different pages</li>
+        <li>Document structure varies significantly from page to page</li>
+    </ul>
+
+    <h3>Claude's Strengths for Page Processing</h3>
+    <p>
+        Claude offers specific advantages for page-level processing:
+    </p>
+    <ul>
+        <li>Ability to understand page context without the entire document</li>
+        <li>Strong comprehension of page-specific formats (tables, forms, etc.)</li>
+        <li>Effective extraction of structured information from individual pages</li>
+        <li>Nuanced analysis of page content within its specific context</li>
+        <li>Capacity to handle longer page content with its extended context window</li>
+    </ul>
+
+    <h3>Configuration Options</h3>
+    <p>
+        When setting up a Claude batch process for pages, you can configure:
+    </p>
+    <ul>
+        <li><strong>Model:</strong> Select which Claude model to use</li>
+        <li><strong>Temperature:</strong> Control creativity vs. determinism (0.0-1.0)</li>
+        <li><strong>Max Tokens:</strong> Limit the length of AI responses</li>
+        <li><strong>Page Selection:</strong> Specify which pages to process</li>
+        <li><strong>Result Storage:</strong> Where to save the AI analysis (page metadata, notes, etc.)</li>
+        <li><strong>Processing Priority:</strong> Set batch job priority</li>
+    </ul>
+
+    <h3>Page Selection Strategies</h3>
+    <p>
+        You can process pages using different selection approaches:
+    </p>
+    <ul>
+        <li><strong>All pages:</strong> Process every page in selected documents</li>
+        <li><strong>Page ranges:</strong> Process specific ranges (e.g., pages 5-10)</li>
+        <li><strong>Specific pages:</strong> Select individual pages to process</li>
+        <li><strong>Page types:</strong> Process only pages of a certain type (title pages, indices, etc.)</li>
+        <li><strong>Content-based:</strong> Process pages containing specific content patterns</li>
+        <li><strong>Metadata-based:</strong> Select pages based on existing metadata properties</li>
+    </ul>
+
+    <h3>Best Practices</h3>
+    <ul>
+        <li>Design prompts specifically for page-level analysis rather than document-level</li>
+        <li>Consider how page context relates to the overall document</li>
+        <li>Start with a small test batch to validate your prompt and settings</li>
+        <li>Request structured output formats for easier post-processing</li>
+        <li>Review results to ensure page context is properly understood</li>
+        <li>Balance batch size with processing thoroughness</li>
+        <li>Use page metadata to organize and track processed results</li>
+    </ul>
+
+    <h3>Related Topics</h3>
+    <ul>
+        <li>{% help_url 'documents_batch_claude' 'Document Batch Processing with Claude' %}</li>
+        <li>{% help_url 'documents_page_batch_gemini' 'Page Batch Processing with Gemini' %}</li>
+        <li>{% help_url 'documents_page_batch_openai' 'Page Batch Processing with ChatGPT' %}</li>
+        <li>{% help_url 'project_prompts' 'Managing AI Prompts' %}</li>
+        <li>{% help_url 'metadata_review_page' 'Reviewing Page Metadata' %}</li>
+    </ul>
+</div>

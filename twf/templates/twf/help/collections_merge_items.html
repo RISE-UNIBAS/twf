@@ -1,0 +1,90 @@
+{% load twf_help %}
+
+<div class="help-content">
+    <h2>Merge Collection Items</h2>
+    <p>
+        This feature allows you to combine multiple collection items into a single item. Merging is useful when
+        you discover that separate collection items actually represent the same logical entity or when you need
+        to consolidate related items for more efficient processing.
+    </p>
+
+    <h3>When to Merge Collection Items</h3>
+    <p>
+        Consider merging collection items when:
+    </p>
+    <ul>
+        <li>Multiple items represent different parts of the same document</li>
+        <li>You've identified duplicate items that should be consolidated</li>
+        <li>Related items would benefit from being processed as a single unit</li>
+        <li>You need to reorganize your collection structure</li>
+        <li>Separate items contain complementary information about the same entity</li>
+    </ul>
+
+    <h3>The Merging Process</h3>
+    <p>
+        Merging collection items involves several steps:
+    </p>
+    <ol>
+        <li>Select the items you want to merge</li>
+        <li>Designate a primary item that will serve as the base for the merged result</li>
+        <li>Configure how metadata from different items should be combined</li>
+        <li>Preview the merge result to verify it meets your needs</li>
+        <li>Confirm the merge operation</li>
+        <li>Review the merged item to ensure all content is properly integrated</li>
+    </ol>
+
+    <h3>Merge Configuration Options</h3>
+    <p>
+        When merging items, you have several configuration options:
+    </p>
+    <ul>
+        <li><strong>Primary Item Selection:</strong> Determine which item serves as the foundation for the merge</li>
+        <li><strong>Metadata Handling:</strong> Choose how conflicting metadata fields should be resolved</li>
+        <li><strong>Content Ordering:</strong> Specify the sequence for combining document content</li>
+        <li><strong>Annotation Integration:</strong> Configure how annotations from different items are combined</li>
+        <li><strong>Conflict Resolution:</strong> Set rules for handling conflicting information</li>
+    </ul>
+
+    <h3>Metadata Consolidation</h3>
+    <p>
+        When merging items with different metadata values, you can choose to:
+    </p>
+    <ul>
+        <li><strong>Use primary:</strong> Keep only the metadata from the primary item</li>
+        <li><strong>Combine all:</strong> Maintain all metadata as lists or combined values</li>
+        <li><strong>Keep non-conflicting:</strong> Merge metadata that doesn't conflict</li>
+        <li><strong>Manual selection:</strong> Individually select which values to keep for each field</li>
+        <li><strong>Create composite:</strong> Generate new metadata that synthesizes information from all sources</li>
+    </ul>
+
+    <h3>Important Considerations</h3>
+    <p>
+        Before merging collection items, keep these points in mind:
+    </p>
+    <ul>
+        <li>Merging is not easily reversible - consider backing up your collection first</li>
+        <li>All items being merged should be logically related</li>
+        <li>Carefully review metadata conflicts before confirming the merge</li>
+        <li>Consider how the merge will affect any linked dictionaries or tags</li>
+        <li>Verify that any document-specific configurations will remain valid after merging</li>
+    </ul>
+
+    <h3>Best Practices</h3>
+    <ul>
+        <li>Start with a well-organized collection before attempting merges</li>
+        <li>Merge related items in small batches rather than all at once</li>
+        <li>Document your merge decisions, especially for complex cases</li>
+        <li>Review merged items thoroughly after the operation</li>
+        <li>Consider how merging affects your overall collection structure</li>
+        <li>Update any references to the original items in external systems</li>
+    </ul>
+
+    <h3>Related Topics</h3>
+    <ul>
+        <li>{% help_url 'collections_list' 'Your Collections' %}</li>
+        <li>{% help_url 'collections_view' 'Viewing Collections' %}</li>
+        <li>{% help_url 'collection_item_view' 'Viewing Collection Items' %}</li>
+        <li>{% help_url 'collection_item_edit' 'Editing Collection Items' %}</li>
+        <li>{% help_url 'name_collection_items' 'Naming Collection Items' %}</li>
+    </ul>
+</div>

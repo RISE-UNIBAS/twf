@@ -1,0 +1,92 @@
+{% load twf_help %}
+
+<div class="help-content">
+    <h2>Manual Dictionary Assignment</h2>
+    <p>
+        This feature allows you to manually assign tags and entities to appropriate dictionary entries. Manual assignment 
+        gives you complete control over how entities are categorized and standardized in your project.
+    </p>
+
+    <h3>When to Use Manual Assignment</h3>
+    <p>
+        Manual dictionary assignment is particularly valuable when:
+    </p>
+    <ul>
+        <li>Working with specialized or complex entities that AI might misinterpret</li>
+        <li>Handling ambiguous terms that require human judgment</li>
+        <li>Ensuring high precision in critical dictionary entries</li>
+        <li>Creating initial high-quality examples for later automated processes</li>
+        <li>Working with historical, obscure, or context-dependent terms</li>
+        <li>Applying domain expertise that automated systems lack</li>
+    </ul>
+
+    <h3>The Manual Assignment Process</h3>
+    <p>
+        To manually assign entities to dictionaries:
+    </p>
+    <ol>
+        <li>Select a tag or entity that needs dictionary assignment</li>
+        <li>Choose the appropriate dictionary for this entity type</li>
+        <li>Search for matching existing entries or create a new entry</li>
+        <li>Review the proposed assignment for accuracy</li>
+        <li>Confirm the assignment to link the entity to the dictionary entry</li>
+        <li>Add additional information or normalization if needed</li>
+    </ol>
+
+    <h3>Assignment Options</h3>
+    <p>
+        When manually assigning entities, you have several options:
+    </p>
+    <ul>
+        <li><strong>Assign to existing entry:</strong> Link the entity to a dictionary entry that already exists</li>
+        <li><strong>Create new entry:</strong> Establish a new dictionary entry for this entity</li>
+        <li><strong>Create variant:</strong> Add this entity as a variant of an existing entry</li>
+        <li><strong>Merge entries:</strong> Combine similar entities into a single dictionary entry</li>
+        <li><strong>Assign with context:</strong> Include contextual information with the assignment</li>
+    </ul>
+
+    <h3>Search and Matching</h3>
+    <p>
+        The system provides several tools to help you find appropriate dictionary entries:
+    </p>
+    <ul>
+        <li><strong>Fuzzy search:</strong> Find entries that approximately match your entity</li>
+        <li><strong>Similarity suggestions:</strong> View entries that might be related</li>
+        <li><strong>Recent assignments:</strong> See recently used dictionary entries</li>
+        <li><strong>Filtered views:</strong> Narrow down entries by various criteria</li>
+        <li><strong>Sorting options:</strong> Order entries by relevance, frequency, or alphabetically</li>
+    </ul>
+
+    <h3>Creating New Entries</h3>
+    <p>
+        When creating a new dictionary entry during manual assignment, you can:
+    </p>
+    <ul>
+        <li>Set the canonical form of the entity</li>
+        <li>Provide additional metadata and descriptive information</li>
+        <li>Link to external authority records or identifiers</li>
+        <li>Add notes about usage or special cases</li>
+        <li>Establish relationships with other dictionary entries</li>
+        <li>Configure normalization settings for this entry</li>
+    </ul>
+
+    <h3>Best Practices</h3>
+    <ul>
+        <li>Establish clear guidelines for manual assignment before starting</li>
+        <li>Be consistent in how you handle similar entities</li>
+        <li>Document special cases or exceptions</li>
+        <li>Check for existing entries before creating new ones</li>
+        <li>Add sufficient context to disambiguate similar entities</li>
+        <li>Review assigned entities periodically for consistency</li>
+        <li>Consider using batch assignment for obvious cases, saving manual work for complex situations</li>
+    </ul>
+
+    <h3>Related Topics</h3>
+    <ul>
+        <li>{% help_url 'dictionaries_overview' 'Dictionary Management Overview' %}</li>
+        <li>{% help_url 'dictionaries_entry_edit' 'Editing Dictionary Entries' %}</li>
+        <li>{% help_url 'dictionaries_entry_merging' 'Merging Dictionary Entries' %}</li>
+        <li>{% help_url 'dictionaries_normalization' 'Entity Normalization' %}</li>
+        <li>{% help_url 'tags_view_open' 'Working with Open Tags' %}</li>
+    </ul>
+</div>
