@@ -1,35 +1,147 @@
 {% load twf_help %}
-<h1>Context Help: Export Configuration</h1>
-<p>
-    The Export Configuration page allows you to set up and manage global export settings for your project. These settings will be applied to all exports created within the project.
-</p>
 
-<h2>Configuration Options</h2>
-<p>
-    On this page, you can configure:
-</p>
-<ul>
-    <li><strong>Default Export Formats:</strong> Define the preferred formats for different types of content (documents, collections, etc.).</li>
-    <li><strong>Metadata Fields:</strong> Specify which metadata fields should be included in exports.</li>
-    <li><strong>File Structure:</strong> Configure how exported files should be organized and structured.</li>
-    <li><strong>Output Templates:</strong> Define templates for formatting the exported content.</li>
-</ul>
+<div class="help-content">
+    <h2>Configure Export Formats</h2>
+    <p>
+        The Export Configuration page allows you to set up and manage global export settings for your project. 
+        These configurations define how content is exported, formatted, and structured across all export types,
+        ensuring consistency and efficiency in your export workflows.
+    </p>
 
-<h2>Global vs. Individual Export Settings</h2>
-<p>
-    Settings configured here apply project-wide but can be overridden for individual exports when needed. This allows for consistent exports across the project while maintaining flexibility for special cases.
-</p>
+    <h3>Configuration Categories</h3>
+    <p>
+        Export configuration covers several key areas:
+    </p>
+    <ul>
+        <li><strong>Format Definitions:</strong> Configuring the structure and content of different export formats</li>
+        <li><strong>Default Settings:</strong> Establishing project-wide defaults for export operations</li>
+        <li><strong>Metadata Mapping:</strong> Defining how metadata fields are represented in exports</li>
+        <li><strong>File Structure:</strong> Setting up organization and naming conventions for export files</li>
+        <li><strong>Content Transformations:</strong> Configuring how content is processed during export</li>
+        <li><strong>Templates:</strong> Creating reusable export templates for different purposes</li>
+    </ul>
 
-<h2>Tips for Export Configuration</h2>
-<ul>
-    <li>Consider the needs of your target audience when selecting export formats.</li>
-    <li>Include only essential metadata to keep exports clean and focused.</li>
-    <li>Save common export configurations as templates if you perform similar exports regularly.</li>
-    <li>Test your export configuration with a small sample before exporting large datasets.</li>
-</ul>
+    <h3>Format Configuration Options</h3>
+    <p>
+        For each export format, you can configure:
+    </p>
+    <ul>
+        <li><strong>Default Export Formats:</strong> 
+            <ul>
+                <li>Set preferred formats for different content types (documents, collections, dictionaries, tags)</li>
+                <li>Configure format-specific options and parameters</li>
+                <li>Define format variations for different export scenarios</li>
+                <li>Set format priorities and fallbacks</li>
+            </ul>
+        </li>
+        <li><strong>Metadata Handling:</strong> 
+            <ul>
+                <li>Specify which metadata fields to include in exports</li>
+                <li>Map internal field names to export field names</li>
+                <li>Configure metadata transformations and normalization</li>
+                <li>Set up metadata validation rules</li>
+                <li>Define required and optional metadata fields</li>
+            </ul>
+        </li>
+        <li><strong>Content Formatting:</strong> 
+            <ul>
+                <li>Define how text content is formatted</li>
+                <li>Configure handling of special characters</li>
+                <li>Set up structural markup options</li>
+                <li>Configure image handling and inclusion</li>
+                <li>Set pagination and section break handling</li>
+            </ul>
+        </li>
+        <li><strong>File Structure:</strong> 
+            <ul>
+                <li>Define file organization hierarchies</li>
+                <li>Set up file naming patterns and conventions</li>
+                <li>Configure bundling and archive options</li>
+                <li>Set up directory structures for multi-file exports</li>
+                <li>Define manifest and index file generation</li>
+            </ul>
+        </li>
+        <li><strong>Output Templates:</strong> 
+            <ul>
+                <li>Create reusable templates for different export types</li>
+                <li>Define layout and styling for formatted outputs</li>
+                <li>Configure header, footer, and metadata placement</li>
+                <li>Set up document structure templates</li>
+                <li>Define custom transformation templates</li>
+            </ul>
+        </li>
+    </ul>
 
-<h1>Related Topics</h1>
-<ul>
-    <li><a href="{% help_url 'modules/workflows/export.html' %}" target="_blank" class="help-link">Export Workflows Documentation</a></li>
-    <li><a href="{% help_url 'modules/parts/settings.html' %}" target="_blank" class="help-link">Project Settings</a></li>
-</ul>
+    <h3>Advanced Configuration Features</h3>
+    <ul>
+        <li><strong>Schema Definitions:</strong> Configure validation schemas for structured formats like XML/JSON</li>
+        <li><strong>XSLT Transformations:</strong> Set up transformation stylesheets for XML-based exports</li>
+        <li><strong>Custom Scripts:</strong> Define custom processing scripts for specialized export needs</li>
+        <li><strong>Conditional Logic:</strong> Configure conditional export rules based on content properties</li>
+        <li><strong>Format Converters:</strong> Set up conversion paths between different formats</li>
+        <li><strong>Post-Processing:</strong> Configure automatic post-processing operations</li>
+        <li><strong>Validation Rules:</strong> Define validation checks for export content</li>
+    </ul>
+
+    <h3>Global vs. Individual Export Settings</h3>
+    <p>
+        Configurations exist at different levels:
+    </p>
+    <ul>
+        <li><strong>Project-Level Defaults:</strong> Settings that apply to all exports in the project</li>
+        <li><strong>Format-Specific Settings:</strong> Configurations specific to particular export formats</li>
+        <li><strong>Content-Type Settings:</strong> Settings that apply to specific types of content</li>
+        <li><strong>Template-Based Settings:</strong> Configurations defined in reusable templates</li>
+        <li><strong>Individual Export Overrides:</strong> Settings specified during a particular export operation</li>
+    </ul>
+    <p>
+        Settings configured at the project level apply globally but can be overridden for individual exports when needed. 
+        This allows for consistent exports across the project while maintaining flexibility for special cases.
+    </p>
+
+    <h3>Reusable Export Templates</h3>
+    <p>
+        Creating export templates allows you to:
+    </p>
+    <ul>
+        <li>Save commonly used export configurations for reuse</li>
+        <li>Share standardized export settings across your team</li>
+        <li>Create purpose-specific export configurations (archival, publication, analysis, etc.)</li>
+        <li>Ensure consistency across multiple export operations</li>
+        <li>Quickly switch between different export strategies</li>
+    </ul>
+
+    <h3>Schema and Standard Compliance</h3>
+    <p>
+        For structured export formats, you can configure:
+    </p>
+    <ul>
+        <li>Compliance with standard schemas (TEI, METS, MODS, Dublin Core, etc.)</li>
+        <li>Custom schema extensions for project-specific needs</li>
+        <li>Validation rules to ensure standard compliance</li>
+        <li>Namespace configurations for XML-based formats</li>
+        <li>Standard identifiers and references</li>
+    </ul>
+
+    <h3>Best Practices for Export Configuration</h3>
+    <ul>
+        <li>Consider the needs of your target audience when selecting and configuring export formats</li>
+        <li>Document your export configurations for team reference and future use</li>
+        <li>Create purpose-specific templates for different export scenarios</li>
+        <li>Balance completeness with usability when configuring metadata inclusion</li>
+        <li>Test configurations with sample content before applying them to large exports</li>
+        <li>Consider long-term preservation needs when configuring archival formats</li>
+        <li>Align your export configurations with relevant standards in your field</li>
+        <li>Review and update export configurations periodically as project needs evolve</li>
+    </ul>
+
+    <h3>Related Topics</h3>
+    <ul>
+        <li>{% help_url 'export_overview' 'Export Overview' %}</li>
+        <li>{% help_url 'export_documents' 'Export Documents' %}</li>
+        <li>{% help_url 'export_collections' 'Export Collections' %}</li>
+        <li>{% help_url 'export_dictionaries' 'Export Dictionaries' %}</li>
+        <li>{% help_url 'export_tags' 'Export Tags' %}</li>
+        <li>{% help_url 'project_settings_export' 'Project Export Settings' %}</li>
+    </ul>
+</div>
