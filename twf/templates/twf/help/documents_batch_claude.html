@@ -1,0 +1,99 @@
+{% load twf_help %}
+
+<div class="help-content">
+    <h2>Document Batch Processing with Claude</h2>
+    <p>
+        This feature allows you to process multiple documents at once using Anthropic's Claude AI models.
+        Batch processing with Claude can significantly enhance document analysis, metadata extraction,
+        and content processing tasks.
+    </p>
+
+    <h3>What is Claude Batch Processing?</h3>
+    <p>
+        Claude batch processing enables you to:
+    </p>
+    <ul>
+        <li>Process multiple documents in an automated way</li>
+        <li>Apply consistent AI analysis across your document collection</li>
+        <li>Extract structured information from document content</li>
+        <li>Generate metadata, summaries, or annotations</li>
+        <li>Classify documents based on content analysis</li>
+        <li>Identify entities, themes, or patterns across documents</li>
+    </ul>
+
+    <h3>Prerequisites</h3>
+    <p>
+        Before using this feature, you need:
+    </p>
+    <ul>
+        <li>A valid Anthropic API key configured in your project settings</li>
+        <li>Documents with readable text content</li>
+        <li>Defined prompts that specify what Claude should extract or analyze</li>
+        <li>Sufficient API quota for your batch size</li>
+    </ul>
+
+    <h3>Batch Processing Steps</h3>
+    <ol>
+        <li>Select the documents you want to process</li>
+        <li>Choose or create a prompt template</li>
+        <li>Configure processing parameters (model, temperature, etc.)</li>
+        <li>Specify where to store the results</li>
+        <li>Start the batch process</li>
+        <li>Monitor progress and review results</li>
+    </ol>
+
+    <h3>Claude's Strengths</h3>
+    <p>
+        Claude is particularly effective for:
+    </p>
+    <ul>
+        <li>Understanding complex document structures and relationships</li>
+        <li>Extracting nuanced information from historical or technical texts</li>
+        <li>Handling longer document contexts compared to some other AI models</li>
+        <li>Following detailed instructions with high accuracy</li>
+        <li>Providing fact-based, balanced analysis</li>
+    </ul>
+
+    <h3>Configuration Options</h3>
+    <p>
+        When setting up a Claude batch process, you can configure:
+    </p>
+    <ul>
+        <li><strong>Model:</strong> Select which Claude model to use (e.g., Claude 3 Opus, Claude 3 Sonnet)</li>
+        <li><strong>Temperature:</strong> Control creativity vs. determinism (0.0-1.0)</li>
+        <li><strong>Max Tokens:</strong> Limit the length of AI responses</li>
+        <li><strong>Chunk Size:</strong> How to split long documents for processing</li>
+        <li><strong>Result Storage:</strong> Where to save the AI analysis (metadata, notes, etc.)</li>
+        <li><strong>Processing Priority:</strong> Set batch job priority</li>
+    </ul>
+
+    <h3>Common Use Cases</h3>
+    <ul>
+        <li>Extracting document metadata (dates, authors, locations, etc.)</li>
+        <li>Generating document summaries or abstracts</li>
+        <li>Identifying key entities mentioned in documents</li>
+        <li>Classifying documents by type, subject, or time period</li>
+        <li>Creating structured annotations from unstructured text</li>
+        <li>Normalizing inconsistent information across documents</li>
+    </ul>
+
+    <h3>Best Practices</h3>
+    <ul>
+        <li>Start with a small test batch to validate your prompt and settings</li>
+        <li>Use specific, clear instructions in your prompts</li>
+        <li>Request structured output formats for easier post-processing</li>
+        <li>Review a sample of results to ensure quality</li>
+        <li>Keep prompts in your project's prompt library for reuse</li>
+        <li>Consider processing documents in logical groups</li>
+        <li>Monitor API usage to manage costs</li>
+    </ul>
+
+    <h3>Related Topics</h3>
+    <ul>
+        <li>{% help_url 'documents_batch_openai' 'Document Batch Processing with ChatGPT' %}</li>
+        <li>{% help_url 'documents_batch_gemini' 'Document Batch Processing with Gemini' %}</li>
+        <li>{% help_url 'project_prompts' 'Managing AI Prompts' %}</li>
+        <li>{% help_url 'project_settings_credentials' 'API Credential Settings' %}</li>
+        <li>{% help_url 'project_task_monitor' 'Monitoring Task Progress' %}</li>
+    </ul>
+</div>

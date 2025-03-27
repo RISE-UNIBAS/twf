@@ -1,0 +1,104 @@
+{% load twf_help %}
+
+<div class="help-content">
+    <h2>Collection Processing with Gemini (Supervised)</h2>
+    <p>
+        This feature allows you to process individual collection items with Google's Gemini AI while maintaining 
+        direct supervision over the analysis. Supervised processing gives you more control over how Gemini interprets 
+        and analyzes your collection items.
+    </p>
+
+    <h3>What is Supervised Collection Processing?</h3>
+    <p>
+        Unlike batch processing which runs automatically on multiple items, supervised processing:
+    </p>
+    <ul>
+        <li>Processes one collection item at a time</li>
+        <li>Gives you the ability to review and modify Gemini's suggestions</li>
+        <li>Allows interactive refinement of the AI analysis</li>
+        <li>Provides immediate feedback on the results</li>
+        <li>Lets you adjust prompts based on initial responses</li>
+        <li>Gives you complete control over which suggestions to accept</li>
+    </ul>
+
+    <h3>Prerequisites</h3>
+    <p>
+        Before using this feature, you need:
+    </p>
+    <ul>
+        <li>A valid Google AI Studio API key configured in your project settings</li>
+        <li>A collection with properly configured items</li>
+        <li>Defined prompts that specify what Gemini should analyze or extract</li>
+    </ul>
+
+    <h3>Supervised Processing Steps</h3>
+    <ol>
+        <li>Select the collection item you want to process</li>
+        <li>Choose or create a prompt template</li>
+        <li>Configure processing parameters (model, temperature, etc.)</li>
+        <li>Submit your request to Gemini</li>
+        <li>Review the AI's response</li>
+        <li>Accept, modify, or reject the suggestions</li>
+        <li>Save the final results to your collection item</li>
+    </ol>
+
+    <h3>When to Use Supervised Processing</h3>
+    <p>
+        Supervised processing with Gemini is ideal when:
+    </p>
+    <ul>
+        <li>Working with multilingual or diverse format documents</li>
+        <li>Processing collection items with both textual and visual elements</li>
+        <li>Handling documents that require careful interpretation</li>
+        <li>Developing and refining prompts before batch processing</li>
+        <li>Working with specialized or technical content</li>
+        <li>Training team members on effective AI interaction</li>
+    </ul>
+
+    <h3>Configuration Options</h3>
+    <p>
+        When setting up a supervised Gemini process, you can configure:
+    </p>
+    <ul>
+        <li><strong>Model:</strong> Select which Gemini model to use</li>
+        <li><strong>Temperature:</strong> Control creativity vs. determinism (0.0-1.0)</li>
+        <li><strong>Top P/Top K:</strong> Parameters that influence output variety</li>
+        <li><strong>Max Output Tokens:</strong> Limit the length of AI responses</li>
+        <li><strong>Processing Scope:</strong> Whether to process the entire document or specific sections</li>
+        <li><strong>Result Format:</strong> How Gemini should structure its response</li>
+    </ul>
+
+    <h3>Refining Your Prompts</h3>
+    <p>
+        Supervised processing is an excellent opportunity to refine your prompts:
+    </p>
+    <ul>
+        <li>Experiment with different instruction phrasings</li>
+        <li>Adjust the level of detail requested</li>
+        <li>Try different output formats</li>
+        <li>Add or remove examples</li>
+        <li>Incorporate domain-specific terminology</li>
+        <li>Take advantage of Gemini's multilingual capabilities</li>
+        <li>Save successful prompts for future use in batch processing</li>
+    </ul>
+
+    <h3>Best Practices</h3>
+    <ul>
+        <li>Review the collection item thoroughly before processing</li>
+        <li>Start with clear, specific instructions in your prompt</li>
+        <li>Be explicit about the format you want for Gemini's response</li>
+        <li>Use the interactive interface to refine responses if needed</li>
+        <li>Save particularly effective prompts to your project's prompt library</li>
+        <li>Document any modifications you make to Gemini's suggestions</li>
+        <li>Consider supervised processing as a training phase before batch processing</li>
+    </ul>
+
+    <h3>Related Topics</h3>
+    <ul>
+        <li>{% help_url 'collections_gemini_batch' 'Collection Batch Processing with Gemini' %}</li>
+        <li>{% help_url 'collections_claude_request' 'Collection Processing with Claude (Supervised)' %}</li>
+        <li>{% help_url 'collections_openai_request' 'Collection Processing with ChatGPT (Supervised)' %}</li>
+        <li>{% help_url 'project_prompts' 'Managing AI Prompts' %}</li>
+        <li>{% help_url 'project_settings_credentials' 'API Credential Settings' %}</li>
+    </ul>
+</div>
