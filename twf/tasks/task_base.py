@@ -1,5 +1,8 @@
 """Task base functions. Functions to start, update, end, and fail tasks."""
+import time
 import traceback
+import logging
+from datetime import datetime
 
 from django.utils import timezone
 from celery import Task as CeleryTask
@@ -7,29 +10,58 @@ from celery import Task as CeleryTask
 from twf.clients.simple_ai_clients import AiApiClient
 from twf.models import Task, Project, User
 
+logger = logging.getLogger(__name__)
+
 
 class BaseTWFTask(CeleryTask):
     """Base task for all TWF Celery tasks."""
+    
+    # Standard descriptions for common task types
+    TASK_DESCRIPTIONS = {
+        "extract_zip_export_task": "Extraction of Transkribus export files to create document and page structures.",
+        "create_collection": "Creation of a new collection in the project.",
+        "search_openai_for_collection": "OpenAI processing of collection items for content extraction or enhancement.",
+        "search_gemini_for_collection": "Gemini AI processing of collection items for content extraction or enhancement.",
+        "search_claude_for_collection": "Claude AI processing of collection items for content extraction or enhancement.",
+        "search_mistral_for_collection": "Mistral AI processing of collection items for content extraction or enhancement.",
+        "search_openai_for_docs": "OpenAI processing of documents for content extraction or enhancement.",
+        "search_gemini_for_docs": "Gemini AI processing of documents for content extraction or enhancement.",
+        "search_claude_for_docs": "Claude AI processing of documents for content extraction or enhancement.",
+        "search_mistral_for_docs": "Mistral AI processing of documents for content extraction or enhancement.",
+        "export_data_task": "Export of project data to various formats.",
+        "export_to_zenodo_task": "Export of project data to Zenodo repository.",
+    }
 
     def before_start(self, task_id, args, kwargs):
         """Initialize project and user before the task starts."""
-
         self.task_id = task_id
         self.get_project_and_user(args[0], args[1])
-
         self.task_params = kwargs
-
+        self.task_start_time = time.time()
+        self.start_datetime = timezone.now()
+        
+        # Task tracking
         self.total_items = None
         self.processed_items = 0
-
+        self.successful_items = 0
+        self.failed_items = 0
+        self.skipped_items = 0
+        
+        # Get standard description for this task type
+        task_description = self.TASK_DESCRIPTIONS.get(self.name, "")
+        
         # Create a new task object in the database
         self.twf_task = Task.objects.create(
             celery_task_id=task_id,
             project=self.project,
             user=self.user,
             status="STARTED",
-            title=self.name,  # Defaults to the task name
+            title=f"Started: {self.name}",
+            description=task_description,
+            text=f"Task initiated at {self.start_datetime.strftime('%Y-%m-%d %H:%M:%S')}.\n"
         )
+        
+        logger.info(f"Starting task {self.name} (ID: {task_id}) for project {self.project.title}")
         self.update_state(state="STARTED", meta={"current": 0, "total": 100, "text": "Task started"})
 
     @staticmethod
@@ -56,32 +88,137 @@ class BaseTWFTask(CeleryTask):
         """Set the total number of items for progress calculation."""
         self.total_items = total
         self.processed_items = 0  # Reset counter
+        
+        # Update task title to reflect the total
+        if self.twf_task and total > 0:
+            item_type = self.get_item_type_name()
+            self.twf_task.title = f"Processing {total} {item_type}"
+            self.twf_task.text += f"Found {total} {item_type} to process.\n"
+            self.twf_task.save(update_fields=["title", "text"])
+            logger.info(f"Task {self.task_id}: set to process {total} {item_type}")
+    
+    def get_item_type_name(self):
+        """Return a descriptive name for the type of items being processed.
+        Subclasses can override this if needed."""
+        if "collection" in self.name.lower():
+            return "collection items"
+        elif "document" in self.name.lower() or "doc" in self.name.lower():
+            return "documents"
+        elif "page" in self.name.lower():
+            return "pages"
+        elif "dict" in self.name.lower():
+            return "dictionary entries"
+        elif "export" in self.name.lower():
+            return "items"
+        else:
+            return "items"
 
-    def advance_task(self, text="In progress"):
+    def advance_task(self, text="In progress", status="success"):
+        """Increment the progress counter and update task progress.
+        status can be 'success', 'failure', or 'skipped'
+        """
         if self.total_items is not None and self.total_items > 0:
             self.processed_items += 1  # Increment processed count
+            
+            # Track detailed status
+            if status.lower() == "success":
+                self.successful_items += 1
+            elif status.lower() == "failure":
+                self.failed_items += 1
+            elif status.lower() == "skipped":
+                self.skipped_items += 1
+                
             progress = int((self.processed_items / self.total_items) * 100)
-            self.update_progress(progress, text)
+            
+            # Add detailed progress info to text
+            detailed_text = f"{text} ({self.processed_items}/{self.total_items})"
+            self.update_progress(progress, detailed_text)
+            
+            # Update text in database with more detail if appropriate
+            if self.processed_items % 10 == 0 or self.processed_items == self.total_items:
+                if self.twf_task:
+                    elapsed = time.time() - self.task_start_time
+                    avg_time = elapsed / self.processed_items if self.processed_items > 0 else 0
+                    self.twf_task.text += f"Progress: {self.processed_items}/{self.total_items} items processed "
+                    self.twf_task.text += f"({elapsed:.1f}s elapsed, {avg_time:.2f}s per item).\n"
+                    self.twf_task.save(update_fields=["text"])
 
     def update_progress(self, progress, text="In progress"):
         """Update task progress in the database."""
         if self.twf_task:
             self.update_state(state="PROGRESS", meta={"current": progress, "total": 100, "text": text})
             self.twf_task.progress = progress
-            self.twf_task.save(update_fields=["progress"])
+            
+            # Update the title to reflect progress
+            if progress < 100:
+                item_type = self.get_item_type_name()
+                if self.total_items:
+                    self.twf_task.title = f"Processing {self.processed_items}/{self.total_items} {item_type} ({progress}%)"
+            
+            self.twf_task.save(update_fields=["progress", "title"])
 
     def process_ai_request(self, items, client_name, prompt, role_description, metadata_field):
         """Generalized function to process AI requests for multiple items."""
-        self.set_total_items(len(items))
+        # Set up the task with detailed tracking information
+        total_items = len(items)
+        self.set_total_items(total_items)
+        
+        # Configure AI client and update task description
         self.create_configured_client(client_name, role_description)
-
+        
+        if self.twf_task:
+            self.twf_task.text += f"AI Client: {client_name.upper()}\n"
+            self.twf_task.text += f"Model: {self.credentials['default_model']}\n"
+            self.twf_task.text += f"Role: {role_description[:100]}...\n" if len(role_description) > 100 else f"Role: {role_description}\n"
+            self.twf_task.text += f"Prompt: {prompt[:100]}...\n" if len(prompt) > 100 else f"Prompt: {prompt}\n"
+            self.twf_task.save(update_fields=["text"])
+        
+        # Track success, failure, and timing stats
+        successful_items = 0
+        failed_items = 0
+        total_time = 0
+        
+        # Process each item
         for item in items:
-            response_dict, elapsed_time = self.prompt_client(item, prompt)
-            item.metadata[metadata_field] = response_dict
-            item.save(current_user=self.user)
-            self.advance_task(text=f"Processed {self.processed_items+1}/{self.total_items}")
-
-        self.end_task()
+            try:
+                start_time = time.time()
+                response_dict, elapsed_time = self.prompt_client(item, prompt)
+                
+                # Save the AI response to the item's metadata
+                item.metadata[metadata_field] = response_dict
+                item.save(current_user=self.user)
+                
+                # Update task statistics
+                successful_items += 1
+                total_time += elapsed_time
+                
+                # Detailed progress message including timing information
+                progress_msg = (f"Processed item {self.processed_items+1}/{total_items} "
+                               f"in {elapsed_time:.2f}s")
+                
+                self.advance_task(text=progress_msg, status="success")
+                
+            except Exception as e:
+                failed_items += 1
+                error_msg = str(e)
+                logger.error(f"Error processing item with {client_name}: {error_msg}")
+                self.advance_task(
+                    text=f"Error processing item {self.processed_items+1}/{total_items}",
+                    status="failure"
+                )
+        
+        # Update task with overall summary
+        avg_time = total_time / successful_items if successful_items else 0
+        
+        # End task with detailed statistics
+        self.end_task(
+            status="SUCCESS",
+            client_name=client_name,
+            model=self.credentials['default_model'],
+            total_time=total_time,
+            average_time=avg_time,
+            failed_items=failed_items
+        )
 
     def process_single_ai_request(self, items, client_name, prompt, role_description, metadata_field):
         self.set_total_items(1)
@@ -98,17 +235,91 @@ class BaseTWFTask(CeleryTask):
 
         self.end_task(ai_result=response_dict)
 
-    def end_task(self, status="SUCCESS", **kwargs):
-        """Mark the task as completed or failed."""
+    def end_task(self, status="SUCCESS", error_msg=None, **kwargs):
+        """Mark the task as completed or failed with detailed documentation."""
         if self.twf_task:
+            # Calculate task duration
+            end_time = timezone.now()
+            duration = (end_time - self.start_datetime).total_seconds()
+            
+            # Format summary for the task text
+            summary = self._generate_task_summary(status, duration, error_msg)
+            self.twf_task.text += summary
+            
+            # Update the final task title with a concise summary
+            item_type = self.get_item_type_name()
+            if status == "SUCCESS":
+                if self.total_items:
+                    self.twf_task.title = f"Processed {self.processed_items} {item_type}"
+                    if self.successful_items < self.processed_items:
+                        self.twf_task.title += f" ({self.successful_items} successful)"
+                else:
+                    self.twf_task.title = f"Successfully completed {self.name}"
+            else:
+                if error_msg:
+                    self.twf_task.title = f"Failed: {error_msg[:50]}..." if len(error_msg) > 50 else f"Failed: {error_msg}"
+                else:
+                    self.twf_task.title = f"Failed to process {item_type}"
+            
+            # Update metadata
             meta = {'current': 100, 'total': 100, 'text': 'Task finished'}
+            meta['duration'] = duration
+            meta['processed_items'] = self.processed_items
+            meta['successful_items'] = self.successful_items
+            meta['failed_items'] = self.failed_items
+            meta['skipped_items'] = self.skipped_items
+            
             if kwargs:
                 meta.update(kwargs)
+            
+            # Update task state
             self.update_state(state=status, meta=meta)
-
-            self.twf_task.end_time = timezone.now()
+            
+            # Update database record
+            self.twf_task.end_time = end_time
             self.twf_task.status = status
-            self.twf_task.save(update_fields=["status"])
+            self.twf_task.meta = meta
+            self.twf_task.save(update_fields=["title", "text", "end_time", "status", "meta"])
+            
+            # Log completion
+            log_msg = f"Task {self.name} (ID: {self.task_id}) completed with status {status}"
+            if status == "SUCCESS":
+                logger.info(log_msg)
+            else:
+                logger.error(f"{log_msg}: {error_msg}")
+    
+    def _generate_task_summary(self, status, duration, error_msg=None):
+        """Generate a detailed summary of the task for documentation purposes."""
+        summary = f"\n---- TASK SUMMARY ----\n"
+        summary += f"Status: {status}\n"
+        summary += f"Duration: {duration:.2f} seconds"
+        
+        if duration > 60:
+            minutes = int(duration // 60)
+            seconds = int(duration % 60)
+            summary += f" ({minutes}m {seconds}s)"
+        summary += "\n"
+        
+        if self.total_items:
+            summary += f"Total items: {self.total_items}\n"
+            summary += f"Processed items: {self.processed_items}\n"
+            
+            if self.successful_items > 0:
+                summary += f"Successfully processed: {self.successful_items}\n"
+            if self.failed_items > 0:
+                summary += f"Failed to process: {self.failed_items}\n"
+            if self.skipped_items > 0:
+                summary += f"Skipped items: {self.skipped_items}\n"
+                
+            if self.processed_items > 0:
+                avg_time = duration / self.processed_items
+                summary += f"Average processing time per item: {avg_time:.2f} seconds\n"
+        
+        if error_msg:
+            summary += f"\nError: {error_msg}\n"
+            
+        summary += "----------------------\n"
+        return summary
 
     def create_configured_client(self, client_name, role_description):
         self.client_name = client_name
