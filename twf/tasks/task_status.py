@@ -61,7 +61,7 @@ def task_status_view(request, task_id):
 
     except Exception as e:
         # Catch any other unexpected exceptions and return as error
-        print("EXCEPTION", e)
+        logger.error("Error in task_status_view: %s", str(e))
         return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
 
 
@@ -84,6 +84,12 @@ def task_remove_view(request, task_id):
     """Remove a task from the database. """
     try:
         task = Task.objects.get(pk=task_id)
+        
+        # Prevent deletion of running tasks
+        if task.status in ['STARTED', 'PENDING', 'PROGRESS']:
+            messages.error(request, 'Cannot delete a running task. Please cancel it first.')
+            return redirect('twf:project_task_monitor')
+            
         task.delete()
         messages.success(request, 'Task removed successfully.')
         # return to the task list page

@@ -53,7 +53,7 @@ from twf.views.export.views_export import TWFExportDocumentsView, TWFExportColle
 from twf.views.metadata.views_metadata import TWFMetadataReviewDocumentsView, TWFMetadataExtractTagsView, \
     TWFMetadataReviewPagesView, TWFMetadataOverviewView
 from twf.views.project.views_project import TWFProjectQueryView, TWFProjectOverviewView, \
-    TWFProjectTaskMonitorView, TWFProjectGeneralSettingsView, TWFProjectCredentialsSettingsView, \
+    TWFProjectTaskMonitorView, TWFProjectTaskDetailView, TWFProjectGeneralSettingsView, TWFProjectCredentialsSettingsView, \
     TWFProjectPromptsView, TWFProjectTaskSettingsView, TWFProjectExportSettingsView, TWFProjectCopyView, \
     TWFProjectResetView, TWFProjectUserManagementView, TWFProjectRepositorySettingsView, TWFProjectPromptEditView, \
     TWFProjectSetupView, TWFProjectTranskribusExtractView, TWFProjectNotesView
@@ -107,6 +107,7 @@ urlpatterns = [
     path('project/setup/reset/delete/collections/', delete_all_collections, name='reset_remove_all_collections'),
 
     path('project/task/monitor/', TWFProjectTaskMonitorView.as_view(), name='project_task_monitor'),
+    path('project/task/<int:pk>/view/', TWFProjectTaskDetailView.as_view(), name='task_detail'),
     path('project/prompts/', TWFProjectPromptsView.as_view(), name='project_prompts'),
     path('project/notes/', TWFProjectNotesView.as_view(), name='project_notes'),
     path('project/prompts/delete/<int:pk>/', delete_prompt, name='project_delete_prompt'),

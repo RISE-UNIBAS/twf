@@ -24,26 +24,73 @@ class TaskTable(tables.Table):
         return format_html('<span class="badge bg-{}">{}</span>', color, value.capitalize())
 
     def render_progress(self, record):
-        if record.status == "STARTED":
+        if record.status in ["STARTED", "PROGRESS"]:
             return format_html(
                 '<div class="progress" style="height: 20px;"><div class="progress-bar progress-bar-striped progress-bar-animated bg-dark" '
                 'role="progressbar" style="width: {}%">{}</div></div>',
                 record.progress,
                 f"{record.progress}%",
             )
+        elif record.status == "SUCCESS":
+            return format_html(
+                '<div class="progress" style="height: 20px;"><div class="progress-bar bg-success" '
+                'role="progressbar" style="width: 100%">Completed</div></div>'
+            )
+        elif record.status == "FAILURE":
+            return format_html(
+                '<div class="progress" style="height: 20px;"><div class="progress-bar bg-danger" '
+                'role="progressbar" style="width: 100%">Failed</div></div>'
+            )
+        elif record.status == "CANCELED":
+            return format_html(
+                '<div class="progress" style="height: 20px;"><div class="progress-bar bg-dark" '
+                'role="progressbar" style="width: 100%">Cancelled</div></div>'
+            )
         return "-"
 
     def render_actions(self, record):
+        from django.urls import reverse
+        view_url = reverse('twf:task_detail', kwargs={'pk': record.pk})
+        cancel_url = reverse('twf:celery_task_cancel', kwargs={'task_id': record.pk})
+        remove_url = reverse('twf:celery_task_remove', kwargs={'task_id': record.pk})
+        
+        # Only show cancel button for tasks that are in progress
+        cancel_button = ''
+        if record.status in ['STARTED', 'PENDING', 'PROGRESS']:
+            cancel_button = format_html(
+                '<a href="#" class="btn btn-sm btn-warning me-1 show-confirm-modal" '
+                'data-redirect-url="{}" '
+                'data-message="Are you sure you want to cancel this task? This will interrupt any ongoing processing." '
+                'title="Cancel Task"><i class="fa fa-ban"></i></a>',
+                cancel_url
+            )
+        
+        # Delete button uses the danger modal - only show for completed or cancelled tasks
+        delete_button = ''
+        if record.status in ['SUCCESS', 'FAILURE', 'CANCELED']:  
+            delete_button = format_html(
+                '<a href="#" class="btn btn-sm btn-danger show-danger-modal" '
+                'data-redirect-url="{}" '
+                'data-message="Are you sure you want to remove this task? This action cannot be undone." '
+                'title="Remove Task"><i class="fa fa-trash"></i></a>',
+                remove_url
+            )
+        
+        # View button stays the same
+        view_button = format_html(
+            '<a href="{}" class="btn btn-sm btn-dark me-1" title="View Details"><i class="fa fa-eye"></i></a>',
+            view_url
+        )
+        
         return format_html(
-            '<a href="#" class="btn btn-sm btn-dark me-1" title="View"><i class="fa fa-eye"></i></a>'
-            '<a href="#" class="btn btn-sm btn-danger me-1" title="Cancel"><i class="fa fa-ban"></i></a>'
-            '<a href="#" class="btn btn-sm btn-secondary" title="Remove"><i class="fa fa-trash"></i></a>'
+            '{}{}{}'.format(view_button, cancel_button, delete_button)
         )
 
     class Meta:
         model = Task
         template_name = "django_tables2/bootstrap4.html"
         fields = ("title", "status", "user", "start_time", "end_time", "progress")
+        attrs = {"class": "table table-striped table-hover"}
 
 
 

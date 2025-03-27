@@ -154,6 +154,39 @@ class TWFProjectTaskMonitorView(SingleTableView, FilterView, TWFProjectView):
         return context
 
 
+class TWFProjectTaskDetailView(TWFProjectView):
+    """View for displaying task details."""
+    
+    template_name = 'twf/project/task_detail.html'
+    page_title = 'Task Details'
+    
+    def get_context_data(self, **kwargs):
+        """Get the context data."""
+        context = super().get_context_data(**kwargs)
+        
+        # Get the task
+        task_id = self.kwargs.get('pk')
+        task = Task.objects.get(pk=task_id)
+        context['task'] = task
+        
+        # Calculate task duration if both start and end times exist
+        if task.start_time and task.end_time:
+            duration = task.end_time - task.start_time
+            # Format duration as hours:minutes:seconds
+            hours, remainder = divmod(duration.total_seconds(), 3600)
+            minutes, seconds = divmod(remainder, 60)
+            context['duration'] = f"{int(hours):02d}:{int(minutes):02d}:{int(seconds):02d}"
+
+        # Format task metadata as a list of key/value pairs for display
+        if task.meta:
+            context['meta_items'] = [
+                {'key': key, 'value': value} 
+                for key, value in task.meta.items() 
+                if key not in ['current', 'total', 'text']  # Skip progress-related keys
+            ]
+        
+        return context
+
 
 class TWFProjectPromptsView(SingleTableView, FilterView, TWFProjectView):
     """View for the project prompts."""
