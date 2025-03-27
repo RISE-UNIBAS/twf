@@ -9,8 +9,6 @@ https://docs.djangoproject.com/en/5.0/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.0/ref/settings/
 """
-from __future__ import absolute_import, unicode_literals
-
 import os
 from pathlib import Path
 
@@ -192,3 +190,41 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = "MS_5KacAT@trial-z3m5jgr6xyxgdpyo.mlsender.net"
 EMAIL_HOST_PASSWORD = "mssp.gAyVOEB.pr9084z1r7xgw63d.uu92zpN"
 DEFAULT_FROM_EMAIL = "no-reply@trial-z3m5jgr6xyxgdpyo.mlsender.net"
+
+# Logging Configuration
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
+            'style': '{',
+        },
+        'simple': {
+            'format': '{levelname} {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
+        },
+        'file': {
+            'class': 'logging.FileHandler',
+            'filename': os.path.join(BASE_DIR, 'twf.log'),
+            'formatter': 'verbose',
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console', 'file'],
+            'level': 'INFO',
+        },
+        'twf': {
+            'handlers': ['console', 'file'],
+            'level': 'DEBUG' if DEBUG else 'INFO',
+            'propagate': True,
+        },
+    },
+}

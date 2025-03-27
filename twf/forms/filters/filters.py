@@ -1,10 +1,13 @@
 """Filter classes for the twf app."""
+import logging
 import django_filters
 from django.forms import CheckboxInput
 from django.contrib.auth import get_user_model
 from twf.models import Document, DictionaryEntry, PageTag, CollectionItem, Task, Prompt, Project, Export, Note
 
 User = get_user_model()
+
+logger = logging.getLogger(__name__)
 
 
 class TagFilter(django_filters.FilterSet):
@@ -39,7 +42,7 @@ class TagFilter(django_filters.FilterSet):
         )
 
         choices = [(vt['variation_type'], vt['variation_type']) for vt in distinct_variation_types]
-        # print(choices)
+        logger.debug("Tag variation type filter choices: %s", choices)
         self.filters['variation_type'].extra.update({
             'choices': choices
         })

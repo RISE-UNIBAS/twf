@@ -1,4 +1,5 @@
 """Views for the project section."""
+import logging
 from datetime import timedelta
 
 from django.contrib import messages
@@ -8,6 +9,8 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import redirect, render
 from django.urls import reverse, reverse_lazy
 from django.utils.timezone import now
+
+logger = logging.getLogger(__name__)
 from django.views.generic import FormView
 from django_filters.views import FilterView
 from django_tables2 import SingleTableView
@@ -384,13 +387,13 @@ class TWFProjectQueryView(FormView, TWFProjectView):
     def form_valid(self, form):
         """Handle the form submission."""
         sql_query = form.cleaned_data['query']
-        print(sql_query)
+        logger.debug("Executing SQL query: %s", sql_query)
 
         try:
             with connection.cursor() as cursor:
                 cursor.execute(sql_query)
                 columns = [col[0] for col in cursor.description]
-                print(columns)
+                logger.debug("Query columns: %s", columns)
                 results = [dict(zip(columns, row)) for row in cursor.fetchall()]
                 if len(results) == 0:
                     messages.info(self.request, 'No results found.')

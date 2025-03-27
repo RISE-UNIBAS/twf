@@ -1,4 +1,5 @@
 """ This module contains the views for the Collection model. """
+import logging
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import get_object_or_404
@@ -8,6 +9,8 @@ from django_filters.views import FilterView
 from django_tables2 import SingleTableView
 
 from twf.forms.filters.filters import CollectionItemFilter
+
+logger = logging.getLogger(__name__)
 from twf.forms.collections.collections_forms import CollectionCreateForm, CollectionAddDocumentForm, CollectionUpdateForm, \
     CollectionItemReviewForm, CollectionItemUpdateForm
 from twf.models import CollectionItem, Collection, Workflow
@@ -94,7 +97,7 @@ class TWFCollectionOverviewView(TWFCollectionsView):
 
     def post(self, request, *args, **kwargs):
         """Handle the post request."""
-        print(request.POST)
+        logger.debug("Collection post request: %s", request.POST)
         if "delete_collection" in request.POST:
             collection = Collection.objects.get(pk=request.POST.get('collection_id'))
             collection.delete()
@@ -377,14 +380,14 @@ class TWFCollectionsReviewView(FormView, TWFCollectionsView):
         action_u = self.request.POST.get('submit-u')
 
         if action_d:
-            print("Deleting item", self.next_item)
+            logger.info("Deleting collection item %s", self.next_item)
             if check_permission(self.request.user, 'collection_item_delete', self.next_item.id):
                 self.next_item.delete()
                 messages.success(self.request, 'Collection item has been deleted successfully.')
             else:
                 messages.error(self.request, 'You do not have permission to delete this collection item.')
         elif action_r or action_f:
-            print("Updating item and continuing", self.next_item)
+            logger.info("Updating collection item and continuing workflow: %s", self.next_item)
             self.next_item.title = form.cleaned_data['title']
             self.next_item.review_notes = form.cleaned_data['review_notes']
 
@@ -399,9 +402,9 @@ class TWFCollectionsReviewView(FormView, TWFCollectionsView):
             else:
                 self.workflow.finish()
         elif action_u:
-            print("Updating item", self.next_item)
-            print(form.cleaned_data['title'])
-            print(form.cleaned_data['review_notes'])
+            logger.info("Updating collection item: %s", self.next_item)
+            logger.debug("New title: %s", form.cleaned_data['title'])
+            logger.debug("New review notes: %s", form.cleaned_data['review_notes'])
             self.next_item.title = form.cleaned_data['title']
             self.next_item.review_notes = form.cleaned_data['review_notes']
             self.next_item.save()

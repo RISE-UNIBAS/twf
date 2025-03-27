@@ -1,4 +1,5 @@
 """Views for the dictionary overview and the dictionary entries."""
+import logging
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import redirect
@@ -6,6 +7,8 @@ from django.urls import reverse, reverse_lazy
 from django.views.generic import FormView
 from django_filters.views import FilterView
 from django_tables2 import SingleTableView
+
+logger = logging.getLogger(__name__)
 
 from twf.forms.filters.filters import DictionaryEntryFilter
 from twf.forms.dictionaries.dictionaries_forms import DictionaryForm, DictionaryEntryForm
@@ -291,13 +294,13 @@ class TWFDictionaryNormDataView(TWFDictionaryView):
     def post(self, request, *args, **kwargs):
         """Handle the POST request."""
         if "submit_geonames" in request.POST:
-            print('submit_geonames')
+            logger.debug('Dictionary normalization - submit_geonames selected')
         elif "submit_gnd" in request.POST:
-            print('submit_gnd')
+            logger.debug('Dictionary normalization - submit_gnd selected')
         elif "submit_wikidata" in request.POST:
-            print('submit_wikidata')
+            logger.debug('Dictionary normalization - submit_wikidata selected')
         elif "submit_openai" in request.POST:
-            print('submit_openai')
+            logger.debug('Dictionary normalization - submit_openai selected')
 
         return redirect('twf:dictionaries_normalization')
 

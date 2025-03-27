@@ -1,8 +1,11 @@
 """Management command to create a collection of songs from a project."""
+import logging
 from django.contrib.auth.models import User
 from django.core.management import BaseCommand
 
 from twf.models import Collection, Project, CollectionItem
+
+logger = logging.getLogger(__name__)
 
 
 class Command(BaseCommand):
@@ -16,7 +19,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         """Handle the command"""
-        print("Trying to create a song collection...")
+        logger.info("Trying to create a song collection...")
 
         project = Project.objects.get(pk=options['project_id'])
         user = User.objects.get(pk=options['user_id'])
@@ -24,15 +27,15 @@ class Command(BaseCommand):
 
         try:
             collection = Collection.objects.get(title="Songs", project=project)
-            print("Collection already exists. Cleaning up...")
+            logger.info("Collection already exists. Cleaning up...")
             collection.items.all().delete()
         except Collection.DoesNotExist:
             collection = Collection(title="Songs", description="A collection of songs", project=project)
             collection.save(current_user=user)
-            print("Collection created.")
+            logger.info("Collection created.")
 
         for document in project.documents.filter(project=project):
-            print(">>>>>>> Document: ", document, document.document_id)
+            logger.debug("Processing document: %s, document_id: %s", document, document.document_id)
             collection_item = CollectionItem(collection=collection,
                                              document_configuration={'annotations': []},
                                              document=document)
@@ -42,7 +45,7 @@ class Command(BaseCommand):
                 anno_types = []
                 for annotation in annotations:
                     if "type" not in annotation:
-                        print(f"Skipping annotation without type: {annotation}")
+                        logger.warning("Skipping annotation without type: %s", annotation)
                         continue
                     anno_types.append(annotation['type'])
                     if annotation['type'] in ['lyrics', 'music', 'heading']:
@@ -51,7 +54,7 @@ class Command(BaseCommand):
             collection_item.title = f'Song in {document.document_id}'
             collection_item.save(current_user=user)
             created_col_items += 1
-            print(f"Added Song for document {document.document_id} with "
-                  f"{len(collection_item.document_configuration['annotations'])} annotations.")
+            logger.info("Added Song for document %s with %d annotations.", 
+                  document.document_id, len(collection_item.document_configuration['annotations']))
 
-        print(f"Created {created_col_items} collection items.")
+        logger.info("Created %d collection items.", created_col_items)

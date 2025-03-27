@@ -1,8 +1,11 @@
 """Management command to clean collections."""
+import logging
 from django.contrib.auth.models import User
 from django.core.management import BaseCommand
 
 from twf.models import Collection, Project
+
+logger = logging.getLogger(__name__)
 
 
 class Command(BaseCommand):
@@ -16,7 +19,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         """Handle the command"""
-        print("Trying to create a song collection...")
+        logger.info("Trying to clean collections...")
 
         project = Project.objects.get(pk=options['project_id'])
         user = User.objects.get(pk=options['user_id'])

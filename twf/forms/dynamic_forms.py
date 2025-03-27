@@ -1,4 +1,5 @@
 """Dynamic form generation based on JSON configuration."""
+import logging
 from datetime import datetime
 
 from crispy_forms.helper import FormHelper
@@ -8,6 +9,8 @@ from django.core.exceptions import ValidationError
 from django_select2.forms import Select2Widget
 
 from twf.models import Dictionary
+
+logger = logging.getLogger(__name__)
 
 
 def get_nested_value(d, keys):
@@ -49,8 +52,8 @@ class DynamicForm(forms.Form):
         super(DynamicForm, self).__init__(*args, **kwargs)
 
         form_field_config = parse_config(json_config, json_data)
-        # TODO HERE WE ARE
-        print(form_field_config)
+        # Configuration for the dynamic form
+        logger.debug("Dynamic form field configuration: %s", form_field_config)
 
         self.helper = FormHelper()
         self.helper.form_id = 'review-form'
@@ -154,11 +157,12 @@ class DynamicForm(forms.Form):
         # DATES
         if field_type == "date":
             date_format = validation_conf.get("format", "%Y-%m-%d")
-            print("DATE FORMAT", value, date_format)
+            logger.debug("Validating date format: %s for value %s", date_format, value)
             try:
                 datetime.strptime(value, date_format)
                 return True
             except ValueError:
+                logger.warning("Date validation failed for value %s using format %s", value, date_format)
                 return False
         # NUMBERS
         elif field_type == "number":

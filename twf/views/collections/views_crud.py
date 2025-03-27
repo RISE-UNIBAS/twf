@@ -2,6 +2,7 @@
 HTML pages, but redirect to the appropriate URL after the operation is
 completed."""
 import json
+import logging
 
 from django.contrib import messages
 from django.http import HttpResponse, JsonResponse
@@ -12,6 +13,8 @@ from django.views.decorators.csrf import csrf_exempt
 
 from twf.models import Collection, CollectionItem, Workflow, Document
 from twf.permissions import check_permission
+
+logger = logging.getLogger(__name__)
 
 def delete_collection_item_annotation(request, pk, index):
     """Delete an annotation from a collection item."""
@@ -189,7 +192,7 @@ def delete_collection(request, collection_id):
 
     workflows = Workflow.objects.filter(collection=collection)
     for workflow in workflows:
-        print(f"Ending workflow {workflow.id}")
+        logger.info("Ending workflow %s due to collection deletion", workflow.id)
         workflow.finish(with_error=True)
 
     collection.delete()

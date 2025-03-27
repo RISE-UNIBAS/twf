@@ -1,4 +1,5 @@
 """ Views for the tags section of the TWF app. """
+import logging
 from collections import defaultdict
 from io import StringIO
 
@@ -8,6 +9,8 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Count
 from django.http import HttpResponse
 from django.shortcuts import redirect
+
+logger = logging.getLogger(__name__)
 from django.urls import reverse, reverse_lazy
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import never_cache
@@ -508,7 +511,7 @@ class TWFTagsDatesGroupView(FormView, TWFTagsView):
 
     def form_valid(self, form):
         """Handle the form submission."""
-        print("Form is valid")
+        logger.debug("Date normalization form is valid")
         tag_id = form.cleaned_data['date_tag']
         tag = PageTag.objects.get(pk=tag_id)
         date_variation = DateVariation(

@@ -1,5 +1,6 @@
 """Views for the metadata section of the TWF application."""
 import json
+import logging
 
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -10,6 +11,8 @@ from twf.forms.dynamic_forms import DynamicForm
 from twf.forms.metadata.metadata_forms import ExtractMetadataValuesForm
 from twf.models import Page, Document, PageTag, Variation
 from twf.views.views_base import TWFView
+
+logger = logging.getLogger(__name__)
 
 
 class TWFMetadataView(LoginRequiredMixin, TWFView):
@@ -135,7 +138,7 @@ class TWFMetadataExtractTagsView(FormView, TWFMetadataView):
                         tag.save(current_user=self.request.user)
                         extracted_values += 1
                 else:
-                    print("there is no json doc metadata")
+                    logger.warning("Document %s has no json metadata", document)
 
         elif extract_from == 'pages':
             data = Page.objects.filter(document__project=project)
@@ -157,7 +160,7 @@ class TWFMetadataExtractTagsView(FormView, TWFMetadataView):
                         tag.save(current_user=self.request.user)
                         extracted_values += 1
                 else:
-                    print("there is no json page metadata")
+                    logger.warning("Page %s has no json metadata", page)
 
         else:
             pass
@@ -223,10 +226,9 @@ class TWFMetadataReviewPagesView(FormView, TWFMetadataView):
         # Save the metadata
         form.is_valid()
         config = self.get_project().get_task_configuration('metadata_review').get('page_metadata_review', {})
-        print("BLA", form.cleaned_data)
+        logger.debug("Metadata form cleaned data: %s", form.cleaned_data)
         next_page = self.get_next_page()
         next_page.save(current_user=self.request.user)
-        # print(next_page.metadata['name'])
         return super().form_valid(form)
 
 import logging

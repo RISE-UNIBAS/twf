@@ -1,5 +1,6 @@
 """Views for exporting data from the TWF."""
 import json
+import logging
 
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import redirect
@@ -8,6 +9,8 @@ from django.http import JsonResponse, HttpResponse
 from django.views.generic import FormView
 from django_filters.views import FilterView
 from django_tables2 import SingleTableView
+
+logger = logging.getLogger(__name__)
 
 from twf.clients.zenodo_client import get_zenodo_uploads
 from twf.forms.dictionaries.dictionaries_forms import DictionaryImportForm
@@ -190,7 +193,7 @@ class TWFExportConfigurationView(FormView, TWFExportView):
         return kwargs
 
     def form_valid(self, form):
-        print("Forms Saved")
+        logger.debug("Export forms saved")
         form.save()
 
         if 'export' in form.cleaned_data:
@@ -198,7 +201,7 @@ class TWFExportConfigurationView(FormView, TWFExportView):
             # Start the export process using Celery
             # task = export_data_task.delay(project.id, export_type, export_format, schema)
             # Return the task ID for progress tracking (assuming this view is called via AJAX)
-            print('Exporting data...')
+            logger.info('Exporting data for project %s', project.id)
         return super().form_valid(form)
 
 

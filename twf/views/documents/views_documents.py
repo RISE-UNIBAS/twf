@@ -1,4 +1,5 @@
 """Views for the project documents."""
+import logging
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Count, Avg
@@ -13,6 +14,9 @@ from twf.forms.documents.documents_forms import DocumentForm, DocumentSearchForm
 from twf.models import Document, Workflow
 from twf.tables.tables_document import DocumentTable
 from twf.views.views_base import TWFView
+
+# Create a logger for this module
+logger = logging.getLogger(__name__)
 
 
 class TWFDocumentView(LoginRequiredMixin, TWFView):
@@ -137,7 +141,7 @@ class TWFDocumentsBrowseView(SingleTableView, FilterView, TWFDocumentView):
         """Get the view."""
         self.object_list = self.get_queryset()
         context = self.get_context_data()
-        return self.render_to_response(context)
+        return self.render_to_response(context)  # This is still valid in class-based views
 
     def get_context_data(self, **kwargs):
         """Get the context data for the view."""
@@ -157,7 +161,7 @@ class TWFDocumentsSearchView(FormView, TWFDocumentView):
     def form_valid(self, form):
         """Handle the form submission."""
         # Add a success message
-        print("WOULD SEARCH FOR DOCUMENTS HERE") # TODO: Implement search
+        logger.debug("WOULD SEARCH FOR DOCUMENTS HERE") # TODO: Implement search
         # Redirect to the success URL
         return super().form_valid(form)
 
