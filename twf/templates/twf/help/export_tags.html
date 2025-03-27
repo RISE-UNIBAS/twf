@@ -1,0 +1,55 @@
+{% load twf_help %}
+<h1>Context Help: Export Tags</h1>
+<p>
+    The Export Tags page allows you to export tag data from your project in various formats. Tags represent annotations and markup present in your documents, often linked to dictionary entries for standardization.
+</p>
+
+<h2>Export Process</h2>
+<ol>
+    <li><strong>Select Tags:</strong> Choose which tags to include in your export:
+        <ul>
+            <li>Filter by tag type (person, place, date, etc.)</li>
+            <li>Filter by status (resolved, open, parked, ignored)</li>
+            <li>Filter by dictionary association</li>
+        </ul>
+    </li>
+    <li><strong>Choose Format:</strong> Select the format for your export (JSON, CSV, XML, etc.).</li>
+    <li><strong>Configure Options:</strong> Set specific export settings:
+        <ul>
+            <li>Include tag context (surrounding text)</li>
+            <li>Include document/page references</li>
+            <li>Include dictionary information</li>
+            <li>Include normalized forms</li>
+        </ul>
+    </li>
+    <li><strong>Start Export:</strong> Click the export button to begin the process.</li>
+</ol>
+
+<h2>Tag Data Options</h2>
+<p>
+    When exporting tags, you can include:
+</p>
+<ul>
+    <li><strong>Tag Text:</strong> The actual text content of each tag.</li>
+    <li><strong>Tag Type:</strong> The category or type classification of each tag.</li>
+    <li><strong>Context:</strong> Text surrounding the tag for context.</li>
+    <li><strong>Location:</strong> Document and page where each tag appears.</li>
+    <li><strong>Position:</strong> Precise coordinates or positions within documents.</li>
+    <li><strong>Normalization:</strong> Standardized forms linked through dictionaries.</li>
+    <li><strong>Metadata:</strong> Additional information associated with tags.</li>
+</ul>
+
+<h2>Export Use Cases</h2>
+<ul>
+    <li><strong>Data Analysis:</strong> Export tags for statistical analysis in external tools.</li>
+    <li><strong>Visualization:</strong> Create visual representations of tag distributions.</li>
+    <li><strong>Entity Networks:</strong> Build relationship networks between tagged entities.</li>
+    <li><strong>Quality Control:</strong> Review tag consistency and accuracy.</li>
+    <li><strong>Publication:</strong> Include structured tag data in research publications.</li>
+</ul>
+
+<h1>Related Topics</h1>
+<ul>
+    <li><a href="{% help_url 'modules/workflows/export.html' %}" target="_blank" class="help-link">Export Workflows Documentation</a></li>
+    <li><a href="{% help_url 'modules/workflows/tags.html' %}" target="_blank" class="help-link">Tag Workflows</a></li>
+</ul>

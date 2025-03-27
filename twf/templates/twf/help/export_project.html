@@ -1,0 +1,69 @@
+{% load twf_help %}
+<h1>Context Help: Export Project</h1>
+<p>
+    The Export Project page allows you to create a comprehensive export of your entire project, including all documents, collections, dictionaries, and metadata. This is useful for project backup, archiving, publication, or transferring to another system.
+</p>
+
+<h2>Export Process</h2>
+<ol>
+    <li><strong>Configure Project Export:</strong> 
+        <ul>
+            <li>Choose which components to include (documents, collections, dictionaries, etc.)</li>
+            <li>Set metadata fields to include</li>
+            <li>Configure export format and structure</li>
+        </ul>
+    </li>
+    <li><strong>Format Options:</strong> Select from available export formats:
+        <ul>
+            <li>JSON (comprehensive data preservation)</li>
+            <li>ZIP (bundled file collection)</li>
+            <li>Custom formats configured in project settings</li>
+        </ul>
+    </li>
+    <li><strong>Data Selection:</strong> Refine what specific content should be included:
+        <ul>
+            <li>All project data or selective content</li>
+            <li>Include/exclude specific document types</li>
+            <li>Include/exclude system metadata</li>
+        </ul>
+    </li>
+    <li><strong>Start Export:</strong> Begin the export process with your selected configuration.</li>
+</ol>
+
+<h2>Project Export Content</h2>
+<p>
+    A comprehensive project export typically includes:
+</p>
+<ul>
+    <li><strong>Project Metadata:</strong> Title, description, owners, settings, etc.</li>
+    <li><strong>Documents:</strong> All document content, structure, and metadata.</li>
+    <li><strong>Pages:</strong> Page content, images, and transcriptions.</li>
+    <li><strong>Collections:</strong> All collections and their items.</li>
+    <li><strong>Dictionaries:</strong> All dictionaries and their entries.</li>
+    <li><strong>Tags:</strong> All tag data across the project.</li>
+    <li><strong>Workflows:</strong> Information about established workflows.</li>
+    <li><strong>User Data:</strong> Relevant user information (limited for privacy).</li>
+</ul>
+
+<h2>When to Use Project Export</h2>
+<ul>
+    <li><strong>Project Backup:</strong> Create comprehensive backups of your project.</li>
+    <li><strong>Project Archiving:</strong> Prepare your project for long-term storage.</li>
+    <li><strong>Data Publication:</strong> Export project data for formal publication.</li>
+    <li><strong>System Migration:</strong> Move your project to a different TWF instance.</li>
+    <li><strong>Data Preservation:</strong> Ensure long-term access to your research data.</li>
+</ul>
+
+<h2>Important Considerations</h2>
+<ul>
+    <li>Project exports may be large and take time to process.</li>
+    <li>Consider privacy and data protection when exporting user-related information.</li>
+    <li>For very large projects, consider breaking exports into smaller components.</li>
+    <li>Test your export configuration with a small project before exporting large datasets.</li>
+</ul>
+
+<h1>Related Topics</h1>
+<ul>
+    <li><a href="{% help_url 'modules/workflows/export.html' %}" target="_blank" class="help-link">Export Workflows Documentation</a></li>
+    <li><a href="{% help_url 'modules/parts/settings.html' %}" target="_blank" class="help-link">Project Settings</a></li>
+</ul>

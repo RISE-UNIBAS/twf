@@ -1,2 +1,52 @@
-<h2>Context Help</h2>
-<p>Export to Zenodo</p>
+{% load twf_help %}
+<h1>Context Help: Export to Zenodo</h1>
+<p>
+    The Export to Zenodo page allows you to publish your project data to Zenodo, an open-access repository operated by CERN. This feature helps make your research data openly available, citable, and compliant with FAIR principles.
+</p>
+
+<h2>What is Zenodo?</h2>
+<p>
+    Zenodo is a general-purpose open repository that allows researchers to deposit research papers, data sets, research software, reports, and any other research-related digital artifacts. It assigns a DOI (Digital Object Identifier) to all publicly available uploads, making your data citable.
+</p>
+
+<h2>Export Process</h2>
+<ol>
+    <li><strong>Configure Metadata:</strong> 
+        <ul>
+            <li>Title and description of your dataset</li>
+            <li>Authors and contributors</li>
+            <li>Keywords, subjects, and related information</li>
+            <li>Choose an appropriate license</li>
+        </ul>
+    </li>
+    <li><strong>Select Content:</strong> Choose what to include in your Zenodo publication:
+        <ul>
+            <li>Documents</li>
+            <li>Collections</li>
+            <li>Dictionaries</li>
+            <li>Project metadata</li>
+        </ul>
+    </li>
+    <li><strong>Export Format:</strong> Select how your data should be formatted for Zenodo.</li>
+    <li><strong>Publication Type:</strong> Choose whether to create a new publication or update an existing one.</li>
+    <li><strong>Review and Submit:</strong> Verify your export settings before publishing to Zenodo.</li>
+</ol>
+
+<h2>Zenodo API Credentials</h2>
+<p>
+    To use this feature, you need to have Zenodo API credentials configured in your project settings. If you don't see these options, please check your project's credential settings or contact your project administrator.
+</p>
+
+<h2>Publication Tips</h2>
+<ul>
+    <li>Provide thorough metadata to make your dataset more discoverable.</li>
+    <li>Choose an appropriate license that reflects how you want others to use your data.</li>
+    <li>Consider creating a README file to include with your export that explains the dataset structure.</li>
+    <li>You can publish to Zenodo Sandbox for testing before doing a final publication.</li>
+</ul>
+
+<h1>Related Topics</h1>
+<ul>
+    <li><a href="{% help_url 'modules/workflows/export.html' %}" target="_blank" class="help-link">Export Workflows Documentation</a></li>
+    <li><a href="{% help_url 'modules/parts/settings.html' %}" target="_blank" class="help-link">Project Settings</a></li>
+</ul>
