@@ -245,18 +245,41 @@ class TWFProjectNotesView(SingleTableView, FilterView, TWFProjectView):
         context['filter'] = self.get_filterset(self.filterset_class)
         return context
 
+class TWFProjectPromptDetailView(TWFProjectView):
+    """View for displaying prompt details."""
+    
+    template_name = 'twf/project/prompt_detail.html'
+    page_title = 'Prompt Details'
+    
+    def get_object(self):
+        """Get the prompt to view."""
+        from django.shortcuts import get_object_or_404
+        return get_object_or_404(Prompt, pk=self.kwargs['pk'], project=self.get_project())
+    
+    def get_context_data(self, **kwargs):
+        """Get the context data."""
+        context = super().get_context_data(**kwargs)
+        context['prompt'] = self.get_object()
+        return context
+
+
 class TWFProjectPromptEditView(FormView, TWFProjectView):
-    """View for the project prompts."""
+    """View for editing a prompt."""
 
     template_name = 'twf/project/edit_prompt.html'
-    page_title = 'Prompts'
+    page_title = 'Edit Prompt'
     form_class = PromptForm
     success_url = reverse_lazy('twf:project_prompts')
 
+    def get_object(self):
+        """Get the prompt to edit."""
+        from django.shortcuts import get_object_or_404
+        return get_object_or_404(Prompt, pk=self.kwargs['pk'], project=self.get_project())
+        
     def get_form_kwargs(self):
         """Get the form kwargs."""
         kwargs = super().get_form_kwargs()
-        kwargs['instance'] = Prompt.objects.get(pk=self.kwargs['pk'])
+        kwargs['instance'] = self.get_object()
         return kwargs
 
     def form_valid(self, form):

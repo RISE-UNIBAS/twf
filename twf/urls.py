@@ -53,10 +53,11 @@ from twf.views.export.views_export import TWFExportDocumentsView, TWFExportColle
 from twf.views.metadata.views_metadata import TWFMetadataReviewDocumentsView, TWFMetadataExtractTagsView, \
     TWFMetadataReviewPagesView, TWFMetadataOverviewView
 from twf.views.project.views_project import TWFProjectQueryView, TWFProjectOverviewView, \
-    TWFProjectTaskMonitorView, TWFProjectTaskDetailView, TWFProjectGeneralSettingsView, TWFProjectCredentialsSettingsView, \
+    TWFProjectTaskMonitorView, TWFProjectTaskDetailView, TWFProjectGeneralSettingsView, \
+    TWFProjectCredentialsSettingsView, \
     TWFProjectPromptsView, TWFProjectTaskSettingsView, TWFProjectExportSettingsView, TWFProjectCopyView, \
     TWFProjectResetView, TWFProjectUserManagementView, TWFProjectRepositorySettingsView, TWFProjectPromptEditView, \
-    TWFProjectSetupView, TWFProjectTranskribusExtractView, TWFProjectNotesView
+    TWFProjectSetupView, TWFProjectTranskribusExtractView, TWFProjectNotesView, TWFProjectPromptDetailView
 from twf.views.project.views_project_ai import TWFProjectAIQueryView, TWFProjectGeminiQueryView, \
     TWFProjectClaudeQueryView, TWFProjectMistralQueryView
 from twf.views.tags.views_tags import TWFProjectTagsView, TWFProjectTagsOpenView, \
@@ -112,6 +113,7 @@ urlpatterns = [
     path('project/notes/', TWFProjectNotesView.as_view(), name='project_notes'),
     path('project/prompts/delete/<int:pk>/', delete_prompt, name='project_delete_prompt'),
     path('project/prompts/edit/<int:pk>/', TWFProjectPromptEditView.as_view(), name='project_edit_prompt'),
+    path('project/prompt/<int:pk>/view/', TWFProjectPromptDetailView.as_view(), name='prompt_detail'),
 
     path('project/settings/general/', TWFProjectGeneralSettingsView.as_view(), name='project_settings_general'),
     path('project/settings/credentials/', TWFProjectCredentialsSettingsView.as_view(),

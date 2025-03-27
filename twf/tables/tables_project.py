@@ -114,13 +114,21 @@ class PromptTable(tables.Table):
                            record.prompt[:80] + "..." if len(record.prompt) > 80 else record.prompt)
 
     def render_actions(self, record):
+        from django.urls import reverse
+        view_url = reverse('twf:prompt_detail', kwargs={'pk': record.pk})
+        edit_url = reverse('twf:project_edit_prompt', kwargs={'pk': record.pk})
+        delete_url = reverse('twf:project_delete_prompt', kwargs={'pk': record.pk})
+        
         return format_html(
-            '<a href="{}" class="btn btn-sm btn-dark me-1" title="View"><i class="fa fa-eye"></i></a>'
-            '<a href="{}" class="btn btn-sm btn-secondary me-1" title="Edit"><i class="fa fa-edit"></i></a>'
-            '<a href="{}" class="btn btn-sm btn-danger" title="Delete"><i class="fa fa-trash"></i></a>',
-            f"/prompt/{record.pk}/view",
-            f"/prompt/{record.pk}/edit",
-            f"/prompt/{record.pk}/delete",
+            '<a href="{}" class="btn btn-sm btn-dark me-1" title="View Details"><i class="fa fa-eye"></i></a>'
+            '<a href="{}" class="btn btn-sm btn-dark me-1" title="Edit"><i class="fa fa-edit"></i></a>'
+            '<a href="#" class="btn btn-sm btn-danger show-danger-modal" '
+            'data-redirect-url="{}" '
+            'data-message="Are you sure you want to delete this prompt? This action cannot be undone." '
+            'title="Delete Prompt"><i class="fa fa-trash"></i></a>',
+            view_url,
+            edit_url,
+            delete_url
         )
 
 
@@ -138,14 +146,24 @@ class NoteTable(tables.Table):
 
     def render_note(self, record):
         return format_html('<span>{}</span>',
-                           record.prompt[:80] + "..." if len(record.prompt) > 80 else record.prompt)
+                           record.note[:80] + "..." if len(record.note) > 80 else record.note)
 
     def render_actions(self, record):
+        from django.urls import reverse
+        
+        # These URLs need to be updated when Note detail/edit/delete views are implemented
+        view_url = "#"  # Placeholder
+        edit_url = "#"  # Placeholder
+        delete_url = "#"  # Placeholder
+        
         return format_html(
-            '<a href="{}" class="btn btn-sm btn-dark me-1" title="View"><i class="fa fa-eye"></i></a>'
-            '<a href="{}" class="btn btn-sm btn-secondary me-1" title="Edit"><i class="fa fa-edit"></i></a>'
-            '<a href="{}" class="btn btn-sm btn-danger" title="Delete"><i class="fa fa-trash"></i></a>',
-            f"/prompt/{record.pk}/view",
-            f"/prompt/{record.pk}/edit",
-            f"/prompt/{record.pk}/delete",
+            '<a href="{}" class="btn btn-sm btn-dark me-1" title="View Details"><i class="fa fa-eye"></i></a>'
+            '<a href="{}" class="btn btn-sm btn-dark me-1" title="Edit"><i class="fa fa-edit"></i></a>'
+            '<a href="#" class="btn btn-sm btn-danger show-danger-modal" '
+            'data-redirect-url="{}" '
+            'data-message="Are you sure you want to delete this note? This action cannot be undone." '
+            'title="Delete Note"><i class="fa fa-trash"></i></a>',
+            view_url,
+            edit_url,
+            delete_url
         )
