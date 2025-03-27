@@ -65,7 +65,9 @@
     
         {% include 'twf/base/confirm_modal.html' %}
         {% include 'twf/base/confirm_modal_danger.html' %}
+        {% if show_context_help %}
         {% include 'twf/base/help_overlay.html' %}
+        {% endif %}
     </main>
 
     <footer class="footer">

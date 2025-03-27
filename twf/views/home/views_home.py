@@ -118,6 +118,7 @@ class TWFHomeIndexView(TWFHomeView):
     """View for the home page."""
     template_name = 'twf/home/home.html'
     page_title = 'Home'
+    show_context_help = False  # Disable context help for the home page
 
     def get_breadcrumbs(self):
         """Get the breadcrumbs."""
@@ -131,12 +132,14 @@ class TWFHomeAboutView(TWFHomeView):
     """View for the about page."""
     template_name = 'twf/home/about.html'
     page_title = 'About'
+    show_context_help = False  # Disable context help for the about page
 
 class TWFHomeLoginView(TWFHomeView, LoginView):
     """View to log in the user."""
     template_name = 'twf/home/users/login.html'
     page_title = 'Login'
     authentication_form = LoginForm
+    show_context_help = False  # Disable context help for the login page
 
 
 class TWFHomePasswordChangeView(TWFHomeView, PasswordChangeView):

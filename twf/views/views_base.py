@@ -17,6 +17,7 @@ class TWFView(TemplateView, ABC):
     project_required = True
     page_title = None
     navigation_anchor = None
+    show_context_help = True  # Flag to control visibility of the context help button
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -119,6 +120,7 @@ class TWFView(TemplateView, ABC):
                     'groups': self.get_sub_navigation()
                 },
                 'navigation_anchor': self.navigation_anchor,
+                'show_context_help': self.show_context_help,  # Add the flag to the context
                 'version': settings.TWF_VERSION
             }
         )
