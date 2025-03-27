@@ -1,33 +1,179 @@
 {% load twf_help %}
-<h1>Context Help: Export List</h1>
-<p>
-    The Export List page shows all exports that have been created in your project. You can use this page to monitor, download, and manage your exports.
-</p>
 
-<h2>Export List Table</h2>
-<p>
-    The table displays the following information for each export:
-</p>
-<ul>
-    <li><strong>Title:</strong> The name of the export.</li>
-    <li><strong>Type:</strong> What type of content was exported (documents, collections, project, etc.).</li>
-    <li><strong>Format:</strong> The file format of the export (JSON, CSV, XML, etc.).</li>
-    <li><strong>Status:</strong> Current status of the export (processing, completed, failed).</li>
-    <li><strong>Created:</strong> When the export was created.</li>
-    <li><strong>Actions:</strong> Buttons to download or delete the export.</li>
-</ul>
+<div class="help-content">
+    <h2>Export List</h2>
+    <p>
+        The Export List page shows all exports that have been created in your project. This centralized
+        view allows you to monitor, download, manage, and track the history of your export operations.
+    </p>
 
-<h2>Managing Exports</h2>
-<p>
-    You can:
-</p>
-<ul>
-    <li><strong>Download:</strong> Click the download button to retrieve the export file.</li>
-    <li><strong>Delete:</strong> Remove exports you no longer need by clicking the delete button.</li>
-    <li><strong>Filter:</strong> Use the filter options to find specific exports by type or date.</li>
-</ul>
+    <h3>Export List Features</h3>
+    <p>
+        The Export List provides a comprehensive overview of all your exports:
+    </p>
+    <ul>
+        <li><strong>Complete History:</strong> View all exports created in your project</li>
+        <li><strong>Status Tracking:</strong> Monitor the progress of ongoing export operations</li>
+        <li><strong>Download Access:</strong> Easily retrieve completed export files</li>
+        <li><strong>Export Management:</strong> Organize, filter, and clean up your export history</li>
+        <li><strong>Export Details:</strong> Access information about each export's configuration and content</li>
+        <li><strong>Export Analytics:</strong> Track export patterns and usage over time</li>
+    </ul>
 
-<h1>Related Topics</h1>
-<ul>
-    <li><a href="{% help_url 'modules/workflows/export.html' %}" target="_blank" class="help-link">Export Workflows Documentation</a></li>
-</ul>
+    <h3>Export List Table</h3>
+    <p>
+        The main table displays detailed information for each export:
+    </p>
+    <ul>
+        <li><strong>Title:</strong> The name or identifier of the export</li>
+        <li><strong>Type:</strong> The category of content that was exported
+            <ul>
+                <li>Document exports (individual or multiple documents)</li>
+                <li>Collection exports (organized document groups)</li>
+                <li>Dictionary exports (terminology resources)</li>
+                <li>Tag exports (entity annotations and references)</li>
+                <li>Project exports (comprehensive project packages)</li>
+                <li>Zenodo publications (research data repositories)</li>
+            </ul>
+        </li>
+        <li><strong>Format:</strong> The file format of the export
+            <ul>
+                <li>Structured data formats (JSON, XML, RDF)</li>
+                <li>Tabular formats (CSV, Excel)</li>
+                <li>Document formats (PDF, DOCX, HTML)</li>
+                <li>Archive formats (ZIP, TAR)</li>
+                <li>Specialized formats (TEI, METS/MODS)</li>
+                <li>Custom defined formats</li>
+            </ul>
+        </li>
+        <li><strong>Status:</strong> Current state of the export process
+            <ul>
+                <li>Queued: Export is waiting to be processed</li>
+                <li>Processing: Export is currently being generated</li>
+                <li>Completed: Export has finished successfully</li>
+                <li>Failed: Export encountered errors</li>
+                <li>Canceled: Export was terminated before completion</li>
+                <li>Expired: Export has exceeded its retention period</li>
+            </ul>
+        </li>
+        <li><strong>Created:</strong> When the export was initiated</li>
+        <li><strong>Completed:</strong> When the export process finished</li>
+        <li><strong>Size:</strong> The file size of the completed export</li>
+        <li><strong>Created By:</strong> User who initiated the export</li>
+        <li><strong>Actions:</strong> Available operations for each export</li>
+    </ul>
+
+    <h3>Export Actions</h3>
+    <p>
+        Several actions are available for managing exports:
+    </p>
+    <ul>
+        <li><strong>Download:</strong> 
+            <ul>
+                <li>Retrieve the completed export file</li>
+                <li>Save the export to your local system</li>
+                <li>Access the exported content for use</li>
+            </ul>
+        </li>
+        <li><strong>View Details:</strong> 
+            <ul>
+                <li>See detailed information about the export</li>
+                <li>View export configuration parameters</li>
+                <li>Check content inclusion details</li>
+                <li>Review error messages for failed exports</li>
+            </ul>
+        </li>
+        <li><strong>Repeat Export:</strong> 
+            <ul>
+                <li>Create a new export using the same parameters</li>
+                <li>Regenerate exports with updated content</li>
+                <li>Rerun exports that failed previously</li>
+            </ul>
+        </li>
+        <li><strong>Delete:</strong> 
+            <ul>
+                <li>Remove exports you no longer need</li>
+                <li>Clean up your export history</li>
+                <li>Free up storage space for new exports</li>
+            </ul>
+        </li>
+        <li><strong>Share:</strong> 
+            <ul>
+                <li>Generate shareable links for specific exports</li>
+                <li>Set access permissions for shared exports</li>
+                <li>Track export access and downloads</li>
+            </ul>
+        </li>
+    </ul>
+
+    <h3>List Management</h3>
+    <p>
+        The Export List includes several management features:
+    </p>
+    <ul>
+        <li><strong>Filtering:</strong> 
+            <ul>
+                <li>Filter by export type (documents, collections, etc.)</li>
+                <li>Filter by format (JSON, PDF, etc.)</li>
+                <li>Filter by status (completed, processing, failed)</li>
+                <li>Filter by date range or time period</li>
+                <li>Filter by creator or other metadata</li>
+            </ul>
+        </li>
+        <li><strong>Sorting:</strong> 
+            <ul>
+                <li>Sort by any column in ascending or descending order</li>
+                <li>Arrange exports by creation date, size, type, etc.</li>
+                <li>Organize exports according to your current needs</li>
+            </ul>
+        </li>
+        <li><strong>Searching:</strong> 
+            <ul>
+                <li>Search export titles or descriptions</li>
+                <li>Find exports containing specific content</li>
+                <li>Locate exports by specific parameters</li>
+            </ul>
+        </li>
+        <li><strong>Bulk Operations:</strong> 
+            <ul>
+                <li>Select multiple exports for batch actions</li>
+                <li>Delete several exports at once</li>
+                <li>Download multiple exports as a package</li>
+            </ul>
+        </li>
+    </ul>
+
+    <h3>Export Status Monitoring</h3>
+    <p>
+        The Export List provides real-time status updates:
+    </p>
+    <ul>
+        <li>Track progress of ongoing export operations</li>
+        <li>Receive notifications when exports complete</li>
+        <li>View detailed progress for large exports</li>
+        <li>Identify and troubleshoot failed exports</li>
+        <li>Monitor system performance and export queue</li>
+    </ul>
+
+    <h3>Best Practices</h3>
+    <ul>
+        <li>Regularly review and clean up your export history to manage storage</li>
+        <li>Use meaningful export titles to easily identify exports later</li>
+        <li>Download and backup important exports to your local system</li>
+        <li>Check failed exports for error messages to understand issues</li>
+        <li>Use filters to quickly locate specific exports in large projects</li>
+        <li>Document export parameters for significant research outputs</li>
+        <li>Monitor export sizes to manage storage constraints</li>
+    </ul>
+
+    <h3>Related Topics</h3>
+    <ul>
+        <li>{% help_url 'export_overview' 'Export Overview' %}</li>
+        <li>{% help_url 'export_configure' 'Configure Export Formats' %}</li>
+        <li>{% help_url 'export_documents' 'Export Documents' %}</li>
+        <li>{% help_url 'export_collections' 'Export Collections' %}</li>
+        <li>{% help_url 'export_dictionaries' 'Export Dictionaries' %}</li>
+        <li>{% help_url 'export_tags' 'Export Tags' %}</li>
+        <li>{% help_url 'export_project' 'Export Project' %}</li>
+    </ul>
+</div>
