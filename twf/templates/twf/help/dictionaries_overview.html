@@ -1,0 +1,68 @@
+{% load twf_help %}
+<h1>Context Help: Dictionaries Overview</h1>
+<p>
+    The Dictionaries Overview page provides a central hub for managing all dictionaries in your project. Dictionaries in TWF are collections of terms and their standardized forms, which help normalize and enrich tags in your documents.
+</p>
+
+<h2>What Are Dictionaries?</h2>
+<p>
+    In TWF, dictionaries serve as controlled vocabularies that:
+</p>
+<ul>
+    <li>Help standardize variations of the same term (e.g., different spellings of names)</li>
+    <li>Provide structured information about entities (people, places, organizations, etc.)</li>
+    <li>Link to external authority records (like GND, Wikidata, GeoNames)</li>
+    <li>Improve search and analysis by using normalized terms</li>
+</ul>
+
+<h2>Dictionary Types</h2>
+<p>
+    TWF supports several dictionary types:
+</p>
+<ul>
+    <li><strong>Person Dictionaries:</strong> For names of individuals</li>
+    <li><strong>Place Dictionaries:</strong> For geographic locations</li>
+    <li><strong>Organization Dictionaries:</strong> For institutions and groups</li>
+    <li><strong>Date Dictionaries:</strong> For standardizing date formats</li>
+    <li><strong>General Dictionaries:</strong> For other types of terms</li>
+    <li><strong>Custom Dictionaries:</strong> For project-specific needs</li>
+</ul>
+
+<h2>Overview Page Features</h2>
+<p>
+    From this page, you can:
+</p>
+<ul>
+    <li><strong>View All Dictionaries:</strong> See a list of all dictionaries in your project</li>
+    <li><strong>Dictionary Statistics:</strong> View the number of entries in each dictionary</li>
+    <li><strong>Quick Navigation:</strong> Access different dictionary management functions</li>
+    <li><strong>Search/Filter:</strong> Find specific dictionaries by type or name</li>
+</ul>
+
+<h2>Key Actions</h2>
+<p>
+    Main actions available from this page:
+</p>
+<ul>
+    <li><a href="{% url 'twf:dictionaries' %}">Browse Dictionaries</a>: View and manage existing dictionaries</li>
+    <li><a href="{% url 'twf:dictionaries_add' %}">Add Dictionary</a>: Add existing dictionaries to your project</li>
+    <li><a href="{% url 'twf:dictionary_create' %}">Create Dictionary</a>: Create a new dictionary from scratch</li>
+    <li>Access workflows for batch enrichment of dictionaries using external sources</li>
+</ul>
+
+<h2>Dictionary Workflows</h2>
+<p>
+    TWF offers several ways to work with dictionaries:
+</p>
+<ul>
+    <li><strong>Manual Management:</strong> Create and edit entries manually</li>
+    <li><strong>Automated Batch Processing:</strong> Enrich multiple entries at once using AI or external databases</li>
+    <li><strong>Supervised Enrichment:</strong> Review and approve suggested enrichments one by one</li>
+    <li><strong>Import/Export:</strong> Share dictionaries between projects or with other systems</li>
+</ul>
+
+<h1>Related Topics</h1>
+<ul>
+    <li><a href="{% help_url 'modules/workflows/dictionaries.html' %}" target="_blank" class="help-link">Dictionary Workflows</a></li>
+    <li><a href="{% help_url 'modules/workflows/tags.html' %}" target="_blank" class="help-link">Tag Workflows</a></li>
+</ul>

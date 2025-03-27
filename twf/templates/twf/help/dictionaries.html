@@ -1,0 +1,73 @@
+{% load twf_help %}
+<h1>Context Help: Dictionaries</h1>
+<p>
+    The Dictionaries page displays all dictionaries currently available in your project, allowing you to browse, search, and manage them. Here you can view details about each dictionary and access its entries.
+</p>
+
+<h2>Dictionary List</h2>
+<p>
+    The main table on this page shows:
+</p>
+<ul>
+    <li><strong>Dictionary Name:</strong> The title of each dictionary</li>
+    <li><strong>Type:</strong> The category (person, place, organization, date, etc.)</li>
+    <li><strong>Entries:</strong> The number of terms contained in the dictionary</li>
+    <li><strong>Created/Modified:</strong> When the dictionary was created and last updated</li>
+    <li><strong>Actions:</strong> Buttons for viewing, editing, or removing dictionaries</li>
+</ul>
+
+<h2>Dictionary Actions</h2>
+<p>
+    For each dictionary, you can:
+</p>
+<ul>
+    <li><strong>View:</strong> Open the dictionary to browse its entries</li>
+    <li><strong>Edit:</strong> Modify the dictionary's properties (name, description, type)</li>
+    <li><strong>Remove:</strong> Detach the dictionary from your project (does not delete the dictionary)</li>
+</ul>
+
+<h2>Filtering and Searching</h2>
+<p>
+    You can filter the dictionary list by:
+</p>
+<ul>
+    <li><strong>Dictionary Type:</strong> Show only person, place, or other types of dictionaries</li>
+    <li><strong>Name/Description:</strong> Search for dictionaries containing specific text</li>
+    <li><strong>Status:</strong> View dictionaries by their completion or usage status</li>
+</ul>
+
+<h2>Adding New Dictionaries</h2>
+<p>
+    From this page, you can access two methods to add dictionaries to your project:
+</p>
+<ul>
+    <li><strong>Add Existing Dictionary:</strong> Incorporate dictionaries that already exist in the system</li>
+    <li><strong>Create New Dictionary:</strong> Start a new dictionary from scratch</li>
+</ul>
+
+<h2>Dictionary Status</h2>
+<p>
+    Dictionaries may have different statuses:
+</p>
+<ul>
+    <li><strong>Active:</strong> Currently in use for tag normalization</li>
+    <li><strong>In Progress:</strong> Still being developed or enriched</li>
+    <li><strong>Reference Only:</strong> Used only for lookup, not automatic normalization</li>
+</ul>
+
+<h2>Using Dictionaries</h2>
+<p>
+    Dictionaries in your project are used to:
+</p>
+<ul>
+    <li>Normalize variations of the same entity in your tags</li>
+    <li>Provide structured information about tagged entities</li>
+    <li>Link your data to external knowledge bases and authority records</li>
+    <li>Improve search, filtering, and analysis capabilities</li>
+</ul>
+
+<h1>Related Topics</h1>
+<ul>
+    <li><a href="{% help_url 'modules/workflows/dictionaries.html' %}" target="_blank" class="help-link">Dictionary Workflows</a></li>
+    <li><a href="{% help_url 'modules/workflows/tags.html' %}" target="_blank" class="help-link">Tag Workflows</a></li>
+</ul>
