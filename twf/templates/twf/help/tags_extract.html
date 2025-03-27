@@ -1,0 +1,78 @@
+{% load twf_help %}
+<h1>Context Help: Extract Tags</h1>
+<p>
+    The Extract Tags page allows you to identify and extract named entities and other significant terms from your documents. This process creates tags that can be normalized, grouped, and analyzed throughout your project.
+</p>
+
+<h2>Tag Extraction Process</h2>
+<ol>
+    <li><strong>Document Selection:</strong> Choose which documents to process for tag extraction:
+        <ul>
+            <li>All documents in the project</li>
+            <li>Documents matching specific criteria</li>
+            <li>Individually selected documents</li>
+        </ul>
+    </li>
+    <li><strong>Extraction Configuration:</strong> Set parameters for the extraction process:
+        <ul>
+            <li>Tag types to extract (people, places, organizations, dates, etc.)</li>
+            <li>Extraction precision settings</li>
+            <li>Minimum confidence threshold</li>
+            <li>Processing options (overwrite existing tags, append new ones)</li>
+        </ul>
+    </li>
+    <li><strong>Start Extraction:</strong> Begin the automated tag identification process</li>
+    <li><strong>Review Results:</strong> After completion, view a summary of extracted tags</li>
+</ol>
+
+<h2>Extraction Methods</h2>
+<p>
+    TWF supports several methods for tag extraction:
+</p>
+<ul>
+    <li><strong>Pattern-Based:</strong> Identify tags based on text patterns and regular expressions</li>
+    <li><strong>Dictionary-Based:</strong> Match text against existing dictionary entries</li>
+    <li><strong>AI-Assisted:</strong> Use language models to identify named entities</li>
+    <li><strong>Hybrid Approaches:</strong> Combine multiple methods for better coverage</li>
+</ul>
+
+<h2>Tag Types</h2>
+<p>
+    The extraction process can identify various types of tags:
+</p>
+<ul>
+    <li><strong>Person:</strong> Names of individuals</li>
+    <li><strong>Place:</strong> Geographic locations</li>
+    <li><strong>Organization:</strong> Institutions, companies, and formal groups</li>
+    <li><strong>Date:</strong> Temporal references and calendar dates</li>
+    <li><strong>Event:</strong> Named historical events</li>
+    <li><strong>Custom Types:</strong> Project-specific categories you define</li>
+</ul>
+
+<h2>Best Practices</h2>
+<ul>
+    <li>Run tag extraction early in your project workflow</li>
+    <li>Start with conservative settings and refine as needed</li>
+    <li>Create appropriate dictionaries before extraction for better results</li>
+    <li>Consider running extraction in phases by tag type</li>
+    <li>Review extracted tags to ensure quality and coverage</li>
+    <li>Re-run extraction if document content changes significantly</li>
+</ul>
+
+<h2>After Extraction</h2>
+<p>
+    Once tags are extracted, you can:
+</p>
+<ul>
+    <li>View all extracted tags in the tag views</li>
+    <li>Normalize tags using dictionaries</li>
+    <li>Group related tags together</li>
+    <li>Analyze tag distributions and patterns</li>
+    <li>Generate tag-based statistics and visualizations</li>
+</ul>
+
+<h1>Related Topics</h1>
+<ul>
+    <li><a href="{% help_url 'modules/workflows/tags.html' %}" target="_blank" class="help-link">Tag Workflows</a></li>
+    <li><a href="{% help_url 'modules/workflows/dictionaries.html' %}" target="_blank" class="help-link">Dictionary Workflows</a></li>
+</ul>
