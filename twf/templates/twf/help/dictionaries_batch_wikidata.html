@@ -1,0 +1,74 @@
+{% load twf_help %}
+<h1>Context Help: Wikidata Batch Enrichment</h1>
+<p>
+    The Wikidata Batch Enrichment page allows you to automatically enrich multiple dictionary entries with data from Wikidata, a collaborative knowledge base that serves as the central storage for structured data for Wikipedia and other Wikimedia projects.
+</p>
+
+<h2>What is Wikidata?</h2>
+<p>
+    Wikidata is a free and open knowledge base that:
+</p>
+<ul>
+    <li>Contains structured data about millions of entities (people, places, concepts, etc.)</li>
+    <li>Provides unique identifiers (Q numbers) for each entity</li>
+    <li>Stores multilingual labels, descriptions, and properties</li>
+    <li>Links to external databases and authority files</li>
+    <li>Is community-maintained and constantly growing</li>
+</ul>
+
+<h2>Batch Enrichment Process</h2>
+<ol>
+    <li><strong>Dictionary Selection:</strong> Choose the dictionary to enrich (compatible with all dictionary types)</li>
+    <li><strong>Entry Selection:</strong> Select the entries to be enriched with Wikidata:
+        <ul>
+            <li>Filter by entry status or characteristics</li>
+            <li>Choose all entries or a specific subset</li>
+        </ul>
+    </li>
+    <li><strong>Enrichment Configuration:</strong> Set parameters for the batch process:
+        <ul>
+            <li>Search precision settings</li>
+            <li>Language preferences</li>
+            <li>Properties to import from Wikidata</li>
+            <li>Confidence threshold for automatic matching</li>
+        </ul>
+    </li>
+    <li><strong>Start Batch Process:</strong> Begin the automated enrichment</li>
+</ol>
+
+<h2>Enrichment Results</h2>
+<p>
+    After the batch process completes:
+</p>
+<ul>
+    <li><strong>Successfully Enriched:</strong> Entries that were confidently matched and updated with Wikidata</li>
+    <li><strong>Uncertain Matches:</strong> Entries with potential matches that require manual review</li>
+    <li><strong>No Matches:</strong> Entries for which no suitable Wikidata records were found</li>
+</ul>
+
+<h2>Wikidata Data Fields</h2>
+<p>
+    Depending on the entity type, Wikidata can provide:
+</p>
+<ul>
+    <li><strong>For Persons:</strong> Birth/death dates, occupations, nationality, works, relationships</li>
+    <li><strong>For Places:</strong> Coordinates, population, country, administrative division</li>
+    <li><strong>For Organizations:</strong> Founding date, headquarters, members, type</li>
+    <li><strong>For All Types:</strong> Alternate names, descriptions in multiple languages, external identifiers</li>
+</ul>
+
+<h2>Best Practices</h2>
+<ul>
+    <li>Ensure dictionary entries have clear, specific names to improve match quality</li>
+    <li>Set appropriate language preferences based on your content</li>
+    <li>Start with smaller batches to test match quality before processing large sets</li>
+    <li>Review uncertain matches manually after batch processing</li>
+    <li>Consider using supervised workflows for ambiguous entries</li>
+    <li>Wikidata has excellent coverage of notable entities across many cultures and domains</li>
+</ul>
+
+<h1>Related Topics</h1>
+<ul>
+    <li><a href="{% help_url 'modules/workflows/dictionaries.html' %}" target="_blank" class="help-link">Dictionary Workflows</a></li>
+    <li><a href="{% help_url 'modules/further_use/source_doc/clients/wikidata.html' %}" target="_blank" class="help-link">Wikidata Client Documentation</a></li>
+</ul>
