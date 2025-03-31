@@ -144,7 +144,28 @@ def copy_project(self, project_id, user_id, **kwargs):
 
 @shared_task(bind=True, base=BaseTWFTask)
 def query_project_openai(self, project_id, user_id, **kwargs):
-    """Query a project and its related objects."""
+    """
+    Query an OpenAI model with documents from the project.
+    
+    This task processes a query to OpenAI models (like GPT-4, GPT-4 Vision) using selected 
+    documents from the project. It supports multimodal prompts with both text and images.
+    
+    The task will:
+    1. Retrieve the specified documents from the project
+    2. Process the query according to the specified prompt mode
+    3. For image modes, automatically select up to 5 images per document
+    4. Send the content to OpenAI and capture the response
+    
+    Args:
+        project_id (int): ID of the project
+        user_id (int): ID of the user running the task
+        **kwargs: Additional keyword arguments
+            - prompt (str): The text prompt to send to the model
+            - role_description (str): System role description for the AI
+            - documents (list): List of document IDs to include
+            - prompt_mode (str): One of "text_only", "images_only", or "text_and_images"
+                                Defaults to "text_only" if not specified
+    """
     self.validate_task_parameters(kwargs, ['prompt', 'role_description', 'documents'])
 
     doc_ids = kwargs.pop('documents')
@@ -160,7 +181,29 @@ def query_project_openai(self, project_id, user_id, **kwargs):
 
 @shared_task(bind=True, base=BaseTWFTask)
 def query_project_gemini(self, project_id, user_id, **kwargs):
-    """Query a project and its related objects."""
+    """
+    Query a Google Gemini model with documents from the project.
+    
+    This task processes a query to Google Gemini models using selected documents 
+    from the project. Gemini models have strong multimodal capabilities and can
+    effectively process both text and images together.
+    
+    The task will:
+    1. Retrieve the specified documents from the project
+    2. Process the query according to the specified prompt mode
+    3. For image modes, automatically select up to 5 images per document
+    4. Send the content to Gemini and capture the response
+    
+    Args:
+        project_id (int): ID of the project
+        user_id (int): ID of the user running the task
+        **kwargs: Additional keyword arguments
+            - prompt (str): The text prompt to send to the model
+            - role_description (str): System role description for the AI
+            - documents (list): List of document IDs to include
+            - prompt_mode (str): One of "text_only", "images_only", or "text_and_images"
+                                Defaults to "text_only" if not specified
+    """
     self.validate_task_parameters(kwargs, ['prompt', 'role_description', 'documents'])
 
     doc_ids = kwargs.pop('documents')
@@ -176,7 +219,33 @@ def query_project_gemini(self, project_id, user_id, **kwargs):
 
 @shared_task(bind=True, base=BaseTWFTask)
 def query_project_claude(self, project_id, user_id, **kwargs):
-    """Query a project and its related objects."""
+    """
+    Query an Anthropic Claude model with documents from the project.
+    
+    This task processes a query to Anthropic Claude models using selected documents
+    from the project. In the current implementation, Claude is limited to text-only
+    processing, regardless of the selected prompt_mode. When image modes are requested,
+    the task automatically falls back to text-only mode with a notification.
+    
+    The task will:
+    1. Retrieve the specified documents from the project
+    2. Process the query using text-only mode (ignoring any image mode requests)
+    3. Send the content to Claude and capture the response
+    
+    Args:
+        project_id (int): ID of the project
+        user_id (int): ID of the user running the task
+        **kwargs: Additional keyword arguments
+            - prompt (str): The text prompt to send to the model
+            - role_description (str): System role description for the AI
+            - documents (list): List of document IDs to include
+            - prompt_mode (str): While this parameter is accepted, Claude currently
+                                only supports "text_only" mode
+    
+    Note:
+        Although Claude models do support image inputs in their native API,
+        this implementation currently forces text-only mode for all Claude requests.
+    """
     self.validate_task_parameters(kwargs, ['prompt', 'role_description', 'documents'])
 
     doc_ids = kwargs.pop('documents')
@@ -199,7 +268,35 @@ def query_project_claude(self, project_id, user_id, **kwargs):
 
 @shared_task(bind=True, base=BaseTWFTask)
 def query_project_mistral(self, project_id, user_id, **kwargs):
-    """Query a project and its related objects."""
+    """
+    Query a Mistral model with documents from the project.
+    
+    This task processes a query to Mistral AI models using selected documents
+    from the project. Currently, Mistral models support only text inputs, so
+    regardless of the selected prompt_mode, the task will operate in text-only mode.
+    When image modes are requested, the task automatically falls back to text-only
+    mode with a notification.
+    
+    The task will:
+    1. Retrieve the specified documents from the project
+    2. Process the query using text-only mode (ignoring any image mode requests)
+    3. Send the content to Mistral and capture the response
+    
+    Args:
+        project_id (int): ID of the project
+        user_id (int): ID of the user running the task
+        **kwargs: Additional keyword arguments
+            - prompt (str): The text prompt to send to the model
+            - role_description (str): System role description for the AI
+            - documents (list): List of document IDs to include
+            - prompt_mode (str): While this parameter is accepted, Mistral currently
+                                only supports "text_only" mode
+    
+    Note:
+        Mistral's API does not currently support image inputs. This implementation
+        forces text-only mode for all Mistral requests, regardless of the selected
+        prompt_mode.
+    """
     self.validate_task_parameters(kwargs, ['prompt', 'role_description', 'documents'])
 
     doc_ids = kwargs.pop('documents')

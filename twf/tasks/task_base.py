@@ -18,16 +18,29 @@ class BaseTWFTask(CeleryTask):
     
     # Standard descriptions for common task types
     TASK_DESCRIPTIONS = {
+        # Document and structure tasks
         "extract_zip_export_task": "Extraction of Transkribus export files to create document and page structures.",
         "create_collection": "Creation of a new collection in the project.",
+        
+        # AI collection processing tasks
         "search_openai_for_collection": "OpenAI processing of collection items for content extraction or enhancement.",
         "search_gemini_for_collection": "Gemini AI processing of collection items for content extraction or enhancement.",
         "search_claude_for_collection": "Claude AI processing of collection items for content extraction or enhancement.",
         "search_mistral_for_collection": "Mistral AI processing of collection items for content extraction or enhancement.",
+        
+        # AI document processing tasks
         "search_openai_for_docs": "OpenAI processing of documents for content extraction or enhancement.",
         "search_gemini_for_docs": "Gemini AI processing of documents for content extraction or enhancement.",
         "search_claude_for_docs": "Claude AI processing of documents for content extraction or enhancement.",
         "search_mistral_for_docs": "Mistral AI processing of documents for content extraction or enhancement.",
+        
+        # AI project query tasks (including multimodal)
+        "query_project_openai": "OpenAI query with selected documents and optional image content.",
+        "query_project_gemini": "Google Gemini query with selected documents and optional image content.",
+        "query_project_claude": "Claude query with selected documents (text-only).",
+        "query_project_mistral": "Mistral query with selected documents (text-only).",
+        
+        # Export tasks
         "export_data_task": "Export of project data to various formats.",
         "export_to_zenodo_task": "Export of project data to Zenodo repository.",
     }
@@ -66,13 +79,44 @@ class BaseTWFTask(CeleryTask):
 
     @staticmethod
     def validate_task_parameters(kwargs, required_params):
-        """Ensure all required parameters are present in kwargs."""
+        """
+        Ensure all required parameters are present in kwargs.
+        
+        This method checks that all parameters in the required_params list are
+        present in the kwargs dictionary. If any are missing, it raises a ValueError
+        with a message indicating which parameters are missing.
+        
+        Args:
+            kwargs (dict): Dictionary of keyword arguments to check
+            required_params (list): List of parameter names that must be present
+            
+        Raises:
+            ValueError: If any required parameters are missing from kwargs
+        """
         missing_params = [param for param in required_params if param not in kwargs]
         if missing_params:
             raise ValueError(f"Missing required parameters: {', '.join(missing_params)}")
 
     def get_project_and_user(self, project_id, user_id):
-        """Fetch project and user from the database."""
+        """
+        Fetch project and user from the database and store them as instance attributes.
+        
+        This method is typically called during task initialization to retrieve the
+        Project and User objects associated with the task. The objects are stored as
+        instance attributes for use by other methods.
+        
+        Args:
+            project_id (int): ID of the project to retrieve
+            user_id (int): ID of the user to retrieve
+            
+        Raises:
+            ValueError: If either project_id or user_id is missing, or if the
+                       corresponding Project or User object does not exist
+            
+        Note:
+            After successful execution, self.project and self.user will be set
+            to the retrieved objects.
+        """
         if not project_id or not user_id:
             raise ValueError("Project ID and User ID are required")
 
@@ -413,6 +457,23 @@ class BaseTWFTask(CeleryTask):
         return summary
 
     def create_configured_client(self, client_name, role_description):
+        """
+        Create and configure an AI client for the specified provider.
+        
+        This method handles the initialization of an AI client by retrieving the
+        appropriate credentials from the project configuration and creating a new
+        instance of AiApiClient. The client is configured with the specified
+        provider, API key, and role description.
+        
+        Args:
+            client_name (str): The name of the AI provider to use
+                              ('openai', 'genai', 'anthropic', or 'mistral')
+            role_description (str): System role description for the AI model
+            
+        Note:
+            The created client is stored in self.client and can be used by other
+            methods to interact with the AI provider.
+        """
         self.client_name = client_name
         self.credentials = self.project.get_credentials(client_name)
         self.client = AiApiClient(api=client_name,
@@ -420,6 +481,25 @@ class BaseTWFTask(CeleryTask):
                                   gpt_role_description=role_description)
 
     def prompt_client(self, item, prompt):
+        """
+        Send a prompt to the AI model with context from a specific item.
+        
+        This is a helper method that constructs a prompt with context from a single
+        item (like a document or collection item) and sends it to the currently
+        configured AI client. The item's text content is appended to the prompt
+        as context.
+        
+        Note that this method does not handle images - for multimodal prompts,
+        use process_single_ai_request with an appropriate prompt_mode.
+        
+        Args:
+            item: An item with a get_text() method (Document, CollectionItem, etc.)
+            prompt (str): The text prompt to send to the model
+            
+        Returns:
+            tuple: (response_dict, elapsed_time) containing the parsed response
+                  from the AI model and the time taken to receive it
+        """
         context = item.get_text()
         prompt = prompt + "\n\n" + "Context:\n" + context
         response, elapsed_time = self.client.prompt(model=self.credentials['default_model'],

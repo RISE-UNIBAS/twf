@@ -22,6 +22,7 @@ Contents:
 
    modules/parts/settings.rst
    modules/parts/batch-workflows.rst
+   modules/parts/multimodal.rst
 
 .. toctree::
    :maxdepth: 2

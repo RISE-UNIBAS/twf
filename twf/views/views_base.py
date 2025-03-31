@@ -140,11 +140,41 @@ def help_content(request, view_name):
 
 
 class AIFormView(FormView):
-    """Mixin for AI views."""
+    """
+    Base view for AI interaction forms.
+    
+    This view provides a foundation for all AI-related forms in the application,
+    including multimodal forms that can process both text and images. It handles:
+    
+    1. Proper form initialization with project context
+    2. AI credential validation 
+    3. Task URL and confirmation message setup
+    
+    When extended by specific AI provider views (like TWFProjectOpenAIView),
+    it configures the appropriate form with the project's credentials and
+    starts the correct Celery task when the form is submitted.
+    
+    Attributes:
+        start_url (str): The URL to start the AI task
+        message (str): Confirmation message to display before starting the task
+    """
     start_url = None
     message = None
 
     def get_form_kwargs(self):
+        """
+        Prepare keyword arguments for the form initialization.
+        
+        This method extends the standard form kwargs with project-specific
+        information and AI task configuration parameters. These kwargs are
+        passed to the form's __init__ method.
+        
+        Returns:
+            dict: Dictionary of keyword arguments for the form, including:
+                - project: The current Project object
+                - data-start-url: URL to start the AI task
+                - data-message: Confirmation message to display
+        """
         kwargs = super().get_form_kwargs()
         kwargs['project'] = self.get_project()
 
@@ -154,14 +184,36 @@ class AIFormView(FormView):
         return kwargs
 
     def get_ai_credentials(self, client_name):
-        """Get the AI credentials."""
+        """
+        Get the AI credentials for a specific provider from the project.
+        
+        Args:
+            client_name (str): The name of the AI provider to get credentials for
+                              ('openai', 'genai', 'anthropic', or 'mistral')
+                              
+        Returns:
+            dict: A dictionary containing the credentials for the specified provider,
+                 typically including 'api_key' and 'default_model' keys
+        """
         project = self.get_project()
         if project is None:
             return {}
         return project.get_credentials(client_name)
 
     def has_ai_credentials(self, client_name):
-        """Check if the AI credentials are set."""
+        """
+        Check if valid AI credentials are set for a specific provider.
+        
+        This method verifies that both an API key and a default model are
+        configured for the specified AI provider.
+        
+        Args:
+            client_name (str): The name of the AI provider to check
+                              ('openai', 'genai', 'anthropic', or 'mistral')
+                              
+        Returns:
+            bool: True if both api_key and default_model are set, False otherwise
+        """
         creds = self.get_ai_credentials(client_name)
         if creds is None:
             return False
