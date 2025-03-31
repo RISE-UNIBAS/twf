@@ -89,39 +89,13 @@ The `AIFormView` base class provides the foundation for all AI-related views, in
 Provider-Specific Views
 ~~~~~~~~~~~~~~~~~~~~~
 
-Each AI provider has its own specific view that extends the base functionality:
+Each AI provider has its own specific view that extends the base functionality. For a detailed 
+explanation of the provider-specific views and multimodal implementation, see:
 
-.. code-block:: python
+.. toctree::
+   :maxdepth: 1
 
-    class OpenAIQueryView(AIFormView):
-        """View for OpenAI queries with multimodal support."""
-        form_class = OpenAIQueryForm
-        template_name = "twf/project/query/openai.html"
-        
-        def get_context_data(self, **kwargs):
-            context = super().get_context_data(**kwargs)
-            context['provider_name'] = 'OpenAI'
-            context['supports_multimodal'] = True
-            context['multimodal_info'] = 'GPT-4 Vision supports images in prompts'
-            return context
-            
-        def get_task_function(self):
-            return start_query_project_openai
-            
-    class ClaudeQueryView(AIFormView):
-        """View for Anthropic Claude queries with multimodal support."""
-        form_class = ClaudeQueryForm
-        template_name = "twf/project/query/claude.html"
-        
-        def get_context_data(self, **kwargs):
-            context = super().get_context_data(**kwargs)
-            context['provider_name'] = 'Claude'
-            context['supports_multimodal'] = True
-            context['multimodal_info'] = 'Claude 3 supports images in prompts'
-            return context
-            
-        def get_task_function(self):
-            return start_query_project_claude
+   views/project_ai.rst
 
 Template Structure
 ~~~~~~~~~~~~~~~~

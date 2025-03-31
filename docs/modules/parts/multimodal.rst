@@ -1,5 +1,5 @@
 Multimodal AI Features
-====================
+=====================
 
 Overview
 --------
@@ -66,7 +66,7 @@ The ``BaseMultiModalAIBatchForm`` class in ``base_batch_forms.py`` provides the 
         )
 
 AI Clients
-~~~~~~~~~
+~~~~~~~~~~
 
 The AI client classes in ``simple_ai_clients.py`` have been extended to handle both file paths and URLs:
 
@@ -122,7 +122,7 @@ User Interface
 The forms include radio buttons for selecting the prompt mode, providing a clear interface for users to choose how they want to interact with the AI providers.
 
 Page Model Enhancements
-~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~
 
 The ``Page`` model includes a ``get_image_url`` method to retrieve image URLs with optional scaling:
 
