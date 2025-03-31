@@ -2,7 +2,7 @@ from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Row, Column, HTML, Div, Button
 from django import forms
 
-from twf.models import Prompt
+from twf.models import Prompt, Page
 
 
 class BaseBatchForm(forms.Form):
@@ -127,4 +127,88 @@ class BaseAIBatchForm(BaseBatchForm):
                 css_class='row form-row'
             )
         )
+        return fields
+
+
+class BaseMultiModalAIBatchForm(BaseAIBatchForm):
+    """ Base form for AI batches with multimodal capabilities. """
+
+    class Meta:
+        js = ('twf/js/ai_prompt_manager.js',)
+
+    # Mode choices for the prompt type
+    PROMPT_MODE_CHOICES = [
+        ('text_only', 'Text only'),
+        ('images_only', 'Images only'),
+        ('text_and_images', 'Text + Images')
+    ]
+
+    def __init__(self, *args, **kwargs):
+        # Get the multimodal_support parameter and remove it from kwargs
+        self.multimodal_support = kwargs.pop('multimodal_support', True)
+        
+        super().__init__(*args, **kwargs)
+        
+        if self.multimodal_support:
+            # Add prompt mode selector
+            self.fields['prompt_mode'] = forms.ChoiceField(
+                label='Sending Mode',
+                choices=self.PROMPT_MODE_CHOICES,
+                initial='text_only',
+                required=True,
+                help_text='Select how to send the prompt to the AI model'
+            )
+            
+            # Note: We no longer need a separate image_pages field since 
+            # we'll automatically select up to 5 images per document
+
+    def get_dynamic_fields(self):
+        """Get the dynamic fields for the form including multimodal fields if supported."""
+        fields = super().get_dynamic_fields()
+        
+        if self.multimodal_support:
+            # Add the mode selector
+            fields.append(
+                Row(
+                    Column('prompt_mode', css_class='form-group col-12 mb-0'),
+                    css_class='row form-row'
+                )
+            )
+            
+            # Add the fixed message about image limits
+            image_info_html = """
+            <div class="multimodal-info alert alert-info mt-2" style="display: none;">
+                <small>
+                    <i class="fas fa-info-circle"></i>
+                    Up to 5 images per document will be included in the request (first 5 pages only).
+                </small>
+            </div>
+            """
+            
+            fields.append(HTML(image_info_html))
+            
+            # Add JavaScript to show/hide the message based on mode selection
+            modal_script = """
+            <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    const modeSelector = document.getElementById('id_prompt_mode');
+                    const infoMessage = document.querySelector('.multimodal-info');
+                    
+                    function toggleInfoMessage() {
+                        // Show message for any mode that includes images
+                        const showMessage = modeSelector.value !== 'text_only';
+                        infoMessage.style.display = showMessage ? 'block' : 'none';
+                    }
+                    
+                    // Initial state
+                    toggleInfoMessage();
+                    
+                    // Toggle on change
+                    modeSelector.addEventListener('change', toggleInfoMessage);
+                });
+            </script>
+            """
+            
+            fields.append(HTML(modal_script))
+            
         return fields

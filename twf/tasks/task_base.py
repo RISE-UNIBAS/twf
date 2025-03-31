@@ -220,18 +220,109 @@ class BaseTWFTask(CeleryTask):
             failed_items=failed_items
         )
 
-    def process_single_ai_request(self, items, client_name, prompt, role_description, metadata_field):
+    def process_single_ai_request(self, items, client_name, prompt, role_description, metadata_field, prompt_mode="text_only"):
+        """
+        Process an AI request with possible multimodal content (text + images).
+        
+        This method handles sending requests to various AI providers (OpenAI, Google Gemini,
+        Anthropic Claude, Mistral) with optional multimodal content. It supports three modes:
+        
+        1. Text Only: Only sends the text prompt and context
+        2. Images Only: Sends only images with a minimal text prompt
+        3. Text + Images: Sends both text and images
+        
+        For image-based modes, the method automatically selects up to 5 images per document 
+        from the provided items. Images are retrieved directly from the Transkribus server
+        using their URLs rather than downloading them locally first.
+        
+        Args:
+            items (QuerySet): The document items to process. These should have a get_text() method
+                             and, for documents, should have associated pages with images.
+            client_name (str): The name of the AI client to use: 'openai', 'genai', 'anthropic', or 'mistral'.
+                              Note that only 'openai' and 'genai' currently support multimodal content.
+            prompt (str): The prompt text from the user
+            role_description (str): System role description for the AI model
+            metadata_field (str): Field name for storing results in metadata
+            prompt_mode (str): One of "text_only", "images_only", or "text_and_images".
+                              Defaults to "text_only".
+        
+        Note:
+            If a client doesn't support images but an image mode is requested, the method
+            will automatically fall back to text-only mode with an appropriate warning.
+        """
         self.set_total_items(1)
         self.create_configured_client(client_name, role_description)
 
-        context_text = ""
-        for item in items:
-            context_text += item.get_text() + "\n"
+        # Log the prompt mode
+        self.twf_task.text += f"Prompt mode: {prompt_mode}\n"
+        
+        # Check if this client supports images
+        supports_images = client_name in ['openai', 'genai'] and hasattr(self.client, 'add_image_resource')
+        
+        # If mode involves images but client doesn't support them, warn and fall back to text
+        if prompt_mode in ['images_only', 'text_and_images'] and not supports_images:
+            fallback_message = f"Warning: {client_name} does not support images. Falling back to text-only mode.\n"
+            self.twf_task.text += fallback_message
+            prompt_mode = "text_only"
+        
+        # Process images if needed based on mode
+        if prompt_mode in ['images_only', 'text_and_images'] and supports_images:
+            # Collect up to 5 images from each document
+            image_count = 0
+            for item in items:
+                if hasattr(item, 'pages'):  # Verify this is a document
+                    # Get up to 5 pages from this document, ordered by page number
+                    pages = item.pages.all().order_by('tk_page_number')[:5]
+                    
+                    for page in pages:
+                        # Use our new method to get image URL with 50% scaling
+                        img_url = page.get_image_url(scale_percent=50)
+                        if img_url:
+                            self.client.add_image_resource(img_url)
+                            self.twf_task.text += f"Added image from page {page.tk_page_number} of document {item.title}\n"
+                            image_count += 1
 
-        prompt = prompt + "\n\n" + "Context:\n" + context_text
+            
+            if image_count > 0:
+                self.twf_task.text += f"Included {image_count} images in the prompt.\n"
+            else:
+                self.twf_task.text += "No valid images found in the selected documents.\n"
+                
+                # If we're in images-only mode but found no images, warn user and fall back to text
+                if prompt_mode == 'images_only':
+                    self.twf_task.text += "Warning: No images found but 'Images only' mode selected. Including text context instead.\n"
+                    prompt_mode = "text_only"
+
+        # Prepare the prompt text based on mode
+        full_prompt = prompt
+        
+        # Add text context if mode includes text or if we're fallback from images-only with no images
+        if prompt_mode in ['text_only', 'text_and_images']:
+            context_text = ""
+            for item in items:
+                context_text += item.get_text() + "\n"
+            
+            # Only add context if it's not empty
+            if context_text.strip():
+                full_prompt += "\n\n" + "Context:\n" + context_text
+        
+        # For images-only mode with no text prompt, use a minimal prompt
+        if prompt_mode == 'images_only':
+            # If user provided a prompt, use it; otherwise use a default
+            if not prompt.strip():
+                full_prompt = "Please describe what you see in these images."
+            
+            # Images-only should NOT include text context
+            self.twf_task.text += "Images-only mode: Using only images without text context.\n"
+        
+        # Call the API
         response, elapsed_time = self.client.prompt(model=self.credentials['default_model'],
-                                                    prompt=prompt)
+                                                   prompt=full_prompt)
         response_dict = response.to_dict()
+
+        # Clear image resources from client after use
+        if hasattr(self.client, 'clear_image_resources'):
+            self.client.clear_image_resources()
 
         self.end_task(ai_result=response_dict)
 

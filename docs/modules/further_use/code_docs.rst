@@ -15,6 +15,7 @@ This is the source code documentation for the TWF project.
    source_doc/forms.rst
    source_doc/tables.rst
    source_doc/tasks.rst
+   source_doc/task_triggers.rst
    source_doc/templates.rst
    source_doc/templatetags.rst
    source_doc/utils.rst

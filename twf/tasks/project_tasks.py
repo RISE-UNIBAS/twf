@@ -149,9 +149,13 @@ def query_project_openai(self, project_id, user_id, **kwargs):
 
     doc_ids = kwargs.pop('documents')
     documents = self.project.documents.filter(pk__in=doc_ids)
+    
+    # Get the prompt mode (defaults to text_only if not provided)
+    prompt_mode = kwargs.pop('prompt_mode', 'text_only')
 
     self.process_single_ai_request(documents, 'openai',
-                                   kwargs['prompt'], kwargs['role_description'], 'openai')
+                                  kwargs['prompt'], kwargs['role_description'], 'openai',
+                                  prompt_mode=prompt_mode)
 
 
 @shared_task(bind=True, base=BaseTWFTask)
@@ -161,9 +165,13 @@ def query_project_gemini(self, project_id, user_id, **kwargs):
 
     doc_ids = kwargs.pop('documents')
     documents = self.project.documents.filter(pk__in=doc_ids)
+    
+    # Get the prompt mode (defaults to text_only if not provided)
+    prompt_mode = kwargs.pop('prompt_mode', 'text_only')
 
     self.process_single_ai_request(documents, 'genai',
-                                   kwargs['prompt'], kwargs['role_description'], 'gemini')
+                                  kwargs['prompt'], kwargs['role_description'], 'gemini',
+                                  prompt_mode=prompt_mode)
 
 
 @shared_task(bind=True, base=BaseTWFTask)
@@ -173,9 +181,20 @@ def query_project_claude(self, project_id, user_id, **kwargs):
 
     doc_ids = kwargs.pop('documents')
     documents = self.project.documents.filter(pk__in=doc_ids)
+    
+    # Get the prompt mode (defaults to text_only if not provided)
+    prompt_mode = kwargs.pop('prompt_mode', 'text_only')
+    
+    # Note about Claude's image support (currently not supported)
+    if prompt_mode in ['images_only', 'text_and_images']:
+        self.twf_task.text += "Note: Claude support for images has been disabled in this version.\n"
+    
+    # Force text-only mode for Claude
+    prompt_mode = 'text_only'
 
     self.process_single_ai_request(documents, 'anthropic',
-                                   kwargs['prompt'], kwargs['role_description'], 'claude')
+                                  kwargs['prompt'], kwargs['role_description'], 'claude',
+                                  prompt_mode=prompt_mode)
 
 
 @shared_task(bind=True, base=BaseTWFTask)
@@ -185,6 +204,17 @@ def query_project_mistral(self, project_id, user_id, **kwargs):
 
     doc_ids = kwargs.pop('documents')
     documents = self.project.documents.filter(pk__in=doc_ids)
+    
+    # Get the prompt mode (defaults to text_only if not provided)
+    prompt_mode = kwargs.pop('prompt_mode', 'text_only')
+    
+    # Note about Mistral's image support (currently not supported)
+    if prompt_mode in ['images_only', 'text_and_images']:
+        self.twf_task.text += "Note: Mistral does not currently support image inputs. Using text-only mode.\n"
+    
+    # Force text-only mode for Mistral
+    prompt_mode = 'text_only'
 
     self.process_single_ai_request(documents, 'mistral',
-                                   kwargs['prompt'], kwargs['role_description'], 'mistral')
+                                  kwargs['prompt'], kwargs['role_description'], 'mistral',
+                                  prompt_mode=prompt_mode)

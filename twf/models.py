@@ -601,6 +601,48 @@ class Page(TimeStampedModel):
                 anno_types.append(el_type)
 
         return ret_items
+            
+    def get_image_url(self, scale_percent=None):
+        """
+        Get the URL to the page image with optional scaling.
+        
+        This method retrieves the image URL from the page's parsed data and 
+        optionally applies scaling using the IIIF protocol. This is particularly
+        useful for multimodal AI prompts where you may want to optimize image
+        size for better API performance or to stay within usage limitations.
+        
+        The scaled image maintains the same aspect ratio as the original but
+        is resized to the specified percentage of its original dimensions.
+        
+        Args:
+            scale_percent (int, optional): Percentage to scale the image (1-100).
+                                         If None, returns the original URL without scaling.
+        
+        Returns:
+            str: URL to the page image (either original or scaled via IIIF),
+                 or None if no image URL is available for this page.
+                 
+        Example:
+            >>> page = Page.objects.get(pk=123)
+            >>> # Get full resolution image URL
+            >>> original_url = page.get_image_url()
+            >>> # Get image scaled to 50% of original size
+            >>> scaled_url = page.get_image_url(scale_percent=50)
+        """
+        try:
+            if 'file' not in self.parsed_data or 'imgUrl' not in self.parsed_data['file']:
+                return None
+                
+            image_url = self.parsed_data['file']['imgUrl']
+            
+            # Return original URL if no scaling requested
+            if scale_percent is None:
+                return image_url
+                
+            # Apply scaling via IIIF
+            return tk_iiif_url(image_url, image_size=f'pct:{scale_percent}')
+        except Exception:
+            return None
 
     def __str__(self):
         return f"Page {self.tk_page_number} of {self.document.document_id}"

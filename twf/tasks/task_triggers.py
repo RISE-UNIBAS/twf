@@ -434,47 +434,131 @@ def start_copy_project(request):
 
 
 def start_query_project_openai(request):
+    """
+    Trigger an OpenAI query task for the project.
+    
+    This function extracts parameters from the request and starts a Celery task
+    to process a query using OpenAI models. It supports multimodal prompts with
+    both text and images.
+    
+    Args:
+        request (HttpRequest): The request object containing POST data
+        
+    Returns:
+        JsonResponse: Response with task_id for tracking progress
+        
+    Post Parameters:
+        prompt (str): The text prompt to send to the model
+        prompt_mode (str): One of "text_only", "images_only", or "text_and_images"
+        role_description (str): System role description for the AI
+        documents (list): List of document IDs to include in the query
+    """
     prompt = request.POST.get('prompt')
+    prompt_mode = request.POST.get('prompt_mode')
     role_description = request.POST.get('role_description')
     documents = request.POST.getlist('documents')
 
     return trigger_task(request, query_project_openai,
                         prompt=prompt,
                         role_description=role_description,
-                        documents=documents)
+                        documents=documents,
+                        prompt_mode=prompt_mode)
 
 
 def start_query_project_gemini(request):
+    """
+    Trigger a Google Gemini query task for the project.
+    
+    This function extracts parameters from the request and starts a Celery task
+    to process a query using Google Gemini models. It supports multimodal prompts
+    with both text and images.
+    
+    Args:
+        request (HttpRequest): The request object containing POST data
+        
+    Returns:
+        JsonResponse: Response with task_id for tracking progress
+        
+    Post Parameters:
+        prompt (str): The text prompt to send to the model
+        prompt_mode (str): One of "text_only", "images_only", or "text_and_images"
+        role_description (str): System role description for the AI
+        documents (list): List of document IDs to include in the query
+    """
     prompt = request.POST.get('prompt')
+    prompt_mode = request.POST.get('prompt_mode')
     role_description = request.POST.get('role_description')
     documents = request.POST.getlist('documents')
 
     return trigger_task(request, query_project_gemini,
                         prompt=prompt,
                         role_description=role_description,
-                        documents=documents)
+                        documents=documents,
+                        prompt_mode=prompt_mode)
 
 
 def start_query_project_claude(request):
+    """
+    Trigger an Anthropic Claude query task for the project.
+    
+    This function extracts parameters from the request and starts a Celery task
+    to process a query using Anthropic Claude models. Note that while the prompt_mode
+    parameter is accepted, Claude currently falls back to text-only mode.
+    
+    Args:
+        request (HttpRequest): The request object containing POST data
+        
+    Returns:
+        JsonResponse: Response with task_id for tracking progress
+        
+    Post Parameters:
+        prompt (str): The text prompt to send to the model
+        prompt_mode (str): Currently only "text_only" is fully supported
+        role_description (str): System role description for the AI
+        documents (list): List of document IDs to include in the query
+    """
     prompt = request.POST.get('prompt')
+    prompt_mode = request.POST.get('prompt_mode', 'text_only')
     role_description = request.POST.get('role_description')
     documents = request.POST.getlist('documents')
 
     return trigger_task(request, query_project_claude,
                         prompt=prompt,
                         role_description=role_description,
-                        documents=documents)
+                        documents=documents,
+                        prompt_mode=prompt_mode)
 
 
 def start_query_project_mistral(request):
+    """
+    Trigger a Mistral query task for the project.
+    
+    This function extracts parameters from the request and starts a Celery task
+    to process a query using Mistral models. Note that while the prompt_mode
+    parameter is accepted, Mistral currently falls back to text-only mode.
+    
+    Args:
+        request (HttpRequest): The request object containing POST data
+        
+    Returns:
+        JsonResponse: Response with task_id for tracking progress
+        
+    Post Parameters:
+        prompt (str): The text prompt to send to the model
+        prompt_mode (str): Currently only "text_only" is fully supported
+        role_description (str): System role description for the AI
+        documents (list): List of document IDs to include in the query
+    """
     prompt = request.POST.get('prompt')
+    prompt_mode = request.POST.get('prompt_mode', 'text_only')
     role_description = request.POST.get('role_description')
     documents = request.POST.getlist('documents')
 
     return trigger_task(request, query_project_mistral,
                         prompt=prompt,
                         role_description=role_description,
-                        documents=documents)
+                        documents=documents,
+                        prompt_mode=prompt_mode)
 
 
 def start_export_documents(request):

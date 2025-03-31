@@ -1,0 +1,152 @@
+{% extends 'twf/base/base.html' %}
+{% load twf_filters %}
+
+{% block page_title %}
+    <h1>Task Details: {{ task.title }}</h1>
+{% endblock %}
+
+{% block content %}
+    <div class="row mb-4">
+        <div class="col-12">
+            <a href="{% url 'twf:project_task_monitor' %}" class="btn btn-outline-dark">
+                <i class="fas fa-arrow-left"></i> Back to Task Monitor
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header bg-dark text-white">
+                    <h5 class="mb-0">Basic Information</h5>
+                </div>
+                <div class="card-body">
+                    <dl class="row">
+                        <dt class="col-sm-4">Title</dt>
+                        <dd class="col-sm-8">{{ task.title }}</dd>
+                        
+                        <dt class="col-sm-4">Status</dt>
+                        <dd class="col-sm-8">
+                            {% if task.status == "SUCCESS" %}
+                                <span class="badge bg-success">Success</span>
+                            {% elif task.status == "FAILURE" %}
+                                <span class="badge bg-danger">Failed</span>
+                            {% elif task.status == "STARTED" %}
+                                <span class="badge bg-info">In Progress</span>
+                            {% elif task.status == "CANCELED" %}
+                                <span class="badge bg-dark">Cancelled</span>
+                            {% else %}
+                                <span class="badge bg-secondary">{{ task.status }}</span>
+                            {% endif %}
+                        </dd>
+                        
+                        <dt class="col-sm-4">Started By</dt>
+                        <dd class="col-sm-8">{{ task.user }}</dd>
+                        
+                        <dt class="col-sm-4">Start Time</dt>
+                        <dd class="col-sm-8">{{ task.start_time|date:"Y-m-d H:i:s" }}</dd>
+                        
+                        <dt class="col-sm-4">End Time</dt>
+                        <dd class="col-sm-8">
+                            {% if task.end_time %}
+                                {{ task.end_time|date:"Y-m-d H:i:s" }}
+                            {% else %}
+                                <span class="text-muted">N/A</span>
+                            {% endif %}
+                        </dd>
+                        
+                        <dt class="col-sm-4">Duration</dt>
+                        <dd class="col-sm-8">
+                            {% if duration %}
+                                {{ duration }}
+                            {% else %}
+                                <span class="text-muted">N/A</span>
+                            {% endif %}
+                        </dd>
+                        
+                        <dt class="col-sm-4">Progress</dt>
+                        <dd class="col-sm-8">
+                            {% if task.status == "STARTED" %}
+                                <div class="progress" style="height: 20px;">
+                                    <div class="progress-bar progress-bar-striped progress-bar-animated bg-dark" 
+                                        role="progressbar" style="width: {{ task.progress }}%">{{ task.progress }}%</div>
+                                </div>
+                            {% else %}
+                                <div class="progress" style="height: 20px;">
+                                    <div class="progress-bar bg-dark" 
+                                        role="progressbar" style="width: {{ task.progress }}%">{{ task.progress }}%</div>
+                                </div>
+                            {% endif %}
+                        </dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header bg-dark text-white">
+                    <h5 class="mb-0">Task Description</h5>
+                </div>
+                <div class="card-body">
+                    {% if task.description %}
+                        <p>{{ task.description }}</p>
+                    {% else %}
+                        <p class="text-muted">No description available.</p>
+                    {% endif %}
+                </div>
+            </div>
+            
+            {% if meta_items %}
+            <div class="card mb-4">
+                <div class="card-header bg-dark text-white">
+                    <h5 class="mb-0">Task Metadata</h5>
+                </div>
+                <div class="card-body">
+                    <dl class="row">
+                        {% for item in meta_items %}
+                            <dt class="col-sm-4">{{ item.key|title }}</dt>
+                            <dd class="col-sm-8">{{ item.value }}</dd>
+                        {% endfor %}
+                    </dl>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <div class="card mb-4">
+        <div class="card-header bg-dark text-white">
+            <h5 class="mb-0">Task Output Log</h5>
+        </div>
+        <div class="card-body">
+            {% if task.text %}
+                <pre class="p-3 bg-light">{{ task.text }}</pre>
+            {% else %}
+                <p class="text-muted">No task output available.</p>
+            {% endif %}
+        </div>
+    </div>
+    
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="btn-group" role="group">
+                {% if task.status == "STARTED" or task.status == "PENDING" or task.status == "PROGRESS" %}
+                    <a href="#" class="btn btn-warning show-confirm-modal me-2" 
+                       data-redirect-url="{% url 'twf:celery_task_cancel' task_id=task.id %}"
+                       data-message="Are you sure you want to cancel this task? This will interrupt any ongoing processing.">
+                        <i class="fas fa-ban"></i> Cancel Task
+                    </a>
+                {% endif %}
+                
+                {% if task.status == "SUCCESS" or task.status == "FAILURE" or task.status == "CANCELED" %}
+                    <a href="#" class="btn btn-danger show-danger-modal" 
+                       data-redirect-url="{% url 'twf:celery_task_remove' task_id=task.id %}"
+                       data-message="Are you sure you want to remove this task? This action cannot be undone.">
+                        <i class="fas fa-trash"></i> Remove Task
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+{% endblock %}

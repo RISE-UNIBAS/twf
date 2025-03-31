@@ -20,9 +20,11 @@ class ExportTable(tables.Table):
 
     def render_actions(self, record):
         return format_html(
-            '<a href="{}" class="btn btn-sm btn-primary me-1" download>'
+            '<a href="{}" class="btn btn-sm btn-dark me-1" download>'
             '<i class="fa fa-download"></i> Download</a>'
-            '<a href="/exports/{}/delete" class="btn btn-sm btn-danger">'
+            '<a href="#" class="btn btn-sm btn-danger show-danger-modal" '
+            'data-redirect-url="/exports/{}/delete" '
+            'data-message="Are you sure you want to delete this export?">'
             '<i class="fa fa-trash"></i> Delete</a>',
             record.export_file.url,
             record.pk

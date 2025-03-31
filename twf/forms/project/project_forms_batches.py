@@ -2,7 +2,7 @@ from crispy_forms.layout import Row, Column
 from django import forms
 from django_select2.forms import Select2MultipleWidget
 
-from twf.forms.base_batch_forms import BaseBatchForm, BaseAIBatchForm
+from twf.forms.base_batch_forms import BaseBatchForm, BaseAIBatchForm, BaseMultiModalAIBatchForm
 from twf.models import Document
 
 
@@ -36,8 +36,8 @@ class ProjectCopyBatchForm(BaseBatchForm):
         return []
 
 
-class ProjectAIBaseForm(BaseAIBatchForm):
-    """Form for querying the AI model with a question and documents."""
+class ProjectAIBaseForm(BaseMultiModalAIBatchForm):
+    """Form for querying the AI model with a question, documents, and optional images."""
 
     documents = forms.ModelMultipleChoiceField(label='Documents', required=True,
                                                help_text='Please select the documents to query.',
@@ -45,6 +45,8 @@ class ProjectAIBaseForm(BaseAIBatchForm):
                                                queryset=Document.objects.none())
 
     def __init__(self, *args, **kwargs):
+        # Default to False - provider-specific forms will override as needed
+        kwargs.setdefault('multimodal_support', False)
         super().__init__(*args, **kwargs)
         self.fields['documents'].queryset = Document.objects.filter(project=self.project)
 
@@ -62,8 +64,13 @@ class ProjectAIBaseForm(BaseAIBatchForm):
         return 'Cancel'
 
 
-
 class OpenAIQueryDatabaseForm(ProjectAIBaseForm):
+    """Form for querying OpenAI models (supports multimodal with GPT-4 Vision)."""
+
+    def __init__(self, *args, **kwargs):
+        # OpenAI supports multimodal 
+        kwargs['multimodal_support'] = True
+        super().__init__(*args, **kwargs)
 
     def get_button_label(self):
         """Get the label for the submit button."""
@@ -71,15 +78,39 @@ class OpenAIQueryDatabaseForm(ProjectAIBaseForm):
 
 
 class GeminiQueryDatabaseForm(ProjectAIBaseForm):
+    """Form for querying Google Gemini models (supports multimodal)."""
+
+    def __init__(self, *args, **kwargs):
+        # Gemini supports multimodal
+        kwargs['multimodal_support'] = True
+        super().__init__(*args, **kwargs)
 
     def get_button_label(self):
         """Get the label for the submit button."""
         return 'Ask Gemini'
 
 
-
 class ClaudeQueryDatabaseForm(ProjectAIBaseForm):
+    """Form for querying Anthropic Claude models (text-only for now)."""
+
+    def __init__(self, *args, **kwargs):
+        # Temporarily disable multimodal for Claude
+        kwargs['multimodal_support'] = False 
+        super().__init__(*args, **kwargs)
 
     def get_button_label(self):
         """Get the label for the submit button."""
         return 'Ask Claude'
+
+
+class MistralQueryDatabaseForm(ProjectAIBaseForm):
+    """Form for querying Mistral models (text-only for now)."""
+
+    def __init__(self, *args, **kwargs):
+        # Mistral doesn't support multimodal
+        kwargs['multimodal_support'] = False
+        super().__init__(*args, **kwargs)
+
+    def get_button_label(self):
+        """Get the label for the submit button."""
+        return 'Ask Mistral'
