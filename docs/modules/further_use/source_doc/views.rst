@@ -38,6 +38,117 @@ For image-based workflows, the system can automatically select relevant images f
 the project's documents and include them in the prompt in the appropriate format
 for each AI provider.
 
+AIFormView Base Class
+~~~~~~~~~~~~~~~~~~~~
+
+The `AIFormView` base class provides the foundation for all AI-related views, including multimodal support:
+
+.. code-block:: python
+
+    class AIFormView(TWFFormView):
+        """
+        Base class for views that interact with AI services.
+        
+        This class provides common functionality for all AI views, including
+        multimodal support for combining text and images in prompts.
+        """
+        
+        template_name = "twf/project/query/query.html"
+        
+        def get_form_kwargs(self):
+            """Add multimodal support flag to form kwargs if this provider supports images."""
+            kwargs = super().get_form_kwargs()
+            
+            # Check if this AI provider supports multimodal
+            provider = self.get_provider_name()
+            kwargs['multimodal_support'] = provider in ['openai', 'claude', 'gemini']
+            
+            return kwargs
+            
+        def form_valid(self, form):
+            """Process the form submission and start AI task."""
+            # Extract form data
+            prompt = form.cleaned_data.get('prompt')
+            role_description = form.cleaned_data.get('role_description')
+            documents = form.cleaned_data.get('documents')
+            
+            # Get multimodal mode if available
+            prompt_mode = form.cleaned_data.get('prompt_mode', 'text_only')
+            
+            # Start the appropriate AI task with multimodal params
+            task_func = self.get_task_function()
+            task_func(
+                prompt=prompt,
+                role_description=role_description,
+                documents=documents,
+                prompt_mode=prompt_mode
+            )
+            
+            return redirect('project_task_monitor')
+
+Provider-Specific Views
+~~~~~~~~~~~~~~~~~~~~~
+
+Each AI provider has its own specific view that extends the base functionality:
+
+.. code-block:: python
+
+    class OpenAIQueryView(AIFormView):
+        """View for OpenAI queries with multimodal support."""
+        form_class = OpenAIQueryForm
+        template_name = "twf/project/query/openai.html"
+        
+        def get_context_data(self, **kwargs):
+            context = super().get_context_data(**kwargs)
+            context['provider_name'] = 'OpenAI'
+            context['supports_multimodal'] = True
+            context['multimodal_info'] = 'GPT-4 Vision supports images in prompts'
+            return context
+            
+        def get_task_function(self):
+            return start_query_project_openai
+            
+    class ClaudeQueryView(AIFormView):
+        """View for Anthropic Claude queries with multimodal support."""
+        form_class = ClaudeQueryForm
+        template_name = "twf/project/query/claude.html"
+        
+        def get_context_data(self, **kwargs):
+            context = super().get_context_data(**kwargs)
+            context['provider_name'] = 'Claude'
+            context['supports_multimodal'] = True
+            context['multimodal_info'] = 'Claude 3 supports images in prompts'
+            return context
+            
+        def get_task_function(self):
+            return start_query_project_claude
+
+Template Structure
+~~~~~~~~~~~~~~~~
+
+The AI view templates include support for selecting the multimodal prompt mode:
+
+.. code-block:: html
+
+    <!-- Multimodal mode selection -->
+    {% if form.prompt_mode %}
+    <div class="mb-3">
+        <label class="form-label">{{ form.prompt_mode.label }}</label>
+        <div class="form-text mb-2">{{ form.prompt_mode.help_text }}</div>
+        
+        <div class="btn-group" role="group">
+            {% for radio in form.prompt_mode %}
+            <div class="form-check form-check-inline">
+                {{ radio.tag }}
+                <label class="form-check-label" for="{{ radio.id_for_label }}">
+                    {{ radio.choice_label }}
+                </label>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
 .. toctree::
    :maxdepth: 1
    :caption: Views modules
@@ -51,4 +162,3 @@ for each AI provider.
    views/dictionaries.rst
    views/collections.rst
    views/export.rst
-
