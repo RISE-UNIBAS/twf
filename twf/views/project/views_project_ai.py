@@ -1,4 +1,11 @@
-""" Views for the AI model. """
+"""
+Views for AI model interactions.
+
+This module contains views for interacting with various AI providers,
+including OpenAI, Google Gemini, Anthropic Claude, and Mistral.
+These views support both text-only and multimodal (text + images) interactions.
+"""
+
 from django.urls import reverse_lazy
 
 from twf.forms.project.project_forms_batches import OpenAIQueryDatabaseForm, GeminiQueryDatabaseForm, \
@@ -8,7 +15,12 @@ from twf.views.views_base import AIFormView
 
 
 class TWFProjectAIQueryView(AIFormView, TWFProjectView):
-    """View for querying the AI model."""
+    """
+    View for querying OpenAI models.
+    
+    This view provides an interface for querying OpenAI models with
+    both text-only and multimodal (text + images) capabilities.
+    """
     template_name = 'twf/project/query/openai.html'
     page_title = 'Ask ChatGPT'
     form_class = OpenAIQueryDatabaseForm
@@ -17,6 +29,17 @@ class TWFProjectAIQueryView(AIFormView, TWFProjectView):
     message = "Do you want to go ahead and ask ChatGPT this question?"
 
     def get_context_data(self, **kwargs):
+        """
+        Get the context data for the template.
+        
+        This method adds OpenAI-specific context data, including multimodal support information.
+        
+        Args:
+            **kwargs: Arbitrary keyword arguments.
+            
+        Returns:
+            dict: The context data.
+        """
         context = super().get_context_data(**kwargs)
         context['ai_heading'] = self.page_title
         context['ai_lead'] = 'Use OpenAI models to answer questions about your documents. GPT-4 Vision models support both text and images.'
@@ -28,6 +51,12 @@ class TWFProjectAIQueryView(AIFormView, TWFProjectView):
 
 
 class TWFProjectGeminiQueryView(AIFormView, TWFProjectView):
+    """
+    View for querying Google Gemini models.
+    
+    This view provides an interface for querying Google Gemini models with
+    native multimodal (text + images) capabilities.
+    """
     template_name = 'twf/project/query/gemini.html'
     page_title = 'Ask Gemini'
     form_class = GeminiQueryDatabaseForm
@@ -36,6 +65,17 @@ class TWFProjectGeminiQueryView(AIFormView, TWFProjectView):
     message = "Are you sure you want to start the Gemini task?"
 
     def get_context_data(self, **kwargs):
+        """
+        Get the context data for the template.
+        
+        This method adds Gemini-specific context data, including multimodal support information.
+        
+        Args:
+            **kwargs: Arbitrary keyword arguments.
+            
+        Returns:
+            dict: The context data.
+        """
         context = super().get_context_data(**kwargs)
         context['ai_heading'] = self.page_title
         context['ai_lead'] = ('Query Google Gemini models for predictions. '
@@ -48,6 +88,13 @@ class TWFProjectGeminiQueryView(AIFormView, TWFProjectView):
 
 
 class TWFProjectClaudeQueryView(AIFormView, TWFProjectView):
+    """
+    View for querying Anthropic Claude models.
+    
+    This view provides an interface for querying Claude models.
+    Multimodal support is temporarily disabled but will be enabled
+    for Claude 3 models in a future update.
+    """
     template_name = 'twf/project/query/claude.html'
     page_title = 'Ask Claude'
     form_class = ClaudeQueryDatabaseForm
@@ -56,6 +103,17 @@ class TWFProjectClaudeQueryView(AIFormView, TWFProjectView):
     message = "Are you sure you want to start the Claude task?"
 
     def get_context_data(self, **kwargs):
+        """
+        Get the context data for the template.
+        
+        This method adds Claude-specific context data, including multimodal support information.
+        
+        Args:
+            **kwargs: Arbitrary keyword arguments.
+            
+        Returns:
+            dict: The context data.
+        """
         context = super().get_context_data(**kwargs)
         context['ai_heading'] = self.page_title
         context['ai_lead'] = ('Query Claude models for predictions. '
@@ -69,6 +127,12 @@ class TWFProjectClaudeQueryView(AIFormView, TWFProjectView):
 
 
 class TWFProjectMistralQueryView(AIFormView, TWFProjectView):
+    """
+    View for querying Mistral models.
+    
+    This view provides an interface for querying Mistral models,
+    which currently only support text-only inputs.
+    """
     template_name = 'twf/project/query/mistral.html'
     page_title = 'Ask Mistral'
     form_class = MistralQueryDatabaseForm  # This is the text-only form
@@ -77,6 +141,17 @@ class TWFProjectMistralQueryView(AIFormView, TWFProjectView):
     message = "Are you sure you want to start the Mistral task?"
 
     def get_context_data(self, **kwargs):
+        """
+        Get the context data for the template.
+        
+        This method adds Mistral-specific context data, including multimodal support information.
+        
+        Args:
+            **kwargs: Arbitrary keyword arguments.
+            
+        Returns:
+            dict: The context data.
+        """
         context = super().get_context_data(**kwargs)
         context['ai_heading'] = self.page_title
         context['ai_lead'] = ('Query Mistral models for predictions. '

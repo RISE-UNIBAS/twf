@@ -1,4 +1,14 @@
-"""Task base functions. Functions to start, update, end, and fail tasks."""
+"""
+Task base functions and classes for the TWF application.
+
+This module provides the foundational infrastructure for task management in the TWF application,
+including task lifecycle management (start, update, progress tracking, and completion),
+error handling, and specialized support for AI processing tasks including multimodal 
+(text + images) capabilities.
+
+The primary class, BaseTWFTask, extends Celery's Task class with TWF-specific tracking,
+reporting, and AI interaction capabilities.
+"""
 import time
 import traceback
 import logging
@@ -14,7 +24,25 @@ logger = logging.getLogger(__name__)
 
 
 class BaseTWFTask(CeleryTask):
-    """Base task for all TWF Celery tasks."""
+    """
+    Base task class for all TWF Celery tasks.
+    
+    This class extends Celery's Task class with TWF-specific functionality for managing
+    the task lifecycle, tracking progress, handling errors, and interacting with AI providers.
+    It provides specialized methods for AI processing, including multimodal content
+    (text + images) where supported by the provider.
+    
+    Key features:
+    - Task progress tracking and reporting through the database
+    - Standardized task creation and completion handling
+    - AI provider integration with consistent interface
+    - Support for text-only and multimodal (text + images) AI requests
+    - Automatic image selection and scaling for multimodal prompts
+    
+    Each task instance creates and updates a Task object in the database to track its
+    status, progress, and results. This enables real-time monitoring of long-running
+    background tasks through the web interface.
+    """
     
     # Standard descriptions for common task types
     TASK_DESCRIPTIONS = {
@@ -202,7 +230,27 @@ class BaseTWFTask(CeleryTask):
             self.twf_task.save(update_fields=["progress", "title"])
 
     def process_ai_request(self, items, client_name, prompt, role_description, metadata_field):
-        """Generalized function to process AI requests for multiple items."""
+        """
+        Generalized function to process text-only AI requests for multiple items.
+        
+        This method handles sending text-only requests to AI providers for a batch of items.
+        It tracks progress, manages the AI client, and stores results in each item's metadata.
+        
+        Unlike process_single_ai_request, this method does not support multimodal content
+        (text + images) and is designed for batch processing rather than single queries.
+        Each item is processed individually with its own context.
+        
+        Args:
+            items (QuerySet): Collection of items to process (documents, collection items, etc.)
+            client_name (str): The name of the AI provider to use ('openai', 'genai', etc.) 
+            prompt (str): The text prompt to send to the model
+            role_description (str): System role description for the AI model
+            metadata_field (str): Field name for storing results in each item's metadata
+            
+        Note:
+            For multimodal processing of a single query with images, use 
+            process_single_ai_request with an appropriate prompt_mode instead.
+        """
         # Set up the task with detailed tracking information
         total_items = len(items)
         self.set_total_items(total_items)
@@ -277,7 +325,11 @@ class BaseTWFTask(CeleryTask):
         
         For image-based modes, the method automatically selects up to 5 images per document 
         from the provided items. Images are retrieved directly from the Transkribus server
-        using their URLs rather than downloading them locally first.
+        using their URLs rather than downloading them locally first. The images are scaled
+        to 50% of their original size to reduce bandwidth usage and improve processing time.
+        
+        The method handles provider capability detection and automatic fallback to text-only
+        mode when needed, ensuring graceful degradation when an unsupported feature is requested.
         
         Args:
             items (QuerySet): The document items to process. These should have a get_text() method
@@ -290,9 +342,19 @@ class BaseTWFTask(CeleryTask):
             prompt_mode (str): One of "text_only", "images_only", or "text_and_images".
                               Defaults to "text_only".
         
+        Technical Details:
+            - Image resources are added to the AI client via the add_image_resource() method
+            - For OpenAI and Gemini, images are sent as URLs in the prompt content
+            - The document's pages are accessed via the pages relation (item.pages.all())
+            - Images are retrieved via the Page model's get_image_url() method with scale_percent=50
+            - For images-only mode with no text, a default prompt is used if none is provided
+            - Images are cleared from the client after use with clear_image_resources()
+            
         Note:
             If a client doesn't support images but an image mode is requested, the method
-            will automatically fall back to text-only mode with an appropriate warning.
+            will automatically fall back to text-only mode with an appropriate warning in
+            the task log. Similarly, if images-only mode is selected but no images are found,
+            it will fall back to text-only mode.
         """
         self.set_total_items(1)
         self.create_configured_client(client_name, role_description)
@@ -465,11 +527,24 @@ class BaseTWFTask(CeleryTask):
         instance of AiApiClient. The client is configured with the specified
         provider, API key, and role description.
         
+        For multimodal functionality, the client initialization sets up the foundation,
+        but additional configuration happens in process_single_ai_request based on
+        the prompt_mode parameter:
+        - For text_only mode: No additional configuration needed
+        - For images_only or text_and_images modes: Image resources are added using
+          the add_image_resource method if the provider supports images
+        
         Args:
             client_name (str): The name of the AI provider to use
                               ('openai', 'genai', 'anthropic', or 'mistral')
             role_description (str): System role description for the AI model
             
+        Provider-Specific Details:
+            - OpenAI: Configured for multimodal support with vision models
+            - Google Gemini: Configured for multimodal support with vision models
+            - Claude & Mistral: Currently configured for text-only support,
+              with automatic fallback for multimodal requests
+              
         Note:
             The created client is stored in self.client and can be used by other
             methods to interact with the AI provider.
@@ -482,15 +557,16 @@ class BaseTWFTask(CeleryTask):
 
     def prompt_client(self, item, prompt):
         """
-        Send a prompt to the AI model with context from a specific item.
+        Send a text-only prompt to the AI model with context from a specific item.
         
         This is a helper method that constructs a prompt with context from a single
         item (like a document or collection item) and sends it to the currently
         configured AI client. The item's text content is appended to the prompt
         as context.
         
-        Note that this method does not handle images - for multimodal prompts,
-        use process_single_ai_request with an appropriate prompt_mode.
+        This method is specifically for text-only prompts and does not handle images.
+        For multimodal prompts that include images, use process_single_ai_request with
+        an appropriate prompt_mode instead.
         
         Args:
             item: An item with a get_text() method (Document, CollectionItem, etc.)
@@ -499,6 +575,16 @@ class BaseTWFTask(CeleryTask):
         Returns:
             tuple: (response_dict, elapsed_time) containing the parsed response
                   from the AI model and the time taken to receive it
+                  
+        Related Methods:
+            - For multimodal processing, see process_single_ai_request instead
+            - For batch processing, see process_ai_request
+            
+        Technical Details:
+            - Uses the AI client configured in create_configured_client
+            - Adds text context from the item using its get_text() method
+            - Does not support images or other media types
+            - Returns the response in a standardized dictionary format
         """
         context = item.get_text()
         prompt = prompt + "\n\n" + "Context:\n" + context

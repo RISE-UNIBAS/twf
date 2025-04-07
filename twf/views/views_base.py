@@ -1,4 +1,10 @@
-"""Base views for all views."""
+"""
+Base views for all TWF views.
+
+This module contains the base view classes used throughout the application,
+including the foundation for AI interactions with both text-only and 
+multimodal (text + images) capabilities.
+"""
 from abc import ABC, abstractmethod
 
 from django.contrib import messages
@@ -13,18 +19,44 @@ from twf.models import Project
 
 
 class TWFView(TemplateView, ABC):
-    """Base view for all views."""
+    """
+    Base view for all TWF views.
+    
+    This abstract base class provides common functionality for all views in the TWF application,
+    including project context, navigation, breadcrumbs, and help content integration.
+    """
     project_required = True
     page_title = None
     navigation_anchor = None
     show_context_help = True  # Flag to control visibility of the context help button
 
     def __init__(self, *args, **kwargs):
+        """
+        Initialize the TWF view.
+        
+        Args:
+            *args: Variable length argument list.
+            **kwargs: Arbitrary keyword arguments.
+                page_title: The title of the page.
+        """
         super().__init__(*args, **kwargs)
         if self.page_title is None:
             self.page_title = kwargs.get('page_title', None)
 
     def dispatch(self, request, *args, **kwargs):
+        """
+        Dispatch the request.
+        
+        This method checks if a project is required and set before proceeding.
+        
+        Args:
+            request: The HTTP request.
+            *args: Variable length argument list.
+            **kwargs: Arbitrary keyword arguments.
+            
+        Returns:
+            HttpResponse: The HTTP response.
+        """
         if self.project_required:
             project = self.get_project()
             if project is None:
@@ -33,21 +65,47 @@ class TWFView(TemplateView, ABC):
         return super().dispatch(request, *args, **kwargs)
 
     def is_project_set(self):
-        """Check if a project is set."""
+        """
+        Check if a project is set.
+        
+        Returns:
+            bool: True if a project is set, False otherwise.
+        """
         return self.s_is_project_set(self.request)
 
     @staticmethod
     def s_is_project_set(request):
-        """Check if a project is set."""
+        """
+        Check if a project is set (static method).
+        
+        Args:
+            request: The HTTP request.
+            
+        Returns:
+            bool: True if a project is set, False otherwise.
+        """
         return request.session.get('project_id', None) is not None
 
     def get_project(self):
-        """Get the project."""
+        """
+        Get the current project.
+        
+        Returns:
+            Project: The current project or None if not set.
+        """
         return self.s_get_project(self.request)
 
     @staticmethod
     def s_get_project(request):
-        """Get the project."""
+        """
+        Get the current project (static method).
+        
+        Args:
+            request: The HTTP request.
+            
+        Returns:
+            Project: The current project or None if not set.
+        """
         project = None
         if TWFView.s_is_project_set(request):
             project_id = request.session.get('project_id')
@@ -58,7 +116,12 @@ class TWFView(TemplateView, ABC):
         return project
 
     def get_breadcrumbs(self):
-        """Get the breadcrumbs."""
+        """
+        Get the breadcrumbs for the current page.
+        
+        Returns:
+            list: A list of breadcrumb items, each with 'url' and 'value' keys.
+        """
         breadcrumbs = [
             {'url': reverse('twf:home'), 'value': '<i class="fas fa-home"></i>'},
         ]
@@ -75,7 +138,12 @@ class TWFView(TemplateView, ABC):
         return breadcrumbs
 
     def get_navigation_items(self):
-        """Get the navigation items."""
+        """
+        Get the main navigation items.
+        
+        Returns:
+            list: A list of navigation items, each with 'url' and 'value' keys.
+        """
         if not self.is_project_set():
             return [
                 {'url': reverse('twf:home'), 'value': 'Home', 'active': True},
@@ -95,16 +163,40 @@ class TWFView(TemplateView, ABC):
 
     @abstractmethod
     def get_sub_navigation(self):
-        """Get the sub navigation."""
+        """
+        Get the sub-navigation items.
+        
+        This method must be implemented by subclasses.
+        
+        Returns:
+            list: A list of sub-navigation items.
+        """
         pass
 
     @abstractmethod
     def get_navigation_index(self):
-        """Get the index of the navigation item."""
+        """
+        Get the index of the active navigation item.
+        
+        This method must be implemented by subclasses.
+        
+        Returns:
+            int: The index of the active navigation item.
+        """
         pass
 
     def get_context_data(self, **kwargs):
-        """Add the project and tag types to the context."""
+        """
+        Get the context data for the template.
+        
+        This method adds common context data like project, navigation, breadcrumbs, etc.
+        
+        Args:
+            **kwargs: Arbitrary keyword arguments.
+            
+        Returns:
+            dict: The context data.
+        """
         context = super().get_context_data(**kwargs)
 
         context.update(
@@ -131,6 +223,16 @@ class TWFView(TemplateView, ABC):
 
 
 def help_content(request, view_name):
+    """
+    Get the help content for a specific view.
+    
+    Args:
+        request: The HTTP request.
+        view_name: The name of the view to get help content for.
+        
+    Returns:
+        HttpResponse: The HTML content for the help overlay.
+    """
     template_path = f"twf/help/{view_name}.html"
     try:
         template = get_template(template_path)
@@ -149,6 +251,13 @@ class AIFormView(FormView):
     1. Proper form initialization with project context
     2. AI credential validation 
     3. Task URL and confirmation message setup
+    4. Support for multimodal (text + images) capabilities
+    
+    The multimodal support allows:
+    - Configuring forms with provider-specific multimodal capabilities
+    - Handling different prompt modes (text-only, images-only, text+images)
+    - Automating the collection and processing of document images
+    - Providing appropriate context data for the template
     
     When extended by specific AI provider views (like TWFProjectOpenAIView),
     it configures the appropriate form with the project's credentials and
@@ -166,14 +275,15 @@ class AIFormView(FormView):
         Prepare keyword arguments for the form initialization.
         
         This method extends the standard form kwargs with project-specific
-        information and AI task configuration parameters. These kwargs are
-        passed to the form's __init__ method.
+        information and AI task configuration parameters. For multimodal forms,
+        it can also pass the multimodal_support flag based on the provider.
         
         Returns:
             dict: Dictionary of keyword arguments for the form, including:
                 - project: The current Project object
                 - data-start-url: URL to start the AI task
                 - data-message: Confirmation message to display
+                - multimodal_support: (Optional) Boolean indicating multimodal support
         """
         kwargs = super().get_form_kwargs()
         kwargs['project'] = self.get_project()
@@ -186,6 +296,9 @@ class AIFormView(FormView):
     def get_ai_credentials(self, client_name):
         """
         Get the AI credentials for a specific provider from the project.
+        
+        This method retrieves the credentials needed to interact with the specified
+        AI provider, including API keys and default model settings.
         
         Args:
             client_name (str): The name of the AI provider to get credentials for
@@ -205,7 +318,8 @@ class AIFormView(FormView):
         Check if valid AI credentials are set for a specific provider.
         
         This method verifies that both an API key and a default model are
-        configured for the specified AI provider.
+        configured for the specified AI provider. It's used to determine
+        if the AI provider can be used for queries.
         
         Args:
             client_name (str): The name of the AI provider to check
@@ -223,3 +337,44 @@ class AIFormView(FormView):
                 return True
 
         return False
+        
+    def get_provider_name(self):
+        """
+        Get the name of the AI provider for this view.
+        
+        This method should be overridden by provider-specific views to return
+        the appropriate provider name.
+        
+        Returns:
+            str: The name of the AI provider ('openai', 'claude', 'gemini', 'mistral')
+        """
+        return None
+        
+    def get_task_function(self):
+        """
+        Get the task function to call when the form is submitted.
+        
+        This method should be overridden by provider-specific views to return
+        the appropriate task function.
+        
+        Returns:
+            function: The task function to call
+        """
+        return None
+        
+    def form_valid(self, form):
+        """
+        Process the valid form submission.
+        
+        This method is called when the form has been successfully validated.
+        It extracts the form data and starts the appropriate AI task.
+        For multimodal forms, it includes the prompt_mode parameter.
+        
+        Args:
+            form: The validated form.
+            
+        Returns:
+            HttpResponse: The HTTP response, usually a redirect to the task monitor.
+        """
+        # This method should be implemented by provider-specific views
+        return super().form_valid(form)

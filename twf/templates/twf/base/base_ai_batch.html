@@ -57,10 +57,151 @@
                     <div class="card-header">AI Result</div>
                     <div class="card-body">
                         <pre class="json-output"><code>${formattedJSON}</code></pre>
+                        <div class="mt-3 text-end">
+                            <button id="save_as_note_btn" class="btn btn-sm btn-secondary">
+                                <i class="fa fa-save me-1"></i> Save as Note
+                            </button>
+                        </div>
                     </div>
                 </div>`;
 
             $("#ai_result").html(aiResultHTML);
+            
+            // Attach event handler for the save as note button
+            attachSaveAsNoteHandler();
+        }
+        
+        function attachSaveAsNoteHandler() {
+            $("#save_as_note_btn").off('click').on('click', function() {
+                // Get the AI result content
+                let aiResultContent = getAIResultContent();
+                if (aiResultContent) {
+                    saveAIResultAsNote(aiResultContent);
+                } else {
+                    console.error("No AI result content found");
+                }
+            });
+        }
+        
+        function getAIResultContent() {
+            // This is a base implementation that can be overridden in child templates
+            
+            // First, check if there's a model-specific result container
+            const claudeResult = $(".claude-result").text();
+            if (claudeResult) {
+                return claudeResult;
+            }
+            
+            const geminiResult = $(".gemini-result").text();
+            if (geminiResult) {
+                return geminiResult;
+            }
+            
+            const openaiResult = $(".openai-result").text();
+            if (openaiResult) {
+                return openaiResult;
+            }
+            
+            const mistralResult = $(".mistral-result").text();
+            if (mistralResult) {
+                return mistralResult;
+            }
+            
+            // Fallback to checking the json-output
+            const jsonOutput = $(".json-output").text();
+            if (jsonOutput) {
+                try {
+                    // Try to parse it as JSON and extract common result patterns
+                    const data = JSON.parse(jsonOutput);
+                    // Different AI services might return results in different formats
+                    if (data.content && data.content[0] && data.content[0].text) {
+                        return data.content[0].text; // Claude format
+                    } else if (data.text) {
+                        return data.text; // Some APIs return direct text
+                    } else if (data.choices && data.choices[0] && data.choices[0].message) {
+                        return data.choices[0].message.content; // OpenAI format
+                    } else {
+                        // Fallback to the entire JSON
+                        return jsonOutput;
+                    }
+                } catch (e) {
+                    // If it's not valid JSON, just return the text
+                    return jsonOutput;
+                }
+            }
+            return null;
+        }
+        
+        function saveAIResultAsNote(aiResult) {
+            // Show a spinner to indicate processing
+            $("#save_as_note_btn").html('<i class="fa fa-spinner fa-spin"></i> Saving...');
+            $("#save_as_note_btn").prop('disabled', true);
+            
+            fetch('{% url "twf:ajax_save_ai_result_as_note" %}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken'),
+                },
+                body: JSON.stringify({
+                    ai_result: aiResult
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Show success message
+                    $("#save_as_note_btn").html('<i class="fa fa-check"></i> Saved');
+                    $("#save_as_note_btn").removeClass('btn-secondary').addClass('btn-success');
+                    
+                    // Reset button after 2 seconds
+                    setTimeout(function() {
+                        $("#save_as_note_btn").html('<i class="fa fa-save me-1"></i> Save as Note');
+                        $("#save_as_note_btn").removeClass('btn-success').addClass('btn-secondary');
+                        $("#save_as_note_btn").prop('disabled', false);
+                    }, 2000);
+                } else {
+                    // Show error message
+                    $("#save_as_note_btn").html('<i class="fa fa-times"></i> Error');
+                    $("#save_as_note_btn").removeClass('btn-secondary').addClass('btn-danger');
+                    console.error("Error saving note:", data.error);
+                    
+                    // Reset button after 2 seconds
+                    setTimeout(function() {
+                        $("#save_as_note_btn").html('<i class="fa fa-save me-1"></i> Save as Note');
+                        $("#save_as_note_btn").removeClass('btn-danger').addClass('btn-secondary');
+                        $("#save_as_note_btn").prop('disabled', false);
+                    }, 2000);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                $("#save_as_note_btn").html('<i class="fa fa-times"></i> Error');
+                $("#save_as_note_btn").removeClass('btn-secondary').addClass('btn-danger');
+                
+                // Reset button after 2 seconds
+                setTimeout(function() {
+                    $("#save_as_note_btn").html('<i class="fa fa-save me-1"></i> Save as Note');
+                    $("#save_as_note_btn").removeClass('btn-danger').addClass('btn-secondary');
+                    $("#save_as_note_btn").prop('disabled', false);
+                }, 2000);
+            });
+        }
+        
+        // Helper function to get CSRF token
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
         }
     </script>
 {% endblock %}

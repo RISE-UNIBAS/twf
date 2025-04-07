@@ -1,3 +1,10 @@
+"""
+Base forms for batch processing in TWF.
+
+This module contains the base form classes used for various batch processing operations,
+including AI interactions with both text-only and multimodal (text + images) capabilities.
+"""
+
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Row, Column, HTML, Div, Button
 from django import forms
@@ -6,13 +13,34 @@ from twf.models import Prompt, Page
 
 
 class BaseBatchForm(forms.Form):
-    """ Base form for batches of dictionaries. """
+    """
+    Base form for batch processing operations.
+    
+    This abstract class provides the foundation for all batch processing forms in TWF,
+    including progress tracking, task control, and consistent UI elements.
+    """
 
     project = None
     task_data = {}
     progress_details = forms.CharField(label='Progress', required=False)
 
     def __init__(self, *args, **kwargs):
+        """
+        Initialize the batch form.
+        
+        Args:
+            *args: Variable length argument list.
+            **kwargs: Arbitrary keyword arguments.
+                project: The project instance (required).
+                data-start-url: The URL to start the task.
+                data-message: Confirmation message when starting the task.
+                data-progress-url-base: Base URL for progress updates.
+                data-progress-bar-id: ID of the progress bar element.
+                data-log-textarea-id: ID of the log textarea element.
+        
+        Raises:
+            ValueError: If project is not provided.
+        """
         self.project = kwargs.pop('project', None)
 
         self.task_data['data-start-url'] = kwargs.pop('data-start-url', None)
@@ -75,25 +103,54 @@ class BaseBatchForm(forms.Form):
         )
 
     def get_button_label(self):
-        """Get the label for the submit button."""
+        """
+        Get the label for the submit button.
+        
+        Returns:
+            str: The button label.
+        """
         return 'Start Batch'
 
     def get_cancel_button_label(self):
-        """Get the label for the submit button."""
-        return 'Start Batch'
+        """
+        Get the label for the cancel button.
+        
+        Returns:
+            str: The cancel button label.
+        """
+        return 'Cancel'
 
     def get_dynamic_fields(self):
-        """Get the dynamic fields for the form."""
+        """
+        Get the dynamic fields for the form.
+        
+        This method should be overridden by subclasses to add form-specific fields.
+        
+        Returns:
+            list: A list of form field layouts.
+        """
         return []
 
 
 class BaseAIBatchForm(BaseBatchForm):
-    """ Base form for AI batches. """
+    """
+    Base form for AI batch operations.
+    
+    This class extends the base batch form with fields and functionality
+    specific to AI operations, including prompts and role descriptions.
+    """
 
     class Meta:
         js = ('twf/js/ai_prompt_manager.js',)
 
     def __init__(self, *args, **kwargs):
+        """
+        Initialize the AI batch form.
+        
+        Args:
+            *args: Variable length argument list.
+            **kwargs: Arbitrary keyword arguments.
+        """
         super().__init__(*args, **kwargs)
 
         self.fields['role_description'] = forms.CharField(label='Role Description', required=True)
@@ -103,7 +160,12 @@ class BaseAIBatchForm(BaseBatchForm):
                                                               required=False)
 
     def get_dynamic_fields(self):
-        """Get the dynamic fields for the form."""
+        """
+        Get the dynamic fields for the AI form.
+        
+        Returns:
+            list: A list of form field layouts including AI-specific fields.
+        """
         button_html = """
          <div class="mt-4">
             <button type="button" id="loadPrompt" class="btn btn-sm btn-dark"
@@ -131,7 +193,12 @@ class BaseAIBatchForm(BaseBatchForm):
 
 
 class BaseMultiModalAIBatchForm(BaseAIBatchForm):
-    """ Base form for AI batches with multimodal capabilities. """
+    """
+    Base form for AI batches with multimodal capabilities.
+    
+    This class extends the AI batch form with additional fields and functionality
+    to support multimodal (text + images) interactions with AI providers.
+    """
 
     class Meta:
         js = ('twf/js/ai_prompt_manager.js',)
@@ -144,6 +211,15 @@ class BaseMultiModalAIBatchForm(BaseAIBatchForm):
     ]
 
     def __init__(self, *args, **kwargs):
+        """
+        Initialize the multimodal AI batch form.
+        
+        Args:
+            *args: Variable length argument list.
+            **kwargs: Arbitrary keyword arguments.
+                multimodal_support (bool): Whether this form should include multimodal fields.
+                                           Defaults to True.
+        """
         # Get the multimodal_support parameter and remove it from kwargs
         self.multimodal_support = kwargs.pop('multimodal_support', True)
         
@@ -163,7 +239,12 @@ class BaseMultiModalAIBatchForm(BaseAIBatchForm):
             # we'll automatically select up to 5 images per document
 
     def get_dynamic_fields(self):
-        """Get the dynamic fields for the form including multimodal fields if supported."""
+        """
+        Get the dynamic fields for the form including multimodal fields if supported.
+        
+        Returns:
+            list: A list of form field layouts including multimodal-specific fields if supported.
+        """
         fields = super().get_dynamic_fields()
         
         if self.multimodal_support:

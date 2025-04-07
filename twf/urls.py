@@ -6,6 +6,7 @@ from twf.tasks.task_status import task_status_view, task_cancel_view, task_remov
 from twf.tasks.task_triggers import *
 from twf.views.ajax.views_ajax_field_validation import validate_page_field, validate_document_field
 from twf.views.ajax.views_ajax_markdown import ajax_markdown_generate, ajax_markdown_preview
+from twf.views.ajax.views_ajax_notes import save_ai_result_as_note
 from twf.views.ajax.views_ajax_prompts import load_prompt, save_prompt, get_prompts
 from twf.views.ajax.views_ajax_transkribus_export import ajax_transkribus_request_export, \
     ajax_transkribus_reset_export, ajax_transkribus_request_export_status
@@ -350,6 +351,7 @@ urlpatterns = [
     path('ajax/load/prompt/', load_prompt, name='ajax_load_prompt'),
     path('ajax/save/prompt/', save_prompt, name='ajax_save_prompt'),
     path('ajax/get/prompts/', get_prompts, name='ajax_get_prompts'),
+    path('ajax/save/ai_result_as_note/', save_ai_result_as_note, name='ajax_save_ai_result_as_note'),
 
     #############################
     # METADATA

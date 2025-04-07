@@ -1,4 +1,16 @@
-"""This module contains the views for triggering the Celery tasks."""
+"""
+This module contains the functions for triggering Celery tasks in the TWF application.
+
+The functions in this module handle the extraction of parameters from HTTP requests,
+the validation of those parameters, and the triggering of appropriate Celery tasks.
+They serve as the bridge between the web interface and the background task processing system.
+
+Key features:
+- Standardized task triggering through the trigger_task helper function
+- Support for various AI operations (OpenAI, Gemini, Claude, Mistral)
+- Specialized handlers for multimodal content (text + images) in project queries
+- Comprehensive support for dictionary, document, collection, and export tasks
+"""
 import os
 import uuid
 from pathlib import Path
@@ -28,7 +40,22 @@ from twf.tasks.export_tasks import export_documents_task, export_collections_tas
 from twf.views.views_base import TWFView
 
 def trigger_task(request, task_function, *args, **kwargs):
-    """Trigger a task and return a JSON response with the task ID."""
+    """
+    Trigger a Celery task and return a JSON response with the task ID.
+    
+    This is a helper function used by all task trigger handlers to standardize
+    the process of starting a background task. It extracts the current project
+    and user from the request, passes them to the task along with any additional
+    arguments, and returns a standardized JSON response for AJAX handling.
+    
+    Args:
+        request (HttpRequest): The HTTP request object
+        task_function (function): The Celery task function to call
+        *args, **kwargs: Additional positional and keyword arguments to pass to the task
+        
+    Returns:
+        JsonResponse: A JSON response containing the task ID for client-side tracking
+    """
     project = TWFView.s_get_project(request)
     user_id = request.user.id
 
@@ -435,11 +462,20 @@ def start_copy_project(request):
 
 def start_query_project_openai(request):
     """
-    Trigger an OpenAI query task for the project.
+    Trigger an OpenAI query task for the project with multimodal support.
     
     This function extracts parameters from the request and starts a Celery task
-    to process a query using OpenAI models. It supports multimodal prompts with
-    both text and images.
+    to process a query using OpenAI models. It fully supports multimodal prompts with
+    both text and images through OpenAI's vision capabilities.
+    
+    The function passes the prompt_mode parameter to control how content is sent:
+    - text_only: Only text content from documents is included
+    - images_only: Only images from documents are included with minimal text
+    - text_and_images: Both document text and images are included
+    
+    For image-based modes, the task will automatically select up to 5 representative
+    images from each document, using the Page model's get_image_url method with 50%
+    scaling to optimize for performance.
     
     Args:
         request (HttpRequest): The request object containing POST data
@@ -452,6 +488,12 @@ def start_query_project_openai(request):
         prompt_mode (str): One of "text_only", "images_only", or "text_and_images"
         role_description (str): System role description for the AI
         documents (list): List of document IDs to include in the query
+        
+    Technical Details:
+        - Uses OpenAI's GPT-4 Vision capabilities (or compatible models)
+        - Images are sent via URLs directly to OpenAI, not uploaded first
+        - Transkribus server provides the images through its API
+        - IIIF protocol is used for image scaling when available
     """
     prompt = request.POST.get('prompt')
     prompt_mode = request.POST.get('prompt_mode')
@@ -467,11 +509,20 @@ def start_query_project_openai(request):
 
 def start_query_project_gemini(request):
     """
-    Trigger a Google Gemini query task for the project.
+    Trigger a Google Gemini query task for the project with multimodal support.
     
     This function extracts parameters from the request and starts a Celery task
-    to process a query using Google Gemini models. It supports multimodal prompts
-    with both text and images.
+    to process a query using Google Gemini models. It fully supports multimodal prompts
+    with both text and images through Gemini's vision capabilities.
+    
+    The function passes the prompt_mode parameter to control how content is sent:
+    - text_only: Only text content from documents is included
+    - images_only: Only images from documents are included with minimal text
+    - text_and_images: Both document text and images are included
+    
+    For image-based modes, the task will automatically select up to 5 representative
+    images from each document, using the Page model's get_image_url method with 50%
+    scaling to optimize for performance.
     
     Args:
         request (HttpRequest): The request object containing POST data
@@ -484,6 +535,12 @@ def start_query_project_gemini(request):
         prompt_mode (str): One of "text_only", "images_only", or "text_and_images"
         role_description (str): System role description for the AI
         documents (list): List of document IDs to include in the query
+        
+    Technical Details:
+        - Uses Google's Gemini Pro Vision capabilities (or compatible models)
+        - Images are downloaded from their URLs before being sent to Gemini
+        - Transkribus server provides the images through its API
+        - IIIF protocol is used for image scaling when available
     """
     prompt = request.POST.get('prompt')
     prompt_mode = request.POST.get('prompt_mode')
@@ -499,11 +556,16 @@ def start_query_project_gemini(request):
 
 def start_query_project_claude(request):
     """
-    Trigger an Anthropic Claude query task for the project.
+    Trigger an Anthropic Claude query task for the project (text-only).
     
     This function extracts parameters from the request and starts a Celery task
     to process a query using Anthropic Claude models. Note that while the prompt_mode
-    parameter is accepted, Claude currently falls back to text-only mode.
+    parameter is accepted for API consistency, Claude implementation currently
+    falls back to text-only mode regardless of the setting.
+    
+    The function takes the same parameters as other AI query functions for consistency,
+    but internally it will convert any multimodal requests to text-only with an
+    appropriate warning message in the task log.
     
     Args:
         request (HttpRequest): The request object containing POST data
@@ -513,9 +575,15 @@ def start_query_project_claude(request):
         
     Post Parameters:
         prompt (str): The text prompt to send to the model
-        prompt_mode (str): Currently only "text_only" is fully supported
+        prompt_mode (str): Parameter accepted but internally converted to "text_only"
         role_description (str): System role description for the AI
         documents (list): List of document IDs to include in the query
+        
+    Implementation Notes:
+        - Future versions may support multimodal content when Claude API adds this capability
+        - The UI indicates this limitation to users through context variables
+        - The task handling automatically converts multimodal requests to text-only
+          with appropriate warnings
     """
     prompt = request.POST.get('prompt')
     prompt_mode = request.POST.get('prompt_mode', 'text_only')
@@ -531,11 +599,16 @@ def start_query_project_claude(request):
 
 def start_query_project_mistral(request):
     """
-    Trigger a Mistral query task for the project.
+    Trigger a Mistral query task for the project (text-only).
     
     This function extracts parameters from the request and starts a Celery task
     to process a query using Mistral models. Note that while the prompt_mode
-    parameter is accepted, Mistral currently falls back to text-only mode.
+    parameter is accepted for API consistency, Mistral implementation currently
+    falls back to text-only mode regardless of the setting.
+    
+    The function takes the same parameters as other AI query functions for consistency,
+    but internally it will convert any multimodal requests to text-only with an
+    appropriate warning message in the task log.
     
     Args:
         request (HttpRequest): The request object containing POST data
@@ -545,9 +618,15 @@ def start_query_project_mistral(request):
         
     Post Parameters:
         prompt (str): The text prompt to send to the model
-        prompt_mode (str): Currently only "text_only" is fully supported
+        prompt_mode (str): Parameter accepted but internally converted to "text_only"
         role_description (str): System role description for the AI
         documents (list): List of document IDs to include in the query
+        
+    Implementation Notes:
+        - Future versions may support multimodal content when Mistral API adds this capability
+        - The UI indicates this limitation to users through context variables
+        - The task handling automatically converts multimodal requests to text-only
+          with appropriate warnings
     """
     prompt = request.POST.get('prompt')
     prompt_mode = request.POST.get('prompt_mode', 'text_only')
