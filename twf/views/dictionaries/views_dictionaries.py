@@ -198,6 +198,8 @@ class TWFDictionaryDictionaryView(SingleTableView, FilterView, TWFDictionaryView
 
     template_name = 'twf/dictionaries/dictionary.html'
     page_title = 'View Dictionary'
+    navigation_anchor = reverse_lazy("twf:dictionaries")
+
     table_class = DictionaryEntryTable
     filterset_class = DictionaryEntryFilter
     paginate_by = 10
@@ -224,6 +226,22 @@ class TWFDictionaryDictionaryView(SingleTableView, FilterView, TWFDictionaryView
         context['filter'] = self.get_filterset(self.filterset_class)
         return context
 
+    def get_breadcrumbs(self):
+        """Get the breadcrumbs for dictionary entry view."""
+        # Start with home and dictionaries section
+        breadcrumbs = [
+            {'url': reverse('twf:home'), 'value': '<i class="fas fa-home"></i>'},
+            {'url': reverse('twf:dictionaries'), 'value': 'Dictionaries'},
+        ]
+
+        # Get the entry and its dictionary
+        dictionary = Dictionary.objects.get(pk=self.kwargs.get('pk'))
+        breadcrumbs.append({
+            'url': reverse('twf:dictionaries_view', args=[dictionary.pk]),
+            'value': dictionary.label
+        })
+        return breadcrumbs
+
 
 class TWFDictionaryDictionaryEntryView(SingleTableView, TWFDictionaryView):
     """View for a single dictionary entry."""
@@ -231,6 +249,7 @@ class TWFDictionaryDictionaryEntryView(SingleTableView, TWFDictionaryView):
     template_name = 'twf/dictionaries/dictionary_entry.html'
     page_title = 'View Dictionary Entry'
     table_class = DictionaryEntryVariationTable
+    navigation_anchor = reverse_lazy("twf:dictionaries")
 
     def get_queryset(self):
         """Get the queryset."""
@@ -241,6 +260,38 @@ class TWFDictionaryDictionaryEntryView(SingleTableView, TWFDictionaryView):
         self.object_list = self.get_queryset()
         context = self.get_context_data()
         return self.render_to_response(context)
+    
+    def get_breadcrumbs(self):
+        """Get the breadcrumbs for dictionary entry view."""
+        # Start with home and dictionaries section
+        breadcrumbs = [
+            {'url': reverse('twf:home'), 'value': '<i class="fas fa-home"></i>'},
+            {'url': reverse('twf:dictionaries'), 'value': 'Dictionaries'},
+        ]
+        
+        # Get the entry and its dictionary
+        entry = self.get_entry()
+        if entry:
+            # Add the dictionary to the breadcrumbs
+            breadcrumbs.append({
+                'url': reverse('twf:dictionaries_view', args=[entry.dictionary.pk]),
+                'value': entry.dictionary.label
+            })
+            
+            # Add the entry itself
+            breadcrumbs.append({
+                'url': self.request.path,
+                'value': f"Entry: {entry.label}"
+            })
+        
+        return breadcrumbs
+    
+    def get_entry(self):
+        """Get the dictionary entry."""
+        try:
+            return DictionaryEntry.objects.get(pk=self.kwargs.get('pk'))
+        except DictionaryEntry.DoesNotExist:
+            return None
 
     def get_context_data(self, **kwargs):
         """Get the context data."""
@@ -248,8 +299,7 @@ class TWFDictionaryDictionaryEntryView(SingleTableView, TWFDictionaryView):
         table = self.table_class(self.object_list, project=self.get_project())
         context['table'] = table
 
-        context['page_title'] = self.page_title
-        context['entry'] = DictionaryEntry.objects.get(pk=self.kwargs.get('pk'))
+        context['entry'] = self.get_entry()
         return context
 
 
@@ -260,6 +310,7 @@ class TWFDictionaryDictionaryEditView(FormView, TWFDictionaryView):
     page_title = 'Edit Dictionary'
     form_class = DictionaryForm
     success_url = reverse_lazy('twf:dictionaries')
+    navigation_anchor = reverse_lazy("twf:dictionaries")
 
     def get_context_data(self, **kwargs):
         """Get the context data."""
@@ -409,19 +460,57 @@ class TWFDictionaryDictionaryEntryEditView(FormView, TWFDictionaryView):
     page_title = 'Edit Dictionary Entry'
     form_class = DictionaryEntryForm
     success_url = reverse_lazy('twf:dictionaries')
+    navigation_anchor = reverse_lazy("twf:dictionaries")
 
     def get_form_kwargs(self):
         """Get the form kwargs."""
         kwargs = super().get_form_kwargs()
         if self.kwargs.get('pk'):
-            kwargs['instance'] = DictionaryEntry.objects.get(pk=self.kwargs.get('pk'))
+            kwargs['instance'] = self.get_entry()
         return kwargs
+    
+    def get_entry(self):
+        """Get the dictionary entry."""
+        try:
+            return DictionaryEntry.objects.get(pk=self.kwargs.get('pk'))
+        except DictionaryEntry.DoesNotExist:
+            return None
+    
+    def get_breadcrumbs(self):
+        """Get the breadcrumbs for dictionary entry edit view."""
+        # Start with home and dictionaries section
+        breadcrumbs = [
+            {'url': reverse('twf:home'), 'value': '<i class="fas fa-home"></i>'},
+            {'url': reverse('twf:dictionaries_overview'), 'value': 'Dictionaries'},
+        ]
+        
+        # Get the entry and its dictionary
+        entry = self.get_entry()
+        if entry:
+            # Add the dictionary to the breadcrumbs
+            breadcrumbs.append({
+                'url': reverse('twf:dictionaries_view', args=[entry.dictionary.pk]),
+                'value': entry.dictionary.label
+            })
+            
+            # Add the entry view as another level
+            breadcrumbs.append({
+                'url': reverse('twf:dictionaries_entry_view', args=[entry.pk]),
+                'value': entry.label
+            })
+            
+            # Add the edit page
+            breadcrumbs.append({
+                'url': self.request.path,
+                'value': 'Edit'
+            })
+        
+        return breadcrumbs
 
     def get_context_data(self, **kwargs):
         """Get the context data."""
         context = super().get_context_data(**kwargs)
-        context['page_title'] = self.page_title
-        context['entry'] = DictionaryEntry.objects.get(pk=self.kwargs.get('pk')) if self.kwargs.get('pk') else None
+        context['entry'] = self.get_entry()
         return context
 
     def form_valid(self, form):
@@ -445,7 +534,11 @@ class TWFDictionaryDictionaryEntryEditView(FormView, TWFDictionaryView):
             # Add a success message
             messages.success(self.request, 'Dictionary Entry settings have been updated successfully.')
 
-            # Redirect to the success URL
+            # Redirect to the dictionary view page instead of the dictionaries list
+            if form.instance.pk:
+                return redirect('twf:dictionaries_entry_view', pk=form.instance.pk)
+            
+            # Fallback to the success URL if something went wrong
             return super().form_valid(form)
 
         # If neither button matches, fallback to the default behavior

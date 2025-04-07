@@ -36,27 +36,21 @@ class DictionaryEntryForm(forms.ModelForm):
 
     class Meta:
         model = DictionaryEntry
-        fields = ['label', 'notes', 'metadata']
-        widgets = {
-            'metadata': JSONEditor(attrs={
-                'style': 'min-height: 400px;'  # Set your desired minimum height here
-            })
-        }
+        fields = ['label', 'notes']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.helper = FormHelper()
         self.helper.layout = Layout(
             Row(
-                Column('label', css_class='form-group col-md-6 mb-0'),
-                Column('notes', css_class='form-group col-md-6 mb-0'),
+                Column('label', css_class='form-group col-12 mb-0'),
                 css_class='row form-row'
             ),
             Row(
-                Column('metadata', css_class='form-group col-md-12 mb-0'),
+                Column('notes', css_class='form-group col-12 mb-0'),
+                css_class='row form-row'
             ),
             Div(
-                Submit('delete_entry', 'Delete Dictionary Entry', css_class='btn btn-danger'),
                 Submit('save_entry', 'Save Dictionary Entry', css_class='btn btn-dark'),
                 css_class='text-end pt-3'
             )

@@ -1,32 +1,147 @@
 {% extends 'twf/base/base.html' %}
 {% load crispy_forms_tags %}
+{% load twf_renders %}
 
 {% block page_title %}
-    <h1>Edit {{ entry.label }}</h1>
+    <div class="d-flex justify-content-between align-items-center">
+        <h1>Edit Dictionary Entry: "{{ entry.label }}"</h1>
+        <div>
+            <a href="{% url 'twf:dictionaries_entry_view' entry.pk %}" class="btn btn-sm btn-dark">
+                <i class="fa fa-eye"></i> View
+            </a>
+            <a href="#" class="btn btn-sm btn-danger show-danger-modal"
+                data-redirect-url="{% url 'twf:dictionaries_entry_view' entry.pk %}"
+                data-message="Are you sure you want to delete this entry? This action cannot be undone.">
+                <i class="fa fa-trash"></i> Delete
+            </a>
+            <a href="{% url 'twf:dictionaries_view' entry.dictionary.pk %}" class="btn btn-sm btn-secondary">
+                <i class="fa fa-arrow-left"></i> Back to Dictionary
+            </a>
+        </div>
+    </div>
 {% endblock %}
 
 {% block content %}
-    <div class="container">
-        <table class="table">
-            <thead>
-                <tr>
-                    <th scope="col">Variation</th>
-                    <th scope="col">Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for variation in entry.variations.all %}
-                    <tr>
-                        <td>{{ variation }}</td>
-                        <td>
-                            <a href="{% url 'twf:dictionaries_delete_variation' variation.pk %}" class="btn btn-outline-danger">Delete</a>
-                        </td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+
+    <div class="row">
+        <div class="col-6">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Entry Details</h5>
+                </div>
+                <div class="card-body">
+                    {% crispy form %}
+                </div>
+            </div>
+        </div>
+        <div class="col-6">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Variations</h5>
+                </div>
+                <div class="card-body">
+                    {% if entry.variations.all %}
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hover">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">Variation</th>
+                                        <th scope="col" width="15%">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for variation in entry.variations.all %}
+                                        <tr>
+                                            <td>{{ variation }}</td>
+                                            <td>
+                                                <a href="#" class="btn btn-sm btn-danger show-danger-modal"
+                                                   data-redirect-url="{% url 'twf:dictionaries_delete_variation' variation.pk %}"
+                                                   data-message="Are you sure you want to delete this variation? This action cannot be undone.">
+                                                    <i class="fa fa-trash"></i> Delete
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="alert alert-info">
+                            No variations found for this dictionary entry.
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="card-footer d-flex justify-content-between align-items-center">
+                     <button type="button" class="btn btn-sm btn-dark" id="addVariationBtn" disabled title="This feature is not yet implemented">
+                        <i class="fa fa-plus"></i> Add Variation
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Metadata</h5>
+                </div>
+                <div class="card-body">
+                    {% render_metadata entry %}
+                </div>
+            </div>
+        </div>
     </div>
 
-    {% crispy form %}
-    
+    <!-- Add Variation Modal -->
+    <div class="modal fade" id="addVariationModal" tabindex="-1" aria-labelledby="addVariationModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addVariationModalLabel">Add Variation</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="variationInput" class="form-label">Variation Text</label>
+                        <input type="text" class="form-control" id="variationInput" placeholder="Enter variation text">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-dark" id="saveVariationBtn">Add Variation</button>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block script %}
+<script>
+    $(document).ready(function() {
+        // Add Variation button click
+        $("#addVariationBtn").click(function() {
+            $('#addVariationModal').modal('show');
+        });
+        
+        // For now, this is just a placeholder as we don't have an endpoint to handle the variation creation
+        // In a real implementation, you would send an AJAX request to create the variation
+        $("#saveVariationBtn").click(function() {
+            let variationText = $("#variationInput").val().trim();
+            if (variationText) {
+                // In real implementation, send this to the server
+                alert("This is a placeholder. In a real implementation, this would create a new variation: " + variationText);
+                $('#addVariationModal').modal('hide');
+            } else {
+                alert("Please enter a variation text");
+            }
+        });
+        
+        // Make metadata JSON editor look better
+        setTimeout(function() {
+            // Apply some styling fixes after the editor loads
+            $(".jsoneditor-poweredBy").hide(); // Hide the powered by message
+            $(".jsoneditor").css("border", "1px solid #ced4da"); // Match Bootstrap form styling
+        }, 500);
+    });
+</script>
 {% endblock %}

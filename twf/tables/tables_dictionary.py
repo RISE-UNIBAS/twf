@@ -40,17 +40,19 @@ class DictionaryTable(tables.Table):
         )
 
     def render_options(self, record):
+        from django.urls import reverse
+        
         return format_html(
             '{} {}',
             format_html(
-                '<a href="/dictionaries/{}/edit" class="btn btn-sm btn-dark me-1" title="Edit">'
-                '<i class="fa fa-pen"></i></a>',
-                record.pk
+                '<a href="{}" class="btn btn-sm btn-dark me-1" title="View">'
+                '<i class="fa fa-eye"></i></a>',
+                reverse('twf:dictionaries_view', args=[record.pk])
             ),
             format_html(
-                '<a href="/dictionaries/{}/delete" class="btn btn-sm btn-danger" title="Delete">'
-                '<i class="fa fa-trash"></i></a>',
-                record.pk
+                '<a href="{}" class="btn btn-sm btn-dark me-1" title="Edit">'
+                '<i class="fa fa-pen"></i></a>',
+                reverse('twf:dictionaries_edit', args=[record.pk])
             )
         )
 
@@ -67,14 +69,14 @@ class DictionaryEntryTable(tables.Table):
     """Table for displaying dictionary entries."""
     variations = tables.Column(verbose_name="Variations", orderable=False)
     metadata = tables.Column(verbose_name="Norm Data", orderable=False)
-    options = tables.TemplateColumn(template_name='twf/tables/dictionary_entry_table_options.html',
-                                    verbose_name="Options", orderable=False, attrs={"td": {"width": "10%"}})
+    options = tables.Column(empty_values=(), verbose_name="Options", orderable=False)
 
     class Meta:
         """Meta class for the DictionaryEntryTable."""
         model = DictionaryEntry
         template_name = "django_tables2/bootstrap.html"  # Using Bootstrap template
         fields = ("label", )
+        attrs = {"class": "table table-striped table-hover table-sm"}
 
     def render_variations(self, record):
         """Renders the variations column with a delete button for each variation."""
@@ -85,6 +87,22 @@ class DictionaryEntryTable(tables.Table):
             html += record_html.format(var.variation)
 
         return mark_safe(html)
+    
+    def render_metadata(self, record):
+        """Renders the metadata column with truncated content."""
+        if not record.metadata:
+            return "—"
+            
+        # Convert to string and truncate if necessary
+        metadata_str = str(record.metadata)
+        if len(metadata_str) > 100:
+            metadata_str = metadata_str[:97] + "..."
+            
+        return format_html(
+            '<span title="{}">{}</span>',
+            str(record.metadata).replace('"', '&quot;'),  # Escape quotes for the title attribute
+            metadata_str
+        )
 
     def render_label(self, value, record):
         """Renders the label column with the label and the type of the dictionary."""
@@ -92,21 +110,40 @@ class DictionaryEntryTable(tables.Table):
         return mark_safe(f"<strong>{value}</strong><br/>"
                          f"<span class='small text-muted'>ID: {record.id}</span><br/>"
                          f"<span class='small text-muted'>{record.modified_by}, {formatted_date}</span>")
+                         
+    def render_options(self, record):
+        """Renders the actions column with buttons."""
+        from django.urls import reverse
+        
+        return format_html(
+            '{} {}',
+            format_html(
+                '<a href="{}" class="btn btn-sm btn-dark me-1" title="View">'
+                '<i class="fa fa-eye"></i></a>',
+                reverse('twf:dictionaries_entry_view', args=[record.pk])
+            ),
+            format_html(
+                '<a href="{}" class="btn btn-sm btn-dark me-1" title="Edit">'
+                '<i class="fa fa-pen"></i></a>',
+                reverse('twf:dictionaries_entry_edit', args=[record.pk])
+            )
+        )
 
 
 class DictionaryEntryVariationTable(tables.Table):
-    """Table for displaying dictionary entries."""
+    """Table for displaying dictionary entry variations."""
 
-    information = tables.Column(accessor="id", verbose_name="Options", orderable=False, attrs={"td": {"width": "10%"}})
+    information = tables.Column(accessor="id", verbose_name="Usages", orderable=False)
+    options = tables.Column(empty_values=(), verbose_name="Options", orderable=False)
 
     def __init__(self, *args, **kwargs):
         self.project = kwargs.pop("project", None)
         super().__init__(*args, **kwargs)
 
-    from django.urls import reverse
-
     def render_information(self, value, record):
-        """Renders the information column with the number of entries and the number of variations."""
+        """Renders the information column with usage statistics."""
+        from django.urls import reverse
+        
         variation_usage_count = PageTag.objects.filter(
             page__document__project=self.project, variation=record.variation
         ).count()
@@ -123,13 +160,41 @@ class DictionaryEntryVariationTable(tables.Table):
             f'<a href="{reverse("twf:view_document", args=[doc.pk])}">{doc.title or doc.document_id}</a>'
             for doc in documents
         )
-
-        return mark_safe(
-            f"Usages: {variation_usage_count} <br/> Documents: {document_links}"
+        
+        # Truncate document links if they're too long
+        if len(document_links) > 100:
+            # This is a simplification; in real life we might want to keep complete links
+            truncated_links = "Multiple documents"
+            return format_html(
+                '<span title="{}">Usages: {}<br/>Documents: {}</span>',
+                document_links,
+                variation_usage_count,
+                truncated_links
+            )
+        
+        return format_html(
+            'Usages: {}<br/>Documents: {}',
+            variation_usage_count,
+            mark_safe(document_links) if document_links else "None"
+        )
+    
+    def render_options(self, record):
+        """Renders the options column with delete button."""
+        from django.urls import reverse
+        
+        delete_url = reverse('twf:dictionaries_delete_variation', args=[record.pk])
+        
+        return format_html(
+            '<a href="#" class="btn btn-sm btn-danger show-danger-modal" '
+            'data-redirect-url="{}" '
+            'data-message="Are you sure you want to delete this variation? Any tags using this variation will be unlinked." '
+            'title="Delete"><i class="fa fa-trash"></i></a>',
+            delete_url
         )
 
     class Meta:
-        """Meta class for the DictionaryEntryTable."""
+        """Meta class for the DictionaryEntryVariationTable."""
         model = Variation
-        template_name = "django_tables2/bootstrap.html"  # Using Bootstrap template
+        template_name = "django_tables2/bootstrap.html"
         fields = ("variation", )
+        attrs = {"class": "table table-striped table-hover table-sm"}

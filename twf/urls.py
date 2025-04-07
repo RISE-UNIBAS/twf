@@ -23,7 +23,7 @@ from twf.views.dictionaries.views_dictionaries_ai import TWFDictionaryGNDBatchVi
     TWFDictionaryWikidataRequestView, TWFDictionaryOpenaiRequestView, TWFDictionaryClaudeRequestView, \
     TWFDictionaryGeminiRequestView, TWFDictionaryMistralBatchView, TWFDictionaryMistralRequestView
 from twf.views.dictionaries.views_crud import remove_dictionary_from_project, add_dictionary_to_project, skip_entry, \
-    delete_variation
+    delete_variation, delete_dictionary_entry
 from twf.views.documents.views_crud import update_document_metadata, delete_document_metadata
 from twf.views.documents.views_documents import TWFDocumentsOverviewView, TWFDocumentsBrowseView, \
     TWFDocumentCreateView, TWFDocumentNameView, TWFDocumentDetailView, TWFDocumentReviewView, TWFDocumentsSearchView
@@ -191,6 +191,7 @@ urlpatterns = [
     path('dictionaries/entry/<int:pk>/skip/', skip_entry, name='dictionaries_entry_skip'),
     path('dictionaries/entry/<int:pk>/edit/',
          TWFDictionaryDictionaryEntryEditView.as_view(), name='dictionaries_entry_edit'),
+    path('dictionaries/entry/<int:pk>/delete/', delete_dictionary_entry, name='dictionaries_entry_delete'),
     path('dictionaries/normalization/wizard/', TWFDictionaryNormDataView.as_view(), name='dictionaries_normalization'),
     path('dictionaries/merge/entries/', TWFDictionaryMergeEntriesView.as_view(), name='dictionaries_entry_merging'),
     path('dictionaries/variations/delete/<int:pk>/', delete_variation, name='dictionaries_delete_variation'),

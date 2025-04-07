@@ -91,3 +91,16 @@ def add_dictionary_to_project(request, pk):
         return HttpResponseRedirect(referer)
 
     return redirect('twf:dictionaries_add')
+
+def delete_dictionary_entry(request, pk):
+    """Delete a dictionary entry."""
+    entry = get_object_or_404(DictionaryEntry, pk=pk)
+    entry.delete()
+    messages.success(request, f'Dictionary entry {pk} has been deleted.')
+
+    # Get the HTTP referer URL
+    referer = request.META.get('HTTP_REFERER')
+    if referer:
+        return HttpResponseRedirect(referer)
+
+    return redirect('twf:dictionaries')  # Redirect to the dictionaries page

@@ -2,10 +2,121 @@
 {% load django_tables2 %}
 
 {% block page_title %}
-    <h1>View "{{ entry.label }}"</h1>
+    <div class="d-flex justify-content-between align-items-center">
+        <h1>Dictionary Entry: "{{ entry.label }}"</h1>
+        <div>
+            <a href="{% url 'twf:dictionaries_entry_edit' entry.pk %}" class="btn btn-sm btn-dark">
+                <i class="fa fa-pen"></i> Edit
+            </a>
+        </div>
+    </div>
 {% endblock %}
 
 {% block content %}
-    <p class="lead">Text. </p>
-    {% render_table table %}
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Entry Information</h5>
+                </div>
+                <div class="card-body">
+                    <table class="table table-sm">
+                        <tbody>
+                            <tr>
+                                <th style="width: 30%">Label:</th>
+                                <td>{{ entry.label }}</td>
+                            </tr>
+                            <tr>
+                                <th>Dictionary:</th>
+                                <td>{{ entry.dictionary.label }} ({{ entry.dictionary.type }})</td>
+                            </tr>
+                            <tr>
+                                <th>Entry ID:</th>
+                                <td>{{ entry.id }}</td>
+                            </tr>
+                            <tr>
+                                <th>Created:</th>
+                                <td>{{ entry.created_at|date:"Y-m-d H:i" }} by {{ entry.created_by|default:"—" }}</td>
+                            </tr>
+                            <tr>
+                                <th>Last Modified:</th>
+                                <td>{{ entry.modified_at|date:"Y-m-d H:i" }} by {{ entry.modified_by|default:"—" }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Normalization Data</h5>
+                </div>
+                <div class="card-body">
+                    {% if entry.metadata %}
+                        <div class="metadata-container">
+                            {% if entry.metadata.name or entry.metadata.title %}
+                                <h6>Name/Title</h6>
+                                <p>{{ entry.metadata.name|default:entry.metadata.title }}</p>
+                            {% endif %}
+                            
+                            {% if entry.metadata.description %}
+                                <h6>Description</h6>
+                                <p>{{ entry.metadata.description }}</p>
+                            {% endif %}
+                            
+                            {% if entry.metadata.id or entry.metadata.gndId or entry.metadata.wikidata_id %}
+                                <h6>External ID</h6>
+                                <p>{{ entry.metadata.id|default:entry.metadata.gndId|default:entry.metadata.wikidata_id }}</p>
+                            {% endif %}
+                            
+                            {% if entry.metadata.url %}
+                                <h6>URL</h6>
+                                <p><a href="{{ entry.metadata.url }}" target="_blank">{{ entry.metadata.url }}</a></p>
+                            {% endif %}
+                            
+                            <!-- Display any other known fields that might exist -->
+                            {% for key, value in entry.metadata.items %}
+                                {% if key != 'name' and key != 'description' and key != 'id' and key != 'gndId' and key != 'wikidata_id' and key != 'url' and key != 'title' %}
+                                    <h6>{{ key|title }}</h6>
+                                    <p>
+                                        {% if value|stringformat:"s"|slice:":4" == "http" %}
+                                            <a href="{{ value }}" target="_blank">{{ value }}</a>
+                                        {% else %}
+                                            {{ value }}
+                                        {% endif %}
+                                    </p>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="alert alert-warning">
+                            No normalization data available for this entry.
+                        </div>
+                    {% endif %}
+                    
+                    {% if entry.notes %}
+                        <h6 class="mt-3">Notes</h6>
+                        <pre class="bg-light p-2 rounded">{{ entry.notes }}</pre>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="card-title mb-0">Variations</h5>
+        </div>
+        <div class="card-body">
+            {% if table.rows %}
+                {% render_table table %}
+            {% else %}
+                <div class="alert alert-info">
+                    No variations found for this dictionary entry.
+                </div>
+            {% endif %}
+        </div>
+    </div>
 {% endblock %}
