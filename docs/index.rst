@@ -18,11 +18,22 @@ Contents:
 
 .. toctree::
    :maxdepth: 2
+   :caption: Tutorials:
+
+   modules/tutorials/index.rst
+
+.. toctree::
+   :maxdepth: 2
    :caption: Core Parts:
 
    modules/parts/settings.rst
    modules/parts/batch-workflows.rst
    modules/parts/multimodal.rst
+   modules/parts/multimodal_quickstart.rst
+   modules/parts/multimodal_config.rst
+   modules/parts/multimodal_best_practices.rst
+   modules/parts/multimodal_troubleshooting.rst
+   modules/parts/multimodal_faq.rst
 
 .. toctree::
    :maxdepth: 2
@@ -33,6 +44,7 @@ Contents:
    modules/workflows/tags.rst
    modules/workflows/metadata.rst
    modules/workflows/dictionaries.rst
+   modules/workflows/multimodal_workflows.rst
 
 
 .. toctree::
