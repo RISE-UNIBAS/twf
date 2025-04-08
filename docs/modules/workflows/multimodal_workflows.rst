@@ -1,10 +1,10 @@
 Multimodal Workflows
-==================
+====================
 
 This guide provides practical workflows and examples for using the multimodal functionality in TWF. It demonstrates common use cases and best practices for combining text and images when querying AI providers.
 
 Basic Workflow
--------------
+--------------
 
 The basic workflow for using multimodal functionality in TWF follows these steps:
 
@@ -15,12 +15,12 @@ The basic workflow for using multimodal functionality in TWF follows these steps
 5. Submit the query and review the results
 
 Text + Images Analysis Workflow
------------------------------
+-------------------------------
 
 This workflow demonstrates how to analyze documents using both text and images:
 
 Step 1: Select Documents
-~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~
 
 1. Navigate to the Documents section
 2. Use filters to find documents containing images
@@ -28,14 +28,14 @@ Step 1: Select Documents
 4. Click "Continue to AI Query"
 
 Step 2: Choose Provider and Mode
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 1. Select the AI provider (e.g., OpenAI for GPT-4 Vision)
 2. Choose "Text + Images" as the prompt mode
 3. Note that the system will automatically select up to 5 images per document
 
 Step 3: Craft an Effective Prompt
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 When combining text and images, craft prompts that:
 
@@ -56,26 +56,26 @@ Analyze these document pages from a 19th century historical manuscript.
 ```
 
 Step 4: Review Results
-~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~
 
 1. Review the AI's response
 2. Save important insights to document metadata
 3. Compare results between different AI providers if needed
 
 Images-Only Workflow
------------------
+--------------------
 
 This workflow focuses on pure image analysis without providing additional text context:
 
 Step 1: Select Documents
-~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~
 
 1. Navigate to the Documents section
 2. Select documents with high-quality images
 3. Click "Continue to AI Query"
 
 Step 2: Configure Query
-~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~
 
 1. Select an AI provider with strong image analysis capabilities (Gemini or GPT-4 Vision)
 2. Choose "Images only" as the prompt mode
@@ -88,17 +88,17 @@ You are an expert document analyst with expertise in historical manuscripts, han
 ```
 
 Step 3: Review Results
-~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~
 
 1. Review the AI's analysis of purely visual content
 2. Save important insights to document metadata
 3. Use insights for document classification or tagging
 
 Practical Examples
-----------------
+------------------
 
 Example 1: Historical Document Analysis
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 **Scenario**: You have scanned historical documents and want to extract key information.
 
@@ -118,7 +118,7 @@ Analyze these historical document scans. For each document:
 ```
 
 Example 2: Handwritten Text Recognition
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 **Scenario**: You need to transcribe handwritten documents.
 
@@ -132,7 +132,7 @@ You are an expert in paleography and handwriting recognition across multiple lan
 ```
 
 Example 3: Document Classification
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 **Scenario**: You need to categorize a large collection of documents.
 
@@ -159,10 +159,10 @@ For each document, provide:
 ```
 
 Advanced Techniques
------------------
+-------------------
 
 Combining Multiple AI Providers
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 For critical analysis, consider using multiple AI providers:
 
@@ -172,7 +172,7 @@ For critical analysis, consider using multiple AI providers:
 4. Compare and combine the insights from all three providers
 
 Image Selection Optimization
-~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The default system selects up to 5 images per document, but you can optimize this:
 
@@ -181,7 +181,7 @@ The default system selects up to 5 images per document, but you can optimize thi
 3. Remember that image quality affects AI performance
 
 Prompt Engineering for Multimodal
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Effective multimodal prompts have these characteristics:
 
@@ -209,10 +209,10 @@ If you encounter unfamiliar abbreviations or specialized maritime terminology, p
 ```
 
 Troubleshooting
--------------
+---------------
 
 Poor Quality Results
-~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~
 
 If you're getting poor quality results:
 
@@ -223,7 +223,7 @@ If you're getting poor quality results:
 5. **System Prompt**: Adjust the system prompt to better guide the AI
 
 Token Limitations
-~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~
 
 When hitting token limitations:
 
@@ -233,7 +233,7 @@ When hitting token limitations:
 4. Split the analysis into multiple smaller queries
 
 Error Resolution
-~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~
 
 Common errors and solutions:
 
