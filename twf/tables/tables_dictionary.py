@@ -162,9 +162,9 @@ class DictionaryEntryVariationTable(tables.Table):
         )
         
         # Truncate document links if they're too long
-        if len(document_links) > 300:
+        if len(document_links) > 1000:
             # This is a simplification; in real life we might want to keep complete links
-            truncated_links = "Multiple documents"
+            truncated_links = "Multiple documents (too much to display)"
             return format_html(
                 '<span title="{}">Usages: {}<br/>Documents: {}</span>',
                 document_links,
