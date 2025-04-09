@@ -1,0 +1,96 @@
+{% load twf_help %}
+
+<div class="help-content">
+    <h2>Request Transkribus Export</h2>
+    <p>
+        This page allows you to request and manage an export of your data from the Transkribus platform. Transkribus is a 
+        comprehensive platform for the automated recognition, transcription, and searching of historical documents.
+    </p>
+
+    <h3>Export Functionality</h3>
+    <p>
+        With this interface, you can:
+    </p>
+    <ol>
+        <li><strong>Request Export:</strong> Initiate a new export request to the Transkribus platform for your collection data</li>
+        <li><strong>Check Status:</strong> Monitor the status of your export job on the Transkribus platform</li>
+        <li><strong>Download Export:</strong> Retrieve your completed export when it's ready</li>
+    </ol>
+
+    <h3>Export Process</h3>
+    <ol>
+        <li><strong>Export Request:</strong>
+            <ul>
+                <li>Click the "Export Requested" button to initiate a new export from Transkribus</li>
+                <li>The system will communicate with Transkribus to start preparing your collection data</li>
+                <li>Your collection ID is automatically sent with the request</li>
+                <li>The status of your request will be updated in the "Current status" section</li>
+            </ul>
+        </li>
+        <li><strong>Status Checking:</strong>
+            <ul>
+                <li>Click the "Check Status of Job" button to query Transkribus about your export progress</li>
+                <li>The status will be updated to reflect the current state of your export</li>
+                <li>Export preparation may take some time depending on the size of your collection</li>
+                <li>You may need to check the status multiple times until the export is complete</li>
+            </ul>
+        </li>
+        <li><strong>Download:</strong>
+            <ul>
+                <li>Once the export is ready, click the "Download Export" button</li>
+                <li>The exported data will be downloaded to your computer</li>
+                <li>The downloaded file will contain the data from your Transkribus collection</li>
+            </ul>
+        </li>
+    </ol>
+
+    <h3>Export Content</h3>
+    <p>
+        The Transkribus export typically includes:
+    </p>
+    <ul>
+        <li><strong>Document Transcriptions:</strong> Text transcriptions of your documents</li>
+        <li><strong>PAGE XML Files:</strong> Structured data about page layouts and text regions</li>
+        <li><strong>Metadata:</strong> Information about your documents and pages</li>
+        <li><strong>Recognition Results:</strong> Text recognition data and confidence scores</li>
+        <li><strong>Document Structure:</strong> Information about document organization</li>
+    </ul>
+
+    <h3>Important Notes</h3>
+    <ul>
+        <li>Your Transkribus collection ID is displayed on the page for reference (e.g., 299865)</li>
+        <li>Export processing time varies based on collection size and Transkribus server load</li>
+        <li>Very large collections may take significant time to export</li>
+        <li>The export will include the entire collection as it exists in Transkribus</li>
+        <li>Ensure you have sufficient storage space for the downloaded export</li>
+        <li>If an export fails, you may need to retry or contact Transkribus support</li>
+    </ul>
+
+    <h3>Troubleshooting</h3>
+    <ul>
+        <li><strong>Unknown Status:</strong> If the status shows as "Unknown," it means the system hasn't yet received status information from Transkribus</li>
+        <li><strong>Export Status Unknown:</strong> The system may not be able to determine the status if there's a communication issue with Transkribus</li>
+        <li><strong>Failed Export:</strong> If your export fails, check your collection ID and try requesting the export again</li>
+        <li><strong>Download Issues:</strong> If you encounter problems downloading your export, ensure you have a stable internet connection and sufficient disk space</li>
+    </ul>
+
+    <h3>After Export</h3>
+    <p>
+        After downloading your Transkribus export, you can:
+    </p>
+    <ul>
+        <li>Import the data into your TWF project</li>
+        <li>Process the transcription data further using TWF tools</li>
+        <li>Create dictionaries and tag entities based on the imported content</li>
+        <li>Build collections organized around your research needs</li>
+        <li>Apply metadata enrichment to enhance the exported content</li>
+    </ul>
+
+    <h3>Related Topics</h3>
+    <ul>
+        <li><a href="{% help_url 'modules/parts/transkribus-structure.html' %}">Request Transkribus Structure</a></li>
+        <li><a href="{% help_url 'modules/parts/import-data.html' %}">Import Data</a></li>
+        <li><a href="{% help_url 'modules/parts/export-overview.html' %}">Export Overview</a></li>
+        <li><a href="{% help_url 'modules/parts/configure-credentials.html' %}">Configure Credentials</a></li>
+    </ul>
+</div>

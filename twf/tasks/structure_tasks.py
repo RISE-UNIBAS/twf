@@ -4,6 +4,7 @@ import os
 import time
 import uuid
 import zipfile
+import xml.etree.ElementTree as ET
 from pathlib import Path
 
 from celery import shared_task
@@ -117,9 +118,12 @@ def extract_files_from_zip(zip_file, extract_to_path, project, celery_task):
                     new_file.write(file_data.read())
                     copied_files.append(new_filepath)
 
-                # Update progress
+                # Update progress with detailed description
                 progress = (i / total_files) * 30  # Allocate 30% for extraction
-                celery_task.update_progress(2 + progress)
+                celery_task.update_progress(
+                    2 + progress,
+                    text=f"Extracting file {i}/{total_files}: {file_info.filename}"
+                )
     return copied_files
 
 
@@ -145,40 +149,154 @@ def process_extracted_files(copied_files, project, extracting_user, celery_task)
     processed_pages = 0
     failed_files = 0
     
-    for i, file in enumerate(copied_files, start=1):
-        if not file.endswith(('metadata.xml', 'mets.xml')):
-            try:
-                data = extract_transkribus_file_metadata(file)
-                doc_id, is_new_page = handle_document_and_page(data, file, project, extracting_user, all_existing_documents)
+    # Separate regular XML files from metadata files
+    page_xml_files = []
+    metadata_files = []
+    
+    for file in copied_files:
+        file_str = str(file)
+        if file_str.endswith(('metadata.xml', 'mets.xml')):
+            metadata_files.append(file)
+        else:
+            page_xml_files.append(file)
+    
+    # Log metadata files found
+    if celery_task.twf_task:
+        celery_task.twf_task.text += f"Found {len(metadata_files)} metadata files and {len(page_xml_files)} page files.\n"
+        celery_task.twf_task.save(update_fields=["text"])
+    
+    # Process page XML files
+    for i, file in enumerate(page_xml_files, start=1):
+        try:
+            data = extract_transkribus_file_metadata(file)
+            doc_id, is_new_page = handle_document_and_page(
+                data, file, project, extracting_user, all_existing_documents, metadata_files
+            )
+            
+            # Track the processed document
+            processed_documents.add(doc_id)
+            
+            # Count new pages
+            if is_new_page:
+                processed_pages += 1
                 
-                # Track the processed document
-                processed_documents.add(doc_id)
-                
-                # Count new pages
-                if is_new_page:
-                    processed_pages += 1
-                    
-                celery_task.advance_task(
-                    text=f"Processed file {i}/{total_files}", 
-                    status="success"
-                )
-            except Exception as e:
-                error_msg = f"Failed to process file {file}: {e}"
-                logging.warning(error_msg)
-                failed_files += 1
-                celery_task.advance_task(
-                    text=f"Error processing file {i}/{total_files}", 
-                    status="failure"
-                )
+            # Add more details about the document and page being processed
+            celery_task.advance_task(
+                text=f"Processed file {i}/{len(page_xml_files)}: Created/updated document {doc_id} with page {data['pageId']}", 
+                status="success"
+            )
+        except Exception as e:
+            error_msg = f"Failed to process file {file}: {e}"
+            logging.warning(error_msg)
+            failed_files += 1
+            file_name = os.path.basename(str(file))
+            celery_task.advance_task(
+                text=f"Error processing file {i}/{len(page_xml_files)}: {file_name} - {str(e)[:100]}", 
+                status="failure"
+            )
         
+        # Update progress with detailed information about the file being processed
+        file_name = os.path.basename(str(file))
         progress = (i / total_files) * 30  # Allocate another 30% for processing
-        celery_task.update_progress(32 + progress)
+        celery_task.update_progress(
+            32 + progress,
+            text=f"Processing file {i}/{total_files}: {file_name}"
+        )
+    
+    # Add summary to task text
+    if celery_task.twf_task:
+        celery_task.twf_task.text += f"\nSummary of document processing:\n"
+        celery_task.twf_task.text += f"- Documents processed: {len(processed_documents)}\n"
+        celery_task.twf_task.text += f"- Pages created: {processed_pages}\n"
+        celery_task.twf_task.text += f"- Failed files: {failed_files}\n"
+        celery_task.twf_task.save(update_fields=["text"])
     
     return len(processed_documents), processed_pages
 
 
-def handle_document_and_page(data, file, project, extracting_user, existing_documents):
+def parse_metadata_files(files, doc_id):
+    """Extract metadata from metadata.xml and mets.xml files for a document.
+    
+    Args:
+        files: List of file paths
+        doc_id: Document ID to find matching metadata files
+    
+    Returns:
+        dict: Metadata extracted from the files
+    """
+    metadata = {}
+    
+    # Look for matching metadata files
+    metadata_file = None
+    mets_file = None
+    
+    for file in files:
+        file_str = str(file)
+        file_basename = os.path.basename(file_str)
+        
+        # Check if the filename contains the document ID
+        if doc_id in file_str:
+            if file_str.endswith('metadata.xml'):
+                metadata_file = file
+            elif file_str.endswith('mets.xml'):
+                mets_file = file
+    
+    # Extract metadata from metadata.xml
+    if metadata_file:
+        try:
+            tree = ET.parse(metadata_file)
+            root = tree.getroot()
+            
+            # Extract basic metadata
+            title_elem = root.find(".//title")
+            if title_elem is not None and title_elem.text:
+                metadata['title'] = title_elem.text.strip()
+            
+            author_elem = root.find(".//author")
+            if author_elem is not None and author_elem.text:
+                metadata['author'] = author_elem.text.strip()
+                
+            # Try to extract more fields
+            for field in ['writer', 'description', 'language', 'authority', 'external_id']:
+                elem = root.find(f".//{field}")
+                if elem is not None and elem.text:
+                    metadata[field] = elem.text.strip()
+            
+            # Add all other available fields
+            for elem in root.findall(".//*"):
+                if elem.text and elem.text.strip() and elem.tag not in metadata:
+                    metadata[elem.tag] = elem.text.strip()
+        except Exception as e:
+            logging.warning(f"Error parsing metadata file for document {doc_id}: {e}")
+    
+    # Extract additional metadata from mets.xml
+    if mets_file:
+        try:
+            tree = ET.parse(mets_file)
+            root = tree.getroot()
+            
+            # Extract metadata from mets file (often has more detailed info)
+            for elem in root.findall(".//*"):
+                if elem.text and elem.text.strip() and elem.tag not in metadata:
+                    # Convert namespace prefixed tags to plain tag names
+                    tag = elem.tag.split('}')[-1] if '}' in elem.tag else elem.tag
+                    metadata[tag] = elem.text.strip()
+        except Exception as e:
+            logging.warning(f"Error parsing mets file for document {doc_id}: {e}")
+    
+    return metadata
+
+
+def handle_document_and_page(data, file, project, extracting_user, existing_documents, metadata_files=None):
     """Handle creation/updating of Document and Page instances.
+    
+    Args:
+        data: Page metadata
+        file: XML file path
+        project: Project instance
+        extracting_user: User performing the extraction
+        existing_documents: Set of existing document IDs
+        metadata_files: List of all XML files (for metadata extraction)
     
     Returns:
         tuple: (document_id, is_new_page) The document ID and whether a new page was created
@@ -189,6 +307,32 @@ def handle_document_and_page(data, file, project, extracting_user, existing_docu
         defaults={'created_by': extracting_user, 'modified_by': extracting_user}
     )
     existing_documents.discard(doc_instance.document_id)
+    
+    # Extract and update document metadata if we have metadata files
+    if metadata_files:
+        document_metadata = parse_metadata_files(metadata_files, data['docId'])
+        
+        # Update document metadata
+        if document_metadata:
+            # Set document title if available
+            if 'title' in document_metadata and not doc_instance.title:
+                doc_instance.title = document_metadata['title']
+            
+            # Update document metadata field if it exists
+            if hasattr(doc_instance, 'metadata'):
+                # Merge with existing metadata but wrap in "transkribus" key
+                existing_metadata = doc_instance.metadata or {}
+                
+                # Create or update the "transkribus" key
+                if 'transkribus' not in existing_metadata:
+                    existing_metadata['transkribus'] = {}
+                
+                # Add all extracted metadata to the transkribus key
+                existing_metadata['transkribus'].update(document_metadata)
+                doc_instance.metadata = existing_metadata
+            
+            # Save document with updated metadata
+            doc_instance.save(current_user=extracting_user)
 
     page_instance, page_created = Page.objects.get_or_create(
         document=doc_instance,
@@ -196,7 +340,11 @@ def handle_document_and_page(data, file, project, extracting_user, existing_docu
         tk_page_number=data['pageNr'],
         defaults={'created_by': extracting_user, 'modified_by': extracting_user}
     )
-    page_instance.xml_file.name = file
+    # Properly assign the file to the FileField by opening and saving the file
+    with open(file, 'rb') as f:
+        file_name = os.path.basename(str(file))
+        page_instance.xml_file.save(file_name, f, save=False)
+    
     page_instance.save(current_user=extracting_user)
     
     return doc_instance.document_id, page_created
@@ -228,7 +376,7 @@ def parse_pages(project, extracting_user, celery_task):
             
             successfully_parsed += 1
             celery_task.advance_task(
-                text=f"Parsed page {i}/{total_pages} from document {page.document.document_id}",
+                text=f"Parsed page {i}/{total_pages}: Page {page.tk_page_id} (#{page.tk_page_number}) from document {page.document.document_id}",
                 status="success"
             )
         except Exception as e:
@@ -236,7 +384,7 @@ def parse_pages(project, extracting_user, celery_task):
             error_msg = f"Failed to parse page {page.tk_page_id} from document {page.document.document_id}: {str(e)}"
             logger.error(error_msg)
             celery_task.advance_task(
-                text=f"Error parsing page {i}/{total_pages}",
+                text=f"Error parsing page {i}/{total_pages}: Page {page.tk_page_id} (#{page.tk_page_number}) from document {page.document.document_id} - {str(e)[:100]}",
                 status="failure"
             )
     
