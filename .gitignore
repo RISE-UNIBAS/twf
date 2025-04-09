@@ -7,3 +7,4 @@ media/
 docs/_build/
 .env
 transkribusWorkflow/google_key.json
+screenshots/
