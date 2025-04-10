@@ -59,6 +59,12 @@ def get_available_actions(project=None, profile=None, for_group=None):
                                      'permanent.</span>'),
             "default_for": []
         },
+        "view_any_project": {
+            "group": "project",
+            "label": "View any project",
+            "description": "User is allowed to view any project.",
+            "default_for": ["manager"]
+        },
         "close_project": {
             "group": "project",
             "label": "Close project",

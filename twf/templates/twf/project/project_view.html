@@ -1,0 +1,255 @@
+{% extends 'twf/base/base.html' %}
+{% load static %}
+{% load twf_filters %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row">
+        <!-- Left Column - Project Summary -->
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="card-title mb-0">Project Summary</h5>
+                </div>
+                <div class="card-body">
+                    <h2 class="mb-3">{{ project.title }}</h2>
+                    <p class="text-muted">
+                        <i class="fas fa-calendar-alt me-2"></i> Created: {{ project.created_at|date:"F j, Y" }}
+                    </p>
+                    <p class="text-muted">
+                        <i class="fas fa-user me-2"></i> Owner: {{ project.owner }}
+                    </p>
+                    <p class="text-muted">
+                        <i class="fas fa-users me-2"></i> Members: {{ project.members.count }}
+                    </p>
+                    <p class="text-muted">
+                        <i class="fas fa-clock me-2"></i> Active for {{ days_active }} days
+                    </p>
+                    
+                    <hr class="my-3">
+                    
+                    <p class="mb-2">
+                        <strong>Status:</strong> 
+                        <span class="badge {% if project.status == 'open' %}bg-success{% else %}bg-danger{% endif %}">
+                            {{ project.status|title }}
+                        </span>
+                    </p>
+                    
+                    <p class="mb-2">
+                        <strong>Collection ID:</strong> {{ project.collection_id }}
+                        {% if project.transkribus_job_id %}
+                        <br><strong>Job ID:</strong> {{ project.transkribus_job_id }}
+                        {% endif %}
+                    </p>
+                    
+                    {% if project.members.count > 0 %}
+                    <hr class="my-3">
+                    <div class="mb-0">
+                        <h6>Project Members</h6>
+                        <ul class="list-unstyled">
+                            <li><i class="fas fa-crown text-warning me-1"></i> {{ project.owner.user.username }}</li>
+                            {% for member in project.members.all|slice:":5" %}
+                            <li><i class="fas fa-user me-1"></i> {{ member.user.username }}</li>
+                            {% endfor %}
+                            {% if project.members.count > 5 %}
+                            <li class="text-muted small">+ {{ project.members.count|add:"-5" }} more members</li>
+                            {% endif %}
+                        </ul>
+                    </div>
+                    {% endif %}
+                    
+                    {% if project.description %}
+                    <hr class="my-3">
+                    <div class="mb-0">
+                        <h6>Description</h6>
+                        <p class="mb-0">{{ project.description }}</p>
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="card-footer text-center">
+                    <a href="{% url 'twf:project_do_select' project.id %}" class="btn btn-primary">
+                        <i class="fas fa-sign-in-alt me-1"></i> Select Project
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Middle Column - Activity Stats -->
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-header bg-info text-white">
+                    <h5 class="card-title mb-0">Project Statistics</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-md-4 mb-3">
+                            <div class="p-3 bg-light rounded">
+                                <h3 class="mb-0">{{ total_docs }}</h3>
+                                <p class="text-muted mb-0">Documents</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="p-3 bg-light rounded">
+                                <h3 class="mb-0">{{ total_pages }}</h3>
+                                <p class="text-muted mb-0">Pages</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="p-3 bg-light rounded">
+                                <h3 class="mb-0">{{ total_tags }}</h3>
+                                <p class="text-muted mb-0">Tags</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <hr class="my-3">
+                    
+                    <h6 class="mb-3">Document Breakdown</h6>
+                    
+                    <div class="mb-4">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <span>With Tags</span>
+                            <span class="text-muted">{{ doc_stats.docs_with_tags }} / {{ doc_stats.total_docs }}</span>
+                        </div>
+                        <div class="progress" style="height: 10px;">
+                            <div class="progress-bar bg-success" role="progressbar" 
+                                style="width: {% widthratio doc_stats.docs_with_tags doc_stats.total_docs 100 %}%;" 
+                                aria-valuenow="{{ doc_stats.docs_with_tags }}" 
+                                aria-valuemin="0" 
+                                aria-valuemax="{{ doc_stats.total_docs }}">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <span>Reviewed</span>
+                            <span class="text-muted">{{ doc_stats.docs_reviewed }} / {{ doc_stats.total_docs }}</span>
+                        </div>
+                        <div class="progress" style="height: 10px;">
+                            <div class="progress-bar bg-info" role="progressbar" 
+                                style="width: {% widthratio doc_stats.docs_reviewed doc_stats.total_docs 100 %}%;" 
+                                aria-valuenow="{{ doc_stats.docs_reviewed }}" 
+                                aria-valuemin="0" 
+                                aria-valuemax="{{ doc_stats.total_docs }}">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <span>Normalized</span>
+                            <span class="text-muted">{{ doc_stats.normalized_tags }} / {{ doc_stats.total_tags }}</span>
+                        </div>
+                        <div class="progress" style="height: 10px;">
+                            <div class="progress-bar bg-warning" role="progressbar" 
+                                style="width: {% widthratio doc_stats.normalized_tags doc_stats.total_tags 100 %}%;" 
+                                aria-valuenow="{{ doc_stats.normalized_tags }}" 
+                                aria-valuemin="0" 
+                                aria-valuemax="{{ doc_stats.total_tags }}">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Right Column - Recent Activity -->
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-header bg-success text-white">
+                    <h5 class="card-title mb-0">Recent Activity</h5>
+                </div>
+                <div class="card-body">
+                    <!-- Recent Tasks -->
+                    <h6 class="border-bottom pb-2 mb-3">Latest Tasks</h6>
+                    {% if recent_tasks %}
+                        <ul class="list-group list-group-flush mb-4">
+                            {% for task in recent_tasks %}
+                                <li class="list-group-item px-0">
+                                    <div class="d-flex w-100 justify-content-between">
+                                        <h6 class="mb-1">{{ task.title|default:"Untitled Task" }}</h6>
+                                        <small class="text-muted">{{ task.start_time|timesince }} ago</small>
+                                    </div>
+                                    <p class="mb-1 text-muted small">{{ task.description|truncatechars:60 }}</p>
+                                    <small class="badge {% if task.status == 'SUCCESS' %}bg-success{% elif task.status == 'FAILURE' %}bg-danger{% else %}bg-secondary{% endif %}">
+                                        {{ task.status }}
+                                    </small>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p class="text-muted mb-4">No recent tasks</p>
+                    {% endif %}
+                    
+                    <!-- Recent Documents -->
+                    <h6 class="border-bottom pb-2 mb-3">Recently Added Documents</h6>
+                    {% if recent_documents %}
+                        <ul class="list-group list-group-flush">
+                            {% for doc in recent_documents %}
+                                <li class="list-group-item px-0">
+                                    <div class="d-flex w-100 justify-content-between">
+                                        <h6 class="mb-1">{{ doc.title|default:"Document"|truncatechars:25 }}</h6>
+                                        <small class="text-muted">{{ doc.created_at|timesince }} ago</small>
+                                    </div>
+                                    <small class="text-muted">ID: {{ doc.document_id }}</small>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p class="text-muted">No documents added yet</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Project Actions Row -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-dark text-white">
+                    <h5 class="card-title mb-0">Project Actions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 d-flex flex-column justify-content-center">
+                            <div class="btn-group" role="group">
+                                <a href="{% url 'twf:project_do_select' project.id %}" class="btn btn-primary">
+                                    <i class="fas fa-sign-in-alt me-1"></i> Select Project
+                                </a>
+                                {% if project.status == 'open' %}
+                                    <a href="#" class="btn btn-warning show-confirm-modal" 
+                                       data-message="Are you sure you want to close this project? Closed projects can still be reopened later."
+                                       data-redirect-url="{% url 'twf:project_do_close' project.id %}">
+                                        <i class="fas fa-times-circle me-1"></i> Close Project
+                                    </a>
+                                {% else %}
+                                    <a href="#" class="btn btn-success show-confirm-modal" 
+                                       data-message="Are you sure you want to reopen this project?"
+                                       data-redirect-url="{% url 'twf:project_do_reopen' project.id %}">
+                                        <i class="fas fa-door-open me-1"></i> Reopen Project
+                                    </a>
+                                {% endif %}
+                                <a href="#" class="btn btn-danger show-danger-modal"
+                                   data-message="Are you sure you want to delete the project <strong>{{ project.title }}</strong>? This action cannot be undone!"
+                                   data-redirect-url="{% url 'twf:project_do_delete' project.id %}">
+                                    <i class="fas fa-trash-alt me-1"></i> Delete Project
+                                </a>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mt-3 mt-md-0">
+                            <p class="text-muted mb-0">
+                                <strong>Last Modified:</strong> {{ project.modified_at|date:"F j, Y H:i" }} by {{ project.modified_by|default:"Unknown" }}
+                            </p>
+                            <p class="text-muted mb-0">
+                                <strong>Created:</strong> {{ project.created_at|date:"F j, Y H:i" }} by {{ project.created_by|default:"Unknown" }}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

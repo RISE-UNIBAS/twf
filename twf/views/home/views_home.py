@@ -6,12 +6,12 @@ from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView, PasswordChangeView
 from django.http import StreamingHttpResponse
-from django.shortcuts import redirect
+from django.shortcuts import redirect, get_object_or_404, render
 from django.urls import reverse, reverse_lazy
 from django.utils.crypto import get_random_string
 from django.utils.timezone import now, timedelta
 from django.views.decorators.csrf import csrf_exempt
-from django.views.generic import FormView
+from django.views.generic import FormView, DetailView
 from django_filters.views import FilterView
 from django_tables2 import SingleTableView
 
@@ -20,11 +20,12 @@ from twf.forms.filters.filters import ProjectFilter, UserFilter
 from twf.forms.project.project_forms import CreateProjectForm
 from twf.forms.user_forms import LoginForm, ChangePasswordForm, UserProfileForm, CreateUserForm
 from twf.models import Project, Document, Page, Dictionary, DictionaryEntry, PageTag, Variation, DateVariation, \
-    UserProfile, User
-from twf.permissions import get_available_actions
+    UserProfile, User, Task, CollectionItem
+from twf.permissions import get_available_actions, check_permission
 from twf.tables.tables_home import ProjectManagementTable, UserManagementTable
 from twf.tasks.instant_tasks import save_instant_task_create_project
 from twf.utils.mail_utils import send_welcome_email, send_reset_email
+from twf.utils.project_statistics import get_document_statistics
 from twf.views.views_base import TWFView
 
 
@@ -318,7 +319,7 @@ class TWFManageProjectsView(SingleTableView, FilterView, LoginRequiredMixin, TWF
 
     def get_queryset(self):
         """Get the queryset for the view."""
-        queryset = Project.objects.all()
+        queryset = Project.objects.all().order_by('title')
         self.filterset = self.filterset_class(self.request.GET, queryset=queryset)
         return self.filterset.qs
 
@@ -432,4 +433,62 @@ def check_system_health(request):
     response["X-Accel-Buffering"] = "no"  # Prevents buffering issues in Nginx
     return response
 
+
+class TWFProjectViewDetailView(LoginRequiredMixin, TWFHomeView):
+    """View for displaying detailed project information.
+    
+    This view provides a comprehensive overview of a specific project, 
+    including statistics, recent activities, and general project information.
+    It serves as the main project view page.
+    """
+    template_name = 'twf/project/project_view.html'
+    page_title = 'Project Details'
+    
+    def get(self, request, *args, **kwargs):
+        """Handle the GET request."""
+        project = get_object_or_404(Project, pk=kwargs.get('pk'))
+        
+        # Check if the user has permission to view this project
+        if not check_permission(request.user, "view_any_project", project):
+            messages.error(request, "You do not have permission to view this project.")
+            return redirect('twf:project_management')
+        
+        return super().get(request, *args, **kwargs)
+    
+    def get_context_data(self, **kwargs):
+        """Get the context data for the view."""
+        context = super().get_context_data(**kwargs)
+        
+        project = get_object_or_404(Project, pk=self.kwargs.get('pk'))
+        
+        # Get project statistics
+        doc_stats = get_document_statistics(project)
+        
+        # Get recent activity data
+        recent_tasks = Task.objects.filter(project=project).order_by('-start_time')[:5]
+        documents = Document.objects.filter(project=project).order_by('-created_at')[:5]
+        collection_items = CollectionItem.objects.filter(collection__project=project).order_by('-created_at')[:5]
+        
+        # Calculate the elapsed time since project creation
+        days_active = (now() - project.created_at).days
+        
+        # Total activity counts
+        total_docs = Document.objects.filter(project=project).count()
+        total_pages = doc_stats.get('total_pages', 0)
+        total_tags = PageTag.objects.filter(page__document__project=project).count()
+        
+        # Add all data to context
+        context.update({
+            'project': project,
+            'doc_stats': doc_stats,
+            'recent_tasks': recent_tasks,
+            'recent_documents': documents,
+            'recent_items': collection_items,
+            'days_active': days_active,
+            'total_docs': total_docs,
+            'total_pages': total_pages,
+            'total_tags': total_tags,
+        })
+        
+        return context
 

@@ -1,12 +1,14 @@
 """Views for creating, reading, updating, and deleting projects."""
 from django.contrib import messages
-from django.shortcuts import redirect
+from django.shortcuts import redirect, get_object_or_404, render
+from django.utils.timezone import now
 
-from twf.models import PageTag, Project
+from twf.models import PageTag, Project, Document, CollectionItem, PageTag, Task
 from twf.permissions import check_permission
 from twf.tasks.instant_tasks import save_instant_task_delete_all_documents, save_instant_task_delete_all_tags, \
     save_instant_task_delete_all_collections
 from twf.views.views_base import TWFView
+from twf.utils.project_statistics import get_document_statistics
 
 
 def delete_all_documents(request):
@@ -91,6 +93,24 @@ def close_project(request, pk):
             messages.success(request, 'Project has been closed.')
         else:
             messages.error(request, 'You do not have the required permissions to close this project.')
+
+    except Project.DoesNotExist:
+        messages.error(request, 'Project does not exist.')
+
+    return redirect('twf:project_management')
+
+
+def reopen_project(request, pk):
+    """Reopen a closed project."""
+    try:
+        project = Project.objects.get(pk=pk)
+
+        if check_permission(request.user, "close_project", project):
+            project.status = 'open'
+            project.save(current_user=request.user)
+            messages.success(request, 'Project has been reopened.')
+        else:
+            messages.error(request, 'You do not have the required permissions to reopen this project.')
 
     except Project.DoesNotExist:
         messages.error(request, 'Project does not exist.')

@@ -9,15 +9,16 @@ User = get_user_model()
 
 class ProjectManagementTable(tables.Table):
     title = tables.Column(verbose_name="Project", attrs={"td": {"class": "fw-bold"}})
-    created = tables.DateTimeColumn(format="Y-m-d H:i", verbose_name="Created")
-    modified = tables.DateTimeColumn(format="Y-m-d H:i", verbose_name="Last Updated")
+    created_at = tables.DateTimeColumn(format="Y-m-d H:i", verbose_name="Created")
+    modified_at = tables.DateTimeColumn(format="Y-m-d H:i", verbose_name="Last Updated")
     status = tables.Column()
+    owner = tables.Column(accessor="owner", verbose_name="Owner")
 
     actions = tables.Column(empty_values=(), verbose_name="Options")
 
     class Meta:
         model = Project
-        fields = ("title", "created", "modified", "status")
+        fields = ("title", "created_at", "modified_at", "owner", "status")
         attrs = {"class": "table table-striped table-hover table-sm"}
 
     def render_status(self, value):
@@ -27,26 +28,48 @@ class ProjectManagementTable(tables.Table):
         }
         color = class_map.get(value.lower(), "dark")
         return format_html('<span class="badge bg-{}">{}</span>', color, value.capitalize())
+        
+    def render_owner(self, value):
+        if value:
+            return format_html('<span title="{}">{}</span>', 
+                              f"User: {value.user.username}", 
+                              value.user.username)
 
     def render_actions(self, record):
-        return format_html(
-            '{} {} {}',
-            format_html(
-                '<a href="{}" class="btn btn-sm btn-secondary me-1" title="View"><i class="fa fa-eye"></i></a>',
-                f"/project/{record.pk}/view",
-            ),
-            format_html(
-                '<a href="{}" class="btn btn-sm btn-warning me-1" title="{} Project">'
-                '<i class="fa fa-toggle-{}"></i></a>',
-                f"/project/{record.pk}/toggle-status",
-                "Close" if record.status == "open" else "Reopen",
-                "off" if record.status == "open" else "on",
-            ),
-            format_html(
-                '<a href="{}" class="btn btn-sm btn-danger" title="Delete"><i class="fa fa-trash"></i></a>',
-                f"/project/{record.pk}/delete",
+        # Status toggle button (close/reopen)
+        if record.status == "open":
+            status_button = format_html(
+                '<a href="#" class="btn btn-sm btn-warning me-1 show-confirm-modal" title="Close Project" '
+                'data-message="Are you sure you want to close the project <strong>{}</strong>?"'
+                'data-redirect-url="{}"><i class="fa fa-toggle-off"></i></a>',
+                record.title,
+                f"/project/close/{record.pk}"
             )
+        else:  # closed
+            status_button = format_html(
+                '<a href="#" class="btn btn-sm btn-success me-1 show-confirm-modal" title="Reopen Project" '
+                'data-message="Are you sure you want to reopen the project <strong>{}</strong>?"'
+                'data-redirect-url="{}"><i class="fa fa-toggle-on"></i></a>',
+                record.title,
+                f"/project/reopen/{record.pk}"
+            )
+
+        # Delete button
+        delete_button = format_html(
+            '<a href="#" class="btn btn-sm btn-danger show-danger-modal" title="Delete" '
+            'data-message="Are you sure you want to delete the project <strong>{}</strong>? This action cannot be undone!"'
+            'data-redirect-url="{}"><i class="fa fa-trash"></i></a>',
+            record.title,
+            f"/project/delete/{record.pk}"
         )
+
+        # View button
+        view_button = format_html(
+            '<a href="{}" class="btn btn-sm btn-secondary me-1" title="View"><i class="fa fa-eye"></i></a>',
+            f"/project/view/{record.pk}"
+        )
+
+        return format_html('{} {} {}', view_button, status_button, delete_button)
 
 
 class UserManagementTable(tables.Table):
