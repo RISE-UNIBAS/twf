@@ -84,7 +84,35 @@
                     progressBar.removeClass('progress-bar-striped progress-bar-animated');
                     progressBar.text(progress.toFixed(2) + '%');
 
-                    if (data.text) {
+                    // If we have full text available, use it (complete log)
+                    if (data.full_text) {
+                        console.log("Full text available:", data.full_text.length, "chars");
+                        const logTextarea = $(logTextareaId);
+                        logTextarea.val(data.full_text);
+                        
+                        // If we have a database task ID, add/update the task link button
+                        if (data.db_task_id) {
+                            console.log("Found DB task ID:", data.db_task_id);
+                            const taskUrl = '/project/task/' + data.db_task_id + '/view/';
+                            const detailsButtonId = 'task-details-btn-' + taskId;
+                            
+                            if (!$('#' + detailsButtonId).length) {
+                                const detailsButton = $('<a>', {
+                                    id: detailsButtonId,
+                                    text: 'View Task Progress',
+                                    href: taskUrl,
+                                    target: '_blank',
+                                    class: 'btn btn-sm btn-secondary ml-2 mt-2'
+                                });
+                                $(logTextareaId).after(detailsButton);
+                            }
+                        }
+                        
+                        scrollToBottom(logTextareaId);
+                    } 
+                    // Fallback to old behavior if full_text is not available
+                    else if (data.text) {
+                        console.log("Only partial text available");
                         const logTextarea = $(logTextareaId);
                         let currentLog = logTextarea.val().trim();
 
@@ -109,6 +137,26 @@
                     progressBar.addClass('bg-success'); // Change the progress bar color to green
                     progressBar.text('Completed');
                     $(logTextareaId).append('Task completed\n');
+                    
+                    // Add a link to the task details page - just show the URL in the textarea
+                    const taskUrl = data.db_task_id ? 
+                        '/project/task/' + data.db_task_id + '/view/' : 
+                        '/project/task_monitor/'; // Fallback to task monitor if no DB ID
+                    
+                    $(logTextareaId).append('View complete task log at: ' + taskUrl + '\n');
+                    
+                    // Create a button below the textarea that links to the task details
+                    const detailsButtonId = 'task-details-btn-' + taskId;
+                    if (!$('#' + detailsButtonId).length) {
+                        const detailsButton = $('<a>', {
+                            id: detailsButtonId,
+                            text: 'View Complete Task Log',
+                            href: taskUrl,
+                            target: '_blank',
+                            class: 'btn btn-sm btn-info ml-2 mt-2'
+                        });
+                        $(logTextareaId).after(detailsButton);
+                    }
 
                     $(cancelButtonId).prop("disabled", true);
                     $(startButtonId).prop("disabled", false);
@@ -137,6 +185,26 @@
                     progressBar.addClass('bg-danger'); // Change the progress bar color to red
                     progressBar.text('Failed');
                     $(logTextareaId).append('Error: ' + data.error + '\n');
+                    
+                    // Add a link to the task details page - just show the URL in the textarea
+                    const taskUrl = data.db_task_id ? 
+                        '/project/task/' + data.db_task_id + '/view/' : 
+                        '/project/task_monitor/'; // Fallback to task monitor if no DB ID
+                    
+                    $(logTextareaId).append('View complete task log at: ' + taskUrl + '\n');
+                    
+                    // Create a button below the textarea that links to the task details
+                    const detailsButtonId = 'task-details-btn-' + taskId;
+                    if (!$('#' + detailsButtonId).length) {
+                        const detailsButton = $('<a>', {
+                            id: detailsButtonId,
+                            text: 'View Complete Task Log',
+                            href: taskUrl,
+                            target: '_blank',
+                            class: 'btn btn-sm btn-danger ml-2 mt-2'
+                        });
+                        $(logTextareaId).after(detailsButton);
+                    }
                     scrollToBottom(logTextareaId);
                 }
             })
