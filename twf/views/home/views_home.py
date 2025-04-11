@@ -441,7 +441,7 @@ class TWFProjectViewDetailView(LoginRequiredMixin, TWFHomeView):
     including statistics, recent activities, and general project information.
     It serves as the main project view page.
     """
-    template_name = 'twf/project/project_view.html'
+    template_name = 'twf/home/project_view.html'
     page_title = 'Project Details'
     
     def get(self, request, *args, **kwargs):
@@ -454,7 +454,16 @@ class TWFProjectViewDetailView(LoginRequiredMixin, TWFHomeView):
             return redirect('twf:project_management')
         
         return super().get(request, *args, **kwargs)
-    
+
+    def get_breadcrumbs(self):
+        """Get the breadcrumbs for the project view."""
+        breadcrumbs = [
+            {'url': reverse('twf:home'), 'value': '<i class="fas fa-home"></i>'},
+            {'url': reverse('twf:project_management'), 'value': 'Project Management'},
+            {'url': reverse('twf:project_view', args=[self.kwargs.get('pk')]), 'value': 'Project Details'},
+        ]
+        return breadcrumbs
+
     def get_context_data(self, **kwargs):
         """Get the context data for the view."""
         context = super().get_context_data(**kwargs)
