@@ -1,6 +1,7 @@
 """Filter classes for the twf app."""
 import logging
 import django_filters
+from django.db.models import Q
 from django.forms import CheckboxInput, DateInput
 from django.contrib.auth import get_user_model
 from twf.models import Document, DictionaryEntry, PageTag, CollectionItem, Task, Prompt, Project, Export, Note
@@ -282,10 +283,37 @@ class UserFilter(django_filters.FilterSet):
 
 
 class ExportFilter(django_filters.FilterSet):
-    export_type = django_filters.CharFilter(lookup_expr='icontains', label="Type")
-    created_by__username = django_filters.CharFilter(lookup_expr='icontains', label="Created by")
-    created = django_filters.DateFromToRangeFilter(label="Created between")
+    """Filter for the exports table."""
+    
+    export_type = django_filters.ChoiceFilter(
+        choices=Export.EXPORT_TYPE_CHOICES,
+        label="Export Type", 
+        empty_label="All Types"
+    )
+    
+    created_by__username = django_filters.CharFilter(
+        lookup_expr='icontains',
+        label="Created by contains"
+    )
+    
+    # Date range filters with custom widgets
+    created_after = django_filters.DateFilter(
+        field_name='created',
+        lookup_expr='gte',
+        label='Created After',
+        widget=DateInput(attrs={'type': 'date', 'class': 'form-control'})
+    )
+    
+    created_before = django_filters.DateFilter(
+        field_name='created', 
+        lookup_expr='lte',
+        label='Created Before',
+        widget=DateInput(attrs={'type': 'date', 'class': 'form-control'})
+    )
 
     class Meta:
+        """Meta class for the export filter."""
         model = Export
-        fields = ["export_type", "created_by__username", "created"]
+        fields = ["export_type", "created_by__username", "created_after", "created_before"]
+        # Don't enforce form validation (important for empty filters)
+        strict = False
