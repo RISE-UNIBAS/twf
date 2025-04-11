@@ -24,7 +24,7 @@ from twf.forms.project.project_forms import QueryDatabaseForm, GeneralSettingsFo
 from twf.models import Page, PageTag, Project, Prompt, Task, Note
 from twf.permissions import check_permission, get_actions_grouped_by_category, get_available_actions
 from twf.tables.tables_project import TaskTable, PromptTable, NoteTable
-from twf.utils.project_statistics import get_document_statistics
+from twf.utils.project_statistics import get_document_statistics, get_tag_statistics, get_dictionary_statistics
 from twf.views.views_base import TWFView
 
 
@@ -546,9 +546,53 @@ class TWFProjectOverviewView(TWFProjectView):
         context = super().get_context_data(**kwargs)
 
         project = self.get_project()
+        
+        # Get document statistics
         context['doc_stats'] = get_document_statistics(project)
-
-        transkribus_creds = self.get_project().get_credentials('transkribus')
+        
+        # Get tag statistics
+        context['tag_stats'] = get_tag_statistics(project)
+        
+        # Get dictionary statistics
+        context['dict_stats'] = get_dictionary_statistics(project)
+        
+        # Get collection statistics
+        total_collections = project.collections.count()
+        total_collection_items = 0
+        collection_progress = {
+            'total': 0,
+            'completed': 0, 
+            'in_progress': 0,
+            'pending': 0
+        }
+        
+        for collection in project.collections.all():
+            items = collection.items.all()
+            total_collection_items += items.count()
+            collection_progress['total'] += items.count()
+            collection_progress['completed'] += items.filter(status='DONE').count()
+            collection_progress['in_progress'] += items.filter(status='IN_PROGRESS').count()
+            collection_progress['pending'] += items.filter(status__in=['TODO', 'PENDING']).count()
+            
+        context['collection_stats'] = {
+            'total_collections': total_collections,
+            'total_collection_items': total_collection_items,
+            'collection_progress': collection_progress
+        }
+        
+        # Calculate task statistics
+        tasks = project.tasks.all()
+        task_stats = {
+            'total': tasks.count(),
+            'completed': tasks.filter(status='SUCCESS').count(),
+            'failed': tasks.filter(status='FAILURE').count(),
+            'pending': tasks.filter(status__in=['PENDING', 'STARTED', 'PROGRESS']).count(),
+            'recent': tasks.order_by('-start_time')[:5]
+        }
+        context['task_stats'] = task_stats
+        
+        # Set up project steps context
+        transkribus_creds = project.get_credentials('transkribus')
         username = None
         password = None
         if transkribus_creds:
@@ -565,6 +609,9 @@ class TWFProjectOverviewView(TWFProjectView):
 
         all_are_true = all(context['steps'].values())
         context['steps']['all_steps_complete'] = all_are_true
+        
+        # Count pending steps
+        context['steps']['pending_count'] = len([s for s in context['steps'].values() if not s]) - (0 if all_are_true else 1)
 
         return context
 

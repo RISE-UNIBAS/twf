@@ -7,12 +7,14 @@ indirectly on the Project model. Most models extend the TimeStampedModel class, 
 'modified_at' fields are updated automatically, but the user who created or modified the object must be provided.
 """
 import json
+from datetime import timedelta
 
 from django.conf import settings
 from django.db import models
 from django.contrib.auth import get_user_model
 from django.db.models import Q
 from django.utils import timezone
+from django.utils.timezone import now
 
 from twf.templatetags.tk_tags import tk_iiif_url, tk_bounding_box
 
@@ -131,6 +133,44 @@ class UserProfile(models.Model):
         if action in project_permissions:
             del self.permissions[str(project.id)][action]
             self.save()
+
+    def get_user_activity(self):
+        """Get activity statistics for a specific user."""
+        # Get the current date and time
+        current_time = now()
+
+        # Define the time ranges
+        last_day = current_time - timedelta(days=1)
+        last_week = current_time - timedelta(weeks=1)
+        last_month = current_time - timedelta(days=30)
+
+        _models = [Project, Document, Page, Dictionary, DictionaryEntry, PageTag, Variation, DateVariation]
+
+        stats = {
+            'created_last_day': 0,
+            'edited_last_day': 0,
+            'created_last_week': 0,
+            'edited_last_week': 0,
+            'created_last_month': 0,
+            'edited_last_month': 0,
+            'created_total': 0,
+            'edited_total': 0,
+        }
+
+        for model in _models:
+            stats['created_last_day'] += model.objects.filter(created_by=self.user, created_at__gte=last_day).count()
+            stats['edited_last_day'] += model.objects.filter(modified_by=self.user, modified_at__gte=last_day).count()
+
+            stats['created_last_week'] += model.objects.filter(created_by=self.user, created_at__gte=last_week).count()
+            stats['edited_last_week'] += model.objects.filter(modified_by=self.user, modified_at__gte=last_week).count()
+
+            stats['created_last_month'] += model.objects.filter(created_by=self.user, created_at__gte=last_month).count()
+            stats['edited_last_month'] += model.objects.filter(modified_by=self.user, modified_at__gte=last_month).count()
+
+            stats['created_total'] += model.objects.filter(created_by=self.user).count()
+            stats['edited_total'] += model.objects.filter(modified_by=self.user).count()
+
+        return stats
 
     def __str__(self):
         """Return the string representation of the UserProfile."""

@@ -75,8 +75,8 @@ class TWFHomeView(TWFView):
 
         if user.is_authenticated:
             nav = [
-                {'url': reverse('twf:user_overview'), 'value': 'Your Activity'},
-                {'url': reverse('twf:user_profile'), 'value': 'User Information'},
+                {'url': reverse('twf:user_overview'), 'value': 'Your Profile'},
+                {'url': reverse('twf:user_profile'), 'value': 'Change User Info'},
                 {'url': reverse('twf:user_change_password'), 'value': 'Change Password'},
                 {'url': reverse('twf:user_logout'), 'value': 'Logout'},
             ]
@@ -220,13 +220,12 @@ class TWFUserDetailView(LoginRequiredMixin, TWFHomeView):
         context['viewed_user'] = user
         
         # User activity statistics
-        activity_stats = self.get_user_activity(user)
+        activity_stats = user.profile.get_user_activity()
         context['activity'] = activity_stats
         
         # Get projects the user owns or is a member of
-        if hasattr(user, 'profile'):
-            context['owned_projects'] = user.profile.owned_projects.all()
-            context['member_projects'] = Project.objects.filter(members=user.profile)
+        context['owned_projects'] = user.profile.owned_projects.all()
+        context['member_projects'] = Project.objects.filter(members=user.profile)
         
         # Get recent actions performed by this user
         recent_actions = []
@@ -250,44 +249,6 @@ class TWFUserDetailView(LoginRequiredMixin, TWFHomeView):
         context['recent_actions'] = recent_actions
         
         return context
-        
-    def get_user_activity(self, user):
-        """Get activity statistics for a specific user."""
-        # Get the current date and time
-        current_time = now()
-
-        # Define the time ranges
-        last_day = current_time - timedelta(days=1)
-        last_week = current_time - timedelta(weeks=1)
-        last_month = current_time - timedelta(days=30)
-
-        models = [Project, Document, Page, Dictionary, DictionaryEntry, PageTag, Variation, DateVariation]
-
-        stats = {
-            'created_last_day': 0,
-            'edited_last_day': 0,
-            'created_last_week': 0,
-            'edited_last_week': 0,
-            'created_last_month': 0,
-            'edited_last_month': 0,
-            'created_total': 0,
-            'edited_total': 0,
-        }
-
-        for model in models:
-            stats['created_last_day'] += model.objects.filter(created_by=user, created_at__gte=last_day).count()
-            stats['edited_last_day'] += model.objects.filter(modified_by=user, modified_at__gte=last_day).count()
-
-            stats['created_last_week'] += model.objects.filter(created_by=user, created_at__gte=last_week).count()
-            stats['edited_last_week'] += model.objects.filter(modified_by=user, modified_at__gte=last_week).count()
-
-            stats['created_last_month'] += model.objects.filter(created_by=user, created_at__gte=last_month).count()
-            stats['edited_last_month'] += model.objects.filter(modified_by=user, modified_at__gte=last_month).count()
-
-            stats['created_total'] += model.objects.filter(created_by=user).count()
-            stats['edited_total'] += model.objects.filter(modified_by=user).count()
-
-        return stats
 
 
 class TWFHomeUserOverView(LoginRequiredMixin, TWFHomeView):
@@ -299,6 +260,14 @@ class TWFHomeUserOverView(LoginRequiredMixin, TWFHomeView):
         """Add the user summary to the context."""
         context = super().get_context_data(**kwargs)
         context['summary'] = self.get_user_summary()
+
+        user = self.request.user
+        activity_stats = user.profile.get_user_activity()
+        context['activity'] = activity_stats
+
+        context['owned_projects'] = user.profile.owned_projects.all()
+        context['member_projects'] = Project.objects.filter(members=user.profile)
+
         return context
 
     def get_user_summary(self):
