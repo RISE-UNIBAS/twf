@@ -19,6 +19,9 @@
 
         // Clear the log before starting
         $(logTextareaId).text('');
+        
+        // Remove any existing task detail buttons
+        $('[id^="task-details-btn-"]').remove();
 
         // Reset the progress bar
         const progressBar = $(progressBarId);
