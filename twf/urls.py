@@ -34,7 +34,9 @@ from twf.views.documents.views_documents_ai import TWFDocumentOpenAIBatchView, \
 from twf.views.export.views_crud import delete_export
 from twf.views.home.views_home import TWFHomeView, TWFHomeLoginView, TWFHomePasswordChangeView, TWFHomeUserOverView, \
     TWFSelectProjectView, TWFHomeUserProfileView, TWFCreateProjectView, TWFManageProjectsView, TWFManageUsersView, \
-    TWFSystemHealthView, check_system_health, TWFHomeIndexView, TWFHomeAboutView, TWFProjectViewDetailView
+    TWFSystemHealthView, check_system_health, TWFHomeIndexView, TWFHomeAboutView, TWFProjectViewDetailView, \
+    TWFUserDetailView
+from twf.views.home.views_crud import activate_user, deactivate_user, delete_user, reset_password
 from twf.views.metadata.views_metadata_ai import TWFMetadataLoadDataView, TWFMetadataLoadSheetsDataView
 from twf.views.project.views_crud import delete_all_documents, delete_all_tags, delete_all_collections, select_project, \
     delete_project, close_project, reopen_project, delete_prompt
@@ -81,6 +83,11 @@ urlpatterns = [
     path('logout/', auth_views.LogoutView.as_view(next_page='twf:home'), name='logout'),
     path('help/<str:view_name>/', help_content, name='help'),
     path('user/management/', TWFManageUsersView.as_view(), name='twf_user_management'),
+    path('user/<int:pk>/', TWFUserDetailView.as_view(), name='user_view'),
+    path('user/<int:pk>/activate/', activate_user, name='user_adm_activate'),
+    path('user/<int:pk>/deactivate/', deactivate_user, name='user_adm_deactivate'),
+    path('user/<int:pk>/delete/', delete_user, name='user_adm_delete'),
+    path('user/<int:pk>/reset_password/', reset_password, name='user_adm_reset_password'),
     path('twf/check/system/health/', check_system_health, name='twf_check_system_health'),
     path('twf/system/health/', TWFSystemHealthView.as_view(), name='twf_system_health'),
 

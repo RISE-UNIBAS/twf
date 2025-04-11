@@ -405,7 +405,7 @@ class Task(models.Model):
     """Additional metadata for the task."""
 
     def __str__(self):
-        return f"Task - {self.task_id} ({self.status})"
+        return f"Task - {self.celery_task_id} ({self.status})"
 
 
 class Document(TimeStampedModel):

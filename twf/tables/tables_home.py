@@ -74,62 +74,142 @@ class ProjectManagementTable(tables.Table):
 
 class UserManagementTable(tables.Table):
     username = tables.Column(verbose_name="Username")
-    email = tables.Column(verbose_name="Email")
+    email = tables.Column(verbose_name="Email") 
+    date_joined = tables.DateTimeColumn(format="Y-m-d", verbose_name="Joined")
+    last_login = tables.DateTimeColumn(format="Y-m-d", verbose_name="Last Login", default="-")
     status = tables.Column(empty_values=(), verbose_name="Status")
+    owned_projects = tables.Column(empty_values=(), verbose_name="Owns Projects")
     actions = tables.Column(empty_values=(), verbose_name="Options")
 
     class Meta:
         model = User
-        fields = ("username", "email")
+        fields = ("username", "email", "date_joined", "last_login")
         attrs = {"class": "table table-striped table-hover table-sm"}
+        
+    def render_date_joined(self, value):
+        return value.strftime("%Y-%m-%d")
+        
+    def render_last_login(self, value):
+        if value:
+            return value.strftime("%Y-%m-%d")
+        return "-"
+    
+    def render_owned_projects(self, record):
+        # Check if the user has a profile and owns any projects
+        if hasattr(record, 'profile'):
+            owned_count = record.profile.owned_projects.count()
+            if owned_count > 0:
+                return format_html(
+                    '<span class="badge bg-warning">{}</span>',
+                    owned_count
+                )
+        return format_html('<span class="text-muted">0</span>')
 
     def render_status(self, record):
         status_tags = []
 
         if record.is_superuser:
             status_tags.append('<span class="badge bg-success">admin</span>')
+        elif record.is_staff:
+            status_tags.append('<span class="badge bg-primary">staff</span>')
 
         if not record.is_active:
             status_tags.append('<span class="badge bg-dark">inactive</span>')
 
         if record == self.context.get("request").user:
-            status_tags.append('<span class="badge bg-info">You</span>')
+            status_tags.append('<span class="badge bg-info">you</span>')
+            
+        if not status_tags:
+            status_tags.append('<span class="badge bg-light text-dark">user</span>')
 
         return format_html(" ".join(status_tags))
 
     def render_actions(self, record):
+        request = self.context.get("request")
+        
+        # Check if user can be deleted (can't delete yourself or users who own projects)
+        can_delete = True
+        delete_tooltip = "Delete User"
+        
+        if record == request.user:
+            can_delete = False
+            delete_tooltip = "Cannot delete yourself"
+        
+        # Check if user owns projects
+        has_owned_projects = False
+        if hasattr(record, 'profile'):
+            has_owned_projects = record.profile.owned_projects.exists()
+            if has_owned_projects:
+                can_delete = False
+                delete_tooltip = "User owns projects and cannot be deleted"
+        
+        # Generate buttons based on state
+        buttons = []
+        
+        # View button
+        view_btn = format_html(
+            '<a href="/user/{}" class="btn btn-sm btn-secondary me-1" '
+            'data-bs-toggle="tooltip" data-bs-placement="top" title="View User Details">'
+            '<i class="fa-solid fa-eye"></i>'
+            '</a>',
+            record.pk
+        )
+        buttons.append(view_btn)
+        
+        # Reset password button
+        reset_btn = format_html(
+            '<a href="#" class="btn btn-sm btn-dark me-1 show-confirm-modal" '
+            'data-message="Are you sure you want to reset password for <strong>{}</strong>? A new random password will be generated and sent to their email." '
+            'data-redirect-url="/user/{}/reset_password/" '
+            'data-bs-toggle="tooltip" data-bs-placement="top" title="Reset Password">'
+            '<i class="fa-solid fa-rotate"></i>'
+            '</a>',
+            record.username, record.pk
+        )
+        buttons.append(reset_btn)
+        
+        # Activate/deactivate button
         if record.is_active:
             toggle_btn = format_html(
-                '<a href="/users/{}/deactivate" class="btn btn-sm btn-dark me-1"'
-                            '   data-bs-toggle="tooltip" data-bs-placement="top" title="Deactivate User">'
-                            '  <i class="fa-solid fa-lock"></i>'
-                            '</a>',
-                record.pk,
+                '<a href="#" class="btn btn-sm btn-warning me-1 show-confirm-modal" '
+                'data-message="Are you sure you want to deactivate <strong>{}</strong>?" '
+                'data-redirect-url="/user/{}/deactivate/" '
+                'data-bs-toggle="tooltip" data-bs-placement="top" title="Deactivate User">'
+                '<i class="fa-solid fa-lock"></i>'
+                '</a>',
+                record.username, record.pk
             )
         else:
             toggle_btn = format_html(
-                '<a href="/users/{}/activate" class="btn btn-sm btn-success me-1"'
-                            '  data-bs-toggle="tooltip" data-bs-placement="top" title="Activate User">'
-                            '  <i class="fa-solid fa-unlock"></i>'
-                            '</a>',
-                record.pk,
+                '<a href="#" class="btn btn-sm btn-success me-1 show-confirm-modal" '
+                'data-message="Are you sure you want to activate <strong>{}</strong>?" '
+                'data-redirect-url="/user/{}/activate/" '
+                'data-bs-toggle="tooltip" data-bs-placement="top" title="Activate User">'
+                '<i class="fa-solid fa-unlock"></i>'
+                '</a>',
+                record.username, record.pk
             )
-
-        return format_html(
-            '{}{}{}',
-            format_html(
-                '<a href="/users/{}/reset-password" class="btn btn-sm btn-dark me-1"'
-                            '  data-bs-toggle="tooltip" data-bs-placement="top" title="Reset Password">'
-                            '  <i class="fa-solid fa-rotate"></i>'
-                            '</a>',
-                record.pk,
-            ),
-            toggle_btn,
-            format_html(
-                '<a href="/users/{}/delete" class="btn btn-sm btn-danger"'
-                            ' data-bs-toggle="tooltip" data-bs-placement="top" title="Delete User">'
-                            '  <i class="fa-solid fa-trash"></i>'
-                            '</a>',
-                record.pk,
+        buttons.append(toggle_btn)
+        
+        # Delete button (with different states)
+        if can_delete:
+            delete_btn = format_html(
+                '<a href="#" class="btn btn-sm btn-danger show-danger-modal" '
+                'data-message="Are you sure you want to delete the user <strong>{}</strong>? This action cannot be undone!" '
+                'data-bs-toggle="tooltip" data-bs-placement="top" title="Delete User" '
+                'data-redirect-url="/user/{}/delete/">'
+                '<i class="fa-solid fa-trash"></i>'
+                '</a>',
+                record.username, record.pk
             )
-        )
+        else:
+            delete_btn = format_html(
+                '<a href="#" class="btn btn-sm btn-outline-danger" '
+                'disabled data-bs-toggle="tooltip" data-bs-placement="top" title="{}">'
+                '<i class="fa-solid fa-trash"></i>'
+                '</a>',
+                delete_tooltip
+            )
+        buttons.append(delete_btn)
+        
+        return format_html(''.join(buttons))

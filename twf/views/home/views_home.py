@@ -186,6 +186,109 @@ class TWFHomeUserProfileView(LoginRequiredMixin, FormView, TWFHomeView):
         return super().form_valid(form)
 
 
+class TWFUserDetailView(LoginRequiredMixin, TWFHomeView):
+    """View to display detailed information about a specific user."""
+    template_name = 'twf/home/user_detail.html'
+    page_title = 'User Details'
+    
+    def get(self, request, *args, **kwargs):
+        """Handle GET request and check permissions."""
+        # Only admins and staff can view user details
+        if not request.user.is_superuser and not request.user.is_staff:
+            messages.error(request, "You do not have permission to view user details.")
+            return redirect('twf:home')
+            
+        return super().get(request, *args, **kwargs)
+
+    def get_breadcrumbs(self):
+        """Get the breadcrumbs for the user detail view."""
+        breadcrumbs = [
+            {'url': reverse('twf:home'), 'value': '<i class="fas fa-home"></i>'},
+            {'url': reverse('twf:twf_user_management'), 'value': 'User Management'},
+            {'url': reverse('twf:user_overview'), 'value': 'User Overview'},
+        ]
+        return breadcrumbs
+
+    def get_context_data(self, **kwargs):
+        """Add user details to the context."""
+        context = super().get_context_data(**kwargs)
+        
+        # Get the user to view
+        user_id = self.kwargs.get('pk')
+        user = get_object_or_404(User, pk=user_id)
+        context['viewed_user'] = user
+        
+        # User activity statistics
+        activity_stats = self.get_user_activity(user)
+        context['activity'] = activity_stats
+        
+        # Get projects the user owns or is a member of
+        if hasattr(user, 'profile'):
+            context['owned_projects'] = user.profile.owned_projects.all()
+            context['member_projects'] = Project.objects.filter(members=user.profile)
+        
+        # Get recent actions performed by this user
+        recent_actions = []
+        
+        # Recent created documents
+        recent_documents = Document.objects.filter(created_by=user).order_by('-created_at')[:5]
+        if recent_documents.exists():
+            recent_actions.append({'title': 'Recent Documents', 'items': recent_documents})
+        
+        # Recent created collections
+        from twf.models import Collection
+        recent_collections = Collection.objects.filter(created_by=user).order_by('-created_at')[:5]
+        if recent_collections.exists():
+            recent_actions.append({'title': 'Recent Collections', 'items': recent_collections})
+        
+        # Recent tasks
+        recent_tasks = Task.objects.filter(user=user).order_by('-start_time')[:5]
+        if recent_tasks.exists():
+            recent_actions.append({'title': 'Recent Tasks', 'items': recent_tasks})
+            
+        context['recent_actions'] = recent_actions
+        
+        return context
+        
+    def get_user_activity(self, user):
+        """Get activity statistics for a specific user."""
+        # Get the current date and time
+        current_time = now()
+
+        # Define the time ranges
+        last_day = current_time - timedelta(days=1)
+        last_week = current_time - timedelta(weeks=1)
+        last_month = current_time - timedelta(days=30)
+
+        models = [Project, Document, Page, Dictionary, DictionaryEntry, PageTag, Variation, DateVariation]
+
+        stats = {
+            'created_last_day': 0,
+            'edited_last_day': 0,
+            'created_last_week': 0,
+            'edited_last_week': 0,
+            'created_last_month': 0,
+            'edited_last_month': 0,
+            'created_total': 0,
+            'edited_total': 0,
+        }
+
+        for model in models:
+            stats['created_last_day'] += model.objects.filter(created_by=user, created_at__gte=last_day).count()
+            stats['edited_last_day'] += model.objects.filter(modified_by=user, modified_at__gte=last_day).count()
+
+            stats['created_last_week'] += model.objects.filter(created_by=user, created_at__gte=last_week).count()
+            stats['edited_last_week'] += model.objects.filter(modified_by=user, modified_at__gte=last_week).count()
+
+            stats['created_last_month'] += model.objects.filter(created_by=user, created_at__gte=last_month).count()
+            stats['edited_last_month'] += model.objects.filter(modified_by=user, modified_at__gte=last_month).count()
+
+            stats['created_total'] += model.objects.filter(created_by=user).count()
+            stats['edited_total'] += model.objects.filter(modified_by=user).count()
+
+        return stats
+
+
 class TWFHomeUserOverView(LoginRequiredMixin, TWFHomeView):
     """View to display an overview of the user."""
     template_name = 'twf/home/users/overview.html'
@@ -349,7 +452,7 @@ class TWFManageUsersView(SingleTableView, FilterView, LoginRequiredMixin, FormVi
 
     def get_queryset(self):
         """Get the queryset for the view."""
-        queryset = User.objects.all()
+        queryset = User.objects.all().order_by('username')
         self.filterset = self.filterset_class(self.request.GET, queryset=queryset)
         return self.filterset.qs
 
@@ -358,36 +461,6 @@ class TWFManageUsersView(SingleTableView, FilterView, LoginRequiredMixin, FormVi
         self.object_list = self.get_queryset()
         context = self.get_context_data()
         return self.render_to_response(context)
-
-    def post(self, request, *args, **kwargs):
-        if 'existing_user_id' in request.POST:
-            user = User.objects.get(pk=request.POST.get('existing_user_id'))
-            action = request.POST.get('action', None)
-            if action == 'user_delete':
-                if user == request.user:
-                    messages.error(request, 'You cannot delete yourself.')
-                    return redirect('twf:twf_user_management')
-                user.delete()
-                messages.success(request, 'User deleted successfully.')
-            elif action == 'pw_reset':
-                initial_password = get_random_string(length=8)
-                user.set_password(initial_password)
-                user.save()
-                send_reset_email(user.email, user.username, initial_password)
-                messages.success(request, 'Password reset successfully. Message sent to user.')
-            elif action == 'user_deactivate':
-                user.is_active = False
-                user.profile.permissions.clear()
-                user.profile.save()
-                user.save()
-                messages.success(request, 'User deactivated successfully.')
-            elif action == 'user_activate':
-                user.is_active = True
-                user.save()
-                messages.success(request, 'User activated successfully.')
-
-            return redirect('twf:twf_user_management')
-        return super().post(request, *args, **kwargs)
 
     def form_valid(self, form):
         user = form.save(commit=False)
