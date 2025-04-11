@@ -8,7 +8,7 @@ multimodal (text + images) capabilities.
 from abc import ABC, abstractmethod
 
 from django.contrib import messages
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import redirect
 from django.template import TemplateDoesNotExist
 from django.template.loader import get_template
@@ -16,6 +16,14 @@ from django.urls import reverse
 from django.views.generic import TemplateView, FormView
 from django.conf import settings
 from twf.models import Project
+
+
+def get_referrer_or_default(request, default='twf:home'):
+    """Get the referrer URL or a default URL."""
+    referer = request.META.get('HTTP_REFERER')
+    if referer:
+        return HttpResponseRedirect(referer)
+    return redirect(default)
 
 
 class TWFView(TemplateView, ABC):

@@ -1,21 +1,13 @@
 """Views for CRUD operations on users."""
 from django.contrib import messages
 from django.contrib.auth import get_user_model
-from django.http import HttpResponseRedirect
 from django.shortcuts import redirect, get_object_or_404
 from django.utils.crypto import get_random_string
 
 from twf.utils.mail_utils import send_reset_email
+from twf.views.views_base import get_referrer_or_default
 
 User = get_user_model()
-
-
-def get_referrer_or_default(request, default='twf:twf_user_management'):
-    """Get the referrer URL or a default URL."""
-    referer = request.META.get('HTTP_REFERER')
-    if referer:
-        return HttpResponseRedirect(referer)
-    return redirect(default)
 
 
 def activate_user(request, pk):
@@ -33,7 +25,7 @@ def activate_user(request, pk):
     user.save()
     
     messages.success(request, f"User '{user.username}' has been activated successfully.")
-    return get_referrer_or_default(request)
+    return get_referrer_or_default(request, default='twf:twf_user_management')
 
 
 def deactivate_user(request, pk):
@@ -49,7 +41,7 @@ def deactivate_user(request, pk):
     # Cannot deactivate yourself
     if user == request.user:
         messages.error(request, "You cannot deactivate your own account.")
-        return get_referrer_or_default(request)
+        return get_referrer_or_default(request, default='twf:twf_user_management')
     
     # Deactivate the user
     user.is_active = False
@@ -78,7 +70,7 @@ def delete_user(request, pk):
     # Cannot delete yourself
     if user == request.user:
         messages.error(request, "You cannot delete your own account.")
-        return get_referrer_or_default(request)
+        return get_referrer_or_default(request, default='twf:twf_user_management')
     
     # Check if the user owns any projects
     if hasattr(user, 'profile') and user.profile.owned_projects.exists():
@@ -135,4 +127,4 @@ def reset_password(request, pk):
     except Exception as e:
         messages.error(request, f"Error resetting password: {str(e)}")
     
-    return get_referrer_or_default(request)
+    return get_referrer_or_default(request, default='twf:twf_user_management')

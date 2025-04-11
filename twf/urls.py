@@ -2,7 +2,7 @@
 from django.urls import path
 from django.contrib.auth import views as auth_views
 
-from twf.tasks.task_status import task_status_view, task_cancel_view, task_remove_view
+from twf.tasks.task_status import task_status_view
 from twf.tasks.task_triggers import *
 from twf.views.ajax.views_ajax_field_validation import validate_page_field, validate_document_field
 from twf.views.ajax.views_ajax_markdown import ajax_markdown_generate, ajax_markdown_preview
@@ -39,7 +39,7 @@ from twf.views.home.views_home import TWFHomeView, TWFHomeLoginView, TWFHomePass
 from twf.views.home.views_crud import activate_user, deactivate_user, delete_user, reset_password
 from twf.views.metadata.views_metadata_ai import TWFMetadataLoadDataView, TWFMetadataLoadSheetsDataView
 from twf.views.project.views_crud import delete_all_documents, delete_all_tags, delete_all_collections, select_project, \
-    delete_project, close_project, reopen_project, delete_prompt
+    delete_project, close_project, reopen_project, delete_prompt, task_cancel_view, task_remove_view
 from twf.views.ajax.views_ajax_download import ajax_transkribus_download_export, download_progress_view
 from twf.views.collections.views_collections import TWFCollectionsReviewView, TWFCollectionOverviewView, \
     TWFCollectionsCreateView, TWFCollectionsDetailView, TWFCollectionsEditView, TWFCollectionsAddDocumentView, \

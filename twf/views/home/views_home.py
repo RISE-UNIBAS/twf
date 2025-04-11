@@ -190,6 +190,7 @@ class TWFUserDetailView(LoginRequiredMixin, TWFHomeView):
     """View to display detailed information about a specific user."""
     template_name = 'twf/home/user_detail.html'
     page_title = 'User Details'
+    navigation_anchor = reverse_lazy('twf:twf_user_management')
     
     def get(self, request, *args, **kwargs):
         """Handle GET request and check permissions."""
@@ -516,6 +517,7 @@ class TWFProjectViewDetailView(LoginRequiredMixin, TWFHomeView):
     """
     template_name = 'twf/home/project_view.html'
     page_title = 'Project Details'
+    navigation_anchor = reverse_lazy('twf:project_management')
     
     def get(self, request, *args, **kwargs):
         """Handle the GET request."""
