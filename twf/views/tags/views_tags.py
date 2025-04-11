@@ -6,7 +6,7 @@ from io import StringIO
 import pandas as pd
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.db.models import Count
+from django.db.models import Count, Q
 from django.http import HttpResponse
 from django.shortcuts import redirect
 
@@ -347,16 +347,16 @@ class TWFTagsGroupView(TWFTagsView):
 class TWFProjectTagsView(SingleTableMixin, FilterView, TWFTagsView):
     """Base class for all tag views."""
     template_name = 'twf/tags/all_tags.html'
-    page_title = 'Project Documents'
+    page_title = 'All Tags'
     filterset_class = TagFilter
     table_class = TagTable
     paginate_by = 20
     model = PageTag
+    strict = False
 
     def post(self, request, *args, **kwargs):
         """Handle the post request."""
         if "export_tags" in request.POST:
-
             result = []
             queryset = self.get_filterset(self.filterset_class).qs
             for item in queryset:
@@ -385,7 +385,7 @@ class TWFProjectTagsView(SingleTableMixin, FilterView, TWFTagsView):
             df.to_csv(csv_buffer, index=False)
             csv_data = csv_buffer.getvalue()
             response = HttpResponse(csv_data, content_type='text/csv')
-            response['Content-Disposition'] = 'attachment; filename="data.csv"'
+            response['Content-Disposition'] = 'attachment; filename="tags_export.csv"'
             return response
 
         return redirect('twf:tags_all')
@@ -394,7 +394,7 @@ class TWFProjectTagsView(SingleTableMixin, FilterView, TWFTagsView):
         """Get the filterset."""
         project = self.get_project()
         excluded = get_excluded_types(project)
-        return filterset_class(self.request.GET, queryset=self.get_queryset(),
+        return filterset_class(self.request.GET or None, queryset=self.get_queryset(),
                                project=project, excluded=excluded)
 
     def get_queryset(self):
@@ -402,27 +402,69 @@ class TWFProjectTagsView(SingleTableMixin, FilterView, TWFTagsView):
         project = self.get_project()
         excluded_types = get_excluded_types(project)
 
-        base_queryset = PageTag.objects.filter(
+        return PageTag.objects.filter(
             page__document__project=project
         ).exclude(variation_type__in=excluded_types)
 
-        self.filterset = self.filterset_class(self.request.GET,
-                                              queryset=base_queryset,
-                                              project=project,
-                                              excluded=excluded_types)
-        return self.filterset.qs
-
     def get(self, request, *args, **kwargs):
-        """Handle the get request."""
-        self.object_list = self.get_queryset()
+        """Handle GET requests."""
+        # Set up initial queryset
+        queryset = self.get_queryset()
+        
+        # Initialize the filter
+        project = self.get_project()
+        excluded = get_excluded_types(project)
+        self.filterset = self.filterset_class(
+            request.GET or None,
+            queryset=queryset,
+            project=project,
+            excluded=excluded
+        )
+        
+        # Set object_list either to all items or filtered items
+        if request.GET and self.filterset.is_bound:
+            self.object_list = self.filterset.qs
+        else:
+            self.object_list = queryset
+            
+        # Log filter results for debugging
+        logger.debug(f"Initial tags queryset count: {queryset.count()}")
+        if hasattr(self, 'filterset') and self.filterset:
+            logger.debug(f"Filtered tags queryset count: {self.filterset.qs.count()}")
+        
+        # Get context and render response
         context = self.get_context_data()
         return self.render_to_response(context)
 
     def get_context_data(self, **kwargs):
         """Get the context data."""
         context = super().get_context_data(**kwargs)
+        
+        # Basic context
         context['page_title'] = self.page_title
-        context['filter'] = self.get_filterset(self.filterset_class)
+        context['filter'] = self.filterset
+        
+        # Tag statistics
+        project = self.get_project()
+        all_tags = PageTag.objects.filter(page__document__project=project)
+        excluded_types = get_excluded_types(project)
+        
+        # Tag statistics for the header
+        stats = {
+            'total': all_tags.exclude(variation_type__in=excluded_types).count(),
+            'resolved': all_tags.exclude(variation_type__in=excluded_types).filter(
+                Q(dictionary_entry__isnull=False) | Q(date_variation_entry__isnull=False)
+            ).count(),
+            'open': all_tags.exclude(variation_type__in=excluded_types).filter(
+                dictionary_entry__isnull=True, 
+                date_variation_entry__isnull=True,
+                is_parked=False
+            ).count(),
+            'parked': all_tags.exclude(variation_type__in=excluded_types).filter(is_parked=True).count(),
+            'ignored': all_tags.filter(variation_type__in=excluded_types).count()
+        }
+        context['tag_stats'] = stats
+        
         return context
 
 

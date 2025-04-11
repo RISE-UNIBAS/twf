@@ -7,16 +7,93 @@
 {% endblock %}
 
 {% block content %}
-    <p class="lead">All tasks from your project are listed here.</p>
+    <p class="lead">All tasks from your project are listed here. Use the filters to narrow down the list.</p>
 
-    {% twf_filter filter %}
+    <!-- Task Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3 mb-2">
+            <div class="card text-white bg-dark h-100">
+                <div class="card-body d-flex justify-content-between align-items-center">
+                    <div>
+                        <h3 class="card-title mb-0">{{ task_stats.total }}</h3>
+                        <p class="card-text">Total Tasks</p>
+                    </div>
+                    <i class="fas fa-tasks fa-2x"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-2">
+            <div class="card text-white bg-success h-100">
+                <div class="card-body d-flex justify-content-between align-items-center">
+                    <div>
+                        <h3 class="card-title mb-0">{{ task_stats.completed }}</h3>
+                        <p class="card-text">Completed</p>
+                    </div>
+                    <i class="fas fa-check-circle fa-2x"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-2">
+            <div class="card text-white bg-danger h-100">
+                <div class="card-body d-flex justify-content-between align-items-center">
+                    <div>
+                        <h3 class="card-title mb-0">{{ task_stats.failed }}</h3>
+                        <p class="card-text">Failed</p>
+                    </div>
+                    <i class="fas fa-times-circle fa-2x"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-2">
+            <div class="card text-white bg-secondary h-100">
+                <div class="card-body d-flex justify-content-between align-items-center">
+                    <div>
+                        <h3 class="card-title mb-0">{{ task_stats.pending }}</h3>
+                        <p class="card-text">In Progress</p>
+                    </div>
+                    <i class="fas fa-spinner fa-2x"></i>
+                </div>
+            </div>
+        </div>
+    </div>
 
+    <!-- Filter Form -->
+    <div class="card mb-4">
+        <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Task Filters</h5>
+            <span class="badge bg-light text-dark">
+                {% if request.GET and filter.qs %}
+                    {{ filter.qs|length }} tasks found
+                {% else %}
+                    {{ table.rows|length }} tasks found
+                {% endif %}
+            </span>
+        </div>
+        <div class="card-body">
+            {% twf_filter filter %}
+        </div>
+    </div>
+
+    <!-- Task Table -->
     <div class="table-responsive-sm mt-3">
         <div class="card">
             <div class="card-body p-0">
                 {% render_table table %}
             </div>
         </div>
+    </div>
+    
+    <!-- Task Types Info -->
+    <div class="mt-4 alert alert-info">
+        <h5><i class="fas fa-info-circle"></i> Task Status Information</h5>
+        <ul class="mb-0">
+            <li><strong>Pending</strong> - Task has been created but not yet started</li>
+            <li><strong>Started</strong> - Task is currently running</li>
+            <li><strong>Progress</strong> - Task is running with reported progress</li>
+            <li><strong>Success</strong> - Task completed successfully</li>
+            <li><strong>Failure</strong> - Task failed to complete</li>
+            <li><strong>Cancelled</strong> - Task was manually cancelled</li>
+        </ul>
     </div>
 
 {% endblock %}

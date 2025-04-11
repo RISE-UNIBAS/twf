@@ -1,23 +1,96 @@
 {% load twf_filters %}
-<form class="row w-100 g-2 align-items-end mb-3" method="get">
-    {% for field in filter.form.visible_fields %}
-        <div class="col">
-            <div class="form-group mb-1">
-                <label class="form-label text-small mb-0">{{ field.label }}</label>
-                {{ field|add_class:"form-control form-control-sm" }}
+<form class="row g-2 mb-3" method="get">
+    <!-- Check if this is a task filter (with our specific fields) -->
+    {% if 'title' in filter.form.fields and 'status' in filter.form.fields and 'start_time_after' in filter.form.fields %}
+        <!-- Task filters with special layout -->
+        
+        <!-- Text filters in first row -->
+        <div class="row g-2 mb-2">
+            {% for field in filter.form.visible_fields %}
+                {% if field.name == 'title' or field.name == 'description' or field.name == 'status' or field.name == 'user' %}
+                    <div class="col-md-3">
+                        <div class="form-group mb-1">
+                            <label class="form-label text-small mb-0">{{ field.label }}</label>
+                            {{ field|add_class:"form-control form-control-sm" }}
+                        </div>
+                    </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+        
+        <!-- Date filters in second row -->
+        <div class="row g-2 mb-2">
+            {% for field in filter.form.visible_fields %}
+                {% if field.name == 'start_time_after' or field.name == 'start_time_before' or field.name == 'end_time_after' or field.name == 'end_time_before' %}
+                    <div class="col-md-3">
+                        <div class="form-group mb-1">
+                            <label class="form-label text-small mb-0">{{ field.label }}</label>
+                            {{ field|add_class:"form-control form-control-sm" }}
+                        </div>
+                    </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+        
+        <!-- Checkbox filters in third row with action buttons -->
+        <div class="row g-2 align-items-end">
+            {% for field in filter.form.visible_fields %}
+                {% if field.name == 'has_completed' %}
+                    <div class="col-md-3">
+                        <div class="form-check mb-2">
+                            {{ field }}
+                            <label class="form-check-label" for="{{ field.id_for_label }}">
+                                {{ field.label }}
+                            </label>
+                        </div>
+                    </div>
+                {% endif %}
+            {% endfor %}
+            
+            <div class="col-md-auto">
+                <div class="d-flex">
+                    <button type="submit" class="btn btn-dark btn-sm me-2"
+                            data-bs-toggle="tooltip" data-bs-placement="top" title="Apply Filters">
+                        <i class="fa fa-filter"></i> Apply Filters
+                    </button>
+                    <a href="." class="btn btn-secondary btn-sm"
+                       data-bs-toggle="tooltip" data-bs-placement="top" title="Clear All Filters">
+                        <i class="fa fa-times"></i> Clear Filters
+                    </a>
+                </div>
             </div>
         </div>
-    {% endfor %}
-    <div class="col-auto">
-        <button type="submit" class="btn btn-dark btn-sm mb-1"
-                data-bs-toggle="tooltip" data-bs-placement="top" title="Filter">
-            <i class="fa fa-filter"></i>
-        </button>
-    </div>
-    <div class="col-auto">
-        <a href="." class="btn btn-secondary btn-sm mb-1"
-           data-bs-toggle="tooltip" data-bs-placement="top" title="Clear filters">
-            <i class="fa fa-times"></i>
-        </a>
-    </div>
+    {% else %}
+        <!-- Generic filter layout for all other filter types -->
+        <div class="row g-3">
+            {% for field in filter.form.visible_fields %}
+                <div class="col-md-4 mb-2">
+                    <div class="form-group">
+                        <label class="form-label text-small mb-1">{{ field.label }}</label>
+                        {% if field.field.widget.input_type == 'checkbox' %}
+                            <div class="form-check">
+                                {{ field }}
+                                <label class="form-check-label" for="{{ field.id_for_label }}">
+                                    {{ field.label }}
+                                </label>
+                            </div>
+                        {% else %}
+                            {{ field|add_class:"form-control form-control-sm" }}
+                        {% endif %}
+                    </div>
+                </div>
+            {% endfor %}
+            
+            <div class="col-12 mt-2">
+                <div class="d-flex">
+                    <button type="submit" class="btn btn-dark btn-sm me-2">
+                        <i class="fa fa-filter"></i> Apply Filters
+                    </button>
+                    <a href="." class="btn btn-secondary btn-sm">
+                        <i class="fa fa-times"></i> Clear Filters
+                    </a>
+                </div>
+            </div>
+        </div>
+    {% endif %}
 </form>

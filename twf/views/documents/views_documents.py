@@ -130,24 +130,59 @@ class TWFDocumentsBrowseView(SingleTableView, FilterView, TWFDocumentView):
     filterset_class = DocumentFilter
     paginate_by = 10
     model = Document
+    strict = False
 
     def get_queryset(self):
         """Get the queryset for the view."""
+        # Get all documents for the current project
         queryset = Document.objects.filter(project_id=self.request.session.get('project_id'))
-        self.filterset = self.filterset_class(self.request.GET, queryset=queryset)
-        return self.filterset.qs
-
+        return queryset
+    
     def get(self, request, *args, **kwargs):
-        """Get the view."""
-        self.object_list = self.get_queryset()
+        """Handle GET requests."""
+        # Set up initial queryset
+        queryset = self.get_queryset()
+        
+        # Initialize the filter
+        self.filterset = self.filterset_class(
+            request.GET or None,
+            queryset=queryset
+        )
+        
+        # Set object_list either to all items or filtered items
+        if request.GET and self.filterset.is_bound:
+            self.object_list = self.filterset.qs
+        else:
+            self.object_list = queryset
+            
+        # Log filter results for debugging
+        logger.debug(f"Initial document queryset count: {queryset.count()}")
+        if hasattr(self, 'filterset') and self.filterset:
+            logger.debug(f"Filtered document queryset count: {self.filterset.qs.count()}")
+        
+        # Get context and render response
         context = self.get_context_data()
-        return self.render_to_response(context)  # This is still valid in class-based views
+        return self.render_to_response(context)
 
     def get_context_data(self, **kwargs):
         """Get the context data for the view."""
         context = super().get_context_data(**kwargs)
         context['page_title'] = self.page_title
-        context['filter'] = self.get_filterset(self.filterset_class)
+        context['filter'] = self.filterset
+        
+        # Add document statistics
+        project = self.get_project()
+        all_documents = project.documents.all()
+        
+        # Document statistics for the header
+        stats = {
+            'total': all_documents.count(),
+            'active': all_documents.filter(is_parked=False).count(),
+            'ignored': all_documents.filter(is_parked=True).count(),
+            'reviewed': all_documents.filter(status='reviewed').count()
+        }
+        context['document_stats'] = stats
+        
         return context
 
 

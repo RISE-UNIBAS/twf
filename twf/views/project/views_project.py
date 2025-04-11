@@ -113,44 +113,79 @@ class TWFProjectTaskMonitorView(SingleTableView, FilterView, TWFProjectView):
     filterset_class = TaskFilter
     paginate_by = 10
     model = Task
+    strict = False  # Don't enforce form validation for empty filters
 
     def get_queryset(self):
         """Get the queryset for the view."""
-        queryset = Task.objects.filter(project_id=self.request.session.get('project_id'))
-        self.filterset = self.filterset_class(self.request.GET, queryset=queryset)
-        return self.filterset.qs
-
+        # Get all tasks for the current project
+        project_id = self.request.session.get('project_id')
+        queryset = Task.objects.filter(project_id=project_id).order_by('-start_time')
+        
+        return queryset
+    
     def get(self, request, *args, **kwargs):
-        """Get the view."""
-        self.object_list = self.get_queryset()
+        """Handle GET requests."""
+        # Set up initial queryset
+        queryset = self.get_queryset()
+        
+        # Initialize the filter
+        self.filterset = self.filterset_class(
+            request.GET or None,
+            queryset=queryset,
+            project=self.get_project()
+        )
+        
+        # Set object_list either to all items or filtered items
+        if request.GET and self.filterset.is_bound:
+            self.object_list = self.filterset.qs
+        else:
+            self.object_list = queryset
+            
+        # Log filter results for debugging
+        logger.debug(f"Initial queryset count: {queryset.count()}")
+        logger.debug(f"Filtered queryset count: {self.object_list.count()}")
+        
+        # Get context and render response
         context = self.get_context_data()
         return self.render_to_response(context)
 
+    def get_filterset(self, filterset_class):
+        """
+        Returns an instance of the filterset to be used in this view.
+        Overridden to properly initialize the filterset with the project.
+        """
+        # If the filterset hasn't been initialized yet
+        if not hasattr(self, 'filterset') or self.filterset is None:
+            self.filterset = filterset_class(
+                self.request.GET or None,
+                queryset=self.get_queryset(),
+                project=self.get_project()
+            )
+        return self.filterset
+        
     def get_context_data(self, **kwargs):
         """Get the context data."""
         context = super().get_context_data(**kwargs)
-        tasks = self.get_project().tasks.all()
-
-        # Handle filtering
-        filter_form = TaskFilterForm(self.request.GET or None, project=self.get_project())
-        if filter_form.is_valid():
-            if filter_form.cleaned_data['started_by']:
-                tasks = tasks.filter(user=filter_form.cleaned_data['started_by'])
-            if filter_form.cleaned_data['status']:
-                tasks = tasks.filter(status=filter_form.cleaned_data['status'])
-
-            # Date range filter
-            date_range = filter_form.cleaned_data['date_range']
-            if date_range == "last_week":
-                tasks = tasks.filter(start_time__gte=now() - timedelta(days=7))
-            elif date_range == "last_month":
-                tasks = tasks.filter(start_time__gte=now() - timedelta(days=30))
-            elif date_range == "last_year":
-                tasks = tasks.filter(start_time__gte=now() - timedelta(days=365))
-
-        context['tasks'] = tasks
-        context['filter_form'] = filter_form
-        context['filter'] = self.get_filterset(self.filterset_class)
+        
+        # Get task stats for display
+        project = self.get_project()
+        all_tasks = project.tasks.all()
+        
+        # Task statistics
+        stats = {
+            'total': all_tasks.count(),
+            'completed': all_tasks.filter(status='SUCCESS').count(),
+            'failed': all_tasks.filter(status='FAILURE').count(),
+            'pending': all_tasks.filter(status__in=['PENDING', 'STARTED', 'PROGRESS']).count(),
+            'cancelled': all_tasks.filter(status='CANCELLED').count(),
+            'today': all_tasks.filter(start_time__date=now().date()).count(),
+            'last_week': all_tasks.filter(start_time__gte=now() - timedelta(days=7)).count()
+        }
+        context['task_stats'] = stats
+        
+        # Make sure the filter is available in the context
+        context['filter'] = self.filterset
+                
         return context
 
 
@@ -197,28 +232,44 @@ class TWFProjectPromptsView(SingleTableView, FilterView, TWFProjectView):
     filterset_class = PromptFilter
     paginate_by = 10
     model = Prompt
+    strict = False
 
     def get_queryset(self):
         """Get the queryset for the view."""
+        # Get all prompts for the current project
         queryset = Prompt.objects.filter(project_id=self.request.session.get('project_id'))
-        self.filterset = self.filterset_class(self.request.GET, queryset=queryset)
-        return self.filterset.qs
-
+        return queryset
+    
     def get(self, request, *args, **kwargs):
-        """Get the view."""
-        self.object_list = self.get_queryset()
+        """Handle GET requests."""
+        # Set up initial queryset
+        queryset = self.get_queryset()
+        
+        # Initialize the filter
+        self.filterset = self.filterset_class(
+            request.GET or None,
+            queryset=queryset
+        )
+        
+        # Set object_list either to all items or filtered items
+        if request.GET and self.filterset.is_bound:
+            self.object_list = self.filterset.qs
+        else:
+            self.object_list = queryset
+            
+        # Get context and render response
         context = self.get_context_data()
         return self.render_to_response(context)
 
     def get_context_data(self, **kwargs):
         """Get the context data."""
         context = super().get_context_data(**kwargs)
-        context['filter'] = self.get_filterset(self.filterset_class)
+        context['filter'] = self.filterset
         return context
 
 
 class TWFProjectNotesView(SingleTableView, FilterView, TWFProjectView):
-    """View for the project prompts."""
+    """View for the project notes."""
 
     template_name = 'twf/project/notes.html'
     page_title = 'Notes'
@@ -226,23 +277,39 @@ class TWFProjectNotesView(SingleTableView, FilterView, TWFProjectView):
     filterset_class = NoteFilter
     paginate_by = 10
     model = Note
+    strict = False
 
     def get_queryset(self):
         """Get the queryset for the view."""
+        # Get all notes for the current project
         queryset = Note.objects.filter(project_id=self.request.session.get('project_id'))
-        self.filterset = self.filterset_class(self.request.GET, queryset=queryset)
-        return self.filterset.qs
-
+        return queryset
+    
     def get(self, request, *args, **kwargs):
-        """Get the view."""
-        self.object_list = self.get_queryset()
+        """Handle GET requests."""
+        # Set up initial queryset
+        queryset = self.get_queryset()
+        
+        # Initialize the filter
+        self.filterset = self.filterset_class(
+            request.GET or None,
+            queryset=queryset
+        )
+        
+        # Set object_list either to all items or filtered items
+        if request.GET and self.filterset.is_bound:
+            self.object_list = self.filterset.qs
+        else:
+            self.object_list = queryset
+            
+        # Get context and render response
         context = self.get_context_data()
         return self.render_to_response(context)
 
     def get_context_data(self, **kwargs):
         """Get the context data."""
         context = super().get_context_data(**kwargs)
-        context['filter'] = self.get_filterset(self.filterset_class)
+        context['filter'] = self.filterset
         return context
 
 class TWFProjectPromptDetailView(TWFProjectView):
