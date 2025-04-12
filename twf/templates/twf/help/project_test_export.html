@@ -1,0 +1,88 @@
+{% load twf_help %}
+
+<div class="help-content">
+    <h2>Test Export</h2>
+    <p>
+        The Test Export feature allows you to request and process a single page from your Transkribus collection to verify that the export and parsing functions work correctly before committing to a full collection export.
+    </p>
+
+    <h3>Feature Status</h3>
+    <p>
+        <strong>Note:</strong> This feature is currently marked as "Not Implemented Yet" (NIY). While the interface elements are visible, the functionality is still under development and may not work as expected.
+    </p>
+
+    <h3>Purpose</h3>
+    <p>
+        Test Export is designed to help you:
+    </p>
+    <ul>
+        <li>Verify your Transkribus connection and authentication credentials</li>
+        <li>Check that the system can properly retrieve data from your collection</li>
+        <li>Preview how your Transkribus data will be processed and displayed</li>
+        <li>Identify potential issues with your collection structure before processing the entire dataset</li>
+        <li>Test export settings and configurations on a small sample</li>
+    </ul>
+
+    <h3>How to Use (When Implemented)</h3>
+    <ol>
+        <li><strong>Prerequisites:</strong>
+            <ul>
+                <li>Ensure your Transkribus credentials are configured in the {% help_url 'project_settings_credentials' 'Credential Settings' %}</li>
+                <li>Verify your project is associated with a valid Transkribus collection ID</li>
+            </ul>
+        </li>
+        <li><strong>Request Test Page:</strong>
+            <ul>
+                <li>Click the "Request Test Page" button</li>
+                <li>The system will connect to Transkribus and request a single page from your collection</li>
+                <li>The status of your request will be displayed in the "Current status" section</li>
+            </ul>
+        </li>
+        <li><strong>Review Results:</strong>
+            <ul>
+                <li>When implemented, this page will show parsing results and metadata extraction from the test page</li>
+                <li>You'll be able to review text recognition, layout analysis, and metadata</li>
+                <li>This preview will help you understand how your data will be processed in a full export</li>
+            </ul>
+        </li>
+    </ol>
+
+    <h3>Benefits of Test Export</h3>
+    <ul>
+        <li><strong>Time-Saving:</strong> Identify issues before processing large collections</li>
+        <li><strong>Configuration Testing:</strong> Verify that your export settings produce the expected results</li>
+        <li><strong>Troubleshooting:</strong> Easier to diagnose problems with a single page than with a full collection</li>
+        <li><strong>Quality Control:</strong> Ensure data quality and integrity before full processing</li>
+    </ul>
+
+    <h3>What to Look For (When Implemented)</h3>
+    <p>
+        When reviewing a test export, pay attention to:
+    </p>
+    <ul>
+        <li>Text recognition accuracy</li>
+        <li>Layout recognition and region identification</li>
+        <li>Metadata extraction and formatting</li>
+        <li>Character encoding and special character handling</li>
+        <li>Image quality and resolution</li>
+        <li>Tag and annotation extraction</li>
+    </ul>
+
+    <h3>Alternative Approaches</h3>
+    <p>
+        Until this feature is fully implemented, you can:
+    </p>
+    <ul>
+        <li>Use the full {% help_url 'project_tk_export' 'Request Transkribus Export' %} feature and examine the results of a small collection</li>
+        <li>Create a test collection in Transkribus with just a few pages for export testing</li>
+        <li>After exporting, check individual documents in the Document view to verify proper data extraction</li>
+    </ul>
+
+    <h3>Related Topics</h3>
+    <ul>
+        <li>{% help_url 'project_tk_export' 'Request Transkribus Export' %}</li>
+        <li>{% help_url 'project_tk_structure' 'Extract Transkribus Export' %}</li>
+        <li>{% help_url 'project_settings_credentials' 'Credential Settings' %}</li>
+        <li>{% help_url 'export_overview' 'Export Overview' %}</li>
+    </ul>
+</div>
