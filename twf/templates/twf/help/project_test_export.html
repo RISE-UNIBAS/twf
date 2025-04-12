@@ -27,7 +27,7 @@
     <ol>
         <li><strong>Prerequisites:</strong>
             <ul>
-                <li>Ensure your Transkribus credentials are configured in the {% help_url 'project_settings_credentials' 'Credential Settings' %}</li>
+                <li>Ensure your Transkribus credentials are configured in the <a href="{% url 'twf:project_settings_credentials' %}">Credential Settings</a></li>
                 <li>Verify your project is associated with a valid Transkribus collection ID</li>
             </ul>
         </li>
@@ -73,16 +73,14 @@
         Until this feature is fully implemented, you can:
     </p>
     <ul>
-        <li>Use the full {% help_url 'project_tk_export' 'Request Transkribus Export' %} feature and examine the results of a small collection</li>
+        <li>Use the full <a href="{% url 'twf:project_tk_export' %}">Request Transkribus Export</a> feature and examine the results of a small collection</li>
         <li>Create a test collection in Transkribus with just a few pages for export testing</li>
         <li>After exporting, check individual documents in the Document view to verify proper data extraction</li>
     </ul>
 
     <h3>Related Topics</h3>
-    <ul>
-        <li>{% help_url 'project_tk_export' 'Request Transkribus Export' %}</li>
-        <li>{% help_url 'project_tk_structure' 'Extract Transkribus Export' %}</li>
-        <li>{% help_url 'project_settings_credentials' 'Credential Settings' %}</li>
-        <li>{% help_url 'export_overview' 'Export Overview' %}</li>
+    <ul class="help-topics">
+        <li><a href="{% help_url 'modules/workflows/project.html' %}" target="_blank" class="help-link btn-ext">Project Workflows</a></li>
+        <li><a href="{% help_url 'modules/parts/settings.html' %}" target="_blank" class="help-link btn-ext">Settings Configuration</a></li>
     </ul>
 </div>

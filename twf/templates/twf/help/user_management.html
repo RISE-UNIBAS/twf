@@ -1,0 +1,52 @@
+<h3>User Management</h3>
+<p>The User Management page allows project administrators to control which users have access to specific features and actions within the project. Permissions are assigned on a per-user and per-project basis.</p>
+
+<h4>Permission Roles</h4>
+<p>The system provides three predefined role templates that can be quickly applied to users:</p>
+<ul>
+    <li><strong>Administrator:</strong> Grants all permissions and full access to all project features</li>
+    <li><strong>Manager:</strong> Allows management of project content, import/export operations, batch processing, and settings configuration</li>
+    <li><strong>User:</strong> Provides access to basic workflows and manual operations, but restricts administrative functions</li>
+</ul>
+
+<p>To assign a role, click the corresponding "Set" button in the user's column. This will automatically check all the permission boxes appropriate for that role.</p>
+
+<h4>Customizing Permissions</h4>
+<p>Beyond the predefined roles, you can customize exactly which actions each user can perform by toggling individual permission checkboxes. Permissions are grouped into categories:</p>
+
+<ul>
+    <li><strong>Project:</strong> Permissions related to project management, settings, and configuration</li>
+    <li><strong>Document:</strong> Permissions for document creation, editing, and batch processing</li>
+    <li><strong>Tag:</strong> Permissions for working with tags, including extraction and grouping</li>
+    <li><strong>Metadata:</strong> Permissions for managing and reviewing metadata</li>
+    <li><strong>Dictionary:</strong> Permissions for dictionary creation, editing, and enrichment workflows</li>
+    <li><strong>Collection:</strong> Permissions for collection management and processing</li>
+    <li><strong>Import/Export:</strong> Permissions for importing and exporting project data</li>
+    <li><strong>Task:</strong> Permissions for managing background tasks</li>
+    <li><strong>Prompt:</strong> Permissions for managing saved prompts</li>
+    <li><strong>Notes:</strong> Permissions for managing project notes</li>
+</ul>
+
+<h4>Bulk Permission Selection</h4>
+<p>For each user (column) and permission category, you can use the checkbox at the top of the column to select or deselect all permissions in that category at once.</p>
+
+<h4>Permission Inheritance</h4>
+<p>Permissions follow these rules:</p>
+<ul>
+    <li>System administrators (superusers) have all permissions across all projects</li>
+    <li>Project owners automatically have all permissions for their projects</li>
+    <li>You cannot modify your own permissions (your column will show disabled checkboxes)</li>
+    <li>You cannot grant permissions that you do not have yourself</li>
+</ul>
+
+<h4>Permission Changes</h4>
+<p>After making changes to user permissions:</p>
+<ol>
+    <li>Review your changes carefully</li>
+    <li>Click the "Save project permission changes" button at the bottom of the page</li>
+    <li>Changes take effect immediately - users may need to refresh their browser to see updated access</li>
+</ol>
+
+<p><strong>Note:</strong> Permissions are a critical security feature. Be careful when granting administrative permissions, especially to users who are not familiar with the system.</p>
+
+<p><strong>Tip:</strong> For most users, the predefined "User" role provides a good balance of functionality without risking accidental data loss or unwanted changes.</p>

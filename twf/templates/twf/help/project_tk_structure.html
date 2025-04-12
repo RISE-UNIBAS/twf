@@ -8,7 +8,7 @@
 
     <h3>Prerequisites</h3>
     <ul>
-        <li><strong>Downloaded Export:</strong> You must have successfully downloaded a Transkribus export using the {% help_url 'project_tk_export' 'Request Transkribus Export' %} functionality</li>
+        <li><strong>Downloaded Export:</strong> You must have successfully downloaded a Transkribus export using the <a href="{% url 'twf:project_tk_export' %}">Request Transkribus Export</a> functionality</li>
         <li><strong>Valid ZIP File:</strong> The downloaded export must be a valid ZIP archive containing PAGE XML files</li>
     </ul>
 
@@ -55,7 +55,7 @@
         <li>Once complete, a summary of the extraction results will be displayed</li>
     </ul>
     <p>
-        You can view detailed status information, including any errors encountered, in the {% help_url 'project_task_monitor' 'Task Monitor' %}.
+        You can view detailed status information, including any errors encountered, in the <a href="{% url 'twf:project_task_monitor' %}">Task Monitor</a>.
     </p>
 
     <h3>What Gets Extracted</h3>
@@ -75,8 +75,8 @@
         Once the extraction is complete, you can proceed with various workflows:
     </p>
     <ul>
-        <li>View and browse the extracted documents in the {% help_url 'documents_overview' 'Documents' %} section</li>
-        <li>Extract tags from the documents using the {% help_url 'tags_extract' 'Extract Tags' %} feature</li>
+        <li>View and browse the extracted documents in the <a href="{% url 'twf:documents_overview' %}">Documents</a> section</li>
+        <li>Extract tags from the documents using the <a href="{% url 'twf:tags_extract' %}">Extract Tags</a> feature</li>
         <li>Enrich document metadata using external sources</li>
         <li>Create collections to organize and group documents</li>
         <li>Export the processed and enriched data for further analysis</li>
@@ -84,7 +84,7 @@
 
     <h3>Troubleshooting</h3>
     <ul>
-        <li><strong>No Export Available:</strong> If you see a warning that there is no export, you need to first download an export using the {% help_url 'project_tk_export' 'Request Transkribus Export' %} page</li>
+        <li><strong>No Export Available:</strong> If you see a warning that there is no export, you need to first download an export using the <a href="{% url 'twf:project_tk_export' %}">Request Transkribus Export</a> page</li>
         <li><strong>Extraction Errors:</strong> Check the Task Monitor for specific error messages if the extraction fails</li>
         <li><strong>Missing Documents:</strong> Ensure your Transkribus export contains valid PAGE XML files</li>
         <li><strong>Incomplete Metadata:</strong> Some metadata may be missing if the corresponding files are not present in the export</li>
@@ -102,10 +102,8 @@
     </ul>
 
     <h3>Related Topics</h3>
-    <ul>
-        <li>{% help_url 'project_tk_export' 'Request Transkribus Export' %}</li>
-        <li>{% help_url 'documents_overview' 'Document Management' %}</li>
-        <li>{% help_url 'tags_extract' 'Extract Tags' %}</li>
-        <li>{% help_url 'project_task_monitor' 'Task Monitor' %}</li>
+    <ul class="help-topics">
+        <li><a href="{% help_url 'modules/workflows/project.html' %}" target="_blank" class="help-link btn-ext">Project Workflows</a></li>
+        <li><a href="{% help_url 'modules/workflows/documents.html' %}" target="_blank" class="help-link btn-ext">Document Workflows</a></li>
     </ul>
 </div>
