@@ -1,63 +1,80 @@
-<h3>Project Overview</h3>
-<p>The Project Overview provides a comprehensive summary of your current project, including key information, statistics, and recent activity.</p>
+{% load twf_help %}
 
-<h4>Project Information Header</h4>
-<ul>
-    <li><strong>Project Name:</strong> Displayed at the top of the page (e.g., "Project 'Letter Test'").</li>
-    <li><strong>Description:</strong> A brief description of your project's purpose.</li>
-    <li><strong>Transkribus Collection ID:</strong> If your project is linked to a Transkribus collection, the ID is shown here.</li>
-    <li><strong>Creation & Membership Details:</strong> Shows who created the project, when it was created, current members, and when it was last modified.</li>
-</ul>
+<div class="help-content">
+    <h2>Project Overview</h2>
+    <p>The Project Overview provides a comprehensive summary of your current project, including key information, statistics, and recent activity.</p>
 
-<h4>Key Metrics Summary</h4>
-<p>The overview cards provide at-a-glance information about your project:</p>
-<ul>
-    <li><strong>Documents:</strong> Total number of documents in this project.</li>
-    <li><strong>Pages:</strong> Total number of pages across all documents.</li>
-    <li><strong>Users:</strong> Number of users with access to this project.</li>
-</ul>
+    <h3>Project Information Header</h3>
+    <ul>
+        <li><strong>Project Name:</strong> Displayed at the top of the page (e.g., "Project 'Letter Test'").</li>
+        <li><strong>Description:</strong> A brief description of your project's purpose.</li>
+        <li><strong>Transkribus Collection ID:</strong> If your project is linked to a Transkribus collection, the ID is shown here.</li>
+        <li><strong>Creation & Membership Details:</strong> Shows who created the project, when it was created, current members, and when it was last modified.</li>
+    </ul>
 
-<h4>Project Statistics</h4>
-<p>This section is divided into multiple areas with detailed statistics:</p>
+    <h3>Key Metrics Summary</h3>
+    <p>The overview cards provide at-a-glance information about your project:</p>
+    <ul>
+        <li><strong>Documents:</strong> Total number of documents in this project.</li>
+        <li><strong>Pages:</strong> Total number of pages across all documents.</li>
+        <li><strong>Users:</strong> Number of users with access to this project.</li>
+    </ul>
 
-<h5>Documents</h5>
-<ul>
-    <li><strong>Total Documents:</strong> Number of documents currently in the project.</li>
-    <li><strong>Total Pages:</strong> Number of pages across all documents.</li>
-    <li><strong>Avg. Pages/Document:</strong> The average number of pages per document.</li>
-    <li><strong>Ignored Pages:</strong> Number and percentage of pages marked as ignored.</li>
-</ul>
+    <h3>Project Statistics</h3>
+    <p>This section is divided into multiple areas with detailed statistics:</p>
 
-<h5>Tags</h5>
-<ul>
-    <li><strong>Total Tags:</strong> Total number of tags extracted from all documents.</li>
-    <li><strong>Tags per Page:</strong> Average number of tags per page.</li>
-    <li><strong>Dictionaries Connected:</strong> Number of dictionaries linked to this project.</li>
-</ul>
+    <h4>Documents</h4>
+    <ul>
+        <li><strong>Total Documents:</strong> Number of documents currently in the project.</li>
+        <li><strong>Total Pages:</strong> Number of pages across all documents.</li>
+        <li><strong>Avg. Pages/Document:</strong> The average number of pages per document.</li>
+        <li><strong>Ignored Pages:</strong> Number and percentage of pages marked as ignored.</li>
+    </ul>
 
-<h5>Collections</h5>
-<ul>
-    <li><strong>Total Collections:</strong> Number of collections created in this project.</li>
-    <li><strong>Collection Items:</strong> Total number of items across all collections.</li>
-    <li><strong>Item Progress:</strong> Visual progress bar showing the status of collection items.</li>
-</ul>
+    <h4>Tags</h4>
+    <ul>
+        <li><strong>Total Tags:</strong> Total number of tags extracted from all documents.</li>
+        <li><strong>Tags per Page:</strong> Average number of tags per page.</li>
+        <li><strong>Dictionaries Connected:</strong> Number of dictionaries linked to this project.</li>
+    </ul>
 
-<h5>Task Activity</h5>
-<ul>
-    <li><strong>Total Tasks:</strong> Total number of tasks initiated in this project.</li>
-    <li><strong>Completed Tasks:</strong> Number of successfully completed tasks.</li>
-    <li><strong>Pending Tasks:</strong> Number of tasks currently in progress.</li>
-    <li><strong>Failed Tasks:</strong> Number of tasks that encountered errors.</li>
-</ul>
+    <h4>Collections</h4>
+    <ul>
+        <li><strong>Total Collections:</strong> Number of collections created in this project.</li>
+        <li><strong>Collection Items:</strong> Total number of items across all collections.</li>
+        <li><strong>Item Progress:</strong> Visual progress bar showing the status of collection items.</li>
+    </ul>
 
-<h4>Project Setup & Recent Tasks</h4>
-<ul>
-    <li><strong>Project Setup:</strong> Shows the setup status of your project with a checklist of completed steps.</li>
-    <li><strong>Recent Tasks:</strong> Lists the most recent processing tasks with their status and duration.</li>
-    <li><strong>View All Tasks:</strong> Click this button to see a complete history of all project tasks.</li>
-</ul>
+    <h4>Task Activity</h4>
+    <ul>
+        <li><strong>Total Tasks:</strong> Total number of tasks initiated in this project.</li>
+        <li><strong>Completed Tasks:</strong> Number of successfully completed tasks.</li>
+        <li><strong>Pending Tasks:</strong> Number of tasks currently in progress.</li>
+        <li><strong>Failed Tasks:</strong> Number of tasks that encountered errors.</li>
+    </ul>
 
-<h4>Navigation</h4>
-<p>Use the left sidebar to navigate to other sections of the project. Each section provides specialized tools for working with different aspects of your data.</p>
+    <h3>Project Setup & Recent Tasks</h3>
+    <ul>
+        <li><strong>Project Setup:</strong> Shows the setup status of your project with a checklist of completed steps.</li>
+        <li><strong>Recent Tasks:</strong> Lists the most recent processing tasks with their status and duration.</li>
+        <li><strong>View All Tasks:</strong> Click this button to see a complete history of all project tasks.</li>
+    </ul>
 
-<p><strong>Tip:</strong> The Project Overview is an excellent starting point to monitor your project's progress and identify areas that need attention.</p>
+    <h3>Navigation</h3>
+    <p>Use the left sidebar to navigate to other sections of the project. Each section provides specialized tools for working with different aspects of your data.</p>
+
+    <p><strong>Tip:</strong> The Project Overview is an excellent starting point to monitor your project's progress and identify areas that need attention.</p>
+
+    <h3>Related Topics</h3>
+    <ul class="help-topics">
+        <li><a href="{% url 'twf:help' 'project_management' %}" class="help-link btn">Project Management</a></li>
+        <li><a href="{% url 'twf:help' 'project_settings_general' %}" class="help-link btn">General Project Settings</a></li>
+        <li><a href="{% url 'twf:help' 'project_task_monitor' %}" class="help-link btn">Task Monitor</a></li>
+        <li><a href="{% url 'twf:help' 'project_prompts' %}" class="help-link btn">Project Prompts</a></li>
+        <li><a href="{% url 'twf:help' 'documents_overview' %}" class="help-link btn">Documents Overview</a></li>
+        <li><a href="{% url 'twf:help' 'collections_overview' %}" class="help-link btn">Collections Overview</a></li>
+        <li><a href="{% url 'twf:help' 'tags_overview' %}" class="help-link btn">Tags Overview</a></li>
+        <li><a href="{% help_url 'modules/introduction/get-started.rst' %}" target="_blank" class="help-link btn-ext">Getting Started Guide</a></li>
+        <li><a href="{% help_url 'modules/parts/settings.html' %}" target="_blank" class="help-link btn-ext">Project Settings</a></li>
+    </ul>
+</div>

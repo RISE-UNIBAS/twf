@@ -1,0 +1,107 @@
+{% load twf_help %}
+
+<div class="help-content">
+    <h2>Viewing a Collection</h2>
+    <p>
+        This page displays the contents and details of a specific collection. Collections organize related documents or document segments
+        into meaningful groups for processing, analysis, and export.
+    </p>
+
+    <h3>Collection Information</h3>
+    <p>
+        At the top of the page, you'll find essential information about the collection:
+    </p>
+    <ul>
+        <li><strong>Title:</strong> The name of the collection</li>
+        <li><strong>Description:</strong> A detailed explanation of the collection's purpose and contents</li>
+        <li><strong>Type:</strong> The category or classification of the collection</li>
+        <li><strong>Created By:</strong> The user who created the collection</li>
+        <li><strong>Creation Date:</strong> When the collection was first created</li>
+        <li><strong>Last Modified:</strong> When the collection was most recently updated</li>
+        <li><strong>Statistics:</strong> Overview of item counts and status distribution</li>
+    </ul>
+
+    <h3>Collection Items Table</h3>
+    <p>
+        The main section of the page displays a table of all items within this collection:
+    </p>
+    <ul>
+        <li><strong>Title/ID:</strong> The identifier for each collection item</li>
+        <li><strong>Status:</strong> The current state of the item (Open, Reviewed, Faulty)</li>
+        <li><strong>Document:</strong> The source document for this item</li>
+        <li><strong>Content Preview:</strong> A brief excerpt of the item's content</li>
+        <li><strong>Annotations:</strong> Number and types of annotations applied to the item</li>
+        <li><strong>Created/Modified:</strong> Timestamps for item creation and updates</li>
+        <li><strong>Actions:</strong> Available operations for each item</li>
+    </ul>
+
+    <h3>Table Controls</h3>
+    <p>
+        Above the table, you'll find controls to manage your view:
+    </p>
+    <ul>
+        <li><strong>Search:</strong> Filter items by entering text to match item content or metadata</li>
+        <li><strong>Filters:</strong> Narrow the displayed items by status, document, or other attributes</li>
+        <li><strong>Sorting:</strong> Change the order of items by clicking column headers</li>
+        <li><strong>Pagination:</strong> Navigate through multiple pages of items</li>
+        <li><strong>Display Options:</strong> Adjust how many items are shown per page</li>
+    </ul>
+
+    <h3>Item Actions</h3>
+    <p>
+        For each collection item, you can perform several actions:
+    </p>
+    <ul>
+        <li><strong>View Item:</strong> Open a detailed view of the collection item</li>
+        <li><strong>Edit Item:</strong> Modify the collection item's content or settings</li>
+        <li><strong>Delete Item:</strong> Remove the item from the collection</li>
+        <li><strong>View Source Document:</strong> Open the original document this item was created from</li>
+        <li><strong>Copy Item:</strong> Create a duplicate of this item</li>
+        <li><strong>Change Status:</strong> Update the workflow status of the item</li>
+    </ul>
+
+    <h3>Collection Management</h3>
+    <p>
+        At the top of the page, you'll find buttons for overall collection management:
+    </p>
+    <ul>
+        <li><strong>Edit Collection:</strong> Modify the collection's properties and settings</li>
+        <li><strong>Add Items:</strong> Create new items or add existing documents to the collection</li>
+        <li><strong>Process Collection:</strong> Apply AI or batch operations to multiple items</li>
+        <li><strong>Export Collection:</strong> Generate an export of the collection and its contents</li>
+        <li><strong>Delete Collection:</strong> Remove the entire collection and its items</li>
+        <li><strong>Download Report:</strong> Generate a summary report of the collection</li>
+    </ul>
+
+    <h3>Status Indicators</h3>
+    <p>
+        Collection items are marked with status indicators:
+    </p>
+    <ul>
+        <li><strong>Open:</strong> Items that have not yet been fully processed or reviewed</li>
+        <li><strong>Reviewed:</strong> Items that have been verified and approved</li>
+        <li><strong>Faulty:</strong> Items that have issues requiring attention</li>
+        <li><strong>Reserved:</strong> Items currently being edited by another user</li>
+    </ul>
+
+    <h3>Best Practices</h3>
+    <ul>
+        <li>Use the search and filter options to quickly locate specific items</li>
+        <li>Review the collection's overall status distribution to track progress</li>
+        <li>Work through items methodically, marking them as Reviewed when complete</li>
+        <li>Use the "Add Items" function to grow collections incrementally</li>
+        <li>Export collections when you need to share or archive the organized content</li>
+        <li>Update collection descriptions as its purpose or scope evolves</li>
+    </ul>
+
+    <h3>Related Topics</h3>
+    <ul class="help-topics">
+        <li><a href="{% url 'twf:help' 'collections_overview' %}" class="help-link btn">Collections Overview</a></li>
+        <li><a href="{% url 'twf:help' 'collections_list' %}" class="help-link btn">Collection List</a></li>
+        <li><a href="{% url 'twf:help' 'collection_edit' %}" class="help-link btn">Edit Collection</a></li>
+        <li><a href="{% url 'twf:help' 'collection_item_view' %}" class="help-link btn">View Collection Item</a></li>
+        <li><a href="{% url 'twf:help' 'collection_item_edit' %}" class="help-link btn">Edit Collection Item</a></li>
+        <li><a href="{% url 'twf:help' 'collections_add_doc' %}" class="help-link btn">Add Documents to Collection</a></li>
+        <li><a href="{% help_url 'modules/workflows/collections.html' %}" target="_blank" class="help-link btn-ext">Collection Workflows</a></li>
+    </ul>
+</div>

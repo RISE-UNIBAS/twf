@@ -1,59 +1,65 @@
 {% load twf_help %}
-<h1>Task Monitor</h1>
-<p>
-    The Task Monitor provides a centralized dashboard to track and manage all tasks running in your project.
-    Tasks are operations which might take a longer time to complete, such as AI processing, or manual tasks that are
-    performed by users. The Task Monitor allows you to monitor the status of these tasks.
-</p>
 
-<h2>Task Monitor Features</h2>
-<ul>
-    <li><strong>Real-time Status:</strong> View the current status of each task (pending, running, completed, failed).</li>
-    <li><strong>Progress Tracking:</strong> See detailed progress bars for long-running tasks.</li>
-    <li><strong>Task Details:</strong> View information about each task, including:
-        <ul>
-            <li>Task type and description</li>
-            <li>Start and estimated completion time</li>
-            <li>User who initiated the task</li>
-            <li>Resources being used</li>
-        </ul>
-    </li>
-    <li><strong>Task Management:</strong> Cancel running tasks or remove completed ones.</li>
-</ul>
+<div class="help-content">
+    <h2>Task Monitor</h2>
+    <p>
+        The Task Monitor provides a centralized dashboard to track and manage all tasks running in your project.
+        Tasks are operations which might take a longer time to complete, such as AI processing, or manual tasks that are
+        performed by users. The Task Monitor allows you to monitor the status of these tasks.
+    </p>
 
-<h2>Task Types</h2>
-<p>
-    The Task Monitor tracks various background operations, including:
-</p>
-<ul>
-    <li>Data import and export processes</li>
-    <li>AI batch processing operations</li>
-    <li>Dictionary enrichment tasks</li>
-    <li>Tag extraction and normalization</li>
-</ul>
+    <h3>Task Monitor Features</h3>
+    <ul>
+        <li><strong>Real-time Status:</strong> View the current status of each task (pending, running, completed, failed).</li>
+        <li><strong>Progress Tracking:</strong> See detailed progress bars for long-running tasks.</li>
+        <li><strong>Task Details:</strong> View information about each task, including:
+            <ul>
+                <li>Task type and description</li>
+                <li>Start and estimated completion time</li>
+                <li>User who initiated the task</li>
+                <li>Resources being used</li>
+            </ul>
+        </li>
+        <li><strong>Task Management:</strong> Cancel running tasks or remove completed ones.</li>
+    </ul>
 
-<h2>Task Actions</h2>
-<p>
-    From the Task Monitor, you can:
-</p>
-<ul>
-    <li><strong>Filter Tasks:</strong> Use the search and filter options to find specific tasks or task types. This only affects the display and doesn't change any tasks.</li>
-    <li><strong>Cancel Tasks:</strong> Stop a running task that is no longer needed or is consuming too many resources.</li>
-    <li><strong>Remove Tasks:</strong> Clear completed or failed tasks from the list. This only removes the task entry from the monitor and does not undo any work the task has already performed.</li>
-    <li><strong>View Details:</strong> Get more information about a specific task, including any error messages for failed tasks.</li>
-</ul>
+    <h3>Task Types</h3>
+    <p>
+        The Task Monitor tracks various background operations, including:
+    </p>
+    <ul>
+        <li>Data import and export processes</li>
+        <li>AI batch processing operations</li>
+        <li>Dictionary enrichment tasks</li>
+        <li>Tag extraction and normalization</li>
+    </ul>
 
-<h2>Task Statuses</h2>
-<ul>
-    <li><strong>Pending:</strong> Task is queued but not yet running.</li>
-    <li><strong>Running:</strong> Task is currently being executed.</li>
-    <li><strong>Completed:</strong> Task has finished successfully.</li>
-    <li><strong>Failed:</strong> Task encountered an error and could not complete.</li>
-    <li><strong>Cancelled:</strong> Task was manually stopped before completion.</li>
-</ul>
+    <h3>Task Actions</h3>
+    <p>
+        From the Task Monitor, you can:
+    </p>
+    <ul>
+        <li><strong>Filter Tasks:</strong> Use the search and filter options to find specific tasks or task types. This only affects the display and doesn't change any tasks.</li>
+        <li><strong>Cancel Tasks:</strong> Stop a running task that is no longer needed or is consuming too many resources.</li>
+        <li><strong>Remove Tasks:</strong> Clear completed or failed tasks from the list. This only removes the task entry from the monitor and does not undo any work the task has already performed.</li>
+        <li><strong>View Details:</strong> Get more information about a specific task, including any error messages for failed tasks.</li>
+    </ul>
 
-<h3>Related Topics</h3>
-<ul class="help-topics">
-    <li><a href="{% help_url 'modules/parts/settings.html' %}" target="_blank" class="help-link btn-ext">Project Settings</a></li>
-    <li><a href="{% help_url 'modules/parts/batch-workflows.html' %}" target="_blank" class="help-link btn-ext">Batch Workflows</a></li>
-</ul>
+    <h3>Task Statuses</h3>
+    <ul>
+        <li><strong>Pending:</strong> Task is queued but not yet running.</li>
+        <li><strong>Running:</strong> Task is currently being executed.</li>
+        <li><strong>Completed:</strong> Task has finished successfully.</li>
+        <li><strong>Failed:</strong> Task encountered an error and could not complete.</li>
+        <li><strong>Cancelled:</strong> Task was manually stopped before completion.</li>
+    </ul>
+
+    <h3>Related Topics</h3>
+    <ul class="help-topics">
+        <li><a href="{% url 'twf:help' 'project_overview' %}" class="help-link btn">Project Overview</a></li>
+        <li><a href="{% url 'twf:help' 'project_prompts' %}" class="help-link btn">Project Prompts</a></li>
+        <li><a href="{% url 'twf:help' 'project_settings_tasks' %}" class="help-link btn">Task Settings</a></li>
+        <li><a href="{% help_url 'modules/parts/settings.html' %}" target="_blank" class="help-link btn-ext">Project Settings</a></li>
+        <li><a href="{% help_url 'modules/parts/batch-workflows.html' %}" target="_blank" class="help-link btn-ext">Batch Workflows</a></li>
+    </ul>
+</div>
