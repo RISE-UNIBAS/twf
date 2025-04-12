@@ -3,83 +3,97 @@
 <div class="help-content">
     <h2>Project Repository Settings</h2>
     <p>
-        The Repository Settings page allows you to configure how your project interacts with external data repositories 
-        like Zenodo, GitHub, or institutional archives. These settings enable proper citation, sharing, and long-term 
-        preservation of your project data.
+        The Repository Settings page allows you to configure how your project data will be published to external repositories like Zenodo. 
+        These settings define the metadata, licensing, and documentation that will accompany your published datasets.
     </p>
 
-    <h3>Repository Configuration</h3>
+    <h3>Version</h3>
     <p>
-        Repository settings typically include:
+        The version number for your dataset. Use semantic versioning (e.g., 1.0.0) to indicate major, minor, and patch changes to your data.
     </p>
     <ul>
-        <li>Data repository selection and connection details</li>
-        <li>Digital Object Identifiers (DOI) and persistent identifiers</li>
-        <li>Licensing and rights information</li>
-        <li>Version control and publication workflow settings</li>
-        <li>Embargo periods and access restrictions</li>
-        <li>Citation preferences and metadata formats</li>
+        <li><strong>Best Practice:</strong> Increment the version number each time you publish an updated version of your dataset</li>
+        <li><strong>Example:</strong> "1.2.3" (major version 1, minor version 2, patch 3)</li>
+    </ul>
+
+    <h3>License</h3>
+    <p>
+        The license that defines how others can use, share, and modify your published data. Choose the license that best aligns with your data sharing goals:
+    </p>
+    <ul>
+        <li><strong>Creative Commons Attribution 4.0 (CC BY 4.0):</strong> Users can share and adapt the data with attribution</li>
+        <li><strong>Creative Commons Attribution-ShareAlike 4.0 (CC BY-SA 4.0):</strong> Users can share and adapt the data with attribution, and must share under the same license</li>
+        <li><strong>Creative Commons Zero v1.0 Universal (CC0 1.0):</strong> Waives all rights to the data (public domain)</li>
+        <li><strong>MIT License:</strong> Permissive license focusing on software</li>
+        <li><strong>GNU General Public License v3.0 (GPL-3.0):</strong> Copyleft license for software</li>
+        <li><strong>Apache License 2.0:</strong> Permissive license with patent grant</li>
+    </ul>
+
+    <h3>Keywords</h3>
+    <p>
+        A list of relevant terms that describe your dataset. These keywords help others discover your data when searching repositories.
+    </p>
+    <ul>
+        <li><strong>Format:</strong> Enter each keyword separately</li>
+        <li><strong>Best Practice:</strong> Include terms related to your research domain, methodology, and content types</li>
+        <li><strong>Example Keywords:</strong> "historical documents", "transcription", "16th century", "manuscripts"</li>
+    </ul>
+
+    <h3>Workflow Description</h3>
+    <p>
+        A detailed markdown document that describes your project methodology, data structure, and any processing steps. This documentation is crucial for others to understand how your data was created and how to use it.
+    </p>
+
+    <h4>Markdown Editor Features</h4>
+    <ul>
+        <li><strong>Generate Default:</strong> Click the "Generate Default" button to automatically create a basic workflow description based on your project data</li>
+        <li><strong>Live Preview:</strong> As you edit the markdown content, a preview will be shown to the right</li>
+        <li><strong>Markdown Formatting:</strong> Use markdown syntax for headings (#, ##), lists (-, *), links ([text](URL)), and other formatting</li>
+    </ul>
+
+    <h4>What to Include in Your Workflow Description</h4>
+    <ul>
+        <li><strong>Project Background:</strong> The context and purpose of your project</li>
+        <li><strong>Data Collection Methods:</strong> How the original data was gathered</li>
+        <li><strong>Processing Steps:</strong> The transformations and enrichments applied to the data</li>
+        <li><strong>Data Structure:</strong> How the dataset is organized</li>
+        <li><strong>Usage Guidelines:</strong> Instructions on how to work with the data</li>
+        <li><strong>Known Limitations:</strong> Any caveats or issues users should be aware of</li>
     </ul>
 
     <h3>Digital Object Identifiers (DOIs)</h3>
     <p>
-        DOIs provide permanent identification for your project and its data:
+        When publishing to Zenodo, a DOI will be generated that provides permanent identification for your project:
     </p>
     <ul>
-        <li>Register a new DOI for your project through supported repositories</li>
-        <li>Link to an existing DOI if your project is already registered</li>
-        <li>Configure DOI metadata to ensure proper attribution</li>
-        <li>Set up versioning to maintain DOI history</li>
-    </ul>
-
-    <h3>Licensing Options</h3>
-    <p>
-        Set appropriate licenses for your project data:
-    </p>
-    <ul>
-        <li>Choose from standard licenses (Creative Commons, MIT, etc.)</li>
-        <li>Configure custom license terms if needed</li>
-        <li>Set different licenses for different components if applicable</li>
-        <li>Specify attribution requirements</li>
-    </ul>
-
-    <h3>Publication Settings</h3>
-    <p>
-        Configure how your project is published to repositories:
-    </p>
-    <ul>
-        <li>Set publication workflows (manual or automated)</li>
-        <li>Configure versioning and release strategies</li>
-        <li>Define which project components are included in publications</li>
-        <li>Set up pre-publication validation checks</li>
-        <li>Configure embargo periods if applicable</li>
+        <li>DOIs ensure your dataset remains citable even if URLs change</li>
+        <li>The system will use the project metadata to prepare DOI registration</li>
+        <li>After publication, your project's DOI can be recorded in the project settings</li>
     </ul>
 
     <h3>Repository Integration</h3>
     <p>
-        The system supports integration with various repositories:
+        The system currently supports integration with:
     </p>
     <ul>
-        <li><strong>Zenodo:</strong> For long-term academic data preservation</li>
-        <li><strong>GitHub/GitLab:</strong> For code and version control</li>
-        <li><strong>Institutional repositories:</strong> For university or organization archives</li>
-        <li><strong>Domain-specific repositories:</strong> For field-specific data sharing</li>
+        <li><strong>Zenodo:</strong> An open data repository operated by CERN that enables long-term storage and sharing of research outputs</li>
     </ul>
 
     <h3>Best Practices</h3>
     <ul>
-        <li>Choose repositories that align with your field's standards</li>
-        <li>Select licenses that match your sharing and reuse intentions</li>
-        <li>Configure comprehensive metadata for better discovery</li>
-        <li>Use persistent identifiers for all significant components</li>
-        <li>Test repository connections before major publishing events</li>
-        <li>Document repository choices and settings for project participants</li>
-        <li>Consider long-term preservation needs when selecting repositories</li>
+        <li>Choose a license that matches your sharing and reuse intentions</li>
+        <li>Use specific, relevant keywords to enhance discoverability</li>
+        <li>Create a comprehensive workflow description to improve reproducibility</li>
+        <li>Test repository connections before publishing (using the credentials in Project Credential Settings)</li>
+        <li>Ensure all team members are properly credited in the project metadata</li>
     </ul>
+
+    <p><strong>Note:</strong> Repository settings are applied when publishing your data to external repositories like Zenodo. These settings don't affect how data is stored or processed within the application.</p>
 
     <h3>Related Topics</h3>
     <ul>
         <li>{% help_url 'project_settings_general' 'General Project Settings' %}</li>
+        <li>{% help_url 'project_settings_credentials' 'Credential Settings' %}</li>
         <li>{% help_url 'project_settings_export' 'Export Settings' %}</li>
         <li>{% help_url 'export_to_zenodo' 'Exporting to Zenodo' %}</li>
         <li>{% help_url 'export_project' 'Exporting Project Data' %}</li>
