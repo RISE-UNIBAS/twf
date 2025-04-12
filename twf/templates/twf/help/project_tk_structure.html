@@ -1,0 +1,111 @@
+{% load twf_help %}
+
+<div class="help-content">
+    <h2>Extract Transkribus Export</h2>
+    <p>
+        This page allows you to extract and process the Transkribus export data you've previously downloaded. The extraction process converts the raw export files into structured documents and pages within the system, making them available for further analysis and enrichment.
+    </p>
+
+    <h3>Prerequisites</h3>
+    <ul>
+        <li><strong>Downloaded Export:</strong> You must have successfully downloaded a Transkribus export using the {% help_url 'project_tk_export' 'Request Transkribus Export' %} functionality</li>
+        <li><strong>Valid ZIP File:</strong> The downloaded export must be a valid ZIP archive containing PAGE XML files</li>
+    </ul>
+
+    <h3>Extraction Process</h3>
+    <p>
+        When you click the "Extract Documents From Transkribus Export" button, the system performs the following operations:
+    </p>
+    <ol>
+        <li><strong>Preparation:</strong>
+            <ul>
+                <li>Validates the ZIP file and creates a temporary extraction directory</li>
+                <li>Checks if the required files are present in the archive</li>
+            </ul>
+        </li>
+        <li><strong>File Extraction:</strong>
+            <ul>
+                <li>Extracts PAGE XML files and metadata files from the ZIP archive</li>
+                <li>Organizes the files in a structured format for processing</li>
+            </ul>
+        </li>
+        <li><strong>Document and Page Creation:</strong>
+            <ul>
+                <li>Creates Document objects for each unique document identified in the export</li>
+                <li>Creates Page objects for each page XML file, linked to the appropriate Document</li>
+                <li>Extracts and associates metadata from available metadata.xml and mets.xml files</li>
+            </ul>
+        </li>
+        <li><strong>Page Parsing:</strong>
+            <ul>
+                <li>Parses each PAGE XML file to extract content, layout, and text region information</li>
+                <li>Stores the parsed data in a structured format for later use</li>
+                <li>Prepares the text content for further processing such as tag extraction</li>
+            </ul>
+        </li>
+    </ol>
+
+    <h3>Monitoring Progress</h3>
+    <p>
+        The extraction process runs as a background task and may take some time for large collections. You can monitor its progress in several ways:
+    </p>
+    <ul>
+        <li>A progress indicator appears on the page during extraction</li>
+        <li>Status updates are provided in the task monitor</li>
+        <li>Once complete, a summary of the extraction results will be displayed</li>
+    </ul>
+    <p>
+        You can view detailed status information, including any errors encountered, in the {% help_url 'project_task_monitor' 'Task Monitor' %}.
+    </p>
+
+    <h3>What Gets Extracted</h3>
+    <p>
+        The extraction process captures several types of information from the Transkribus export:
+    </p>
+    <ul>
+        <li><strong>Document Structure:</strong> Document ID, title, and organization</li>
+        <li><strong>Page Content:</strong> Transcribed text, page numbers, and page IDs</li>
+        <li><strong>Layout Information:</strong> Text regions, lines, and their coordinates</li>
+        <li><strong>Metadata:</strong> Author, creation date, language, and other available metadata</li>
+        <li><strong>XML Source:</strong> The original PAGE XML files are preserved for reference</li>
+    </ul>
+
+    <h3>After Extraction</h3>
+    <p>
+        Once the extraction is complete, you can proceed with various workflows:
+    </p>
+    <ul>
+        <li>View and browse the extracted documents in the {% help_url 'documents_overview' 'Documents' %} section</li>
+        <li>Extract tags from the documents using the {% help_url 'tags_extract' 'Extract Tags' %} feature</li>
+        <li>Enrich document metadata using external sources</li>
+        <li>Create collections to organize and group documents</li>
+        <li>Export the processed and enriched data for further analysis</li>
+    </ul>
+
+    <h3>Troubleshooting</h3>
+    <ul>
+        <li><strong>No Export Available:</strong> If you see a warning that there is no export, you need to first download an export using the {% help_url 'project_tk_export' 'Request Transkribus Export' %} page</li>
+        <li><strong>Extraction Errors:</strong> Check the Task Monitor for specific error messages if the extraction fails</li>
+        <li><strong>Missing Documents:</strong> Ensure your Transkribus export contains valid PAGE XML files</li>
+        <li><strong>Incomplete Metadata:</strong> Some metadata may be missing if the corresponding files are not present in the export</li>
+    </ul>
+
+    <h3>Advanced Features</h3>
+    <p>
+        During extraction, the system performs several advanced operations:
+    </p>
+    <ul>
+        <li>Automatic detection and extraction of document metadata from various file formats</li>
+        <li>XML parsing and conversion to a structured JSON format for efficient processing</li>
+        <li>Document deduplication and proper versioning</li>
+        <li>Preservation of the original Transkribus file structure</li>
+    </ul>
+
+    <h3>Related Topics</h3>
+    <ul>
+        <li>{% help_url 'project_tk_export' 'Request Transkribus Export' %}</li>
+        <li>{% help_url 'documents_overview' 'Document Management' %}</li>
+        <li>{% help_url 'tags_extract' 'Extract Tags' %}</li>
+        <li>{% help_url 'project_task_monitor' 'Task Monitor' %}</li>
+    </ul>
+</div>
