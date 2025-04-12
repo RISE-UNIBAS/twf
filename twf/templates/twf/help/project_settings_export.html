@@ -1,0 +1,67 @@
+<h3>Export Settings</h3>
+<p>The Export Settings page allows you to configure how data from your project is formatted and exported. These settings determine the structure and content of exported documents, pages, and project information.</p>
+
+<h4>Configuration Format</h4>
+<p>Export configurations use a JSON format to map source data fields to output fields. For each tab, you'll define the mapping between your source data and the desired export structure.</p>
+
+<h4>Document Export Settings</h4>
+<p>Configure how document information is exported. Define which document fields and metadata should be included in exports and how they should be formatted.</p>
+<p><strong>Example Configuration:</strong></p>
+<pre>{
+  "id": {"value": "{document_id}"},
+  "title": {"value": "{title}"},
+  "description": {"value": "{description}"},
+  "author": {"value": "{metadata.author}"},
+  "tag_list": {"value": "", "style": "nested"}
+}</pre>
+
+<h4>Page Export Settings</h4>
+<p>Configure how page-level data is exported. Pages are the individual parts of a document, each with their own content and metadata.</p>
+<p><strong>Example Configuration:</strong></p>
+<pre>{
+  "page_number": {"value": "{page_number}"},
+  "document_id": {"value": "{document.id}"},
+  "content": {"value": "{text_content}"},
+  "tags": {"value": ""}
+}</pre>
+
+<h4>Project Export Settings</h4>
+<p>Configure how project-level information is exported. This includes general project metadata and cross-document statistics.</p>
+<p><strong>Example Configuration:</strong></p>
+<pre>{
+  "project_title": {"value": "{title}"},
+  "description": {"value": "{description}"},
+  "version": {"value": "{version}"},
+  "owner": {"value": "{owner.username}"}
+}</pre>
+
+<h4>Field Value Syntax</h4>
+<ul>
+    <li><strong>Static Text:</strong> Use plain text for static values that don't change ("My Project Title")</li>
+    <li><strong>Field Reference:</strong> Use curly braces to reference source fields ("{title}", "{metadata.author}")</li>
+    <li><strong>Nested Metadata:</strong> Access nested metadata using dot notation ("{metadata.creation_date}")</li>
+    <li><strong>Built-in Fields:</strong> Use special fields like "tag_list", "used_dicts", "data_curators"</li>
+    <li><strong>Date/Time Fields:</strong> Use "date.today" and "time.now" with formatting options</li>
+</ul>
+
+<h4>Special Data Fields</h4>
+<p>Several special fields can be included in your export configuration:</p>
+<ul>
+    <li><strong>tag_list:</strong> Includes all tags associated with the item (available for projects, documents, and pages)</li>
+    <li><strong>used_dicts:</strong> Lists dictionaries used by the item (available for projects, documents, and collections)</li>
+    <li><strong>data_curators:</strong> Lists users who have worked on the item</li>
+    <li><strong>date.today:</strong> Inserts the current date</li>
+    <li><strong>time.now:</strong> Inserts the current time</li>
+</ul>
+
+<h4>Field Formatting Options</h4>
+<p>You can specify additional formatting options for fields:</p>
+<ul>
+    <li><strong>style:</strong> For list fields, choose between "flat" or "nested" presentation</li>
+    <li><strong>properties:</strong> For object fields, specify which properties to include</li>
+    <li><strong>format:</strong> For date/time fields, specify the format (e.g., "YYYY-MM-DD")</li>
+</ul>
+
+<p><strong>Note:</strong> Changes to export settings only affect future exports and don't alter your source data. To test your export configuration, use the "Test Export" feature in the Setup Project section.</p>
+
+<p><strong>Tip:</strong> Before setting up a complex export configuration, review the documentation for your target data format to ensure compatibility.</p>
