@@ -140,6 +140,24 @@ def delete_prompt(request, pk):
     return get_referrer_or_default(request, default='twf:project_prompts')
 
 
+def delete_note(request, pk):
+    """Delete a note."""
+    project = TWFView.s_get_project(request)
+
+    if not check_permission(request.user, "delete_note", project):
+        messages.error(request, "You do not have permission to delete a note.")
+        return get_referrer_or_default(request, default='twf:project_notes')
+
+    try:
+        note = project.notes.get(pk=pk)
+        note.delete()
+        messages.success(request, "Note deleted.")
+    except project.notes.model.DoesNotExist:
+        messages.error(request, "Note does not exist.")
+
+    return get_referrer_or_default(request, default='twf:project_notes')
+
+
 def task_cancel_view(request, task_id):
     """Cancel a task by its task_id. """
     try:

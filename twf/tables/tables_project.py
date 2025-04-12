@@ -152,9 +152,9 @@ class NoteTable(tables.Table):
         from django.urls import reverse
         
         # These URLs need to be updated when Note detail/edit/delete views are implemented
-        view_url = "#"  # Placeholder
-        edit_url = "#"  # Placeholder
-        delete_url = "#"  # Placeholder
+        view_url = reverse('twf:project_notes_view', kwargs={'pk': record.pk})
+        edit_url = reverse('twf:project_notes_edit', kwargs={'pk': record.pk})
+        delete_url = reverse('twf:project_notes_delete', kwargs={'pk': record.pk})
         
         return format_html(
             '<a href="{}" class="btn btn-sm btn-dark me-1" title="View Details"><i class="fa fa-eye"></i></a>'

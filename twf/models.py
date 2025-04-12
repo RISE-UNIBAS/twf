@@ -1233,9 +1233,9 @@ class Export(TimeStampedModel):
 
 class Note(TimeStampedModel):
 
-    project = models.ForeignKey(Project, on_delete=models.CASCADE)
-    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
+    project = models.ForeignKey(Project, related_name='notes', on_delete=models.CASCADE)
+    title = models.CharField(max_length=255)
     note = models.TextField()
 
     def __str__(self):
-        return f"Note - {self.created_by}"
+        return f"Note - {self.title}"

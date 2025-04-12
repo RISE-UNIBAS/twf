@@ -39,7 +39,7 @@ from twf.views.home.views_home import TWFHomeView, TWFHomeLoginView, TWFHomePass
 from twf.views.home.views_crud import activate_user, deactivate_user, delete_user, reset_password
 from twf.views.metadata.views_metadata_ai import TWFMetadataLoadDataView, TWFMetadataLoadSheetsDataView
 from twf.views.project.views_crud import delete_all_documents, delete_all_tags, delete_all_collections, select_project, \
-    delete_project, close_project, reopen_project, delete_prompt, task_cancel_view, task_remove_view
+    delete_project, close_project, reopen_project, delete_prompt, task_cancel_view, task_remove_view, delete_note
 from twf.views.ajax.views_ajax_download import ajax_transkribus_download_export, download_progress_view
 from twf.views.collections.views_collections import TWFCollectionsReviewView, TWFCollectionOverviewView, \
     TWFCollectionsCreateView, TWFCollectionsDetailView, TWFCollectionsEditView, TWFCollectionsAddDocumentView, \
@@ -60,7 +60,8 @@ from twf.views.project.views_project import TWFProjectQueryView, TWFProjectOverv
     TWFProjectCredentialsSettingsView, \
     TWFProjectPromptsView, TWFProjectTaskSettingsView, TWFProjectExportSettingsView, TWFProjectCopyView, \
     TWFProjectResetView, TWFProjectUserManagementView, TWFProjectRepositorySettingsView, TWFProjectPromptEditView, \
-    TWFProjectSetupView, TWFProjectTranskribusExtractView, TWFProjectNotesView, TWFProjectPromptDetailView
+    TWFProjectSetupView, TWFProjectTranskribusExtractView, TWFProjectNotesView, TWFProjectPromptDetailView, \
+    TWFProjectNoteEditView, TWFProjectNoteDetailView
 from twf.views.project.views_project_ai import TWFProjectAIQueryView, TWFProjectGeminiQueryView, \
     TWFProjectClaudeQueryView, TWFProjectMistralQueryView
 from twf.views.tags.views_tags import TWFProjectTagsView, TWFProjectTagsOpenView, \
@@ -119,11 +120,16 @@ urlpatterns = [
 
     path('project/task/monitor/', TWFProjectTaskMonitorView.as_view(), name='project_task_monitor'),
     path('project/task/<int:pk>/view/', TWFProjectTaskDetailView.as_view(), name='task_detail'),
+
     path('project/prompts/', TWFProjectPromptsView.as_view(), name='project_prompts'),
-    path('project/notes/', TWFProjectNotesView.as_view(), name='project_notes'),
     path('project/prompts/delete/<int:pk>/', delete_prompt, name='project_delete_prompt'),
     path('project/prompts/edit/<int:pk>/', TWFProjectPromptEditView.as_view(), name='project_edit_prompt'),
     path('project/prompt/<int:pk>/view/', TWFProjectPromptDetailView.as_view(), name='prompt_detail'),
+
+    path('project/notes/', TWFProjectNotesView.as_view(), name='project_notes'),
+    path('project/notes/<int:pk>/delete/', delete_note, name='project_notes_delete'),
+    path('project/notes/<int:pk>/edit/', TWFProjectNoteEditView.as_view(), name='project_notes_edit'),
+    path('project/notes/<int:pk>/view/', TWFProjectNoteDetailView.as_view(), name='project_notes_view'),
 
     path('project/settings/general/', TWFProjectGeneralSettingsView.as_view(), name='project_settings_general'),
     path('project/settings/credentials/', TWFProjectCredentialsSettingsView.as_view(),

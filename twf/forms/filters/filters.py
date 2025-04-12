@@ -229,6 +229,7 @@ class NoteFilter(django_filters.FilterSet):
         """Meta class for the prompt filter."""
         model = Note
         fields = {
+            'title': ['icontains'],
             'note': ['icontains'],
         }
 

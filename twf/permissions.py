@@ -562,6 +562,14 @@ def get_available_actions(project=None, profile=None, for_group=None):
             "description": "User is allowed to delete a prompt.",
             "default_for": ["manager"]
         },
+        ###############################
+        # Prompt actions
+        "delete_note": {
+            "group": "notes",
+            "label": "Delete note",
+            "description": "User is allowed to delete a note.",
+            "default_for": ["manager"]
+        },
     }
 
     if profile:

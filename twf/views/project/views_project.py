@@ -20,7 +20,7 @@ from twf.forms.filters.filters import TaskFilter, PromptFilter, NoteFilter
 from twf.forms.filters.project_filter_forms import TaskFilterForm, PromptFilterForm
 from twf.forms.project.project_forms_batches import ProjectCopyBatchForm, DocumentExtractionBatchForm
 from twf.forms.project.project_forms import QueryDatabaseForm, GeneralSettingsForm, CredentialsForm, \
-    TaskSettingsForm, ExportSettingsForm, RepositorySettingsForm, PromptForm
+    TaskSettingsForm, ExportSettingsForm, RepositorySettingsForm, PromptForm, NoteForm
 from twf.models import Page, PageTag, Project, Prompt, Task, Note
 from twf.permissions import check_permission, get_actions_grouped_by_category, get_available_actions
 from twf.tables.tables_project import TaskTable, PromptTable, NoteTable
@@ -311,6 +311,59 @@ class TWFProjectNotesView(SingleTableView, FilterView, TWFProjectView):
         context = super().get_context_data(**kwargs)
         context['filter'] = self.filterset
         return context
+
+
+class TWFProjectNoteEditView(FormView, TWFProjectView):
+    """View for editing a note."""
+
+    template_name = 'twf/project/edit_note.html'
+    page_title = 'Edit Note'
+    form_class = NoteForm
+    success_url = reverse_lazy('twf:project_notes')
+
+    def get_object(self):
+        """Get the prompt to edit."""
+        from django.shortcuts import get_object_or_404
+        return get_object_or_404(Note, pk=self.kwargs['pk'], project=self.get_project())
+
+    def get_form_kwargs(self):
+        """Get the form kwargs."""
+        kwargs = super().get_form_kwargs()
+        kwargs['instance'] = self.get_object()
+        return kwargs
+
+    def form_valid(self, form):
+        """Handle the form submission."""
+        # Save the form and show a success message
+        self.object = form.save(commit=False)
+        self.object.save(current_user=self.request.user)
+
+        messages.success(self.request, 'Note has been updated successfully.')
+        return super().form_valid(form)
+
+    def get_context_data(self, **kwargs):
+        """Get the context data."""
+        context = super().get_context_data(**kwargs)
+        return context
+
+
+class TWFProjectNoteDetailView(TWFProjectView):
+    """View for displaying note details."""
+
+    template_name = 'twf/project/note_detail.html'
+    page_title = 'Note Details'
+
+    def get_object(self):
+        """Get the prompt to view."""
+        from django.shortcuts import get_object_or_404
+        return get_object_or_404(Note, pk=self.kwargs['pk'], project=self.get_project())
+
+    def get_context_data(self, **kwargs):
+        """Get the context data."""
+        context = super().get_context_data(**kwargs)
+        context['note'] = self.get_object()
+        return context
+
 
 class TWFProjectPromptDetailView(TWFProjectView):
     """View for displaying prompt details."""
