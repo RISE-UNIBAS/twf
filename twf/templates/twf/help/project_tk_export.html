@@ -3,46 +3,63 @@
 <div class="help-content">
     <h2>Request Transkribus Export</h2>
     <p>
-        This page allows you to request and manage an export of your data from the Transkribus platform. Transkribus is a 
-        comprehensive platform for the automated recognition, transcription, and searching of historical documents.
+        This page allows you to request, monitor, and download an export of your Transkribus collection. The export process brings your Transkribus data into the system for further processing and enrichment.
     </p>
 
-    <h3>Export Functionality</h3>
+    <h3>Prerequisites</h3>
+    <ul>
+        <li><strong>Transkribus Account:</strong> You must have a valid Transkribus account with access to the collection</li>
+        <li><strong>Credentials Configured:</strong> Your Transkribus username and password must be configured in the {% help_url 'project_settings_credentials' 'Credential Settings' %}</li>
+        <li><strong>Collection ID:</strong> Your project must be associated with a valid Transkribus collection ID (currently: <strong>{{ project.collection_id }}</strong>)</li>
+    </ul>
+
+    <h3>Export Process Overview</h3>
+    <p>Exporting from Transkribus is a three-step process:</p>
+    <ol>
+        <li><strong>Request Export:</strong> Initiate a request to Transkribus to prepare your data for export</li>
+        <li><strong>Check Status:</strong> Monitor the progress of your export job on the Transkribus servers</li>
+        <li><strong>Download Export:</strong> Once complete, download the export package to your project</li>
+    </ol>
+
+    <h3>Step 1: Start Export Job</h3>
     <p>
-        With this interface, you can:
+        Click the "Start Export Job" button to begin the export process. This sends a request to Transkribus to prepare your collection data for export. The system will:
+    </p>
+    <ul>
+        <li>Authenticate with your Transkribus credentials</li>
+        <li>Submit an export request for your collection</li>
+        <li>Receive and store a job ID for tracking</li>
+    </ul>
+    <p><strong>Note:</strong> The button will be disabled if you have not configured Transkribus credentials or if an export job is already in progress.</p>
+
+    <h3>Step 2: Check Export Status</h3>
+    <p>
+        After requesting an export, click "Check Export Status" to monitor the progress. The export job on Transkribus may take several minutes depending on the size of your collection. The status will be one of:
+    </p>
+    <ul>
+        <li><strong>PENDING:</strong> The job is in the queue but has not started processing yet</li>
+        <li><strong>RUNNING:</strong> The export is currently being prepared by Transkribus</li>
+        <li><strong>FAILED:</strong> The export job failed - check your credentials and collection ID</li>
+        <li><strong>FINISHED:</strong> The export is complete and ready for download</li>
+    </ul>
+    <p><strong>Tip:</strong> You may need to click "Check Export Status" multiple times until the job completes.</p>
+
+    <h3>Step 3: Download Export</h3>
+    <p>
+        Once the export status shows "FINISHED", the "Download Export" button will become active. Click it to download the export package from Transkribus to your project. The progress bar shows the download and extraction status.
+    </p>
+    <p><strong>Note:</strong> Depending on the size of your collection, this process may take several minutes. Do not close the browser window during download.</p>
+
+    <h3>Restarting the Export Process</h3>
+    <p>
+        If you have already downloaded an export file and want to start over with a fresh export:
     </p>
     <ol>
-        <li><strong>Request Export:</strong> Initiate a new export request to the Transkribus platform for your collection data</li>
-        <li><strong>Check Status:</strong> Monitor the status of your export job on the Transkribus platform</li>
-        <li><strong>Download Export:</strong> Retrieve your completed export when it's ready</li>
+        <li>Click the "Restart Export Job" button in the warning box at the bottom of the page</li>
+        <li>This will reset the export process, removing any previously downloaded data</li>
+        <li>You can then start a new export job from the beginning</li>
     </ol>
-
-    <h3>Export Process</h3>
-    <ol>
-        <li><strong>Export Request:</strong>
-            <ul>
-                <li>Click the "Export Requested" button to initiate a new export from Transkribus</li>
-                <li>The system will communicate with Transkribus to start preparing your collection data</li>
-                <li>Your collection ID is automatically sent with the request</li>
-                <li>The status of your request will be updated in the "Current status" section</li>
-            </ul>
-        </li>
-        <li><strong>Status Checking:</strong>
-            <ul>
-                <li>Click the "Check Status of Job" button to query Transkribus about your export progress</li>
-                <li>The status will be updated to reflect the current state of your export</li>
-                <li>Export preparation may take some time depending on the size of your collection</li>
-                <li>You may need to check the status multiple times until the export is complete</li>
-            </ul>
-        </li>
-        <li><strong>Download:</strong>
-            <ul>
-                <li>Once the export is ready, click the "Download Export" button</li>
-                <li>The exported data will be downloaded to your computer</li>
-                <li>The downloaded file will contain the data from your Transkribus collection</li>
-            </ul>
-        </li>
-    </ol>
+    <p><strong>Warning:</strong> Restarting the export will delete your current export file but will not affect any documents, tags, or other data already processed from a previous export.</p>
 
     <h3>Export Content</h3>
     <p>
@@ -56,41 +73,28 @@
         <li><strong>Document Structure:</strong> Information about document organization</li>
     </ul>
 
-    <h3>Important Notes</h3>
-    <ul>
-        <li>Your Transkribus collection ID is displayed on the page for reference (e.g., 299865)</li>
-        <li>Export processing time varies based on collection size and Transkribus server load</li>
-        <li>Very large collections may take significant time to export</li>
-        <li>The export will include the entire collection as it exists in Transkribus</li>
-        <li>Ensure you have sufficient storage space for the downloaded export</li>
-        <li>If an export fails, you may need to retry or contact Transkribus support</li>
-    </ul>
-
     <h3>Troubleshooting</h3>
     <ul>
-        <li><strong>Unknown Status:</strong> If the status shows as "Unknown," it means the system hasn't yet received status information from Transkribus</li>
+        <li><strong>Unknown Status:</strong> If the status shows as "Unknown," check your Transkribus credentials in the settings</li>
         <li><strong>Export Status Unknown:</strong> The system may not be able to determine the status if there's a communication issue with Transkribus</li>
         <li><strong>Failed Export:</strong> If your export fails, check your collection ID and try requesting the export again</li>
         <li><strong>Download Issues:</strong> If you encounter problems downloading your export, ensure you have a stable internet connection and sufficient disk space</li>
     </ul>
 
-    <h3>After Export</h3>
+    <h3>Next Steps</h3>
     <p>
-        After downloading your Transkribus export, you can:
+        After successfully downloading the export:
     </p>
-    <ul>
-        <li>Import the data into your TWF project</li>
-        <li>Process the transcription data further using TWF tools</li>
-        <li>Create dictionaries and tag entities based on the imported content</li>
-        <li>Build collections organized around your research needs</li>
-        <li>Apply metadata enrichment to enhance the exported content</li>
-    </ul>
+    <ol>
+        <li>Proceed to {% help_url 'project_tk_structure' 'Extract Transkribus Export' %} to process and structure the data within the system</li>
+        <li>The extracted data will be organized into documents and pages</li>
+        <li>You can then begin working with your Transkribus content using the system's features</li>
+    </ol>
 
     <h3>Related Topics</h3>
     <ul>
-        <li><a href="{% help_url 'modules/parts/transkribus-structure.html' %}">Request Transkribus Structure</a></li>
-        <li><a href="{% help_url 'modules/parts/import-data.html' %}">Import Data</a></li>
-        <li><a href="{% help_url 'modules/parts/export-overview.html' %}">Export Overview</a></li>
-        <li><a href="{% help_url 'modules/parts/configure-credentials.html' %}">Configure Credentials</a></li>
+        <li>{% help_url 'project_tk_structure' 'Extract Transkribus Export' %}</li>
+        <li>{% help_url 'project_settings_credentials' 'Credential Settings' %}</li>
+        <li>{% help_url 'export_overview' 'Export Overview' %}</li>
     </ul>
 </div>
