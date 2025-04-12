@@ -1,0 +1,52 @@
+<!-- has been checked -->
+{% load twf_help %}
+
+<div class="help-content">
+    <h2>Review Collections</h2>
+    <p>
+        This page allows you to systematically review collection items. The review workflow presents items one by one, letting you examine, modify, and set a status for each item before proceeding to the next.
+    </p>
+
+    <h3>Starting a Review Workflow</h3>
+    <ol>
+        <li>Select the collection you want to review</li>
+        <li>Click "Start Review Workflow" to begin</li>
+        <li>Only one review workflow can be active at a time</li>
+    </ol>
+
+    <h3>Review Process</h3>
+    <p>
+        For each collection item, you can:
+    </p>
+    <ul>
+        <li><strong>Review Content:</strong> Examine the item's text and annotations</li>
+        <li><strong>Edit Item:</strong> Make changes to the title or content</li>
+        <li><strong>Add Notes:</strong> Record comments or issues in the notes field</li>
+        <li><strong>Set Status:</strong> Mark the item as:
+            <ul>
+                <li>Reviewed: Item is correct and complete</li>
+                <li>Faulty: Item has issues that need attention</li>
+                <li>Open: Skip for now and review later</li>
+            </ul>
+        </li>
+        <li><strong>Continue:</strong> Move to the next item after setting status</li>
+    </ul>
+
+    <h3>Workflow Completion</h3>
+    <p>
+        The workflow continues until you've reviewed all items or choose to stop. You can:
+    </p>
+    <ul>
+        <li>Pause and resume the workflow later</li>
+        <li>Get an overview of your progress</li>
+        <li>Generate a report of reviewed items when finished</li>
+    </ul>
+
+    <h3>Related Topics</h3>
+    <ul class="help-topics">
+        <li><a href="{% url 'twf:help' 'collections_overview' %}" class="help-link btn">Collections Overview</a></li>
+        <li><a href="{% url 'twf:help' 'collection_view' %}" class="help-link btn">View Collection</a></li>
+        <li><a href="{% url 'twf:help' 'collection_item_edit' %}" class="help-link btn">Edit Collection Item</a></li>
+        <li><a href="{% help_url 'modules/workflows/collections.html' %}" target="_blank" class="help-link btn-ext">Collection Workflows</a></li>
+    </ul>
+</div>
