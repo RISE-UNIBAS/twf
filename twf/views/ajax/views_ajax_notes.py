@@ -40,7 +40,7 @@ def save_ai_result_as_note(request):
         # Create a new note with the AI result
         note = Note(
             project=project,
-            user=request.user,
+            title=ai_result[:20],
             note=ai_result
         )
         note.save(current_user=request.user)
