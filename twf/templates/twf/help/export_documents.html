@@ -1,205 +1,24 @@
+<!-- has been checked -->
 {% load twf_help %}
 
 <div class="help-content">
     <h2>Export Documents</h2>
     <p>
-        The Export Documents page allows you to export documents from your project in various formats. You can 
-        select specific documents to export, apply filters to find relevant documents, and configure detailed 
-        export settings to meet your specific needs.
+        This page allows you to export documents from your project. Configure the export format and options first.
     </p>
 
-    <h3>Export Process</h3>
+    <h3>Key Steps</h3>
     <ol>
-        <li><strong>Select Documents:</strong> Choose which documents to include in the export:
-            <ul>
-                <li>Use the table to select individual documents</li>
-                <li>Filter documents by metadata (title, date, author, etc.)</li>
-                <li>Filter by document status or workflow stage</li>
-                <li>Filter by tag content or dictionary associations</li>
-                <li>Filter by collection membership</li>
-                <li>Use the "Select All" option for bulk selection</li>
-                <li>Sort by any column to organize your selection</li>
-            </ul>
-        </li>
-        <li><strong>Choose Format:</strong> Select the desired export format:
-            <ul>
-                <li>JSON (structured format with complete data preservation)</li>
-                <li>XML (structured format with schema validation)</li>
-                <li>TEI (Text Encoding Initiative format for humanities scholarship)</li>
-                <li>TXT (plain text export of document content)</li>
-                <li>CSV (tabular format for document metadata)</li>
-                <li>PDF (formatted human-readable documents)</li>
-                <li>HTML (web-ready document format)</li>
-                <li>DOCX/ODT (word processor formats)</li>
-                <li>Custom formats defined in your project settings</li>
-            </ul>
-        </li>
-        <li><strong>Configure Options:</strong> Set specific options for the selected format:
-            <ul>
-                <li>Content inclusion options (full text, summaries, excerpts)</li>
-                <li>Page content handling (all pages, selected pages, page ranges)</li>
-                <li>Metadata inclusion and formatting</li>
-                <li>Tag and annotation handling</li>
-                <li>Image inclusion and resolution settings</li>
-                <li>File organization and naming patterns</li>
-                <li>Character encoding and special character handling</li>
-                <li>Pagination and document structure representation</li>
-                <li>Dictionary reference inclusion and formatting</li>
-            </ul>
-        </li>
-        <li><strong>Advanced Settings:</strong> Configure additional export parameters:
-            <ul>
-                <li>Document bundling options (separate files vs. single archive)</li>
-                <li>Include supplementary files (README, metadata glossary, etc.)</li>
-                <li>Transformation rules for content normalization</li>
-                <li>Styling and formatting options for rich text formats</li>
-                <li>Set post-processing operations</li>
-                <li>Configure error handling and validation rules</li>
-            </ul>
-        </li>
-        <li><strong>Preview:</strong> Generate a sample of your export for verification</li>
-        <li><strong>Start Export:</strong> Click the export button to begin the export process</li>
-        <li><strong>Monitor Progress:</strong> For large document sets, track the export progress</li>
-        <li><strong>Download:</strong> Save the completed export to your local system or server</li>
+        <li><strong>Configure Export:</strong> Create an <a href="{% url 'twf:export_configure'%}">export configuration</a></li>
+        <li><strong>Export:</strong> Start the export process and download when complete</li>
     </ol>
-
-    <h3>Document Content Components</h3>
-    <p>
-        When exporting documents, you can include various components:
-    </p>
-    <ul>
-        <li><strong>Document Metadata:</strong> Information about the document
-            <ul>
-                <li>Title, author, date, and other core metadata</li>
-                <li>Source information and provenance</li>
-                <li>Document classification and categorization</li>
-                <li>Processing status and workflow information</li>
-                <li>Creation and modification history</li>
-                <li>Project-specific metadata fields</li>
-            </ul>
-        </li>
-        <li><strong>Document Content:</strong> The actual content of the document
-            <ul>
-                <li>Full text transcriptions</li>
-                <li>Page images and facsimiles</li>
-                <li>Structural markup (headings, paragraphs, etc.)</li>
-                <li>Formatting information</li>
-                <li>Tables, lists, and other structured content</li>
-            </ul>
-        </li>
-        <li><strong>Pages:</strong> Page-level information
-            <ul>
-                <li>Page numbers and sequence information</li>
-                <li>Page-specific metadata</li>
-                <li>Image data and quality information</li>
-                <li>Page-specific annotations</li>
-            </ul>
-        </li>
-        <li><strong>Tags and Annotations:</strong> Markup within documents
-            <ul>
-                <li>Named entity tags (people, places, dates, etc.)</li>
-                <li>Dictionary references and normalizations</li>
-                <li>Editorial annotations and comments</li>
-                <li>Structural annotations</li>
-                <li>Tag status information</li>
-            </ul>
-        </li>
-        <li><strong>Relationships:</strong> Connections to other project elements
-            <ul>
-                <li>Collection memberships</li>
-                <li>Document relationships (part of, references, etc.)</li>
-                <li>External resource links</li>
-                <li>Cross-references within the project</li>
-            </ul>
-        </li>
-    </ul>
-
-    <h3>Format Considerations</h3>
-    <p>
-        Different export formats offer various advantages:
-    </p>
-    <ul>
-        <li><strong>JSON/XML:</strong>
-            <ul>
-                <li>Preserves complete document structure and metadata</li>
-                <li>Supports complex relationships and hierarchies</li>
-                <li>Machine-readable for programmatic processing</li>
-                <li>Good for data interchange and system integration</li>
-                <li>Supports complete data representation</li>
-            </ul>
-        </li>
-        <li><strong>TEI:</strong>
-            <ul>
-                <li>Specialized format for text encoding in humanities</li>
-                <li>Rich structural and semantic markup</li>
-                <li>Strong support for scholarly annotations</li>
-                <li>Compatible with digital humanities tools and workflows</li>
-                <li>Supports detailed representation of textual features</li>
-            </ul>
-        </li>
-        <li><strong>TXT/CSV:</strong>
-            <ul>
-                <li>Simple formats for basic content and metadata</li>
-                <li>Universal compatibility</li>
-                <li>Easy to process with standard tools</li>
-                <li>Good for simple content extraction</li>
-                <li>Limited in representing complex structure or formatting</li>
-            </ul>
-        </li>
-        <li><strong>PDF/DOCX/HTML:</strong>
-            <ul>
-                <li>Focused on human-readable presentation</li>
-                <li>Preserves visual formatting and layout</li>
-                <li>Good for publication and sharing</li>
-                <li>Widely supported viewing formats</li>
-                <li>May lose some structured data aspects</li>
-            </ul>
-        </li>
-    </ul>
-
-    <h3>Use Cases for Document Exports</h3>
-    <ul>
-        <li><strong>Publication:</strong> Prepare documents for formal publication</li>
-        <li><strong>Archiving:</strong> Create archival copies of document collections</li>
-        <li><strong>Analysis:</strong> Export for text analysis or data mining</li>
-        <li><strong>Sharing:</strong> Distribute documents to colleagues or other researchers</li>
-        <li><strong>Integration:</strong> Connect document data with other systems</li>
-        <li><strong>Backup:</strong> Preserve document content and structure</li>
-        <li><strong>Print Production:</strong> Prepare documents for physical printing</li>
-        <li><strong>Teaching:</strong> Create teaching materials from document collections</li>
-        <li><strong>Transformation:</strong> Convert documents to new formats for different uses</li>
-    </ul>
-
-    <h3>Advanced Export Strategies</h3>
-    <ul>
-        <li><strong>Selective Content:</strong> Export only the document components you need</li>
-        <li><strong>Staged Exports:</strong> Export different components in separate operations</li>
-        <li><strong>Format Combinations:</strong> Use multiple formats for different aspects of your data</li>
-        <li><strong>Template-Based:</strong> Apply custom templates to standardize output appearance</li>
-        <li><strong>Multi-Format:</strong> Generate multiple formats in a single export operation</li>
-        <li><strong>Incremental:</strong> Export only documents that have changed since last export</li>
-    </ul>
-
-    <h3>Best Practices</h3>
-    <ul>
-        <li>Define clear criteria for document selection before starting export</li>
-        <li>Choose the format that best matches your intended use</li>
-        <li>Include sufficient metadata to provide context for documents</li>
-        <li>Test your export configuration with a small document set first</li>
-        <li>Document your export parameters for reproducibility</li>
-        <li>Consider file size limitations for large document collections</li>
-        <li>Verify the integrity and completeness of exported documents</li>
-        <li>Include documentation explaining document structure and content</li>
-    </ul>
 
     <h3>Related Topics</h3>
     <ul class="help-topics">
         <li><a href="{% url 'twf:help' 'export_overview' %}" class="help-link btn">Export Overview</a></li>
-        <li><a href="{% url 'twf:help' 'export_configure' %}" class="help-link btn">Configure Export Formats</a></li>
-        <li><a href="{% url 'twf:help' 'documents_overview' %}" class="help-link btn">Document Management Overview</a></li>
-        <li><a href="{% url 'twf:help' 'documents_browse' %}" class="help-link btn">Browsing Documents</a></li>
+        <li><a href="{% url 'twf:help' 'export_configure' %}" class="help-link btn">Configure Export</a></li>
+        <li><a href="{% url 'twf:help' 'documents_overview' %}" class="help-link btn">Documents Overview</a></li>
         <li><a href="{% url 'twf:help' 'export_collections' %}" class="help-link btn">Export Collections</a></li>
         <li><a href="{% help_url 'modules/workflows/export.html' %}" target="_blank" class="help-link btn-ext">Export Workflows</a></li>
-        <li><a href="{% help_url 'modules/workflows/documents.html' %}" target="_blank" class="help-link btn-ext">Document Workflows</a></li>
     </ul>
 </div>
