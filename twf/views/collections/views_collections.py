@@ -9,7 +9,7 @@ from django_filters.views import FilterView
 from django_tables2 import SingleTableView
 
 from twf.forms.filters.filters import CollectionItemFilter, CollectionFilter
-from twf.tables.tables_collection import CollectionItemTable, CollectionTable
+from twf.tables.tables_collection import CollectionTable
 
 logger = logging.getLogger(__name__)
 from twf.forms.collections.collections_forms import CollectionCreateForm, CollectionAddDocumentForm, CollectionUpdateForm, \

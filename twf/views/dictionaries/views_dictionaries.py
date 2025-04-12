@@ -349,7 +349,8 @@ class TWFDictionaryDictionaryEntryView(SingleTableView, TWFDictionaryView):
         # Start with home and dictionaries section
         breadcrumbs = [
             {'url': reverse('twf:home'), 'value': '<i class="fas fa-home"></i>'},
-            {'url': reverse('twf:dictionaries'), 'value': 'Dictionaries'},
+            {'url': reverse('twf:dictionaries_overview'), 'value': 'Dictionaries'},
+            {'url': reverse('twf:dictionaries'), 'value': 'Dictionary List'},
         ]
         
         # Get the entry and its dictionary
@@ -424,6 +425,7 @@ class TWFDictionaryNormDataView(TWFDictionaryView):
 
     template_name = 'twf/dictionaries/normalization_wizard.html'
     page_title = 'Normalization Data Wizard'
+    navigation_anchor = reverse_lazy("twf:dictionaries_normalization")
 
     def post(self, request, *args, **kwargs):
         """Handle the POST request."""
@@ -565,6 +567,7 @@ class TWFDictionaryDictionaryEntryEditView(FormView, TWFDictionaryView):
         breadcrumbs = [
             {'url': reverse('twf:home'), 'value': '<i class="fas fa-home"></i>'},
             {'url': reverse('twf:dictionaries_overview'), 'value': 'Dictionaries'},
+            {'url': reverse('twf:dictionaries'), 'value': 'Dictionary List'},
         ]
         
         # Get the entry and its dictionary
