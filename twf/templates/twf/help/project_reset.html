@@ -1,0 +1,116 @@
+{% load twf_help %}
+
+<div class="help-content">
+    <h2>Reset Functions</h2>
+    <p>
+        The Reset Functions page provides tools for resetting or removing various components of your project. These functions are helpful when you need to clean up your project, start fresh with certain components, or recover from errors.
+    </p>
+
+    <p class="text-danger">
+        <strong>Warning:</strong> Many of these actions can result in data loss and cannot be undone. Use these functions with extreme caution.
+    </p>
+
+    <h3>Action Categories</h3>
+    <p>
+        Reset functions are divided into two categories based on their potential impact:
+    </p>
+    <ul>
+        <li><strong>A Bit Dangerous:</strong> Actions that significantly modify your data but are not entirely destructive</li>
+        <li><strong>Dangerous:</strong> Irreversible actions that permanently delete data</li>
+    </ul>
+
+    <h3>A Bit Dangerous Functions</h3>
+    <h4>Unpark All Tags</h4>
+    <p>
+        This function un-parks all tags that have been previously parked (set aside) in your project.
+    </p>
+    <ul>
+        <li><strong>Use when:</strong> You want to reconsider all parked tags</li>
+        <li><strong>Impact:</strong> All parked tags will become active again and appear in relevant tag views</li>
+        <li><strong>Recovery:</strong> You can manually re-park individual tags if needed</li>
+    </ul>
+
+    <h4>Remove All Prompts</h4>
+    <p>
+        This function deletes all saved AI prompts from your project.
+    </p>
+    <ul>
+        <li><strong>Use when:</strong> You want to clear out old or unused prompts</li>
+        <li><strong>Impact:</strong> All saved prompts will be permanently deleted</li>
+        <li><strong>Recovery:</strong> You will need to recreate any needed prompts manually</li>
+    </ul>
+
+    <h4>Remove All Tasks</h4>
+    <p>
+        This function deletes all task records from your project's history.
+    </p>
+    <ul>
+        <li><strong>Use when:</strong> You want to clear task history or free up database space</li>
+        <li><strong>Impact:</strong> Task history and logs will be permanently deleted, but the results of completed tasks (e.g., extracted tags, created documents) remain intact</li>
+        <li><strong>Recovery:</strong> Task history cannot be recovered</li>
+    </ul>
+
+    <h4>Remove All Dictionaries</h4>
+    <p>
+        This function removes all dictionaries from your project (but doesn't delete the dictionaries themselves).
+    </p>
+    <ul>
+        <li><strong>Use when:</strong> You want to start fresh with dictionaries or remove unwanted dictionaries</li>
+        <li><strong>Impact:</strong> Dictionaries will be unlinked from your project but will still exist in the system</li>
+        <li><strong>Recovery:</strong> You can re-add dictionaries to your project as needed</li>
+    </ul>
+
+    <h3>Dangerous Functions</h3>
+    <h4>Delete All Documents</h4>
+    <p>
+        This function permanently deletes all documents in your project, along with associated pages and tags.
+    </p>
+    <ul>
+        <li><strong>Use when:</strong> You need to completely start over with document processing</li>
+        <li><strong>Impact:</strong> 
+            <ul>
+                <li>All documents will be permanently deleted</li>
+                <li>All pages associated with those documents will be deleted</li>
+                <li>All tags associated with those pages will be deleted</li>
+                <li>Collections may become uneditable if they reference deleted documents</li>
+            </ul>
+        </li>
+        <li><strong>Recovery:</strong> None. You would need to re-extract documents from your Transkribus export</li>
+    </ul>
+
+    <h4>Delete All Tags</h4>
+    <p>
+        This function permanently deletes all tags in your project.
+    </p>
+    <ul>
+        <li><strong>Use when:</strong> You need to redo tag extraction or remove problematic tags</li>
+        <li><strong>Impact:</strong> All tags will be permanently deleted, including any manual corrections or modifications</li>
+        <li><strong>Recovery:</strong> None. You would need to re-extract tags from your documents</li>
+    </ul>
+
+    <h4>Delete All Collections</h4>
+    <p>
+        This function permanently deletes all collections in your project.
+    </p>
+    <ul>
+        <li><strong>Use when:</strong> You need to start over with collection organization</li>
+        <li><strong>Impact:</strong> All collections and collection items will be permanently deleted</li>
+        <li><strong>Recovery:</strong> None. You would need to recreate collections manually</li>
+    </ul>
+
+    <h3>Best Practices</h3>
+    <ol>
+        <li><strong>Consider Alternatives:</strong> Before using reset functions, consider if there are less destructive ways to achieve your goal</li>
+        <li><strong>Document Your Process:</strong> Make notes about your project state before using reset functions</li>
+        <li><strong>Backup First:</strong> Consider creating a project copy before using dangerous functions</li>
+        <li><strong>Start Small:</strong> Use the least destructive function that meets your needs</li>
+        <li><strong>Verify Selection:</strong> Double-check the confirmation dialog to ensure you're performing the intended action</li>
+    </ol>
+
+    <h3>Related Topics</h3>
+    <ul>
+        <li>{% help_url 'project_copy' 'Copy Project' %} (to create a backup before large changes)</li>
+        <li>{% help_url 'project_tk_structure' 'Extract Transkribus Export' %} (to rebuild documents after deletion)</li>
+        <li>{% help_url 'tags_extract' 'Extract Tags' %} (to rebuild tags after deletion)</li>
+    </ul>
+</div>
