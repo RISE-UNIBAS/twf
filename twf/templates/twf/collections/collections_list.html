@@ -1,21 +1,48 @@
 {% extends 'twf/base/base.html' %}
+{% load render_table from django_tables2 %}
+{% load twf_filters %}
+
+{% block page_title %}
+    <div class="d-flex justify-content-between align-items-center pb-1 mb-3">
+      <h1 class="mb-0" style="width: 100%;">Collections</h1>
+      <a href="{% url 'twf:project_collections_create' %}" class="btn btn-sm btn-dark"
+         data-bs-toggle="tooltip" data-bs-placement="top" title="Create a new collection">
+        <i class="fa fa-plus"></i>
+      </a>
+    </div>
+{% endblock %}
 
 {% block content %}
-        
-     {% for col in collections %}
-         <div class="container p-0 m-0 mt-3">
-            <div class="card">
-                <div class="card-body">
-                    <h5 class="card-title">{{ col.title }}</h5>
-                    <p class="card-text">
-                        {{ col.description }}
-                    </p>
-                    <p>
-                        <small class="text-muted">Created: {{ col.created_at }} by {{ col.created_by }}, Items: {{ col.items.all.count }}</small>
-                    </p>
-                    <a href="{% url 'twf:collections_view' col.id %}" class="btn btn-dark float-end ms-2">View</a>
-                </div>
+    <p class="lead">These collections organize your project's content. Use filters to search or sort collections.</p>
+
+    <!-- Filter Card -->
+    <div class="card mb-4">
+        <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+            <div class="d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Collection Filters</h5>
+                <span class="badge bg-secondary">
+                    {% if request.GET and filter.qs %}
+                        {{ filter.qs|length }} collections found
+                    {% else %}
+                        {{ table.rows|length }} collections found
+                    {% endif %}
+                </span>
             </div>
         </div>
-     {% endfor %}
+        <div class="card-body">
+            {% twf_filter filter %}
+        </div>
+    </div>
+
+    <!-- Collections Table -->
+    <div class="card">
+        <div class="card-header">
+            <h5 class="card-title mb-0">Your Collections</h5>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                {% render_table table %}
+            </div>
+        </div>
+    </div>
 {% endblock %}

@@ -4,7 +4,8 @@ import django_filters
 from django.db.models import Q
 from django.forms import CheckboxInput, DateInput
 from django.contrib.auth import get_user_model
-from twf.models import Document, DictionaryEntry, PageTag, CollectionItem, Task, Prompt, Project, Export, Note
+from twf.models import Document, DictionaryEntry, PageTag, CollectionItem, Task, Prompt, Project, Export, Note, \
+    Collection, Dictionary
 
 User = get_user_model()
 
@@ -245,16 +246,104 @@ class ProjectFilter(django_filters.FilterSet):
         fields = ['title', 'status', 'owner__user__username']
 
 
+class DictionaryFilter(django_filters.FilterSet):
+    """Filter for the dictionaries table."""
+    
+    label = django_filters.CharFilter(lookup_expr='icontains', label="Label contains")
+    type = django_filters.ChoiceFilter(
+        choices=[
+            ('person', 'Person'),
+            ('place', 'Place'),
+            ('organization', 'Organization'),
+            ('topic', 'Topic'),
+            ('date', 'Date'),
+            ('other', 'Other')
+        ],
+        label="Dictionary type", 
+        empty_label="All types"
+    )
+    
+    class Meta:
+        """Meta class for the dictionary filter."""
+        model = Dictionary
+        fields = ['label', 'type']
+
+
 class DictionaryEntryFilter(django_filters.FilterSet):
     """Filter for the dictionary entry table."""
+    
+    label = django_filters.CharFilter(lookup_expr='icontains', label="Label contains")
+    variation = django_filters.CharFilter(
+        method='filter_by_variation',
+        label="Variation contains"
+    )
+    has_metadata = django_filters.BooleanFilter(
+        method='filter_has_metadata',
+        label="Has normalization data",
+        widget=CheckboxInput()
+    )
+    has_variations = django_filters.BooleanFilter(
+        method='filter_has_variations',
+        label="Has variations",
+        widget=CheckboxInput()
+    )
+    modified_by = django_filters.CharFilter(
+        field_name='modified_by',
+        lookup_expr='icontains',
+        label="Modified by"
+    )
+    modified_after = django_filters.DateFilter(
+        field_name='modified_at',
+        lookup_expr='gte',
+        label='Modified after',
+        widget=DateInput(attrs={'type': 'date', 'class': 'form-control'})
+    )
+    modified_before = django_filters.DateFilter(
+        field_name='modified_at',
+        lookup_expr='lte',
+        label='Modified before',
+        widget=DateInput(attrs={'type': 'date', 'class': 'form-control'})
+    )
 
     class Meta:
         """Meta class for the dictionary entry filter."""
         model = DictionaryEntry
-        fields = {
-            'label': ['icontains'],
-        }
+        fields = [
+            'label', 'variation', 'has_metadata', 'has_variations',
+            'modified_by', 'modified_after', 'modified_before'
+        ]
+        
+    def filter_has_metadata(self, queryset, name, value):
+        """Filter entries that have metadata."""
+        if value:
+            return queryset.exclude(metadata={})
+        return queryset
+        
+    def filter_has_variations(self, queryset, name, value):
+        """Filter entries that have variations."""
+        if value:
+            return queryset.filter(variations__isnull=False).distinct()
+        return queryset
+        
+    def filter_by_variation(self, queryset, name, value):
+        """Filter entries by variation text."""
+        if value:
+            return queryset.filter(variations__variation__icontains=value).distinct()
+        return queryset
 
+
+
+class CollectionFilter(django_filters.FilterSet):
+    """Filter for the collections table."""
+    
+    title = django_filters.CharFilter(lookup_expr='icontains', label="Title contains")
+    description = django_filters.CharFilter(lookup_expr='icontains', label="Description contains")
+    created_by__username = django_filters.CharFilter(lookup_expr='icontains', label="Created by")
+    
+    class Meta:
+        """Meta class for the collection filter."""
+        model = Collection
+        fields = ["title", "description", "created_by__username"]
 
 
 class CollectionItemFilter(django_filters.FilterSet):
@@ -265,11 +354,16 @@ class CollectionItemFilter(django_filters.FilterSet):
     title = django_filters.CharFilter(lookup_expr='icontains', label="Item Title")
     document_title = django_filters.CharFilter(field_name="document__title", lookup_expr="icontains",
                                                label="Document Title")
+    status = django_filters.ChoiceFilter(
+        choices=CollectionItem.STATUS_CHOICES,
+        label="Status", 
+        empty_label="All Statuses"
+    )
 
     class Meta:
         """Meta class for the collection item filter."""
         model = CollectionItem
-        fields = ["document_id", "title", "document_title"]
+        fields = ["document_id", "title", "document_title", "status"]
 
 
 class UserFilter(django_filters.FilterSet):

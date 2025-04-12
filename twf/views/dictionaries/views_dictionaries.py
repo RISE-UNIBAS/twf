@@ -10,7 +10,7 @@ from django_tables2 import SingleTableView
 
 logger = logging.getLogger(__name__)
 
-from twf.forms.filters.filters import DictionaryEntryFilter
+from twf.forms.filters.filters import DictionaryEntryFilter, DictionaryFilter
 from twf.forms.dictionaries.dictionaries_forms import DictionaryForm, DictionaryEntryForm
 from twf.forms.enrich_forms import EnrichEntryManualForm, EnrichEntryForm
 from twf.models import Dictionary, DictionaryEntry, Variation, PageTag
@@ -122,46 +122,111 @@ class TWFDictionaryOverviewView(TWFDictionaryView):
         return context
 
 
-class TWFDictionaryDictionariesView(SingleTableView, TWFDictionaryView):
+class TWFDictionaryDictionariesView(SingleTableView, FilterView, TWFDictionaryView):
     """View for the dictionaries. Provides a table of all dictionaries.
     The table is filterable and sortable."""
     template_name = 'twf/dictionaries/dictionaries.html'
     page_title = 'Dictionaries Overview'
     table_class = DictionaryTable
+    filterset_class = DictionaryFilter
     paginate_by = 10
     model = Dictionary
+    strict = False  # Don't enforce form validation for filters
 
     def get_queryset(self):
         """Get the queryset."""
         project = self.get_project()
-        return project.selected_dictionaries.all()
+        queryset = project.selected_dictionaries.all()
+        self.filterset = self.filterset_class(self.request.GET or None, queryset=queryset)
+        
+        # If filter is applied, return filtered queryset
+        if self.request.GET and self.filterset.is_bound:
+            return self.filterset.qs
+        return queryset
 
     def get(self, request, *args, **kwargs):
-        """Handle the GET request."""
-        self.object_list = self.get_queryset()
+        """Handle the GET request with proper filter handling."""
+        # Set up initial queryset
+        project = self.get_project()
+        queryset = project.selected_dictionaries.all()
+        
+        # Initialize the filter
+        self.filterset = self.filterset_class(
+            request.GET or None,
+            queryset=queryset
+        )
+        
+        # Set object_list either to all items or filtered items
+        if request.GET and self.filterset.is_bound:
+            self.object_list = self.filterset.qs
+        else:
+            self.object_list = queryset
+            
+        # Get context and render response
         context = self.get_context_data()
         return self.render_to_response(context)
+        
+    def get_context_data(self, **kwargs):
+        """Get the context data."""
+        context = super().get_context_data(**kwargs)
+        context['filter'] = self.filterset
+        return context
 
 
-class TWFDictionaryAddView(SingleTableView, TWFDictionaryView):
-    """View for the dictionary overview."""
+class TWFDictionaryAddView(SingleTableView, FilterView, TWFDictionaryView):
+    """View for adding dictionaries to the project."""
 
     template_name = 'twf/dictionaries/dictionaries_add.html'
     page_title = 'Add Dictionaries'
     table_class = DictionaryAddTable
+    filterset_class = DictionaryFilter
     paginate_by = 10
     model = Dictionary
+    strict = False  # Don't enforce form validation for filters
 
     def get_queryset(self):
-        """Get the queryset."""
+        """Get the queryset of dictionaries not already in the project."""
         selected_dictionaries = self.get_project().selected_dictionaries.all()
-        return Dictionary.objects.all().exclude(pk__in=[d.pk for d in selected_dictionaries])
+        queryset = Dictionary.objects.all().exclude(pk__in=[d.pk for d in selected_dictionaries])
+        
+        # Initialize the filter
+        self.filterset = self.filterset_class(
+            self.request.GET or None,
+            queryset=queryset
+        )
+        
+        # If filter is applied, return filtered queryset
+        if self.request.GET and self.filterset.is_bound:
+            return self.filterset.qs
+        return queryset
 
     def get(self, request, *args, **kwargs):
-        """Handle the GET request."""
-        self.object_list = self.get_queryset()
+        """Handle the GET request with proper filter handling."""
+        # Set up initial queryset
+        selected_dictionaries = self.get_project().selected_dictionaries.all()
+        queryset = Dictionary.objects.all().exclude(pk__in=[d.pk for d in selected_dictionaries])
+        
+        # Initialize the filter
+        self.filterset = self.filterset_class(
+            request.GET or None,
+            queryset=queryset
+        )
+        
+        # Set object_list either to all items or filtered items
+        if request.GET and self.filterset.is_bound:
+            self.object_list = self.filterset.qs
+        else:
+            self.object_list = queryset
+            
+        # Get context and render response
         context = self.get_context_data()
         return self.render_to_response(context)
+        
+    def get_context_data(self, **kwargs):
+        """Get the context data."""
+        context = super().get_context_data(**kwargs)
+        context['filter'] = self.filterset
+        return context
 
 
 class TWFDictionaryCreateView(FormView, TWFDictionaryView):
@@ -204,26 +269,44 @@ class TWFDictionaryDictionaryView(SingleTableView, FilterView, TWFDictionaryView
     filterset_class = DictionaryEntryFilter
     paginate_by = 10
     model = DictionaryEntry
+    strict = False  # Don't enforce form validation for filters
 
     def get_queryset(self):
         """Get the queryset."""
         queryset = DictionaryEntry.objects.filter(dictionary_id=self.kwargs.get('pk'))
-        self.filterset = self.filterset_class(self.request.GET,
-                                              queryset=queryset)
-        return self.filterset.qs
+        self.filterset = self.filterset_class(self.request.GET or None, queryset=queryset)
+        
+        # If filter is applied, return filtered queryset
+        if self.request.GET and self.filterset.is_bound:
+            return self.filterset.qs
+        return queryset
 
     def get(self, request, *args, **kwargs):
-        """Handle the GET request."""
-        self.object_list = self.get_queryset()
+        """Handle the GET request with proper filter handling."""
+        # Set up initial queryset
+        queryset = DictionaryEntry.objects.filter(dictionary_id=self.kwargs.get('pk'))
+        
+        # Initialize the filter
+        self.filterset = self.filterset_class(
+            request.GET or None,
+            queryset=queryset
+        )
+        
+        # Set object_list either to all items or filtered items
+        if request.GET and self.filterset.is_bound:
+            self.object_list = self.filterset.qs
+        else:
+            self.object_list = queryset
+            
+        # Get context and render response
         context = self.get_context_data()
         return self.render_to_response(context)
 
     def get_context_data(self, **kwargs):
         """Get the context data."""
         context = super().get_context_data(**kwargs)
-        context['page_title'] = self.page_title
         context['dictionary'] = Dictionary.objects.get(pk=self.kwargs.get('pk'))
-        context['filter'] = self.get_filterset(self.filterset_class)
+        context['filter'] = self.filterset
         return context
 
     def get_breadcrumbs(self):

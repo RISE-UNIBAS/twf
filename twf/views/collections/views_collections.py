@@ -8,7 +8,8 @@ from django.views.generic import FormView
 from django_filters.views import FilterView
 from django_tables2 import SingleTableView
 
-from twf.forms.filters.filters import CollectionItemFilter
+from twf.forms.filters.filters import CollectionItemFilter, CollectionFilter
+from twf.tables.tables_collection import CollectionItemTable, CollectionTable
 
 logger = logging.getLogger(__name__)
 from twf.forms.collections.collections_forms import CollectionCreateForm, CollectionAddDocumentForm, CollectionUpdateForm, \
@@ -120,9 +121,47 @@ class TWFCollectionOverviewView(TWFCollectionsView):
         return context
 
 
-class TWFCollectionListView(TWFCollectionsView):
+class TWFCollectionListView(SingleTableView, FilterView, TWFCollectionsView):
+    """View for listing all collections."""
     template_name = 'twf/collections/collections_list.html'
     page_title = 'Collection List'
+    table_class = CollectionTable
+    filterset_class = CollectionFilter
+    paginate_by = 10
+    model = Collection
+    strict = False
+    
+    def get_queryset(self):
+        """Get the queryset for the view."""
+        queryset = Collection.objects.filter(project_id=self.request.session.get('project_id'))
+        return queryset
+    
+    def get(self, request, *args, **kwargs):
+        """Handle GET requests."""
+        # Set up initial queryset
+        queryset = self.get_queryset()
+        
+        # Initialize the filter
+        self.filterset = self.filterset_class(
+            request.GET or None,
+            queryset=queryset
+        )
+        
+        # Set object_list either to all items or filtered items
+        if request.GET and self.filterset.is_bound:
+            self.object_list = self.filterset.qs
+        else:
+            self.object_list = queryset
+            
+        # Get context and render response
+        context = self.get_context_data()
+        return self.render_to_response(context)
+    
+    def get_context_data(self, **kwargs):
+        """Get the context data."""
+        context = super().get_context_data(**kwargs)
+        context['filter'] = self.filterset
+        return context
 
 
 class TWFCollectionsEditView(FormView, TWFCollectionsView):
@@ -288,25 +327,40 @@ class TWFCollectionsDetailView(SingleTableView, FilterView, TWFCollectionsView):
     filterset_class = CollectionItemFilter
     paginate_by = 10
     model = CollectionItem
+    strict = False  # Don't enforce form validation for filters
 
     def get_queryset(self):
         """Get the queryset for the view."""
         queryset = CollectionItem.objects.filter(collection_id=self.kwargs.get("pk"))
         self.filterset = self.filterset_class(self.request.GET, queryset=queryset)
-        self.object_list = self.filterset.qs
-        return self.object_list
-
+        return self.filterset.qs
+    
     def get(self, request, *args, **kwargs):
-        """Get the view."""
-        self.object_list = self.get_queryset()
-        return super().get(request, *args, **kwargs)
+        """Handle GET requests with proper filter handling."""
+        # Set up initial queryset
+        queryset = CollectionItem.objects.filter(collection_id=self.kwargs.get("pk"))
+        
+        # Initialize the filter
+        self.filterset = self.filterset_class(
+            request.GET or None,
+            queryset=queryset
+        )
+        
+        # Set object_list either to all items or filtered items
+        if request.GET and self.filterset.is_bound:
+            self.object_list = self.filterset.qs
+        else:
+            self.object_list = queryset
+            
+        # Get context and render response
+        context = self.get_context_data()
+        return self.render_to_response(context)
 
     def get_context_data(self, **kwargs):
         """Get the context data for the view."""
         context = super().get_context_data(**kwargs)
         context['collection'] = Collection.objects.get(pk=self.kwargs.get('pk'))
-        context['page_title'] = self.page_title
-        context['filter'] = self.get_filterset(self.filterset_class)
+        context['filter'] = self.filterset
         return context
 
 

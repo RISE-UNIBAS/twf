@@ -1,7 +1,49 @@
 {% extends 'twf/base/base.html' %}
 {% load django_tables2 %}
+{% load twf_filters %}
+
+{% block page_title %}
+    <div class="d-flex justify-content-between align-items-center pb-1 mb-3">
+      <h1 class="mb-0" style="width: 100%;">Dictionaries</h1>
+      <div>
+        {% if perms.twf.dictionary_add %}
+        <a href="{% url 'twf:dictionaries_add' %}" class="btn btn-sm btn-dark me-1"
+           data-bs-toggle="tooltip" data-bs-placement="top" title="Add existing dictionaries">
+          <i class="fa fa-plus-circle"></i> Add Dictionary
+        </a>
+        {% endif %}
+        {% if perms.twf.dictionary_create %}
+        <a href="{% url 'twf:dictionary_create' %}" class="btn btn-sm btn-dark"
+           data-bs-toggle="tooltip" data-bs-placement="top" title="Create a new dictionary">
+          <i class="fa fa-plus"></i> Create New
+        </a>
+        {% endif %}
+      </div>
+    </div>
+{% endblock %}
 
 {% block content %}
-    <p class="lead">Manage dictionaries in the project.</p>
-    {% render_table table %}
+    <p class="lead">Manage dictionaries in your project. Each dictionary contains entries with normalized information.</p>
+
+    <!-- Filter Card -->
+    <div class="card mb-4">
+        <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Dictionary Filters</h5>
+            <span class="badge bg-light text-dark">
+                {% if request.GET and filter.qs %}
+                    {{ filter.qs|length }} dictionaries found
+                {% else %}
+                    {{ table.rows|length }} dictionaries
+                {% endif %}
+            </span>
+        </div>
+        <div class="card-body">
+            {% twf_filter filter %}
+        </div>
+    </div>
+    
+    <!-- Dictionaries Table -->
+    <div class="table-responsive-sm">
+        {% render_table table %}
+    </div>
 {% endblock %}

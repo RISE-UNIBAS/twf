@@ -1,7 +1,51 @@
 {% extends 'twf/base/base.html' %}
 {% load django_tables2 %}
+{% load twf_filters %}
+
+{% block page_title %}
+    <div class="d-flex justify-content-between align-items-center pb-1 mb-3">
+      <h1 class="mb-0" style="width: 100%;">Add Dictionaries</h1>
+      <div>
+        {% if perms.twf.dictionary_create %}
+        <a href="{% url 'twf:dictionary_create' %}" class="btn btn-sm btn-dark"
+           data-bs-toggle="tooltip" data-bs-placement="top" title="Create a new dictionary">
+          <i class="fa fa-plus"></i> Create New Dictionary
+        </a>
+        {% endif %}
+      </div>
+    </div>
+{% endblock %}
 
 {% block content %}
-    <p class="lead">Add existing dictionaries to your project.</p>
-    {% render_table table %}
+    <p class="lead">Add existing dictionaries to your project. Select dictionaries that will help with normalizing your data.</p>
+    <p class="text-muted small">Click "Add to Project" to add a dictionary to your current project. You can add multiple dictionaries.</p>
+
+    <!-- Filter Card -->
+    <div class="card mb-4">
+        <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Search Dictionaries</h5>
+            <span class="badge bg-light text-dark">
+                {% if request.GET and filter.qs %}
+                    {{ filter.qs|length }} dictionaries found
+                {% else %}
+                    {{ table.rows|length }} dictionaries available
+                {% endif %}
+            </span>
+        </div>
+        <div class="card-body">
+            {% twf_filter filter %}
+        </div>
+    </div>
+    
+    <!-- Available Dictionaries Table -->
+    <div class="table-responsive-sm">
+        {% render_table table %}
+    </div>
+    
+    <!-- Back to Dictionaries -->
+    <div class="mt-3">
+        <a href="{% url 'twf:dictionaries' %}" class="btn btn-sm btn-secondary">
+            <i class="fa fa-arrow-left"></i> Back to Dictionaries
+        </a>
+    </div>
 {% endblock %}

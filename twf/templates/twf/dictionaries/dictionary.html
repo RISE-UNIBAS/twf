@@ -1,11 +1,65 @@
 {% extends 'twf/base/base.html' %}
 {% load django_tables2 %}
+{% load twf_filters %}
 
-{% block title %}
-    <h1>Dictionary: {{ dictionary.label }}</h1>
+{% block page_title %}
+    <div class="d-flex justify-content-between align-items-center pb-1 mb-3">
+        <h1 class="mb-0" style="width: 100%;">Dictionary: {{ dictionary.label }}</h1>
+        <div>
+            <a href="{% url 'twf:dictionaries_edit' dictionary.pk %}" class="btn btn-sm btn-dark me-1"
+               data-bs-toggle="tooltip" data-bs-placement="top" title="Edit dictionary">
+                <i class="fa fa-edit"></i> Edit Dictionary
+            </a>
+        </div>
+    </div>
 {% endblock %}
 
 {% block content %}
-    {% include 'twf/tables/filter.html' %}
-    {% render_table table %}
+    <p class="lead">
+        Dictionary type: <strong>{{ dictionary.type }}</strong> | 
+        Created by: <strong>{{ dictionary.created_by }}</strong> | 
+        Last modified: <strong>{{ dictionary.modified_at|date:"d M Y H:i" }}</strong>
+    </p>
+    
+    <!-- Entries Count Card -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card bg-light">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Total Entries</h5>
+                    <p class="display-4">{{ table.rows|length }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Dictionary Description</h5>
+                    <p>{{ dictionary.description|default:"No description available." }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter Card -->
+    <div class="card mb-4">
+        <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Dictionary Entry Filters</h5>
+            <span class="badge bg-light text-dark">
+                {% if request.GET and filter.qs %}
+                    {{ filter.qs|length }} entries found
+                {% else %}
+                    {{ table.rows|length }} entries found
+                {% endif %}
+            </span>
+        </div>
+        <div class="card-body">
+            {% twf_filter filter %}
+        </div>
+    </div>
+    
+    <!-- Entries Table -->
+    <div class="table-responsive-sm mt-3">
+        {% render_table table %}
+    </div>
 {% endblock %}

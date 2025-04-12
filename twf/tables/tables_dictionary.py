@@ -67,66 +67,115 @@ class DictionaryAddTable(DictionaryTable):
 
 class DictionaryEntryTable(tables.Table):
     """Table for displaying dictionary entries."""
+    label = tables.Column(verbose_name="Entry Label")
     variations = tables.Column(verbose_name="Variations", orderable=False)
-    metadata = tables.Column(verbose_name="Norm Data", orderable=False)
-    options = tables.Column(empty_values=(), verbose_name="Options", orderable=False)
+    metadata = tables.Column(verbose_name="Normalization Data", orderable=False)
+    modified_at = tables.DateTimeColumn(format="Y-m-d H:i", verbose_name="Modified")
+    actions = tables.Column(empty_values=(), verbose_name="Actions", orderable=False)
 
     class Meta:
         """Meta class for the DictionaryEntryTable."""
         model = DictionaryEntry
-        template_name = "django_tables2/bootstrap.html"  # Using Bootstrap template
-        fields = ("label", )
-        attrs = {"class": "table table-striped table-hover table-sm"}
+        template_name = "django_tables2/bootstrap4.html"
+        fields = ("label", "variations", "metadata", "modified_at")
+        attrs = {"class": "table table-striped table-hover"}
 
     def render_variations(self, record):
-        """Renders the variations column with a delete button for each variation."""
+        """Renders the variations column with badges for each variation."""
         variations = record.variations.all()
+        if not variations:
+            return format_html('<span class="text-muted">No variations</span>')
+        
         html = ""
-        record_html = """<span class="badge bg-secondary">{}</span>&nbsp;"""
-        for var in variations:
-            html += record_html.format(var.variation)
-
-        return mark_safe(html)
+        for var in variations[:5]:  # Limit to first 5 variations to avoid overflow
+            html += format_html('<span class="badge bg-secondary me-1 mb-1">{}</span>', var.variation)
+            
+        # Show count if there are more variations
+        if variations.count() > 5:
+            html += format_html('<span class="badge bg-info">+{} more</span>', variations.count() - 5)
+            
+        return html
     
     def render_metadata(self, record):
-        """Renders the metadata column with truncated content."""
+        """Renders the metadata column with truncated content and status badge."""
         if not record.metadata:
-            return "—"
-            
-        # Convert to string and truncate if necessary
-        metadata_str = str(record.metadata)
-        if len(metadata_str) > 100:
-            metadata_str = metadata_str[:97] + "..."
-            
+            return format_html('<span class="badge bg-warning">No data</span>')
+        
+        # Show a success badge for entries with metadata
+        status_badge = format_html('<span class="badge bg-success mb-1">Normalized</span>')
+        
+        # Extract key information from metadata
+        metadata_info = ""
+        if 'preferred_name' in record.metadata:
+            metadata_info += format_html('<strong>Name:</strong> {}<br>', record.metadata['preferred_name'])
+        if 'id' in record.metadata:
+            metadata_info += format_html('<strong>ID:</strong> {}<br>', record.metadata['id'])
+        if 'url' in record.metadata:
+            metadata_info += format_html('<a href="{}" target="_blank" class="small">Authority Link</a>', 
+                                        record.metadata['url'])
+        
+        # If we couldn't extract specific fields, show truncated version
+        if not metadata_info:
+            metadata_str = str(record.metadata)
+            if len(metadata_str) > 80:
+                metadata_str = metadata_str[:77] + "..."
+                
+            metadata_info = format_html('<span class="small">{}</span>', metadata_str)
+        
         return format_html(
-            '<span title="{}">{}</span>',
-            str(record.metadata).replace('"', '&quot;'),  # Escape quotes for the title attribute
-            metadata_str
+            '{}<br>{}',
+            status_badge,
+            metadata_info
         )
 
     def render_label(self, value, record):
-        """Renders the label column with the label and the type of the dictionary."""
-        formatted_date = record.modified_at.strftime("%a, %d %b %Y %H:%M")
-        return mark_safe(f"<strong>{value}</strong><br/>"
-                         f"<span class='small text-muted'>ID: {record.id}</span><br/>"
-                         f"<span class='small text-muted'>{record.modified_by}, {formatted_date}</span>")
-                         
-    def render_options(self, record):
-        """Renders the actions column with buttons."""
+        """Renders the label column with a link to the entry view."""
         from django.urls import reverse
         
         return format_html(
-            '{} {}',
-            format_html(
-                '<a href="{}" class="btn btn-sm btn-dark me-1" title="View">'
-                '<i class="fa fa-eye"></i></a>',
-                reverse('twf:dictionaries_entry_view', args=[record.pk])
-            ),
-            format_html(
-                '<a href="{}" class="btn btn-sm btn-dark me-1" title="Edit">'
-                '<i class="fa fa-pen"></i></a>',
-                reverse('twf:dictionaries_entry_edit', args=[record.pk])
-            )
+            '<a href="{}" class="fw-bold">{}</a><br>'
+            '<span class="small text-muted">ID: {}</span>',
+            reverse('twf:dictionaries_entry_view', args=[record.pk]),
+            value,
+            record.id
+        )
+        
+    def render_modified_at(self, value, record):
+        """Renders the modified date with user information."""
+        return format_html(
+            '{}<br><span class="small text-muted">by {}</span>',
+            value,
+            record.modified_by or "—"
+        )
+                         
+    def render_actions(self, record):
+        """Renders the actions column with buttons and dropdown."""
+        from django.urls import reverse
+        
+        view_url = reverse('twf:dictionaries_entry_view', args=[record.pk])
+        edit_url = reverse('twf:dictionaries_entry_edit', args=[record.pk])
+        delete_url = reverse('twf:dictionaries_entry_delete', args=[record.pk])
+        
+        # Create dropdown menu for actions
+        return format_html(
+            '<div class="btn-group">'
+            '<a href="{}" class="btn btn-sm btn-dark"><i class="fa fa-eye"></i></a>'
+            '<a href="{}" class="btn btn-sm btn-secondary"><i class="fa fa-pencil"></i></a>'
+            '<button type="button" class="btn btn-sm btn-dark dropdown-toggle dropdown-toggle-split" '
+            'data-bs-toggle="dropdown" aria-expanded="false">'
+            '<span class="visually-hidden">Toggle Dropdown</span>'
+            '</button>'
+            '<ul class="dropdown-menu dropdown-menu-end">'
+            '<a class="dropdown-item" href="{}"><i class="fa fa-eye"></i> View Details</a>'
+            '<a class="dropdown-item" href="{}"><i class="fa fa-pencil"></i> Edit Entry</a>'
+            '<div class="dropdown-divider"></div>'
+            '<a class="dropdown-item text-danger show-danger-modal" href="#" '
+            'data-redirect-url="{}" '
+            'data-message="Are you sure you want to delete this dictionary entry? This cannot be undone.">'
+            '<i class="fa fa-trash"></i> Delete Entry</a>'
+            '</ul>'
+            '</div>',
+            view_url, edit_url, view_url, edit_url, delete_url
         )
 
 
