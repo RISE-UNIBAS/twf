@@ -1,95 +1,37 @@
+<!-- has been checked -->
 {% load twf_help %}
 
 <div class="help-content">
-    <h2>Collections View</h2>
+    <h2>Your Collections</h2>
     <p>
-        The Collections View shows all collections available in your project. A collection is a curated set of document items
-        grouped together for a specific purpose, such as thematic organization, batch processing, or export preparation.
+        This page displays all collections associated with your project. Collections organize your documents into meaningful groups for management, analysis, and processing.
     </p>
 
-    <h3>Collections List</h3>
+    <h3>Collection List</h3>
     <p>
-        The main table displays all collections in your project with key information:
+        For each collection, you can see:
     </p>
     <ul>
-        <li><strong>Title:</strong> The name of each collection</li>
-        <li><strong>Description:</strong> A brief explanation of the collection's purpose</li>
-        <li><strong>Type:</strong> The category or classification of the collection</li>
-        <li><strong>Items:</strong> The number of document items contained in the collection</li>
-        <li><strong>Status Distribution:</strong> Visual representation of item statuses within the collection</li>
-        <li><strong>Created By:</strong> The user who created the collection</li>
-        <li><strong>Created/Modified:</strong> Timestamps for collection creation and updates</li>
-        <li><strong>Actions:</strong> Available operations for each collection</li>
+        <li><strong>Title:</strong> The name of the collection</li>
+        <li><strong>Description:</strong> An overview of the collection's purpose</li>
+        <li><strong>Item Count:</strong> The number of documents in the collection</li>
+        <li><strong>Created:</strong> When the collection was created and by whom</li>
     </ul>
 
-    <h3>Navigation Controls</h3>
-    <p>
-        Above the collections table, you'll find various controls:
-    </p>
+    <h3>Available Actions</h3>
     <ul>
-        <li><strong>Create Collection:</strong> Start a new collection in your project</li>
-        <li><strong>Search:</strong> Filter collections by name, description, or other properties</li>
-        <li><strong>Filter:</strong> Narrow displayed collections by type, creator, or date range</li>
-        <li><strong>Sort:</strong> Change how collections are ordered in the list</li>
-        <li><strong>Pagination:</strong> Navigate through multiple pages of collections</li>
-        <li><strong>Display Options:</strong> Adjust how many collections are shown per page</li>
-    </ul>
-
-    <h3>Collection Actions</h3>
-    <p>
-        For each collection, several actions are available through the Actions column:
-    </p>
-    <ul>
-        <li><strong>View:</strong> Open the detailed view of the collection and its items</li>
-        <li><strong>Edit:</strong> Modify the collection's properties and settings</li>
-        <li><strong>Process:</strong> Apply batch operations or AI processing to the collection</li>
-        <li><strong>Export:</strong> Generate an export of the collection</li>
-        <li><strong>Delete:</strong> Remove the collection from your project</li>
-        <li><strong>Copy:</strong> Create a duplicate of the collection</li>
-    </ul>
-
-    <h3>Status Indicators</h3>
-    <p>
-        Collections show aggregated status information for their items:
-    </p>
-    <ul>
-        <li><strong>Open:</strong> Items that have not yet been fully processed</li>
-        <li><strong>Reviewed:</strong> Items that have been verified and approved</li>
-        <li><strong>Faulty:</strong> Items that have issues requiring attention</li>
-        <li><strong>Status Progress:</strong> Visual bar showing the proportion of items in each status</li>
-    </ul>
-
-    <h3>Collection Types</h3>
-    <p>
-        Collections can be organized by various types according to your project's needs:
-    </p>
-    <ul>
-        <li><strong>Thematic:</strong> Collections based on subject matter or topics</li>
-        <li><strong>Chronological:</strong> Collections organized by time period</li>
-        <li><strong>Workflow:</strong> Collections representing stages in a processing workflow</li>
-        <li><strong>Export:</strong> Collections prepared specifically for export</li>
-        <li><strong>Analysis:</strong> Collections grouped for specific analytical purposes</li>
-        <li><strong>Custom:</strong> User-defined collection types specific to your project</li>
-    </ul>
-
-    <h3>Collection Management Tips</h3>
-    <ul>
-        <li>Use descriptive titles and detailed descriptions for better organization</li>
-        <li>Create separate collections for different research questions or themes</li>
-        <li>Review collection status indicators regularly to track progress</li>
-        <li>Use collection types consistently to maintain organizational structure</li>
-        <li>Export important collections for sharing or archiving</li>
-        <li>Delete obsolete collections to keep your project organized</li>
+        <li><strong>View:</strong> Open a collection to see its contents</li>
+        <li><strong>Edit:</strong> Modify collection properties</li>
+        <li><strong>Create:</strong> Add a new collection to your project</li>
+        <li><strong>Delete:</strong> Remove a collection from your project</li>
     </ul>
 
     <h3>Related Topics</h3>
     <ul class="help-topics">
         <li><a href="{% url 'twf:help' 'collections_overview' %}" class="help-link btn">Collections Overview</a></li>
-        <li><a href="{% url 'twf:help' 'collections_list' %}" class="help-link btn">Collection List</a></li>
-        <li><a href="{% url 'twf:help' 'collections_create' %}" class="help-link btn">Create Collection</a></li>
         <li><a href="{% url 'twf:help' 'collection_view' %}" class="help-link btn">View Collection</a></li>
-        <li><a href="{% url 'twf:help' 'collection_edit' %}" class="help-link btn">Edit Collection</a></li>
-        <li><a href="{% url 'twf:help' 'collections_add_doc' %}" class="help-link btn">Add Documents to Collection</a></li>
+        <li><a href="{% url 'twf:help' 'project_collections_create' %}" class="help-link btn">Create Collection</a></li>
+        <li><a href="{% url 'twf:help' 'export_collections' %}" class="help-link btn">Export Collections</a></li>
         <li><a href="{% help_url 'modules/workflows/collections.html' %}" target="_blank" class="help-link btn-ext">Collection Workflows</a></li>
     </ul>
 </div>

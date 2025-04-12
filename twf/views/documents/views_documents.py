@@ -87,6 +87,7 @@ class TWFDocumentsOverviewView(TWFDocumentView):
     """View for the project documents overview."""
     template_name = 'twf/documents/overview.html'
     page_title = 'Documents'
+    show_context_help = False
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

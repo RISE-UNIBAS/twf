@@ -95,6 +95,7 @@ class TWFCollectionOverviewView(TWFCollectionsView):
 
     template_name = 'twf/collections/collections_overview.html'
     page_title = 'Collections'
+    show_context_help = False
 
     def post(self, request, *args, **kwargs):
         """Handle the post request."""

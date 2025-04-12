@@ -1,0 +1,38 @@
+<!-- has been checked -->
+{% load twf_help %}
+
+<div class="help-content">
+    <h2>Viewing a Collection Item</h2>
+    <p>
+        This page displays the details of a collection item. A collection item consists of structured text
+        segments from a document that have been grouped together.
+    </p>
+
+    <h3>Collection Item Details</h3>
+    <ul>
+        <li><strong>Title:</strong> The name of the collection item</li>
+        <li><strong>Status:</strong> The current workflow state of the item</li>
+        <li><strong>Document:</strong> The source document from which this item was created</li>
+    </ul>
+
+    <h3>Content Segments</h3>
+    <p>
+        The main section displays the text segments that make up this collection item. Each segment is shown
+        with its context and formatting preserved from the original document.
+    </p>
+
+    <h3>Available Actions</h3>
+    <ul>
+        <li><strong>Edit Item:</strong> Modify the collection item's properties or content</li>
+        <li><strong>View Document:</strong> See the full source document</li>
+        <li><strong>Download:</strong> Export the collection item as text or JSON</li>
+    </ul>
+
+    <h3>Related Topics</h3>
+    <ul class="help-topics">
+        <li><a href="{% url 'twf:help' 'collections_overview' %}" class="help-link btn">Collections Overview</a></li>
+        <li><a href="{% url 'twf:help' 'collection_view' %}" class="help-link btn">View Collection</a></li>
+        <li><a href="{% url 'twf:help' 'collection_item_edit' %}" class="help-link btn">Edit Collection Item</a></li>
+        <li><a href="{% help_url 'modules/workflows/collections.html' %}" target="_blank" class="help-link btn-ext">Collection Workflows</a></li>
+    </ul>
+</div>

@@ -1,102 +1,33 @@
+<!-- has been checked -->
 {% load twf_help %}
 
 <div class="help-content">
-    <h2>Collection Batch Processing with Claude</h2>
+    <h2>Collection Batch Processing</h2>
     <p>
-        This feature allows you to process multiple collection items at once using Anthropic's Claude AI models.
-        Batch processing with Claude is particularly useful for analyzing, categorizing, or enriching collections
-        of related documents.
+        This feature allows you to process multiple collection items at once using AI models. Batch processing is useful for analyzing, categorizing, or enriching collections of related documents.
     </p>
-
-    <h3>What is Collection Batch Processing?</h3>
-    <p>
-        Collection batch processing with Claude enables you to:
-    </p>
-    <ul>
-        <li>Process multiple collection items in an automated way</li>
-        <li>Apply consistent AI analysis across your entire collection</li>
-        <li>Extract common patterns or themes across related documents</li>
-        <li>Generate metadata or annotations for collection items</li>
-        <li>Identify relationships between documents in your collection</li>
-        <li>Perform comparative analysis across collection items</li>
-    </ul>
 
     <h3>Prerequisites</h3>
-    <p>
-        Before using this feature, you need:
-    </p>
     <ul>
-        <li>A valid Anthropic API key configured in your project settings</li>
+        <li>A valid API key configured in your project settings</li>
         <li>A collection with properly configured items</li>
-        <li>Defined prompts that specify what Claude should analyze or extract</li>
-        <li>Sufficient API quota for your batch size</li>
+        <li>Defined prompts that specify what the AI should analyze or extract</li>
     </ul>
 
     <h3>Batch Processing Steps</h3>
     <ol>
-        <li>Select the collection you want to process</li>
-        <li>Choose which items within the collection to include</li>
+        <li>Select the collection to process</li>
         <li>Select or create a prompt template</li>
-        <li>Configure processing parameters (model, temperature, etc.)</li>
-        <li>Specify where to store the results</li>
+        <li>Configure processing parameters</li>
         <li>Start the batch process</li>
         <li>Monitor progress and review results</li>
     </ol>
 
-    <h3>Benefits of Claude for Collections</h3>
-    <p>
-        Claude offers specific advantages for collection processing:
-    </p>
-    <ul>
-        <li>Strong contextual understanding across multiple documents</li>
-        <li>Ability to recognize subtle patterns and connections</li>
-        <li>Effective handling of historical or specialized texts</li>
-        <li>Comprehensive analysis that captures nuanced relationships</li>
-        <li>Detailed output that preserves important context</li>
-    </ul>
-
-    <h3>Configuration Options</h3>
-    <p>
-        When setting up a Claude batch process for collections, you can configure:
-    </p>
-    <ul>
-        <li><strong>Model:</strong> Select which Claude model to use</li>
-        <li><strong>Temperature:</strong> Control creativity vs. determinism (0.0-1.0)</li>
-        <li><strong>Max Tokens:</strong> Limit the length of AI responses</li>
-        <li><strong>Processing Scope:</strong> Whether to process entire documents or specific sections</li>
-        <li><strong>Result Storage:</strong> Where to save the AI analysis (collection metadata, notes, etc.)</li>
-        <li><strong>Processing Priority:</strong> Set batch job priority</li>
-    </ul>
-
-    <h3>Common Use Cases</h3>
-    <ul>
-        <li>Identifying common themes across collection items</li>
-        <li>Generating comparative summaries of related documents</li>
-        <li>Extracting structured data from collection items</li>
-        <li>Creating chronological narratives from document collections</li>
-        <li>Analyzing the evolution of concepts across related texts</li>
-        <li>Identifying key figures or entities that appear across collections</li>
-    </ul>
-
-    <h3>Best Practices</h3>
-    <ul>
-        <li>Organize your collections logically before batch processing</li>
-        <li>Start with a small subset to test your prompt and settings</li>
-        <li>Use specific, clear instructions in your prompts</li>
-        <li>Request structured output formats when appropriate</li>
-        <li>Review a sample of results to ensure quality</li>
-        <li>Consider how items in your collection relate to each other when crafting prompts</li>
-        <li>Save successful prompts in your library for future use</li>
-    </ul>
-
     <h3>Related Topics</h3>
     <ul class="help-topics">
-        <li><a href="{% url 'twf:help' 'collections_openai_batch' %}" class="help-link btn">Collection Batch Processing with ChatGPT</a></li>
-        <li><a href="{% url 'twf:help' 'collections_gemini_batch' %}" class="help-link btn">Collection Batch Processing with Gemini</a></li>
-        <li><a href="{% url 'twf:help' 'collections_view' %}" class="help-link btn">Viewing Collections</a></li>
+        <li><a href="{% url 'twf:help' 'collections_view' %}" class="help-link btn">View Collection</a></li>
         <li><a href="{% url 'twf:help' 'project_prompts' %}" class="help-link btn">Managing AI Prompts</a></li>
-        <li><a href="{% url 'twf:help' 'project_settings_credentials' %}" class="help-link btn">API Credential Settings</a></li>
-        <li><a href="{% help_url 'modules/parts/multimodal.html' %}" target="_blank" class="help-link btn-ext">Multimodal Processing</a></li>
+        <li><a href="{% url 'twf:help' 'project_settings_credentials' %}" class="help-link btn">API Credentials</a></li>
         <li><a href="{% help_url 'modules/workflows/collections.html' %}" target="_blank" class="help-link btn-ext">Collection Workflows</a></li>
     </ul>
 </div>

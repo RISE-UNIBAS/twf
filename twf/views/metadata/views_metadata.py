@@ -66,6 +66,7 @@ class TWFMetadataOverviewView(TWFMetadataView):
     """View for the metadata overview."""
     template_name = 'twf/metadata/overview.html'
     page_title = 'Metadata'
+    show_context_help = False
 
     def get_context_data(self, **kwargs):
         """Get the context data."""

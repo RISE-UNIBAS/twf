@@ -1,51 +1,23 @@
+<!-- has been checked -->
 {% load twf_help %}
 
 <div class="help-content">
-<h2>Editing a Collection</h2>
-<p>
-    This page allows you to modify the properties and settings of an existing collection. A collection in TWF serves as a container for organizing related document items.
-</p>
-
-<h3>Collection Properties</h3>
-<p>You can edit the following collection properties:</p>
-<ul>
-    <li><strong>Title:</strong> The display name of the collection, which should be descriptive and unique</li>
-    <li><strong>Description:</strong> A detailed explanation of the collection's purpose and contents</li>
-    <li><strong>Collection Type:</strong> The category or classification of this collection</li>
-    <li><strong>Status:</strong> The current state of the collection (e.g., in progress, complete)</li>
-</ul>
-
-<h3>Collection Management</h3>
-<p>From the edit page, you can also:</p>
-<ul>
-    <li><strong>Change ownership:</strong> Transfer the collection to another project member</li>
-    <li><strong>Set visibility:</strong> Control which project members can access this collection</li>
-    <li><strong>Define workflows:</strong> Set up processing steps for items in this collection</li>
-    <li><strong>Configure sorting:</strong> Set the default sort order for collection items</li>
-</ul>
-
-<h3>After Saving Changes</h3>
-<p>
-    When you save your changes, you will be returned to the collection view page where you can see all items within this collection. If you need to edit individual collection items, you should select them from the collection view.
-</p>
-
-<h3>Collection Items</h3>
-<p>
-    This form only edits the collection properties, not the individual items within the collection. To modify collection items:
-</p>
-<ol>
-    <li>Save any changes to the collection first</li>
-    <li>Return to the collection view</li>
-    <li>Select a specific item from the table to edit its properties</li>
-</ol>
-
-<h3>Related Topics</h3>
-<ul class="help-topics">
-    <li><a href="{% url 'twf:help' 'collections_overview' %}" class="help-link btn">Collections Overview</a></li>
-    <li><a href="{% url 'twf:help' 'collections_list' %}" class="help-link btn">Collection List</a></li>
-    <li><a href="{% url 'twf:help' 'collection_view' %}" class="help-link btn">View Collection</a></li>
-    <li><a href="{% url 'twf:help' 'collection_item_edit' %}" class="help-link btn">Edit Collection Item</a></li>
-    <li><a href="{% url 'twf:help' 'collections_add_doc' %}" class="help-link btn">Add Documents to Collection</a></li>
-    <li><a href="{% help_url 'modules/workflows/collections.html' %}" target="_blank" class="help-link btn-ext">Collection Workflows</a></li>
-</ul>
+    <h2>Editing a Collection</h2>
+    <p>
+        This page allows you to modify the properties of an existing collection.
+    </p>
+    
+    <h3>Key Properties</h3>
+    <ul>
+        <li><strong>Title:</strong> The display name of the collection</li>
+        <li><strong>Description:</strong> A detailed explanation of the collection's purpose</li>
+    </ul>
+    
+    <h3>Related Topics</h3>
+    <ul class="help-topics">
+        <li><a href="{% url 'twf:help' 'collections_overview' %}" class="help-link btn">Collections Overview</a></li>
+        <li><a href="{% url 'twf:help' 'collection_view' %}" class="help-link btn">View Collection</a></li>
+        <li><a href="{% url 'twf:help' 'collection_item_edit' %}" class="help-link btn">Edit Collection Item</a></li>
+        <li><a href="{% help_url 'modules/workflows/collections.html' %}" target="_blank" class="help-link btn-ext">Collection Workflows</a></li>
+    </ul>
 </div>

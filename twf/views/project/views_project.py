@@ -593,6 +593,7 @@ class TWFProjectOverviewView(TWFProjectView):
 
     template_name = 'twf/project/overview.html'
     page_title = 'Project'
+    show_context_help = False
 
     def get_context_data(self, **kwargs):
         """Get the context data."""

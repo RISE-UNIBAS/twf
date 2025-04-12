@@ -60,7 +60,7 @@ class CollectionTable(tables.Table):
     
     def render_actions(self, record):
         """Render the action buttons."""
-        view_url = reverse_lazy('twf:collections_view', kwargs={'pk': record.pk})
+        view_url = reverse_lazy('twf:collection_view', kwargs={'pk': record.pk})
         edit_url = reverse_lazy('twf:collection_edit', kwargs={'pk': record.pk})
         delete_modal = format_html(
             '<a href="#" class="btn btn-sm btn-danger show-danger-modal" '

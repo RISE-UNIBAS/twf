@@ -119,6 +119,7 @@ class TWFTagsOverviewView(TWFTagsView):
     """View for the tags overview."""
     template_name = 'twf/tags/overview.html'
     page_title = 'Tags'
+    show_context_help = False
 
     def get_context_data(self, **kwargs):
         """Get the context data."""
