@@ -1,0 +1,50 @@
+<h3>Task Settings</h3>
+<p>The Task Settings page allows you to configure various task-related settings for your project. These settings control how data is processed, normalized, and validated throughout the application.</p>
+
+<h4>Date Normalization Settings</h4>
+<ul>
+    <li><strong>Date Input Format:</strong> Specify the format of dates in your documents. Options include:
+        <ul>
+            <li><strong>Auto Detect:</strong> The system will attempt to determine the date format automatically</li>
+            <li><strong>DMY:</strong> Day-Month-Year format (e.g., 25/12/2023)</li>
+            <li><strong>YMD:</strong> Year-Month-Day format (e.g., 2023/12/25)</li>
+        </ul>
+    </li>
+    <li><strong>Resolve to Precision:</strong> Specify the level of precision to which dates should be normalized (e.g., day, month, year). This affects how partial dates are processed.</li>
+</ul>
+
+<h4>Google Sheets Connection</h4>
+<p>These settings allow you to connect your project to a Google Sheets document for importing metadata and other information.</p>
+<ul>
+    <li><strong>Google Sheet ID:</strong> The unique identifier for your Google Sheet, found in the URL: <code>https://docs.google.com/spreadsheets/d/<b>GOOGLE_SHEET_ID</b>/edit</code></li>
+    <li><strong>Google Sheet Range:</strong> The range of cells to read from the sheet (e.g., "Sheet1!A1:Z100")</li>
+    <li><strong>Google Sheet Valid Columns:</strong> A list of column names that should be processed from the sheet</li>
+    <li><strong>Google Sheet Document ID Column:</strong> The column containing document identifiers to match with your project documents</li>
+    <li><strong>Google Sheet Document Title Column:</strong> The column containing document titles</li>
+</ul>
+
+<h4>Metadata Review Settings</h4>
+<p>Configure how metadata is reviewed at both the page and document levels.</p>
+<ul>
+    <li><strong>Page Metadata Review:</strong> JSON configuration specifying fields and validation rules for page-level metadata review</li>
+    <li><strong>Document Metadata Review:</strong> JSON configuration specifying fields and validation rules for document-level metadata review</li>
+</ul>
+<p><strong>Format:</strong> Both fields should contain valid JSON objects that define metadata fields to review, their types, and any validation rules.</p>
+
+<h4>Tag Type Settings</h4>
+<ul>
+    <li><strong>Tag Type Translator:</strong> A JSON mapping that translates between different tag naming conventions. This allows standardization of tag types from different sources.</li>
+    <li><strong>Ignored Tag Types:</strong> A JSON array of tag types that should be ignored during processing. Tags with these types will not be displayed or included in exports.</li>
+</ul>
+
+<h4>Working with JSON Fields</h4>
+<p>Several settings on this page require JSON data. When editing these fields:</p>
+<ul>
+    <li>Ensure your JSON is valid - use a JSON validator if needed</li>
+    <li>For the tag type translator, use a format like: <code>{"original_tag_type": "standardized_tag_type"}</code></li>
+    <li>For ignored tag types, use an array format: <code>["tag_type_1", "tag_type_2"]</code></li>
+</ul>
+
+<p><strong>Note:</strong> Changes to task settings may affect how data is processed and displayed throughout the application. If you're uncertain about a setting, leave it at its default value.</p>
+
+<p><strong>Tip:</strong> After updating settings, perform a test operation to ensure the new configuration works as expected.</p>
