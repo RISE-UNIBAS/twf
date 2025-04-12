@@ -1,0 +1,49 @@
+<!-- has been checked -->
+{% load twf_help %}
+
+<div class="help-content">
+    <h2>Dictionary Normalization</h2>
+    <p>
+        Normalization is the process of standardizing dictionary entries by linking them to established authorities or creating consistent representations.
+    </p>
+
+    <h3>Normalization Methods</h3>
+    <ul>
+        <li><strong>External Authorities</strong>: Link entries to recognized knowledge bases</li>
+        <li><strong>Manual Normalization</strong>: Create standardized forms when no external match exists</li>
+        <li><strong>AI-Assisted</strong>: Use language models to suggest normalizations</li>
+    </ul>
+
+    <h3>External Authority Services</h3>
+    <ul>
+        <li><strong>GND</strong> (Integrated Authority File): For persons, organizations, events</li>
+        <li><strong>Wikidata</strong>: A comprehensive knowledge base for various entity types</li>
+        <li><strong>GeoNames</strong>: For geographic locations and place names</li>
+    </ul>
+
+    <h3>Normalization Process</h3>
+    <ul>
+        <li>Enter a search term related to your dictionary entry</li>
+        <li>Review search results from the selected authority</li>
+        <li>Select the best matching entry or create a manual form</li>
+        <li>Save the normalized form to your dictionary entry</li>
+    </ul>
+
+    <h3>Best Practices</h3>
+    <ul>
+        <li>Always try to link to established authorities when possible</li>
+        <li>Be consistent in your normalization approach</li>
+        <li>Document your decision process for difficult cases</li>
+        <li>Use the same normalization source for similar entries</li>
+    </ul>
+
+    <h3>Related Topics</h3>
+    <ul class="help-topics">
+        <li><a href="{% url 'twf:help' 'dictionaries' %}" class="help-link btn">Dictionaries Overview</a></li>
+        <li><a href="{% url 'twf:help' 'dictionaries_entry_edit' %}" class="help-link btn">Editing Dictionary Entries</a></li>
+        <li><a href="{% url 'twf:help' 'dictionaries_request_geonames' %}" class="help-link btn">GeoNames Integration</a></li>
+        <li><a href="{% url 'twf:help' 'dictionaries_request_gnd' %}" class="help-link btn">GND Integration</a></li>
+        <li><a href="{% url 'twf:help' 'dictionaries_request_wikidata' %}" class="help-link btn">Wikidata Integration</a></li>
+        <li><a href="{% help_url 'modules/workflows/dictionaries.html' %}" target="_blank" class="help-link btn-ext">Dictionary Workflows</a></li>
+    </ul>
+</div>

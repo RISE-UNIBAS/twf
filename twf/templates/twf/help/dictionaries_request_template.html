@@ -1,0 +1,78 @@
+<!-- has been checked -->
+{% load twf_help %}
+
+<div class="help-content">
+    <h2>Dictionary Enrichment (Supervised)</h2>
+    <p>
+        This feature allows you to leverage AI to assist with dictionary entry 
+        enrichment while maintaining direct supervision over the process. Supervised enrichment gives you 
+        control over how AI suggestions are applied to your dictionaries.
+    </p>
+
+    <h3>What is Supervised Dictionary Enrichment?</h3>
+    <p>
+        Unlike batch processing which runs automatically, supervised dictionary enrichment:
+    </p>
+    <ul>
+        <li>Processes one dictionary entry at a time</li>
+        <li>Gives you the ability to review and modify AI suggestions</li>
+        <li>Allows interactive refinement of the analysis</li>
+        <li>Provides immediate feedback on the results</li>
+        <li>Lets you adjust prompts based on initial responses</li>
+        <li>Gives you complete control over which suggestions to accept</li>
+    </ul>
+
+    <h3>Prerequisites</h3>
+    <p>
+        Before using this feature, you need:
+    </p>
+    <ul>
+        <li>A valid API key configured in your project settings</li>
+        <li>Dictionary entries that need enrichment</li>
+        <li>Defined prompts that specify what the AI should analyze or suggest</li>
+    </ul>
+
+    <h3>Supervised Enrichment Steps</h3>
+    <ol>
+        <li>Select the dictionary entry you want to enrich</li>
+        <li>Choose or create a prompt template</li>
+        <li>Configure processing parameters (model, temperature, etc.)</li>
+        <li>Submit your request</li>
+        <li>Review the AI's enrichment suggestions</li>
+        <li>Accept, modify, or reject the suggestions</li>
+        <li>Save the final results to your dictionary entry</li>
+    </ol>
+
+    <h3>Types of Dictionary Enrichment</h3>
+    <p>
+        AI can help with various aspects of dictionary enrichment:
+    </p>
+    <ul>
+        <li><strong>Entity disambiguation:</strong> Clarifying ambiguous entries</li>
+        <li><strong>Metadata enhancement:</strong> Adding descriptive information</li>
+        <li><strong>Variant identification:</strong> Suggesting alternative forms</li>
+        <li><strong>Authority record matching:</strong> Finding corresponding records in external systems</li>
+        <li><strong>Contextual information:</strong> Adding historical or background details</li>
+        <li><strong>Relationship suggestions:</strong> Identifying connections to other entities</li>
+    </ul>
+
+    <h3>Best Practices</h3>
+    <ul>
+        <li>Review the dictionary entry thoroughly before processing</li>
+        <li>Start with clear, specific instructions in your prompt</li>
+        <li>Be explicit about the format and type of enrichment you want</li>
+        <li>Use the interface to ask follow-up questions if needed</li>
+        <li>Save effective prompts to your project's prompt library</li>
+        <li>Verify factual information suggested by the AI</li>
+    </ul>
+
+    <h3>Related Topics</h3>
+    <ul class="help-topics">
+        <li><a href="{% url 'twf:help' 'dictionaries' %}" class="help-link btn">Dictionaries Overview</a></li>
+        <li><a href="{% url 'twf:help' 'dictionaries_entry_edit' %}" class="help-link btn">Editing Dictionary Entries</a></li>
+        <li><a href="{% url 'twf:help' 'project_prompts' %}" class="help-link btn">Managing AI Prompts</a></li>
+        <li><a href="{% url 'twf:help' 'project_settings_credentials' %}" class="help-link btn">API Credential Settings</a></li>
+        <li><a href="{% help_url 'modules/workflows/dictionaries.html' %}" target="_blank" class="help-link btn-ext">Dictionary Workflows</a></li>
+        <li><a href="{% help_url 'modules/parts/multimodal.html' %}" target="_blank" class="help-link btn-ext">AI Integration</a></li>
+    </ul>
+</div>

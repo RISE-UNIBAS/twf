@@ -2,30 +2,30 @@
 {% load twf_help %}
 
 <div class="help-content">
-    <h2>Edit Dictionary</h2>
+    <h2>Editing a Dictionary</h2>
     <p>
         This page allows you to modify the properties of an existing dictionary.
     </p>
 
     <h3>Editable Properties</h3>
     <ul>
-        <li><strong>Dictionary Title</strong>: Change the dictionary name</li>
-        <li><strong>Description</strong>: Update the purpose and content description</li>
-        <li><strong>Access Settings</strong>: Modify who can view and edit the dictionary</li>
+        <li><strong>Dictionary Title</strong>: You can rename the dictionary</li>
+        <li><strong>Description</strong>: Update the dictionary's purpose and contents</li>
+        <li><strong>Access Settings</strong>: Change who can view and edit this dictionary</li>
     </ul>
 
     <h3>Important Notes</h3>
     <ul>
         <li>The dictionary type (Person, Place, etc.) cannot be changed after creation</li>
-        <li>Renaming a dictionary does not affect its entries or associations</li>
+        <li>Renaming a dictionary does not affect its entries or their associations</li>
         <li>Changes to access settings take effect immediately</li>
     </ul>
 
     <h3>Related Topics</h3>
     <ul class="help-topics">
         <li><a href="{% url 'twf:help' 'dictionaries' %}" class="help-link btn">Dictionaries Overview</a></li>
-        <li><a href="{% url 'twf:help' 'dictionaries_view' %}" class="help-link btn">View Dictionary</a></li>
-        <li><a href="{% url 'twf:help' 'dictionary_create' %}" class="help-link btn">Create Dictionary</a></li>
+        <li><a href="{% url 'twf:help' 'dictionary_view' %}" class="help-link btn">Viewing Dictionaries</a></li>
+        <li><a href="{% url 'twf:help' 'dictionary_create' %}" class="help-link btn">Creating Dictionaries</a></li>
         <li><a href="{% help_url 'modules/workflows/dictionaries.html' %}" target="_blank" class="help-link btn-ext">Dictionary Workflows</a></li>
     </ul>
 </div>

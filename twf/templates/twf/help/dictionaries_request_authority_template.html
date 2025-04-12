@@ -1,0 +1,56 @@
+<!-- has been checked -->
+{% load twf_help %}
+
+<div class="help-content">
+    <h2>Dictionary Authority Integration</h2>
+    <p>
+        This feature allows you to link dictionary entries to external authority records, improving data quality
+        and enabling integration with established knowledge bases.
+    </p>
+
+    <h3>What is Authority Integration?</h3>
+    <p>
+        Authority integration helps you:
+    </p>
+    <ul>
+        <li>Standardize entity references using established identifiers</li>
+        <li>Enrich entries with additional metadata from authority sources</li>
+        <li>Enable interoperability with other systems and datasets</li>
+        <li>Improve search and filtering capabilities</li>
+        <li>Validate and disambiguate similar entities</li>
+    </ul>
+
+    <h3>Integration Process</h3>
+    <ol>
+        <li>Enter a search term related to your dictionary entry</li>
+        <li>Browse the search results from the authority database</li>
+        <li>Review detailed information about potential matches</li>
+        <li>Select the most appropriate match for your entry</li>
+        <li>Apply the selected authority data to your dictionary entry</li>
+    </ol>
+
+    <h3>When to Use</h3>
+    <ul>
+        <li>When creating new dictionary entries</li>
+        <li>When improving existing entries that lack standardization</li>
+        <li>When preparing data for export or sharing</li>
+        <li>When resolving ambiguous or duplicate entities</li>
+    </ul>
+
+    <h3>Best Practices</h3>
+    <ul>
+        <li>Use specific search terms to find better matches</li>
+        <li>Review all metadata before applying to your entry</li>
+        <li>Be consistent in how you select authority records</li>
+        <li>Document cases where no suitable match exists</li>
+        <li>Consider the scope and focus of your project when selecting matches</li>
+    </ul>
+
+    <h3>Related Topics</h3>
+    <ul class="help-topics">
+        <li><a href="{% url 'twf:help' 'dictionaries' %}" class="help-link btn">Dictionaries Overview</a></li>
+        <li><a href="{% url 'twf:help' 'dictionaries_entry_edit' %}" class="help-link btn">Editing Dictionary Entries</a></li>
+        <li><a href="{% url 'twf:help' 'dictionaries_normalization' %}" class="help-link btn">Normalization Process</a></li>
+        <li><a href="{% help_url 'modules/workflows/dictionaries.html' %}" target="_blank" class="help-link btn-ext">Dictionary Workflows</a></li>
+    </ul>
+</div>

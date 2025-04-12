@@ -1,0 +1,44 @@
+<!-- has been checked -->
+{% load twf_help %}
+
+<div class="help-content">
+    <h2>Authority Batch Enrichment</h2>
+    <p>
+        This feature allows you to automatically enrich multiple dictionary entries with data from external authority services, improving data quality and adding structured metadata.
+    </p>
+
+    <h3>Batch Enrichment Process</h3>
+    <ol>
+        <li>Choose the dictionary to enrich (matching the authority service's focus)</li>
+        <li>Select entries to process (all entries or a filtered subset)</li>
+        <li>Configure enrichment parameters (search precision, thresholds, etc.)</li>
+        <li>Start the batch process and monitor progress</li>
+        <li>Review results after completion</li>
+    </ol>
+
+    <h3>Enrichment Results</h3>
+    <p>
+        After processing, entries will be categorized as:
+    </p>
+    <ul>
+        <li><strong>Successfully Enriched:</strong> Entries confidently matched and updated</li>
+        <li><strong>Uncertain Matches:</strong> Entries with potential matches requiring review</li>
+        <li><strong>No Matches:</strong> Entries for which no suitable records were found</li>
+    </ul>
+
+    <h3>Best Practices</h3>
+    <ul>
+        <li>Use specific, clear entry names to improve match quality</li>
+        <li>Start with small batches to test the matching quality</li>
+        <li>Review uncertain matches manually after processing</li>
+        <li>Use supervised workflows for ambiguous or complex entries</li>
+        <li>Consider the authority's regional or topical focus for best results</li>
+    </ul>
+
+    <h3>Related Topics</h3>
+    <ul class="help-topics">
+        <li><a href="{% url 'twf:help' 'dictionaries' %}" class="help-link btn">Dictionaries Overview</a></li>
+        <li><a href="{% url 'twf:help' 'dictionaries_normalization' %}" class="help-link btn">Normalization Process</a></li>
+        <li><a href="{% help_url 'modules/workflows/dictionaries.html' %}" target="_blank" class="help-link btn-ext">Dictionary Workflows</a></li>
+    </ul>
+</div>

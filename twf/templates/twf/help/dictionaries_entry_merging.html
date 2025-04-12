@@ -1,0 +1,40 @@
+<!-- has been checked -->
+{% load twf_help %}
+
+<div class="help-content">
+    <h2>Merging Dictionary Entries</h2>
+    <p>
+        This page allows you to combine two similar or duplicate dictionary entries into a single entry.
+    </p>
+
+    <h3>When to Merge Entries</h3>
+    <ul>
+        <li>When multiple entries refer to the same real-world entity</li>
+        <li>When duplicate entries were created by mistake</li>
+        <li>When entries with slight variations should be consolidated</li>
+    </ul>
+
+    <h3>Merging Process</h3>
+    <ul>
+        <li>Select a primary entry that will be kept</li>
+        <li>Select secondary entries to merge into the primary entry</li>
+        <li>Review the resulting merged entry</li>
+        <li>Confirm the merge operation</li>
+    </ul>
+
+    <h3>Important Considerations</h3>
+    <ul>
+        <li>Merging is permanent and cannot be easily undone</li>
+        <li>All tags associated with merged entries will be reassigned</li>
+        <li>Only entries of the same type can be merged</li>
+        <li>The merged entry retains the primary entry's normalized form</li>
+    </ul>
+
+    <h3>Related Topics</h3>
+    <ul class="help-topics">
+        <li><a href="{% url 'twf:help' 'dictionaries' %}" class="help-link btn">Dictionaries Overview</a></li>
+        <li><a href="{% url 'twf:help' 'dictionaries_entry_edit' %}" class="help-link btn">Editing Dictionary Entries</a></li>
+        <li><a href="{% url 'twf:help' 'dictionaries_entry_view' %}" class="help-link btn">Viewing Dictionary Entries</a></li>
+        <li><a href="{% help_url 'modules/workflows/dictionaries.html' %}" target="_blank" class="help-link btn-ext">Dictionary Workflows</a></li>
+    </ul>
+</div>

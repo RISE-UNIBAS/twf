@@ -1,81 +1,42 @@
+<!-- has been checked -->
 {% load twf_help %}
 
 <div class="help-content">
     <h2>Editing Dictionary Entries</h2>
     <p>
-        This page allows you to edit existing dictionary entries. Dictionary entries are the individual records within your dictionaries
-        that represent normalized entities such as people, places, organizations, or other terms of interest.
+        This page allows you to edit dictionary entries, which represent normalized entities such as people, places, or organizations.
     </p>
 
-    <h3>Dictionary Entry Fields</h3>
-    <p>
-        When editing a dictionary entry, you'll work with several key fields:
-    </p>
+    <h3>Key Fields</h3>
     <ul>
-        <li><strong>Label</strong>: The primary identifier for this entry, typically the canonical form of a name or term</li>
-        <li><strong>Type</strong>: The category this entry belongs to (e.g., person, place, organization)</li>
-        <li><strong>Normalized Form</strong>: The standardized version of this entity, often linked to an external authority</li>
-        <li><strong>Definition</strong>: An optional description or clarification of the entry</li>
-        <li><strong>Metadata</strong>: Additional structured information about the entry</li>
-        <li><strong>External Identifiers</strong>: Links to authoritative records in external systems</li>
+        <li><strong>Label</strong>: Primary identifier, typically the canonical form</li>
+        <li><strong>Type</strong>: Category (person, place, organization, etc.)</li>
+        <li><strong>Normalized Form</strong>: Standardized version linked to external authorities</li>
+        <li><strong>Definition</strong>: Optional description of the entry</li>
+        <li><strong>Metadata</strong>: Additional structured information</li>
     </ul>
-
-    <h3>Editing Process</h3>
-    <p>
-        The dictionary entry editing process typically involves:
-    </p>
-    <ol>
-        <li>Reviewing the current entry information</li>
-        <li>Updating fields as needed</li>
-        <li>Adding or modifying metadata</li>
-        <li>Linking to external authority records</li>
-        <li>Saving your changes</li>
-    </ol>
 
     <h3>Working with Normalized Forms</h3>
-    <p>
-        Normalized forms are critical for data consistency. When editing an entry, you can:
-    </p>
     <ul>
-        <li><strong>Search external authorities</strong> like GND, Wikidata, or GeoNames</li>
-        <li><strong>Select an existing normalized form</strong> from search results</li>
-        <li><strong>Create a manual normalized form</strong> if no suitable match exists</li>
-        <li><strong>View details</strong> about the selected normalized form</li>
-        <li><strong>Change the normalized form</strong> if needed</li>
-    </ul>
-
-    <h3>Adding and Editing Metadata</h3>
-    <p>
-        Dictionary entries can contain rich metadata beyond the basic fields:
-    </p>
-    <ul>
-        <li>Dates of birth and death for persons</li>
-        <li>Geographic coordinates for places</li>
-        <li>Alternative names or spellings</li>
-        <li>Historical context information</li>
-        <li>Relationships to other entries</li>
-        <li>Custom fields specific to your project</li>
+        <li>Search external authorities (GND, Wikidata, GeoNames)</li>
+        <li>Select from search results or create a manual form</li>
+        <li>View and modify normalized form details as needed</li>
     </ul>
 
     <h3>Best Practices</h3>
     <ul>
-        <li>Be consistent in how you format labels and names</li>
-        <li>Always link to external authorities when possible</li>
-        <li>Add sufficient contextual information to distinguish similar entries</li>
-        <li>Document your decisions about normalization</li>
-        <li>Consider how this entry relates to others in your project</li>
-        <li>Review associated document tags after making significant changes</li>
+        <li>Be consistent with formatting labels and names</li>
+        <li>Link to external authorities when possible</li>
+        <li>Add sufficient context to distinguish similar entries</li>
+        <li>Review associated tags after making significant changes</li>
     </ul>
 
     <h3>Related Topics</h3>
     <ul class="help-topics">
-        <li><a href="{% url 'twf:help' 'dictionaries_overview' %}" class="help-link btn">Dictionary Management Overview</a></li>
+        <li><a href="{% url 'twf:help' 'dictionaries' %}" class="help-link btn">Dictionaries Overview</a></li>
         <li><a href="{% url 'twf:help' 'dictionaries_normalization' %}" class="help-link btn">Normalization Process</a></li>
         <li><a href="{% url 'twf:help' 'dictionaries_entry_view' %}" class="help-link btn">Viewing Dictionary Entries</a></li>
         <li><a href="{% url 'twf:help' 'dictionaries_entry_merging' %}" class="help-link btn">Merging Dictionary Entries</a></li>
-        <li><a href="{% url 'twf:help' 'dictionaries_request_geonames' %}" class="help-link btn">GeoNames Integration</a></li>
-        <li><a href="{% url 'twf:help' 'dictionaries_request_gnd' %}" class="help-link btn">GND Integration</a></li>
-        <li><a href="{% url 'twf:help' 'dictionaries_request_wikidata' %}" class="help-link btn">Wikidata Integration</a></li>
         <li><a href="{% help_url 'modules/workflows/dictionaries.html' %}" target="_blank" class="help-link btn-ext">Dictionary Workflows</a></li>
     </ul>
 </div>

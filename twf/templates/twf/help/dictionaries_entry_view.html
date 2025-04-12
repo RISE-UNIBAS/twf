@@ -1,0 +1,46 @@
+<!-- has been checked -->
+{% load twf_help %}
+
+<div class="help-content">
+    <h2>Viewing Dictionary Entries</h2>
+    <p>
+        This page displays detailed information about a dictionary entry, which represents a normalized entity such as a person, place, or organization.
+    </p>
+
+    <h3>Entry Information</h3>
+    <ul>
+        <li><strong>Label</strong>: The primary identifier for this entry</li>
+        <li><strong>Type</strong>: The category this entry belongs to</li>
+        <li><strong>Normalized Form</strong>: The standardized version linked to external authorities</li>
+        <li><strong>Definition</strong>: Description providing context about the entry</li>
+        <li><strong>Metadata</strong>: Additional structured information</li>
+    </ul>
+
+    <h3>External References</h3>
+    <p>
+        When available, this page shows links to external authority systems like:
+    </p>
+    <ul>
+        <li>GND (Integrated Authority File)</li>
+        <li>Wikidata</li>
+        <li>GeoNames (for geographic locations)</li>
+    </ul>
+
+    <h3>Usage Information</h3>
+    <p>
+        You can see where this dictionary entry is used across your project:
+    </p>
+    <ul>
+        <li>Document tags associated with this entry</li>
+        <li>Related dictionary entries</li>
+        <li>Usage statistics</li>
+    </ul>
+
+    <h3>Related Topics</h3>
+    <ul class="help-topics">
+        <li><a href="{% url 'twf:help' 'dictionaries' %}" class="help-link btn">Dictionaries Overview</a></li>
+        <li><a href="{% url 'twf:help' 'dictionaries_entry_edit' %}" class="help-link btn">Editing Dictionary Entries</a></li>
+        <li><a href="{% url 'twf:help' 'dictionaries_entry_merging' %}" class="help-link btn">Merging Dictionary Entries</a></li>
+        <li><a href="{% help_url 'modules/workflows/dictionaries.html' %}" target="_blank" class="help-link btn-ext">Dictionary Workflows</a></li>
+    </ul>
+</div>

@@ -1,62 +1,40 @@
+<!-- has been checked -->
 {% load twf_help %}
-<h1>Context Help: Create New Dictionary</h1>
-<p>
-    The Create New Dictionary page allows you to establish a new dictionary from scratch. Dictionaries in TWF are collections of terms and their standardized forms, which help normalize and enrich tags in your documents.
-</p>
 
-<h2>Dictionary Creation Form</h2>
-<p>
-    When creating a new dictionary, you'll need to provide:
-</p>
-<ul>
-    <li><strong>Dictionary Title:</strong> A clear, descriptive name for your dictionary</li>
-    <li><strong>Dictionary Type:</strong> The category of terms this dictionary will contain:
-        <ul>
-            <li>Person: For names of individuals</li>
-            <li>Place: For geographic locations</li>
-            <li>Organization: For institutions and groups</li>
-            <li>Date: For date formats and references</li>
-            <li>General: For other types of terms</li>
-        </ul>
-    </li>
-    <li><strong>Description:</strong> A brief explanation of the dictionary's purpose and contents</li>
-    <li><strong>Access Settings:</strong> Who can view and edit this dictionary</li>
-</ul>
+<div class="help-content">
+    <h2>Create New Dictionary</h2>
+    <p>
+        This page allows you to create a new dictionary from scratch. Dictionaries help normalize and enrich tags in your documents.
+    </p>
 
-<h2>Dictionary Types Explained</h2>
-<p>
-    Choosing the correct dictionary type is important:
-</p>
-<ul>
-    <li><strong>Person Dictionary:</strong> Used for standardizing variations of people's names. Supports links to biographical databases like GND.</li>
-    <li><strong>Place Dictionary:</strong> For geographic locations. Can be enriched with coordinates and hierarchical information from sources like GeoNames.</li>
-    <li><strong>Organization Dictionary:</strong> For institutions, companies, and other formal groups. Can be linked to authority records.</li>
-    <li><strong>Date Dictionary:</strong> Helps standardize different date formats and historical date references.</li>
-    <li><strong>General Dictionary:</strong> For any other terms that don't fit the above categories.</li>
-</ul>
+    <h3>Required Information</h3>
+    <ul>
+        <li><strong>Dictionary Title</strong>: A clear, descriptive name</li>
+        <li><strong>Dictionary Type</strong>: Person, Place, Organization, Date, or General</li>
+        <li><strong>Description</strong>: Brief explanation of the dictionary's purpose</li>
+        <li><strong>Access Settings</strong>: Visibility and edit permissions</li>
+    </ul>
 
-<h2>After Creation</h2>
-<p>
-    Once you create a dictionary:
-</p>
-<ol>
-    <li>The empty dictionary will appear in your project's dictionary list</li>
-    <li>You can begin adding entries manually or through batch processes</li>
-    <li>You can enrich entries using external sources like GND, Wikidata, or GeoNames</li>
-    <li>The dictionary will become available for tag normalization</li>
-</ol>
+    <h3>Dictionary Types</h3>
+    <ul>
+        <li><strong>Person</strong>: For standardizing people's names (links to GND)</li>
+        <li><strong>Place</strong>: For geographic locations (links to GeoNames)</li>
+        <li><strong>Organization</strong>: For institutions and formal groups</li>
+        <li><strong>Date</strong>: For standardizing date formats and references</li>
+        <li><strong>General</strong>: For any other terms</li>
+    </ul>
 
-<h2>Best Practices</h2>
-<ul>
-    <li>Use clear, consistent naming conventions for dictionaries</li>
-    <li>Choose the correct type to enable appropriate enrichment options</li>
-    <li>Provide detailed descriptions to help other users understand the dictionary's purpose</li>
-    <li>Plan your dictionary structure before adding many entries</li>
-    <li>Consider how the dictionary will be used for tag normalization</li>
-</ul>
+    <h3>After Creation</h3>
+    <p>
+        Once created, you can add entries manually or through batch processes, enrich them using external sources, 
+        and use the dictionary for tag normalization.
+    </p>
 
-<h3>Related Topics</h3>
-<ul class="help-topics">
-    <li><a href="{% help_url 'modules/workflows/dictionaries.html' %}" target="_blank" class="help-link btn-ext">Dictionary Workflows</a></li>
-    <li><a href="{% help_url 'modules/workflows/tags.html' %}" target="_blank" class="help-link btn-ext">Tag Workflows</a></li>
-</ul>
+    <h3>Related Topics</h3>
+    <ul class="help-topics">
+        <li><a href="{% url 'twf:help' 'dictionaries' %}" class="help-link btn">Dictionaries Overview</a></li>
+        <li><a href="{% url 'twf:help' 'dictionaries_add' %}" class="help-link btn">Adding Existing Dictionaries</a></li>
+        <li><a href="{% help_url 'modules/workflows/dictionaries.html' %}" target="_blank" class="help-link btn-ext">Dictionary Workflows</a></li>
+        <li><a href="{% help_url 'modules/workflows/tags.html' %}" target="_blank" class="help-link btn-ext">Tag Workflows</a></li>
+    </ul>
+</div>

@@ -2,35 +2,35 @@
 {% load twf_help %}
 
 <div class="help-content">
-    <h2>View Dictionary</h2>
+    <h2>Dictionary View</h2>
     <p>
-        This page displays a dictionary and its entries. You can browse, search, and manage the dictionary's contents.
+        This page displays a specific dictionary and its entries. You can browse, search, filter, and manage the dictionary's contents.
     </p>
 
-    <h3>Dictionary Information</h3>
+    <h3>Dictionary Overview</h3>
     <ul>
         <li>Dictionary title, type, and description</li>
         <li>Number of entries and statistics</li>
-        <li>Creation and modification details</li>
+        <li>Creation and modification information</li>
     </ul>
 
-    <h3>Managing Entries</h3>
+    <h3>Entry Management</h3>
     <ul>
-        <li>Search for entries using the search box</li>
-        <li>Filter entries by different criteria</li>
-        <li>Sort entries by clicking column headers</li>
-        <li>Add new entries with the "Add Entry" button</li>
-        <li>Edit or delete entries using action buttons</li>
+        <li>Search for specific entries using the search box</li>
+        <li>Filter entries by various criteria</li>
+        <li>Sort entries by clicking on column headers</li>
+        <li>Add new entries using the "Add Entry" button</li>
+        <li>Edit or delete existing entries using the action buttons</li>
     </ul>
 
     <h3>Batch Operations</h3>
     <p>
-        You can perform operations on multiple entries:
+        You can perform operations on multiple entries at once:
     </p>
     <ul>
         <li>Export selected entries or the entire dictionary</li>
         <li>Normalize multiple entries using external authorities</li>
-        <li>Apply AI-based enrichment to selected entries</li>
+        <li>Apply bulk edits to selected entries</li>
     </ul>
 
     <h3>Related Topics</h3>
@@ -38,7 +38,7 @@
         <li><a href="{% url 'twf:help' 'dictionaries' %}" class="help-link btn">Dictionaries Overview</a></li>
         <li><a href="{% url 'twf:help' 'dictionaries_entry_edit' %}" class="help-link btn">Editing Dictionary Entries</a></li>
         <li><a href="{% url 'twf:help' 'dictionaries_entry_view' %}" class="help-link btn">Viewing Dictionary Entries</a></li>
-        <li><a href="{% url 'twf:help' 'dictionary_edit' %}" class="help-link btn">Editing Dictionary Properties</a></li>
+        <li><a href="{% url 'twf:help' 'dictionaries_normalization' %}" class="help-link btn">Normalization Process</a></li>
         <li><a href="{% help_url 'modules/workflows/dictionaries.html' %}" target="_blank" class="help-link btn-ext">Dictionary Workflows</a></li>
     </ul>
 </div>
