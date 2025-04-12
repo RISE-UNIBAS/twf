@@ -91,11 +91,13 @@
     <p><strong>Note:</strong> Repository settings are applied when publishing your data to external repositories like Zenodo. These settings don't affect how data is stored or processed within the application.</p>
 
     <h3>Related Topics</h3>
-    <ul>
-        <li>{% help_url 'project_settings_general' 'General Project Settings' %}</li>
-        <li>{% help_url 'project_settings_credentials' 'Credential Settings' %}</li>
-        <li>{% help_url 'project_settings_export' 'Export Settings' %}</li>
-        <li>{% help_url 'export_to_zenodo' 'Exporting to Zenodo' %}</li>
-        <li>{% help_url 'export_project' 'Exporting Project Data' %}</li>
+    <ul class="help-topics">
+        <li><a href="{% url 'twf:help' 'project_settings_general' %}" class="help-link btn">General Project Settings</a></li>
+        <li><a href="{% url 'twf:help' 'project_settings_credentials' %}" class="help-link btn">Credential Settings</a></li>
+        <li><a href="{% url 'twf:help' 'project_settings_export' %}" class="help-link btn">Export Settings</a></li>
+        <li><a href="{% url 'twf:help' 'export_to_zenodo' %}" class="help-link btn">Exporting to Zenodo</a></li>
+        <li><a href="{% url 'twf:help' 'export_project' %}" class="help-link btn">Exporting Project Data</a></li>
+        <li><a href="{% help_url 'modules/parts/settings.html' %}" target="_blank" class="help-link btn-ext">Project Settings Guide</a></li>
+        <li><a href="{% help_url 'modules/workflows/export.html' %}" target="_blank" class="help-link btn-ext">Export Workflows</a></li>
     </ul>
 </div>

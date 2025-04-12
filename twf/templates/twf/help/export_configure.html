@@ -136,12 +136,14 @@
     </ul>
 
     <h3>Related Topics</h3>
-    <ul>
-        <li>{% help_url 'export_overview' 'Export Overview' %}</li>
-        <li>{% help_url 'export_documents' 'Export Documents' %}</li>
-        <li>{% help_url 'export_collections' 'Export Collections' %}</li>
-        <li>{% help_url 'export_dictionaries' 'Export Dictionaries' %}</li>
-        <li>{% help_url 'export_tags' 'Export Tags' %}</li>
-        <li>{% help_url 'project_settings_export' 'Project Export Settings' %}</li>
+    <ul class="help-topics">
+        <li><a href="{% url 'twf:help' 'export_overview' %}" class="help-link btn">Export Overview</a></li>
+        <li><a href="{% url 'twf:help' 'export_documents' %}" class="help-link btn">Export Documents</a></li>
+        <li><a href="{% url 'twf:help' 'export_collections' %}" class="help-link btn">Export Collections</a></li>
+        <li><a href="{% url 'twf:help' 'export_dictionaries' %}" class="help-link btn">Export Dictionaries</a></li>
+        <li><a href="{% url 'twf:help' 'export_tags' %}" class="help-link btn">Export Tags</a></li>
+        <li><a href="{% url 'twf:help' 'project_settings_export' %}" class="help-link btn">Project Export Settings</a></li>
+        <li><a href="{% help_url 'modules/workflows/export.html' %}" target="_blank" class="help-link btn-ext">Export Workflows</a></li>
+        <li><a href="{% help_url 'modules/parts/settings.html' %}" target="_blank" class="help-link btn-ext">Project Settings</a></li>
     </ul>
 </div>

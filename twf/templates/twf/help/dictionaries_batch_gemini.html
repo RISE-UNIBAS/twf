@@ -108,11 +108,13 @@
     </ul>
 
     <h3>Related Topics</h3>
-    <ul>
-        <li>{% help_url 'dictionaries_batch_claude' 'Dictionary Batch Processing with Claude' %}</li>
-        <li>{% help_url 'dictionaries_batch_openai' 'Dictionary Batch Processing with ChatGPT' %}</li>
-        <li>{% help_url 'dictionaries_request_gemini' 'Dictionary Enrichment with Gemini (Supervised)' %}</li>
-        <li>{% help_url 'project_prompts' 'Managing AI Prompts' %}</li>
-        <li>{% help_url 'project_settings_credentials' 'API Credential Settings' %}</li>
+    <ul class="help-topics">
+        <li><a href="{% url 'twf:help' 'dictionaries_batch_claude' %}" class="help-link btn">Dictionary Batch Processing with Claude</a></li>
+        <li><a href="{% url 'twf:help' 'dictionaries_batch_openai' %}" class="help-link btn">Dictionary Batch Processing with ChatGPT</a></li>
+        <li><a href="{% url 'twf:help' 'dictionaries_request_gemini' %}" class="help-link btn">Dictionary Enrichment with Gemini (Supervised)</a></li>
+        <li><a href="{% url 'twf:help' 'project_prompts' %}" class="help-link btn">Managing AI Prompts</a></li>
+        <li><a href="{% url 'twf:help' 'project_settings_credentials' %}" class="help-link btn">API Credential Settings</a></li>
+        <li><a href="{% help_url 'modules/workflows/dictionaries.html' %}" target="_blank" class="help-link btn-ext">Dictionary Workflows</a></li>
+        <li><a href="{% help_url 'modules/parts/multimodal.html' %}" target="_blank" class="help-link btn-ext">AI Integration</a></li>
     </ul>
 </div>

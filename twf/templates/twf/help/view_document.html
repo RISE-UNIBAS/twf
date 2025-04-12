@@ -1,0 +1,111 @@
+{% load twf_help %}
+
+<div class="help-content">
+    <h2>Document Viewer</h2>
+    <p>
+        The Document Viewer allows you to examine and work with the content of a document in your project. This view
+        provides a comprehensive interface for viewing page content, managing document tags, and annotating documents.
+    </p>
+
+    <h3>Document Navigation</h3>
+    <p>
+        The document viewer provides several ways to navigate through your document:
+    </p>
+    <ul>
+        <li><strong>Page navigation:</strong> Move forward and backward through document pages</li>
+        <li><strong>Page thumbnails:</strong> Click on page thumbnails for quick navigation</li>
+        <li><strong>Page selector:</strong> Jump directly to a specific page by number</li>
+        <li><strong>Zoom controls:</strong> Adjust zoom level to view page content in different detail levels</li>
+    </ul>
+
+    <h3>Content Display</h3>
+    <p>
+        Document content is displayed with several helpful features:
+    </p>
+    <ul>
+        <li><strong>Text recognition:</strong> Text is recognized and overlaid on page images</li>
+        <li><strong>Tag highlighting:</strong> Entity tags are highlighted in different colors based on type</li>
+        <li><strong>Line numbering:</strong> Text lines are numbered for easier reference</li>
+        <li><strong>Searchable text:</strong> Use browser search to find specific text in the displayed content</li>
+    </ul>
+
+    <h3>Working with Tags</h3>
+    <p>
+        Within the document viewer, you can:
+    </p>
+    <ul>
+        <li><strong>View tags:</strong> See all tags identified in the current page</li>
+        <li><strong>Select tags:</strong> Click on highlighted tags to select them</li>
+        <li><strong>Review tag details:</strong> See tag information and status</li>
+        <li><strong>Resolve tags:</strong> Assign tags to dictionary entries directly from the viewer</li>
+        <li><strong>Create new tags:</strong> Select text to create new manual tags</li>
+        <li><strong>Edit existing tags:</strong> Modify tag attributes or boundaries</li>
+    </ul>
+
+    <h3>Document Information</h3>
+    <p>
+        The document viewer provides access to various document metadata:
+    </p>
+    <ul>
+        <li><strong>Document title:</strong> The name and identifier of the current document</li>
+        <li><strong>Processing status:</strong> Current state of the document's workflow</li>
+        <li><strong>Document metadata:</strong> Access to key document information</li>
+        <li><strong>Tag statistics:</strong> Summary of tag counts by type and status</li>
+        <li><strong>Processing history:</strong> Record of operations performed on the document</li>
+    </ul>
+
+    <h3>Sidebar Tools</h3>
+    <p>
+        The sidebar provides access to additional functionality:
+    </p>
+    <ul>
+        <li><strong>Tag List:</strong> View and filter all tags in the current document</li>
+        <li><strong>Page List:</strong> Access all pages with thumbnail previews</li>
+        <li><strong>Metadata:</strong> View and edit document and page metadata</li>
+        <li><strong>Notes:</strong> Add and view document annotations and comments</li>
+        <li><strong>Dictionary Lookup:</strong> Search dictionaries for terms in the document</li>
+    </ul>
+
+    <h3>Annotation Tools</h3>
+    <p>
+        The document viewer offers several ways to annotate and mark up documents:
+    </p>
+    <ul>
+        <li><strong>Highlighting:</strong> Mark important text sections with color highlighting</li>
+        <li><strong>Comments:</strong> Add notes to specific document sections</li>
+        <li><strong>Bookmarks:</strong> Mark important pages for quick access</li>
+        <li><strong>Tag creation:</strong> Select text to create new entity tags</li>
+    </ul>
+
+    <h3>Search and Filter</h3>
+    <p>
+        The document viewer includes several search capabilities:
+    </p>
+    <ul>
+        <li><strong>Text search:</strong> Find specific text throughout the document</li>
+        <li><strong>Tag filter:</strong> Filter displayed tags by type, status, or other attributes</li>
+        <li><strong>Jump to matches:</strong> Navigate directly to search matches</li>
+    </ul>
+
+    <h3>Best Practices</h3>
+    <ul>
+        <li>Use keyboard shortcuts for faster navigation (arrow keys, Page Up/Down)</li>
+        <li>Adjust zoom levels appropriately when working with dense text or images</li>
+        <li>Review tags in context rather than just in the tag list</li>
+        <li>Add notes to document your analysis and decision-making process</li>
+        <li>Use the tag filter to focus on specific tag types when working through a document</li>
+        <li>Save your work regularly, especially after making extensive tag changes</li>
+    </ul>
+
+    <h3>Related Topics</h3>
+    <ul class="help-topics">
+        <li><a href="{% url 'twf:help' 'documents_overview' %}" class="help-link btn">Document Management Overview</a></li>
+        <li><a href="{% url 'twf:help' 'document_metadata' %}" class="help-link btn">Document Metadata</a></li>
+        <li><a href="{% url 'twf:help' 'tags_overview' %}" class="help-link btn">Tag Management</a></li>
+        <li><a href="{% url 'twf:help' 'tags_extract' %}" class="help-link btn">Tag Extraction</a></li>
+        <li><a href="{% url 'twf:help' 'metadata_review_document' %}" class="help-link btn">Review Document Metadata</a></li>
+        <li><a href="{% url 'twf:help' 'metadata_review_page' %}" class="help-link btn">Review Page Metadata</a></li>
+        <li><a href="{% help_url 'modules/workflows/documents.html' %}" target="_blank" class="help-link btn-ext">Document Workflows</a></li>
+        <li><a href="{% help_url 'modules/workflows/tags.html' %}" target="_blank" class="help-link btn-ext">Tag Workflows</a></li>
+    </ul>
+</div>

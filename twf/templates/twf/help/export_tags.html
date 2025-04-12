@@ -133,11 +133,13 @@
     </ul>
 
     <h3>Related Topics</h3>
-    <ul>
-        <li>{% help_url 'export_overview' 'Export Overview' %}</li>
-        <li>{% help_url 'export_configure' 'Configure Export Formats' %}</li>
-        <li>{% help_url 'tags_overview' 'Tag Management Overview' %}</li>
-        <li>{% help_url 'dictionaries_overview' 'Dictionary Management' %}</li>
-        <li>{% help_url 'tags_view_resolved' 'Resolved Tags' %}</li>
+    <ul class="help-topics">
+        <li><a href="{% url 'twf:help' 'export_overview' %}" class="help-link btn">Export Overview</a></li>
+        <li><a href="{% url 'twf:help' 'export_configure' %}" class="help-link btn">Configure Export Formats</a></li>
+        <li><a href="{% url 'twf:help' 'tags_overview' %}" class="help-link btn">Tag Management Overview</a></li>
+        <li><a href="{% url 'twf:help' 'dictionaries_overview' %}" class="help-link btn">Dictionary Management</a></li>
+        <li><a href="{% url 'twf:help' 'tags_view_resolved' %}" class="help-link btn">Resolved Tags</a></li>
+        <li><a href="{% help_url 'modules/workflows/export.html' %}" target="_blank" class="help-link btn-ext">Export Workflows</a></li>
+        <li><a href="{% help_url 'modules/workflows/tags.html' %}" target="_blank" class="help-link btn-ext">Tag Workflows</a></li>
     </ul>
 </div>

@@ -72,11 +72,13 @@
     </ul>
 
     <h3>Related Topics</h3>
-    <ul>
-        <li>{% help_url 'metadata_load_metadata' 'Loading Metadata from Files' %}</li>
-        <li>{% help_url 'metadata_load_sheets_data' 'Loading Metadata from Google Sheets' %}</li>
-        <li>{% help_url 'metadata_review_document' 'Reviewing Document Metadata' %}</li>
-        <li>{% help_url 'project_settings_credentials' 'Configuring AI API Credentials' %}</li>
-        <li>{% help_url 'project_prompts' 'Managing AI Prompts' %}</li>
+    <ul class="help-topics">
+        <li><a href="{% url 'twf:help' 'metadata_load_metadata' %}" class="help-link btn">Loading Metadata from Files</a></li>
+        <li><a href="{% url 'twf:help' 'metadata_load_sheets_data' %}" class="help-link btn">Loading Metadata from Google Sheets</a></li>
+        <li><a href="{% url 'twf:help' 'metadata_review_document' %}" class="help-link btn">Reviewing Document Metadata</a></li>
+        <li><a href="{% url 'twf:help' 'project_settings_credentials' %}" class="help-link btn">Configuring AI API Credentials</a></li>
+        <li><a href="{% url 'twf:help' 'project_prompts' %}" class="help-link btn">Managing AI Prompts</a></li>
+        <li><a href="{% help_url 'modules/workflows/metadata.html' %}" target="_blank" class="help-link btn-ext">Metadata Workflows</a></li>
+        <li><a href="{% help_url 'modules/parts/multimodal.html' %}" target="_blank" class="help-link btn-ext">AI Integration</a></li>
     </ul>
 </div>

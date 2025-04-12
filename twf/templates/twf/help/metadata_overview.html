@@ -68,12 +68,14 @@
         <li>Consider future uses when designing metadata fields</li>
     </ul>
 
-    <h3>Available Tools</h3>
-    <ul>
-        <li>{% help_url 'metadata_load_metadata' 'Load Metadata from JSON Files' %}</li>
-        <li>{% help_url 'metadata_load_sheets_data' 'Load Metadata from Google Sheets' %}</li>
-        <li>{% help_url 'metadata_extract' 'Extract Metadata with AI' %}</li>
-        <li>{% help_url 'metadata_review_document' 'Review Document Metadata' %}</li>
-        <li>{% help_url 'metadata_review_page' 'Review Page Metadata' %}</li>
+    <h3>Related Topics</h3>
+    <ul class="help-topics">
+        <li><a href="{% url 'twf:help' 'metadata_load_metadata' %}" class="help-link btn">Load Metadata from JSON Files</a></li>
+        <li><a href="{% url 'twf:help' 'metadata_load_sheets_data' %}" class="help-link btn">Load Metadata from Google Sheets</a></li>
+        <li><a href="{% url 'twf:help' 'metadata_extract' %}" class="help-link btn">Extract Metadata with AI</a></li>
+        <li><a href="{% url 'twf:help' 'metadata_review_document' %}" class="help-link btn">Review Document Metadata</a></li>
+        <li><a href="{% url 'twf:help' 'metadata_review_page' %}" class="help-link btn">Review Page Metadata</a></li>
+        <li><a href="{% help_url 'modules/workflows/metadata.html' %}" target="_blank" class="help-link btn-ext">Metadata Workflows</a></li>
+        <li><a href="{% help_url 'modules/workflows/documents.html' %}" target="_blank" class="help-link btn-ext">Document Workflows</a></li>
     </ul>
 </div>

@@ -1,4 +1,7 @@
-<h1>Context Help</h1>
+{% load twf_help %}
+
+<div class="help-content">
+<h1>Context Help: Collection Item Edit</h1>
 <p>
     This page allows you to update and refine a collection item. A collection item consists of structured text
     segments from a document, which you can review, split, and manage.
@@ -41,3 +44,13 @@
 <p>
     This section allows reviewers to leave comments or notes about the collection item.
 </p>
+
+<h3>Related Topics</h3>
+<ul class="help-topics">
+    <li><a href="{% url 'twf:help' 'collections_overview' %}" class="help-link btn">Collections Overview</a></li>
+    <li><a href="{% url 'twf:help' 'collection_view' %}" class="help-link btn">View Collection</a></li>
+    <li><a href="{% url 'twf:help' 'collection_item_view' %}" class="help-link btn">View Collection Item</a></li>
+    <li><a href="{% url 'twf:help' 'documents_overview' %}" class="help-link btn">Documents Overview</a></li>
+    <li><a href="{% help_url 'modules/workflows/collections.html' %}" target="_blank" class="help-link btn-ext">Collection Workflows</a></li>
+</ul>
+</div>

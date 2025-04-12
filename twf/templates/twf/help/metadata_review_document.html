@@ -70,11 +70,13 @@
     </ul>
 
     <h3>Related Topics</h3>
-    <ul>
-        <li>{% help_url 'metadata_review_page' 'Reviewing Page Metadata' %}</li>
-        <li>{% help_url 'metadata_load_metadata' 'Loading Metadata from Files' %}</li>
-        <li>{% help_url 'metadata_extract' 'Extracting Metadata' %}</li>
-        <li>{% help_url 'export_configuration' 'Export Configuration' %} (metadata affects exports)</li>
-        <li>{% help_url 'documents_browse' 'Browsing Documents' %}</li>
+    <ul class="help-topics">
+        <li><a href="{% url 'twf:help' 'metadata_review_page' %}" class="help-link btn">Reviewing Page Metadata</a></li>
+        <li><a href="{% url 'twf:help' 'metadata_load_metadata' %}" class="help-link btn">Loading Metadata from Files</a></li>
+        <li><a href="{% url 'twf:help' 'metadata_extract' %}" class="help-link btn">Extracting Metadata</a></li>
+        <li><a href="{% url 'twf:help' 'export_configuration' %}" class="help-link btn">Export Configuration</a></li>
+        <li><a href="{% url 'twf:help' 'documents_browse' %}" class="help-link btn">Browsing Documents</a></li>
+        <li><a href="{% help_url 'modules/workflows/metadata.html' %}" target="_blank" class="help-link btn-ext">Metadata Workflows</a></li>
+        <li><a href="{% help_url 'modules/workflows/documents.html' %}" target="_blank" class="help-link btn-ext">Document Workflows</a></li>
     </ul>
 </div>

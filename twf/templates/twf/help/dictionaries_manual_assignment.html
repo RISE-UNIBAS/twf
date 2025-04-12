@@ -82,11 +82,13 @@
     </ul>
 
     <h3>Related Topics</h3>
-    <ul>
-        <li>{% help_url 'dictionaries_overview' 'Dictionary Management Overview' %}</li>
-        <li>{% help_url 'dictionaries_entry_edit' 'Editing Dictionary Entries' %}</li>
-        <li>{% help_url 'dictionaries_entry_merging' 'Merging Dictionary Entries' %}</li>
-        <li>{% help_url 'dictionaries_normalization' 'Entity Normalization' %}</li>
-        <li>{% help_url 'tags_view_open' 'Working with Open Tags' %}</li>
+    <ul class="help-topics">
+        <li><a href="{% url 'twf:help' 'dictionaries_overview' %}" class="help-link btn">Dictionary Management Overview</a></li>
+        <li><a href="{% url 'twf:help' 'dictionaries_entry_edit' %}" class="help-link btn">Editing Dictionary Entries</a></li>
+        <li><a href="{% url 'twf:help' 'dictionaries_entry_merging' %}" class="help-link btn">Merging Dictionary Entries</a></li>
+        <li><a href="{% url 'twf:help' 'dictionaries_normalization' %}" class="help-link btn">Entity Normalization</a></li>
+        <li><a href="{% url 'twf:help' 'tags_view_open' %}" class="help-link btn">Working with Open Tags</a></li>
+        <li><a href="{% help_url 'modules/workflows/dictionaries.html' %}" target="_blank" class="help-link btn-ext">Dictionary Workflows</a></li>
+        <li><a href="{% help_url 'modules/workflows/tags.html' %}" target="_blank" class="help-link btn-ext">Tag Workflows</a></li>
     </ul>
 </div>

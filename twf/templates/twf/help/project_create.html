@@ -1,12 +1,17 @@
-<h3>Creating a New Project</h3>
+{% load twf_help %}
+
+<div class="help-content">
+<h2>Creating a New Project</h2>
 <p>As an administrator, you can create a new project by clicking on the <strong>"Create Project"</strong> button in the navigation bar.</p>
 
-<h4>Project Details</h4>
+<h3>Project Details</h3>
 <p>Each project requires the following details:</p>
 
 <ul>
     <li><strong>Title:</strong> The project's title must be unique in the database.</li>
     <li><strong>Description:</strong> A brief description of the project that can be included in exports.</li>
+    <li><strong>Keywords:</strong> Optional tags or keywords that help categorize your project.</li>
+    <li><strong>License:</strong> The licensing terms applicable to your project data.</li>
     <li><strong>Transkribus Collection ID:</strong> 
         <ul>
             <li>The ID of the collection in Transkribus, used to link the project to the collection.</li>
@@ -16,10 +21,41 @@
     </li>
 </ul>
 
-<h4>User Roles & Permissions</h4>
+<h3>User Roles & Permissions</h3>
 <p>Each project has assigned roles that define user permissions:</p>
 
 <ul>
     <li><strong>Project Owner:</strong> The user assigned as the project owner. Can edit the project and manage users. Does not have to be an admin account. Permissions are assigned per project.</li>
     <li><strong>Project Members:</strong> Users who are granted access to the project. They can view the project and work within workflows. Users can be added or removed later.</li>
 </ul>
+
+<h3>Project Configuration</h3>
+<p>After creating a project, you'll need to configure several aspects:</p>
+
+<ul>
+    <li><strong>API Credentials:</strong> For integration with external services like Transkribus, OpenAI, etc.</li>
+    <li><strong>Export Settings:</strong> Define how project data will be exported and structured</li>
+    <li><strong>Dictionaries:</strong> Create or import dictionaries for entity normalization</li>
+    <li><strong>Task Configuration:</strong> Define automated task settings</li>
+</ul>
+
+<h3>Best Practices</h3>
+<ul>
+    <li>Choose a descriptive project title that clearly identifies your project's purpose</li>
+    <li>Write a comprehensive description that explains the project goals and scope</li>
+    <li>Add appropriate team members early to facilitate collaboration</li>
+    <li>Configure API credentials right after project creation if you plan to use AI services</li>
+    <li>Consider creating project documentation using the notes feature</li>
+</ul>
+
+<h3>Related Topics</h3>
+<ul class="help-topics">
+    <li><a href="{% url 'twf:help' 'project_overview' %}" class="help-link btn">Project Overview</a></li>
+    <li><a href="{% url 'twf:help' 'project_management' %}" class="help-link btn">Project Management</a></li>
+    <li><a href="{% url 'twf:help' 'project_settings_general' %}" class="help-link btn">General Project Settings</a></li>
+    <li><a href="{% url 'twf:help' 'project_settings_credentials' %}" class="help-link btn">API Credential Settings</a></li>
+    <li><a href="{% url 'twf:help' 'project_tk_export' %}" class="help-link btn">Request Transkribus Export</a></li>
+    <li><a href="{% help_url 'modules/parts/settings.html' %}" target="_blank" class="help-link btn-ext">Project Settings Guide</a></li>
+    <li><a href="{% help_url 'modules/introduction/get-started.rst' %}" target="_blank" class="help-link btn-ext">Getting Started</a></li>
+</ul>
+</div>

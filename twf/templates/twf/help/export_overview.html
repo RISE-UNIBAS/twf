@@ -192,14 +192,16 @@
     </ul>
 
     <h3>Related Topics</h3>
-    <ul>
-        <li>{% help_url 'export_configure' 'Configure Export Formats' %}</li>
-        <li>{% help_url 'export_documents' 'Export Documents' %}</li>
-        <li>{% help_url 'export_collections' 'Export Collections' %}</li>
-        <li>{% help_url 'export_dictionaries' 'Export Dictionaries' %}</li>
-        <li>{% help_url 'export_tags' 'Export Tags' %}</li>
-        <li>{% help_url 'export_project' 'Export Project' %}</li>
-        <li>{% help_url 'export_to_zenodo' 'Export to Zenodo' %}</li>
-        <li>{% help_url 'import_dictionaries' 'Import Dictionaries' %}</li>
+    <ul class="help-topics">
+        <li><a href="{% url 'twf:help' 'export_configure' %}" class="help-link btn">Configure Export Formats</a></li>
+        <li><a href="{% url 'twf:help' 'export_documents' %}" class="help-link btn">Export Documents</a></li>
+        <li><a href="{% url 'twf:help' 'export_collections' %}" class="help-link btn">Export Collections</a></li>
+        <li><a href="{% url 'twf:help' 'export_dictionaries' %}" class="help-link btn">Export Dictionaries</a></li>
+        <li><a href="{% url 'twf:help' 'export_tags' %}" class="help-link btn">Export Tags</a></li>
+        <li><a href="{% url 'twf:help' 'export_project' %}" class="help-link btn">Export Project</a></li>
+        <li><a href="{% url 'twf:help' 'export_to_zenodo' %}" class="help-link btn">Export to Zenodo</a></li>
+        <li><a href="{% url 'twf:help' 'import_dictionaries' %}" class="help-link btn">Import Dictionaries</a></li>
+        <li><a href="{% help_url 'modules/workflows/export.html' %}" target="_blank" class="help-link btn-ext">Export Workflows</a></li>
+        <li><a href="{% help_url 'modules/parts/settings.html' %}" target="_blank" class="help-link btn-ext">Project Settings</a></li>
     </ul>
 </div>

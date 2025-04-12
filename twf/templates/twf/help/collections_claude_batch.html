@@ -90,11 +90,13 @@
     </ul>
 
     <h3>Related Topics</h3>
-    <ul>
-        <li>{% help_url 'collections_openai_batch' 'Collection Batch Processing with ChatGPT' %}</li>
-        <li>{% help_url 'collections_gemini_batch' 'Collection Batch Processing with Gemini' %}</li>
-        <li>{% help_url 'collections_view' 'Viewing Collections' %}</li>
-        <li>{% help_url 'project_prompts' 'Managing AI Prompts' %}</li>
-        <li>{% help_url 'project_settings_credentials' 'API Credential Settings' %}</li>
+    <ul class="help-topics">
+        <li><a href="{% url 'twf:help' 'collections_openai_batch' %}" class="help-link btn">Collection Batch Processing with ChatGPT</a></li>
+        <li><a href="{% url 'twf:help' 'collections_gemini_batch' %}" class="help-link btn">Collection Batch Processing with Gemini</a></li>
+        <li><a href="{% url 'twf:help' 'collections_view' %}" class="help-link btn">Viewing Collections</a></li>
+        <li><a href="{% url 'twf:help' 'project_prompts' %}" class="help-link btn">Managing AI Prompts</a></li>
+        <li><a href="{% url 'twf:help' 'project_settings_credentials' %}" class="help-link btn">API Credential Settings</a></li>
+        <li><a href="{% help_url 'modules/parts/multimodal.html' %}" target="_blank" class="help-link btn-ext">Multimodal Processing</a></li>
+        <li><a href="{% help_url 'modules/workflows/collections.html' %}" target="_blank" class="help-link btn-ext">Collection Workflows</a></li>
     </ul>
 </div>

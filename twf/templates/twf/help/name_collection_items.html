@@ -79,11 +79,12 @@
     </ul>
 
     <h3>Related Topics</h3>
-    <ul>
-        <li>{% help_url 'collections_overview' 'Collections Overview' %}</li>
-        <li>{% help_url 'name_documents' 'Naming Documents' %}</li>
-        <li>{% help_url 'collections_view' 'Viewing Collections' %}</li>
-        <li>{% help_url 'collection_item_view' 'Viewing Collection Items' %}</li>
-        <li>{% help_url 'collection_edit' 'Editing Collections' %}</li>
+    <ul class="help-topics">
+        <li><a href="{% url 'twf:help' 'collections_overview' %}" class="help-link btn">Collections Overview</a></li>
+        <li><a href="{% url 'twf:help' 'name_documents' %}" class="help-link btn">Naming Documents</a></li>
+        <li><a href="{% url 'twf:help' 'collections_view' %}" class="help-link btn">Viewing Collections</a></li>
+        <li><a href="{% url 'twf:help' 'collection_item_view' %}" class="help-link btn">Viewing Collection Items</a></li>
+        <li><a href="{% url 'twf:help' 'collection_edit' %}" class="help-link btn">Editing Collections</a></li>
+        <li><a href="{% help_url 'modules/workflows/collections.html' %}" target="_blank" class="help-link btn-ext">Collection Workflows</a></li>
     </ul>
 </div>

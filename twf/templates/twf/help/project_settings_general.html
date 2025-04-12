@@ -1,4 +1,7 @@
-<h3>General Project Settings</h3>
+{% load twf_help %}
+
+<div class="help-content">
+<h1>Context Help: General Project Settings</h1>
 <p>The General Settings page allows you to configure the basic information and properties of your project. These settings determine how your project appears, who can access it, and what dictionaries are associated with it.</p>
 
 <h4>Project Information</h4>
@@ -30,3 +33,12 @@
 </ul>
 
 <p><strong>Note:</strong> Changes to project settings may affect how data is displayed and processed throughout the application. Review your settings carefully before saving.</p>
+
+<h3>Related Topics</h3>
+<ul class="help-topics">
+    <li><a href="{% url 'twf:help' 'project_settings_credentials' %}" class="help-link btn">API Credentials Settings</a></li>
+    <li><a href="{% url 'twf:help' 'project_settings_export' %}" class="help-link btn">Export Settings</a></li>
+    <li><a href="{% url 'twf:help' 'project_settings_tasks' %}" class="help-link btn">Task Settings</a></li>
+    <li><a href="{% help_url 'modules/parts/settings.html' %}" target="_blank" class="help-link btn-ext">Settings Configuration</a></li>
+    <li><a href="{% help_url 'modules/workflows/project.html' %}" target="_blank" class="help-link btn-ext">Project Workflows</a></li>
+</ul>

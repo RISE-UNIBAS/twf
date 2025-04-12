@@ -1,0 +1,105 @@
+{% load twf_help %}
+
+<div class="help-content">
+    <h2>Project Notes</h2>
+    <p>
+        The Project Notes feature allows you to create, manage, and share important notes related to your project. Notes are a convenient way to document decisions, record important information, and communicate with team members.
+    </p>
+
+    <h3>Notes Overview</h3>
+    <p>
+        On this page, you can:
+    </p>
+    <ul>
+        <li>View all notes associated with your current project</li>
+        <li>Filter notes based on various criteria</li>
+        <li>Access detailed views of individual notes</li>
+        <li>Create new notes to share information with your team</li>
+    </ul>
+
+    <h3>Notes Table</h3>
+    <p>
+        The main section of the page displays a table of all notes in your project. For each note, you can see:
+    </p>
+    <ul>
+        <li><strong>Title:</strong> The note's title, which serves as a quick reference</li>
+        <li><strong>Created:</strong> When the note was initially created</li>
+        <li><strong>Created By:</strong> The user who created the note</li>
+        <li><strong>Last Modified:</strong> When the note was last updated</li>
+        <li><strong>Actions:</strong> Options to view, edit, or delete the note</li>
+    </ul>
+
+    <h3>Filtering Notes</h3>
+    <p>
+        Use the filters at the top of the page to narrow down the list of notes. You can filter by:
+    </p>
+    <ul>
+        <li><strong>Title:</strong> Find notes containing specific text in their titles</li>
+        <li><strong>Creator:</strong> Show notes created by a specific team member</li>
+        <li><strong>Date Range:</strong> Display notes created or modified within a certain timeframe</li>
+    </ul>
+    <p>
+        After setting your filters, the table will update to show only the matching notes, with a count of how many notes were found.
+    </p>
+
+    <h3>Working with Notes</h3>
+    <h4>Creating a Note</h4>
+    <p>
+        To create a new note:
+    </p>
+    <ol>
+        <li>Click the <strong>"+"</strong> button in the upper right corner of the page</li>
+        <li>Enter a title that clearly describes the note's content</li>
+        <li>Type your note text in the provided text area</li>
+        <li>Click "Save Note" to create the note</li>
+    </ol>
+
+    <h4>Viewing a Note</h4>
+    <p>
+        To view a note's full details:
+    </p>
+    <ol>
+        <li>Find the note in the table</li>
+        <li>Click the "View" button (eye icon) for that note</li>
+        <li>The note details page will show the complete note content and metadata</li>
+    </ol>
+
+    <h4>Editing a Note</h4>
+    <p>
+        To modify an existing note:
+    </p>
+    <ol>
+        <li>View the note details page</li>
+        <li>Click the "Edit Note" button</li>
+        <li>Make your changes to the title or content</li>
+        <li>Click "Save Note" to update the note</li>
+    </ol>
+
+    <h4>Deleting a Note</h4>
+    <p>
+        To remove a note that is no longer needed:
+    </p>
+    <ol>
+        <li>View the note details page</li>
+        <li>Click the "Delete Note" button</li>
+        <li>Confirm your decision in the confirmation dialog</li>
+    </ol>
+    <p class="text-danger">
+        <strong>Note:</strong> Deleting a note is permanent and cannot be undone.
+    </p>
+
+    <h3>Best Practices for Notes</h3>
+    <ul>
+        <li><strong>Use Clear Titles:</strong> Make titles descriptive so team members can quickly understand the note's purpose</li>
+        <li><strong>Keep Notes Organized:</strong> Create separate notes for different topics rather than combining multiple subjects</li>
+        <li><strong>Include Context:</strong> Provide enough background information for others to understand the note's content</li>
+        <li><strong>Update Regularly:</strong> Edit notes when information changes rather than creating duplicate notes</li>
+        <li><strong>Document Decisions:</strong> Use notes to record important project decisions and their rationale</li>
+    </ul>
+
+    <h3>Related Topics</h3>
+    <ul class="help-topics">
+        <li><a href="{% help_url 'modules/workflows/project.html' %}" target="_blank" class="help-link btn-ext">Project Workflows</a></li>
+        <li><a href="{% help_url 'modules/parts/settings.html' %}" target="_blank" class="help-link btn-ext">Project Setup</a></li>
+    </ul>
+</div>

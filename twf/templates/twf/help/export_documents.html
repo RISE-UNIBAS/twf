@@ -193,11 +193,13 @@
     </ul>
 
     <h3>Related Topics</h3>
-    <ul>
-        <li>{% help_url 'export_overview' 'Export Overview' %}</li>
-        <li>{% help_url 'export_configure' 'Configure Export Formats' %}</li>
-        <li>{% help_url 'documents_overview' 'Document Management Overview' %}</li>
-        <li>{% help_url 'documents_browse' 'Browsing Documents' %}</li>
-        <li>{% help_url 'export_collections' 'Export Collections' %}</li>
+    <ul class="help-topics">
+        <li><a href="{% url 'twf:help' 'export_overview' %}" class="help-link btn">Export Overview</a></li>
+        <li><a href="{% url 'twf:help' 'export_configure' %}" class="help-link btn">Configure Export Formats</a></li>
+        <li><a href="{% url 'twf:help' 'documents_overview' %}" class="help-link btn">Document Management Overview</a></li>
+        <li><a href="{% url 'twf:help' 'documents_browse' %}" class="help-link btn">Browsing Documents</a></li>
+        <li><a href="{% url 'twf:help' 'export_collections' %}" class="help-link btn">Export Collections</a></li>
+        <li><a href="{% help_url 'modules/workflows/export.html' %}" target="_blank" class="help-link btn-ext">Export Workflows</a></li>
+        <li><a href="{% help_url 'modules/workflows/documents.html' %}" target="_blank" class="help-link btn-ext">Document Workflows</a></li>
     </ul>
 </div>

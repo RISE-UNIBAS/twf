@@ -1,4 +1,6 @@
 {% load twf_help %}
+
+<div class="help-content">
 <h1>Context Help: Tags Overview</h1>
 <p>
     The Tags Overview page provides a central access point for all tag-related functions in your project. Tags are annotations within your documents that identify entities, concepts, or data points of interest.
@@ -58,8 +60,16 @@
     <li>Review ignored tags periodically to ensure nothing important was missed</li>
 </ul>
 
-<h1>Related Topics</h1>
-<ul>
-    <li><a href="{% help_url 'modules/workflows/tags.html' %}" target="_blank" class="help-link">Tag Workflows</a></li>
-    <li><a href="{% help_url 'modules/workflows/dictionaries.html' %}" target="_blank" class="help-link">Dictionary Workflows</a></li>
+<h3>Related Topics</h3>
+<ul class="help-topics">
+    <li><a href="{% url 'twf:help' 'tags_extract' %}" class="help-link btn">Tag Extraction</a></li>
+    <li><a href="{% url 'twf:help' 'tags_view_open' %}" class="help-link btn">Open Tags</a></li>
+    <li><a href="{% url 'twf:help' 'tags_view_resolved' %}" class="help-link btn">Resolved Tags</a></li>
+    <li><a href="{% url 'twf:help' 'tags_view_parked' %}" class="help-link btn">Parked Tags</a></li>
+    <li><a href="{% url 'twf:help' 'tags_view_ignored' %}" class="help-link btn">Ignored Tags</a></li>
+    <li><a href="{% url 'twf:help' 'tags_settings' %}" class="help-link btn">Tag Settings</a></li>
+    <li><a href="{% url 'twf:help' 'dictionaries_overview' %}" class="help-link btn">Dictionary Management</a></li>
+    <li><a href="{% help_url 'modules/workflows/tags.html' %}" target="_blank" class="help-link btn-ext">Tag Workflows</a></li>
+    <li><a href="{% help_url 'modules/workflows/dictionaries.html' %}" target="_blank" class="help-link btn-ext">Dictionary Workflows</a></li>
 </ul>
+</div>

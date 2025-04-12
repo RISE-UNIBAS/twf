@@ -93,10 +93,12 @@
     </ul>
 
     <h3>Related Topics</h3>
-    <ul>
-        <li>{% help_url 'dictionaries_overview' 'Dictionary Management Overview' %}</li>
-        <li>{% help_url 'dictionaries_add' 'Adding Dictionaries' %}</li>
-        <li>{% help_url 'dictionary_create' 'Creating New Dictionaries' %}</li>
-        <li>{% help_url 'export_dictionaries' 'Exporting Dictionaries' %}</li>
+    <ul class="help-topics">
+        <li><a href="{% url 'twf:help' 'dictionaries_overview' %}" class="help-link btn">Dictionary Management Overview</a></li>
+        <li><a href="{% url 'twf:help' 'dictionaries_add' %}" class="help-link btn">Adding Dictionaries</a></li>
+        <li><a href="{% url 'twf:help' 'dictionary_create' %}" class="help-link btn">Creating New Dictionaries</a></li>
+        <li><a href="{% url 'twf:help' 'export_dictionaries' %}" class="help-link btn">Exporting Dictionaries</a></li>
+        <li><a href="{% help_url 'modules/workflows/dictionaries.html' %}" target="_blank" class="help-link btn-ext">Dictionary Workflows</a></li>
+        <li><a href="{% help_url 'modules/parts/batch-workflows.html' %}" target="_blank" class="help-link btn-ext">Batch Workflows</a></li>
     </ul>
 </div>

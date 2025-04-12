@@ -185,11 +185,13 @@
     </ul>
 
     <h3>Related Topics</h3>
-    <ul>
-        <li>{% help_url 'export_overview' 'Export Overview' %}</li>
-        <li>{% help_url 'export_configure' 'Configure Export Formats' %}</li>
-        <li>{% help_url 'dictionaries_overview' 'Dictionary Management Overview' %}</li>
-        <li>{% help_url 'import_dictionaries' 'Importing Dictionaries' %}</li>
-        <li>{% help_url 'dictionaries_normalization' 'Entity Normalization' %}</li>
+    <ul class="help-topics">
+        <li><a href="{% url 'twf:help' 'export_overview' %}" class="help-link btn">Export Overview</a></li>
+        <li><a href="{% url 'twf:help' 'export_configure' %}" class="help-link btn">Configure Export Formats</a></li>
+        <li><a href="{% url 'twf:help' 'dictionaries_overview' %}" class="help-link btn">Dictionary Management Overview</a></li>
+        <li><a href="{% url 'twf:help' 'import_dictionaries' %}" class="help-link btn">Importing Dictionaries</a></li>
+        <li><a href="{% url 'twf:help' 'dictionaries_normalization' %}" class="help-link btn">Entity Normalization</a></li>
+        <li><a href="{% help_url 'modules/workflows/export.html' %}" target="_blank" class="help-link btn-ext">Export Workflows</a></li>
+        <li><a href="{% help_url 'modules/workflows/dictionaries.html' %}" target="_blank" class="help-link btn-ext">Dictionary Workflows</a></li>
     </ul>
 </div>

@@ -1,0 +1,121 @@
+{% load twf_help %}
+
+<div class="help-content">
+    <h2>Tag Settings</h2>
+    <p>
+        This page allows you to configure how tags are managed and processed in your project. Tag settings control
+        various aspects of tag behavior, including categorization, extraction, and normalization.
+    </p>
+
+    <h3>Tag Types</h3>
+    <p>
+        Tag types categorize the entities you are identifying in your documents:
+    </p>
+    <ul>
+        <li><strong>Person:</strong> Names of individuals</li>
+        <li><strong>Place:</strong> Geographic locations</li>
+        <li><strong>Organization:</strong> Institutions, companies, agencies</li>
+        <li><strong>Date:</strong> Temporal references</li>
+        <li><strong>Term:</strong> Specialized vocabulary or concepts</li>
+        <li><strong>Custom types:</strong> Project-specific categories</li>
+    </ul>
+    <p>
+        Each tag type can be configured with:
+    </p>
+    <ul>
+        <li>Color-coding for visual identification</li>
+        <li>Associated dictionaries for normalization</li>
+        <li>Processing rules and workflows</li>
+    </ul>
+
+    <h3>Tag Ignoring Rules</h3>
+    <p>
+        These settings determine which tags are automatically ignored during processing:
+    </p>
+    <ul>
+        <li><strong>Ignore by type:</strong> Exclude specific tag categories</li>
+        <li><strong>Ignore by pattern:</strong> Skip tags matching certain text patterns</li>
+        <li><strong>Ignore by length:</strong> Exclude tags shorter or longer than specified limits</li>
+        <li><strong>Ignore common words:</strong> Automatically skip common words or stopwords</li>
+    </ul>
+    <p>
+        Ignoring rules help reduce noise and focus your tagging efforts on the most relevant entities.
+    </p>
+
+    <h3>Tag Extraction Settings</h3>
+    <p>
+        Configure how tags are automatically extracted from documents:
+    </p>
+    <ul>
+        <li><strong>Extraction method:</strong> Choose between rule-based, NER, or AI-assisted extraction</li>
+        <li><strong>Confidence threshold:</strong> Set minimum confidence level for automated extraction</li>
+        <li><strong>Context window:</strong> Define how much surrounding text to consider</li>
+        <li><strong>Extraction scope:</strong> Specify document sections to process</li>
+    </ul>
+
+    <h3>Tag Normalization Defaults</h3>
+    <p>
+        These settings control the default behavior for normalizing tags:
+    </p>
+    <ul>
+        <li><strong>Default dictionary:</strong> Set the primary dictionary for each tag type</li>
+        <li><strong>Automatic normalization:</strong> Configure when tags should be automatically normalized</li>
+        <li><strong>External authority preferences:</strong> Prioritize specific external authorities (GND, Wikidata, etc.)</li>
+        <li><strong>Similarity threshold:</strong> Set minimum match confidence for automated assignment</li>
+    </ul>
+
+    <h3>Tag Grouping Rules</h3>
+    <p>
+        Configure how related tags should be grouped:
+    </p>
+    <ul>
+        <li><strong>Similarity detection:</strong> Set criteria for identifying related tags</li>
+        <li><strong>Variation handling:</strong> Determine how spelling and form variations are managed</li>
+        <li><strong>Group visualization:</strong> Configure how tag groups are displayed</li>
+        <li><strong>Auto-grouping threshold:</strong> Set confidence level for automatic grouping</li>
+    </ul>
+
+    <h3>Tag Appearance Settings</h3>
+    <p>
+        Control how tags are visually represented:
+    </p>
+    <ul>
+        <li><strong>Color scheme:</strong> Customize colors for different tag types</li>
+        <li><strong>Display format:</strong> Configure how tag information is presented in interfaces</li>
+        <li><strong>Highlighting style:</strong> Set how tags are highlighted in document text</li>
+    </ul>
+
+    <h3>Applying Settings Changes</h3>
+    <p>
+        When you modify tag settings:
+    </p>
+    <ol>
+        <li>Specify whether changes apply to existing tags or only new ones</li>
+        <li>Consider reprocessing existing tags with new settings if needed</li>
+        <li>Test changes on a small subset before applying project-wide</li>
+        <li>Document significant settings changes for project consistency</li>
+    </ol>
+
+    <h3>Best Practices</h3>
+    <ul>
+        <li>Establish tag type conventions early in your project</li>
+        <li>Create clear guidelines for what constitutes each tag type</li>
+        <li>Balance automation with quality control</li>
+        <li>Regularly review and refine your tag settings as the project evolves</li>
+        <li>Document your tag configuration decisions for team consistency</li>
+        <li>Consider how settings will impact downstream processes like export and analysis</li>
+    </ul>
+
+    <h3>Related Topics</h3>
+    <ul class="help-topics">
+        <li><a href="{% url 'twf:help' 'tags_overview' %}" class="help-link btn">Tag Management Overview</a></li>
+        <li><a href="{% url 'twf:help' 'tags_extract' %}" class="help-link btn">Tag Extraction</a></li>
+        <li><a href="{% url 'twf:help' 'tags_group' %}" class="help-link btn">Tag Grouping</a></li>
+        <li><a href="{% url 'twf:help' 'tags_view_open' %}" class="help-link btn">Open Tags</a></li>
+        <li><a href="{% url 'twf:help' 'tags_view_resolved' %}" class="help-link btn">Resolved Tags</a></li>
+        <li><a href="{% url 'twf:help' 'tags_view_parked' %}" class="help-link btn">Parked Tags</a></li>
+        <li><a href="{% url 'twf:help' 'tags_view_ignored' %}" class="help-link btn">Ignored Tags</a></li>
+        <li><a href="{% help_url 'modules/workflows/tags.html' %}" target="_blank" class="help-link btn-ext">Tag Workflows</a></li>
+        <li><a href="{% help_url 'modules/parts/settings.html' %}" target="_blank" class="help-link btn-ext">Project Settings</a></li>
+    </ul>
+</div>

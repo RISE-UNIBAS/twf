@@ -54,11 +54,12 @@
     </ul>
 
     <h3>Related Topics</h3>
-    <ul>
-        <li>{% help_url 'tags_overview' 'Tag Management Overview' %}</li>
-        <li>{% help_url 'tags_view_open' 'Open Tags' %}</li>
-        <li>{% help_url 'tags_view_resolved' 'Resolved Tags' %}</li>
-        <li>{% help_url 'tags_view_ignored' 'Ignored Tags' %}</li>
-        <li>{% help_url 'tags_extract' 'Tag Extraction' %}</li>
+    <ul class="help-topics">
+        <li><a href="{% url 'twf:help' 'tags_overview' %}" class="help-link btn">Tag Management Overview</a></li>
+        <li><a href="{% url 'twf:help' 'tags_view_open' %}" class="help-link btn">Open Tags</a></li>
+        <li><a href="{% url 'twf:help' 'tags_view_resolved' %}" class="help-link btn">Resolved Tags</a></li>
+        <li><a href="{% url 'twf:help' 'tags_view_ignored' %}" class="help-link btn">Ignored Tags</a></li>
+        <li><a href="{% url 'twf:help' 'tags_extract' %}" class="help-link btn">Tag Extraction</a></li>
+        <li><a href="{% help_url 'modules/workflows/tags.html' %}" target="_blank" class="help-link btn-ext">Tag Workflows</a></li>
     </ul>
 </div>

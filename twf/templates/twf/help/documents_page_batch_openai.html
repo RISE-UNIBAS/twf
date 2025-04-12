@@ -118,11 +118,13 @@
     </ul>
 
     <h3>Related Topics</h3>
-    <ul>
-        <li>{% help_url 'documents_batch_openai' 'Document Batch Processing with ChatGPT' %}</li>
-        <li>{% help_url 'documents_page_batch_claude' 'Page Batch Processing with Claude' %}</li>
-        <li>{% help_url 'documents_page_batch_gemini' 'Page Batch Processing with Gemini' %}</li>
-        <li>{% help_url 'project_prompts' 'Managing AI Prompts' %}</li>
-        <li>{% help_url 'metadata_review_page' 'Reviewing Page Metadata' %}</li>
+    <ul class="help-topics">
+        <li><a href="{% url 'twf:help' 'documents_batch_openai' %}" class="help-link btn">Document Batch Processing with ChatGPT</a></li>
+        <li><a href="{% url 'twf:help' 'documents_page_batch_claude' %}" class="help-link btn">Page Batch Processing with Claude</a></li>
+        <li><a href="{% url 'twf:help' 'documents_page_batch_gemini' %}" class="help-link btn">Page Batch Processing with Gemini</a></li>
+        <li><a href="{% url 'twf:help' 'project_prompts' %}" class="help-link btn">Managing AI Prompts</a></li>
+        <li><a href="{% url 'twf:help' 'metadata_review_page' %}" class="help-link btn">Reviewing Page Metadata</a></li>
+        <li><a href="{% help_url 'modules/parts/multimodal.html' %}" target="_blank" class="help-link btn-ext">Multimodal Processing</a></li>
+        <li><a href="{% help_url 'modules/workflows/documents.html' %}" target="_blank" class="help-link btn-ext">Document Workflows</a></li>
     </ul>
 </div>

@@ -1,8 +1,16 @@
 {% load twf_help %}
-<h1>Context Help</h1>
+<div class="help-content">
+<h1>Context Help: User Overview</h1>
 <p>
     This page provides a summary of your recent
     and cumulative activity across all projects
     in the system. It helps you keep track of how
     much data you've created or edited.
 </p>
+
+<h3>Related Topics</h3>
+<ul class="help-topics">
+    <li><a href="{% help_url 'modules/workflows/project.html' %}" target="_blank" class="help-link btn-ext">Project Workflows</a></li>
+    <li><a href="{% url 'twf:help' 'user_profile' %}" class="help-link btn">User Profile</a></li>
+</ul>
+</div>
