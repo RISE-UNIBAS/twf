@@ -33,8 +33,24 @@ def get_tag_statistics(project):
     """Get statistics for tags."""
 
     total_tags = PageTag.objects.filter(page__document__project=project).count()
+    total_pages = Page.objects.filter(document__project=project).count()
+    
+    # Calculate tags per page
+    tags_per_page = round(total_tags / total_pages, 1) if total_pages > 0 else 0
+    
+    # Calculate open and resolved tags
+    open_tags = PageTag.objects.filter(page__document__project=project, is_parked=False).count()
+    resolved_tags = PageTag.objects.filter(page__document__project=project, is_parked=True).count()
+    
+    # Get tag types distribution
+    tag_types = PageTag.objects.filter(page__document__project=project).values('variation_type').annotate(count=Count('id')).order_by('-count')[:5]
+    
     return {
-        'total_tags': total_tags
+        'total_tags': total_tags,
+        'tags_per_page': tags_per_page,
+        'open_tags': open_tags,
+        'resolved_tags': resolved_tags,
+        'tag_types': tag_types
     }
 
 

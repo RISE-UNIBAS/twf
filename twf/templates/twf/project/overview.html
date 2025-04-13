@@ -59,7 +59,7 @@
                                         </div>
                                         <div class="d-flex justify-content-between mb-2">
                                             <span>Tags per Page:</span>
-                                            <span class="fw-bold">{% if doc_stats.total_pages > 0 %}{{ tag_stats.total_tags|default:0|divisibleby:doc_stats.total_pages|floatformat:1 }}{% else %}0{% endif %}</span>
+                                            <span class="fw-bold">{{ tag_stats.tags_per_page|floatformat:1 }}</span>
                                         </div>
                                         <div class="d-flex justify-content-between">
                                             <span>Dictionaries Connected:</span>
