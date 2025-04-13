@@ -60,7 +60,7 @@ def create_project_md(project):
 
     project_md += f"""
 ## Workflow Description
-{project.workflow_description}
+
 
 ## Technical Details
 The data stems from the Transkribus platform and has been processed by the TWF.

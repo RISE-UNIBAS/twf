@@ -540,7 +540,10 @@ class RepositorySettingsForm(forms.ModelForm):
     )
 
     keywords = forms.JSONField(
-        widget=Select2TagWidget(attrs={'style': 'width: 100%;'}),
+        widget=Select2TagWidget(attrs={
+            'style': 'width: 100%;', 
+            'data-token-separators': json.dumps([','])  # Only use comma as separator
+        }),
         required=False,
     )
 
