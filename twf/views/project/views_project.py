@@ -9,23 +9,22 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import redirect, render
 from django.urls import reverse, reverse_lazy
 from django.utils.timezone import now
-
-logger = logging.getLogger(__name__)
 from django.views.generic import FormView
 from django_filters.views import FilterView
 from django_tables2 import SingleTableView
 
 from twf.forms.dynamic_forms import DynamicForm
 from twf.forms.filters.filters import TaskFilter, PromptFilter, NoteFilter
-from twf.forms.filters.project_filter_forms import TaskFilterForm, PromptFilterForm
 from twf.forms.project.project_forms_batches import ProjectCopyBatchForm, DocumentExtractionBatchForm
 from twf.forms.project.project_forms import QueryDatabaseForm, GeneralSettingsForm, CredentialsForm, \
     TaskSettingsForm, ExportSettingsForm, RepositorySettingsForm, PromptForm, NoteForm
-from twf.models import Page, PageTag, Project, Prompt, Task, Note
-from twf.permissions import check_permission, get_actions_grouped_by_category, get_available_actions
+from twf.models import Page, PageTag, Prompt, Task, Note
+from twf.permissions import get_actions_grouped_by_category, get_available_actions
 from twf.tables.tables_project import TaskTable, PromptTable, NoteTable
 from twf.utils.project_statistics import get_document_statistics, get_tag_statistics, get_dictionary_statistics
 from twf.views.views_base import TWFView
+
+logger = logging.getLogger(__name__)
 
 
 class TWFProjectView(LoginRequiredMixin, TWFView):
@@ -76,8 +75,6 @@ class TWFProjectView(LoginRequiredMixin, TWFView):
                 'options': [
                     {'url': reverse('twf:project_tk_export'),
                      'value': 'Request Transkribus Export', 'permission': 'request_transkribus_export'},
-                    {'url': reverse('twf:project_test_export'),
-                     'value': 'Test Export', 'permission': 'test_transkribus_export'},
                     {'url': reverse('twf:project_tk_structure'),
                      'value': 'Extract Transkribus Export', 'permission': 'extract_transkribus_export'},
                     {'url': reverse('twf:project_copy'),
