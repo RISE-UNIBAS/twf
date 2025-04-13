@@ -13,27 +13,3 @@
         {% endfor %}
     {% endif %}. The project was last modified <strong>{{ project.modified_at|timesince }} ago</strong>.
 {% endblock %}
-
-{% block number_1 %}
-    {{ project.documents.count }}
-{% endblock %}
-
-{% block number_1_label %}
-    Documents
-{% endblock %}
-
-{% block number_2 %}
-    {{ doc_stats.total_pages }}
-{% endblock %}
-
-{% block number_2_label %}
-    Pages
-{% endblock %}
-
-{% block number_3 %}
-    {{ project.members.count|add:1 }}
-{% endblock %}
-
-{% block number_3_label %}
-    Users
-{% endblock %}

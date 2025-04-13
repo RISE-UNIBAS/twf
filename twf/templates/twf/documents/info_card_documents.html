@@ -6,27 +6,3 @@
     imported during project setup. Documents serve as the main unit of the project, each consisting 
     of individual pages for detailed exploration.
 {% endblock %}
-
-{% block number_1 %}
-    {{ total_documents }}
-{% endblock %}
-
-{% block number_1_label %}
-    Documents
-{% endblock %}
-
-{% block number_2 %}
-    {{ avg_pages_per_document|floatformat:2 }}
-{% endblock %}
-
-{% block number_2_label %}
-    Average number of pages
-{% endblock %}
-
-{% block number_3 %}
-    {{ ignored_documents_count }} ({{ ignored_documents_percentage|floatformat:2 }}%)
-{% endblock %}
-
-{% block number_3_label %}
-    Ignored Documents
-{% endblock %}

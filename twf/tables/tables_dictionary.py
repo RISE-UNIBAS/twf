@@ -40,7 +40,6 @@ class DictionaryTable(tables.Table):
         )
 
     def render_options(self, record):
-        from django.urls import reverse
         
         return format_html(
             '{} {}',
@@ -60,8 +59,20 @@ class DictionaryTable(tables.Table):
 class DictionaryAddTable(DictionaryTable):
     """Table for displaying dictionaries to add to a project."""
 
-    options = tables.TemplateColumn(template_name='twf/tables/dictionary_table_add_options.html',
-                                    verbose_name="Options", orderable=False, attrs={"td": {"width": "15%"}})
+    class Meta:
+        model = Dictionary
+        fields = ("label", "type")
+        attrs = {"class": "table table-striped table-hover table-sm"}
+
+    def render_options(self, record):
+        return format_html(
+            '{}',
+            format_html(
+                '<a href="{}" class="btn btn-sm btn-dark me-1" title="Add">'
+                '<i class="fa fa-plus"></i></a>',
+                reverse('twf:dictionaries_add_to_project', args=[record.pk])
+            )
+        )
 
 
 

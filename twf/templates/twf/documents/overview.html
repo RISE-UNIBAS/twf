@@ -1,29 +1,237 @@
 {% extends 'twf/base/base.html' %}
 
+{% block page_title %}
+    <h1>Documents Overview</h1>
+{% endblock %}
+
 {% block content %}
-
     {% include 'twf/documents/info_card_documents.html' %}
-     <div class="row">
-
-        <!-- Metadata Keys Card -->
-        <div class="col-12 mb-3">
-            <div class="card border-secondary">
-                <div class="card-header bg-secondary text-white">
-                    <h5 class="mb-0">Present Metadata Keys in Document Metadata</h5>
+    
+    <div class="row mt-3">
+        <!-- Document Content Section -->
+        <div class="col-md-8">
+            <!-- Document Stats -->
+            <div class="card mb-4">
+                <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0">Document Statistics</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="border-bottom pb-2 mb-3">General</h6>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>Total Documents:</span>
+                                <span class="fw-bold">{{ doc_stats.total_documents|default:"0" }}</span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>Total Pages:</span>
+                                <span class="fw-bold">{{ doc_stats.total_pages|default:"0" }}</span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>Avg. Pages/Document:</span>
+                                <span class="fw-bold">{{ doc_stats.average_pages_per_document.num_pages__avg|floatformat:1|default:"0.0" }}</span>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <span>Ignored Pages:</span>
+                                <span class="fw-bold">{{ doc_stats.ignored_pages|default:"0" }} ({{ doc_stats.ignored_percentage|floatformat:1|default:"0.0" }}%)</span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="border-bottom pb-2 mb-3">Document Status</h6>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>Completed:</span>
+                                <span class="fw-bold">{{ doc_stats.completed_documents|default:"0" }}</span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>In Progress:</span>
+                                <span class="fw-bold">{{ doc_stats.in_progress_documents|default:"0" }}</span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-3">
+                                <span>Parked:</span>
+                                <span class="fw-bold">{{ doc_stats.parked_documents|default:"0" }}</span>
+                            </div>
+                            
+                            {% if doc_stats.total_documents > 0 %}
+                            <div class="progress mt-2" style="height: 25px">
+                                <div class="progress-bar bg-success" 
+                                     style="width: {% if doc_stats.total_documents > 0 %}{{ doc_stats.completed_documents|divisibleby:doc_stats.total_documents|floatformat:1 }}{% else %}0{% endif %}%" 
+                                     title="Completed">
+                                    {{ doc_stats.completed_documents|default:"0" }}
+                                </div>
+                                <div class="progress-bar bg-warning" 
+                                     style="width: {% if doc_stats.total_documents > 0 %}{{ doc_stats.in_progress_documents|divisibleby:doc_stats.total_documents|floatformat:1 }}{% else %}0{% endif %}%" 
+                                     title="In Progress">
+                                    {{ doc_stats.in_progress_documents|default:"0" }}
+                                </div>
+                                <div class="progress-bar bg-secondary" 
+                                     style="width: {% if doc_stats.total_documents > 0 %}{{ doc_stats.parked_documents|divisibleby:doc_stats.total_documents|floatformat:1 }}{% else %}0{% endif %}%" 
+                                     title="Parked">
+                                    {{ doc_stats.parked_documents|default:"0" }}
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Tag Stats -->
+            <div class="card mb-4">
+                <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0">Tag Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="border-bottom pb-2 mb-3">Tag Statistics</h6>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>Total Tags:</span>
+                                <span class="fw-bold">{{ tag_stats.total_tags|default:"0" }}</span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>Tags per Page:</span>
+                                <span class="fw-bold">{{ tag_stats.tags_per_page|default:"0" }}</span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>Open Tags:</span>
+                                <span class="fw-bold">{{ tag_stats.open_tags|default:"0" }}</span>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <span>Resolved Tags:</span>
+                                <span class="fw-bold">{{ tag_stats.resolved_tags|default:"0" }}</span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="border-bottom pb-2 mb-3">Tag Distribution</h6>
+                            {% if tag_stats.tag_types %}
+                                {% for tag_type in tag_stats.tag_types %}
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span>{{ tag_type.variation_type }}:</span>
+                                    <span class="fw-bold">{{ tag_type.count }}</span>
+                                </div>
+                                {% endfor %}
+                            {% else %}
+                                <p class="text-muted">No tag type information available.</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Metadata Keys Card -->
+            <div class="card mb-4">
+                <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0">Present Metadata Keys in Document Metadata</h5>
                 </div>
                 <div class="card-body">
                     {% if metadata_keys %}
-                        <ul>
+                        <div class="d-flex justify-content-between mb-3">
+                            <span>Total Keys:</span>
+                            <span class="fw-bold">{{ metadata_keys|length }}</span>
+                        </div>
+                        <div class="row">
                             {% for key in metadata_keys %}
-                                <li>{{ key }}</li>
+                                <div class="col-lg-4 col-md-6 mb-2">
+                                    <div class="d-flex align-items-center">
+                                        <i class="fa fa-key text-secondary me-2"></i>
+                                        <span>{{ key }}</span>
+                                    </div>
+                                </div>
                             {% endfor %}
-                        </ul>
+                        </div>
                     {% else %}
                         <p>No metadata keys available.</p>
                     {% endif %}
                 </div>
             </div>
         </div>
+        
+        <!-- Document Actions -->
+        <div class="col-md-4">
+            <!-- Quick Actions -->
+            <div class="card mb-4">
+                <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0">Document Actions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'twf:documents_browse' %}" class="btn btn-outline-primary">
+                            <i class="fa fa-list me-2"></i> Browse Documents
+                        </a>
+                        <a href="{% url 'twf:documents_search' %}" class="btn btn-outline-info">
+                            <i class="fa fa-search me-2"></i> Search Documents
+                        </a>
+                        <a href="{% url 'twf:name_documents' %}" class="btn btn-outline-success">
+                            <i class="fa fa-font me-2"></i> Name Documents
+                        </a>
+                        <a href="{% url 'twf:documents_review' %}" class="btn btn-outline-warning">
+                            <i class="fa fa-check-square me-2"></i> Review Documents
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Recent Documents -->
+            {% if recent_documents %}
+            <div class="card mb-4">
+                <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0">Recent Documents</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="list-group list-group-flush">
+                        {% for doc in recent_documents %}
+                        <a href="{% url 'twf:view_document' doc.id %}" class="list-group-item list-group-item-action">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h6 class="mb-1 text-truncate">{{ doc.title|default:"Untitled Document" }}</h6>
+                                <small class="text-muted">{{ doc.created_at|timesince }}</small>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <small>
+                                    <span class="badge {% if doc.status == 'completed' %}bg-success{% elif doc.is_parked %}bg-secondary{% else %}bg-warning{% endif %}">
+                                        {% if doc.status == 'completed' %}Completed{% elif doc.is_parked %}Parked{% else %}In Progress{% endif %}
+                                    </span>
+                                </small>
+                                <small class="text-muted">{{ doc.pages.count }} pages</small>
+                            </div>
+                        </a>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            
+            <!-- Document Sample -->
+            {% if sample_document %}
+            <div class="card mb-4">
+                <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0">Sample Document Preview</h5>
+                </div>
+                <div class="card-body">
+                    <h6 class="mb-2">{{ sample_document.title|default:"Untitled Document" }}</h6>
+                    <p class="small text-muted mb-3">
+                        {{ sample_document.pages.count }} pages | 
+                        Created: {{ sample_document.created_at|date:"M d, Y" }}
+                    </p>
+                    
+                    {% if sample_document.pages.exists %}
+                        {% with first_page=sample_document.pages.first %}
+                            {% if first_page.image %}
+                                <div class="text-center mb-3">
+                                    <img src="{{ first_page.image.url }}" alt="Sample page" class="img-fluid img-thumbnail" style="max-height: 200px;">
+                                </div>
+                            {% endif %}
+                            <div class="d-grid">
+                                <a href="{% url 'twf:view_document' sample_document.id %}" class="btn btn-sm btn-outline-primary">
+                                    View Complete Document
+                                </a>
+                            </div>
+                        {% endwith %}
+                    {% else %}
+                        <p class="text-muted">This document has no pages.</p>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
     </div>
-
 {% endblock %}

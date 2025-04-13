@@ -187,8 +187,13 @@ class TWFDictionaryAddView(SingleTableView, FilterView, TWFDictionaryView):
 
     def get_queryset(self):
         """Get the queryset of dictionaries not already in the project."""
-        selected_dictionaries = self.get_project().selected_dictionaries.all()
-        queryset = Dictionary.objects.all().exclude(pk__in=[d.pk for d in selected_dictionaries])
+        project = self.get_project()
+        
+        # Get the IDs of dictionaries already in the project more efficiently
+        selected_dictionary_ids = project.selected_dictionaries.values_list('id', flat=True)
+        
+        # Get all dictionaries except those already in the project
+        queryset = Dictionary.objects.exclude(id__in=selected_dictionary_ids)
         
         # Initialize the filter
         self.filterset = self.filterset_class(
@@ -203,22 +208,15 @@ class TWFDictionaryAddView(SingleTableView, FilterView, TWFDictionaryView):
 
     def get(self, request, *args, **kwargs):
         """Handle the GET request with proper filter handling."""
-        # Set up initial queryset
-        selected_dictionaries = self.get_project().selected_dictionaries.all()
-        queryset = Dictionary.objects.all().exclude(pk__in=[d.pk for d in selected_dictionaries])
+        # Get the queryset using the existing method to avoid code duplication
+        queryset = self.get_queryset()
         
-        # Initialize the filter
-        self.filterset = self.filterset_class(
-            request.GET or None,
-            queryset=queryset
-        )
+        # Set object_list to the queryset 
+        self.object_list = queryset
         
-        # Set object_list either to all items or filtered items
-        if request.GET and self.filterset.is_bound:
-            self.object_list = self.filterset.qs
-        else:
-            self.object_list = queryset
-            
+        # Log the count for debugging
+        logger.debug(f"Available dictionaries count: {queryset.count()}")
+        
         # Get context and render response
         context = self.get_context_data()
         return self.render_to_response(context)

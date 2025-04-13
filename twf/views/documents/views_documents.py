@@ -94,30 +94,79 @@ class TWFDocumentsOverviewView(TWFDocumentView):
 
         project = self.get_project()
         documents = project.documents.all()
-
-        # Total number of documents
+        
+        # Document statistics
         total_documents = documents.count()
-
-        # Average number of pages per document
-        avg_pages_per_document = documents.annotate(num_pages=Count('pages')).aggregate(Avg('num_pages'))[
-                                     'num_pages__avg'] or 0
-
-        # Number and percentage of ignored documents
+        total_pages = sum(doc.pages.count() for doc in documents)
+        
+        # Average pages per document
+        avg_pages = documents.annotate(num_pages=Count('pages')).aggregate(Avg('num_pages'))
+        
+        # Status counts
+        completed_documents = documents.filter(status='completed').count()
+        in_progress_documents = documents.filter(status='in_progress').count()
+        parked_documents = documents.filter(is_parked=True).count()
+        
+        # Ignored documents statistics
+        ignored_pages = sum(doc.pages.filter(is_ignored=True).count() for doc in documents)
+        ignored_percentage = (ignored_pages / total_pages * 100) if total_pages > 0 else 0
         ignored_documents_count = documents.filter(is_parked=True).count()
         ignored_documents_percentage = (ignored_documents_count / total_documents * 100) if total_documents > 0 else 0
 
-        # Gather metadata keys if metadata is available
+        # Gather metadata keys from all documents
         metadata_keys = set()
         for document in documents:
             if isinstance(document.metadata, dict):
                 metadata_keys.update(document.metadata.keys())
+        
+        # Tag statistics
+        from twf.models import PageTag
+        project_tags = PageTag.objects.filter(page__document__project=project)
+        total_tags = project_tags.count()
+        open_tags = project_tags.filter(is_parked=False).count()
+        resolved_tags = project_tags.filter(is_parked=True).count()
+        
+        # Calculate tags per page
+        tags_per_page = total_tags / total_pages if total_pages > 0 else 0
+        
+        # Get tag types distribution
+        tag_types = project_tags.values('variation_type').annotate(count=Count('id')).order_by('-count')[:5]
+        
+        # Get a sample document for preview (most recently created)
+        sample_document = documents.order_by('-created_at').first()
+        
+        # Get recent documents (5 most recently modified)
+        recent_documents = documents.order_by('-modified_at')[:5]
+        
+        # Create document statistics dictionary
+        doc_stats = {
+            'total_documents': total_documents,
+            'total_pages': total_pages,
+            'average_pages_per_document': avg_pages,
+            'completed_documents': completed_documents,
+            'in_progress_documents': in_progress_documents,
+            'parked_documents': parked_documents,
+            'ignored_pages': ignored_pages,
+            'ignored_percentage': ignored_percentage,
+            'ignored_documents': ignored_documents_count,
+            'ignored_documents_percentage': ignored_documents_percentage,
+        }
+        
+        # Create tag statistics dictionary
+        tag_stats = {
+            'total_tags': total_tags,
+            'open_tags': open_tags,
+            'resolved_tags': resolved_tags,
+            'tags_per_page': tags_per_page,
+            'tag_types': tag_types,
+        }
 
         context.update({
-            'total_documents': total_documents,
-            'avg_pages_per_document': avg_pages_per_document,
-            'ignored_documents_count': ignored_documents_count,
-            'ignored_documents_percentage': ignored_documents_percentage,
+            'doc_stats': doc_stats,
+            'tag_stats': tag_stats,
             'metadata_keys': sorted(metadata_keys),
+            'sample_document': sample_document,
+            'recent_documents': recent_documents,
         })
 
         return context
