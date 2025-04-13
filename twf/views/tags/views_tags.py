@@ -41,7 +41,6 @@ class TWFTagsView(LoginRequiredMixin, TWFView):
                 'options': [
                     {'url': reverse('twf:tags_overview'), 'value': 'Overview'},
                     {'url': reverse('twf:tags_all'), 'value': 'All Tags'},
-                    {'url': reverse('twf:tags_settings'), 'value': 'Settings'},
                 ]
             },
             {
@@ -214,22 +213,6 @@ class TWFTagsOverviewView(TWFTagsView):
             'average_grouped_percentage': average_grouped_percentage
         }
 
-        return context
-
-
-class TWFTagsSettingsView(TWFTagsView):
-    """View for the tag settings."""
-    template_name = 'twf/tags/settings.html'
-    page_title = 'Tag Settings'
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        project = self.get_project()
-        task_configurations = project.get_task_configuration("tag_types")
-        context['task_configurations'] = task_configurations
-        context['tag_types'] = get_all_tag_types(project)
-        context['excluded_types'] = get_excluded_types(project)
-        context['date_types'] = get_date_types(project)
         return context
 
 

@@ -66,7 +66,7 @@ from twf.views.project.views_project_ai import TWFProjectAIQueryView, TWFProject
     TWFProjectClaudeQueryView, TWFProjectMistralQueryView
 from twf.views.tags.views_tags import TWFProjectTagsView, TWFProjectTagsOpenView, \
     TWFProjectTagsParkedView, TWFProjectTagsResolvedView, TWFProjectTagsIgnoredView, TWFTagsDatesGroupView, \
-    TWFTagsGroupView, TWFTagsOverviewView, TWFTagsExtractView, TWFTagsSettingsView
+    TWFTagsGroupView, TWFTagsOverviewView, TWFTagsExtractView
 from twf.workflows.collection_workflows import start_review_collection_workflow
 from twf.workflows.document_workflows import start_review_document_workflow
 
@@ -178,7 +178,6 @@ urlpatterns = [
     path('tags/all/', TWFProjectTagsView.as_view(template_name='twf/tags/all_tags.html',
                                                  page_title='All Tags'),
          name='tags_all'),
-    path('tags/settings/', TWFTagsSettingsView.as_view(), name='tags_settings'),
     path('tags/group/', TWFTagsGroupView.as_view(), name='tags_group'),
     path('tags/dates/', TWFTagsDatesGroupView.as_view(), name='tags_dates'),
     # Tag views
