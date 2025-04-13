@@ -56,6 +56,9 @@ class ProjectCopyBatchForm(BaseBatchForm):
     
     This form provides the interface for creating a copy of an existing project.
     """
+    new_project_name = forms.CharField(label='New Project Name', required=True,
+                                        help_text='Please enter a name for the new project. Must be unique.',
+                                        widget=forms.TextInput(attrs={'style': 'width: 100%;'}))
 
     def __init__(self, *args, **kwargs):
         """
@@ -66,6 +69,8 @@ class ProjectCopyBatchForm(BaseBatchForm):
             **kwargs: Arbitrary keyword arguments.
         """
         super().__init__(*args, **kwargs)
+        # Set the initial value for the new project name
+        self.fields['new_project_name'].initial = f"{self.project.title} (Copy)"
 
     def get_button_label(self):
         """
@@ -83,7 +88,12 @@ class ProjectCopyBatchForm(BaseBatchForm):
         Returns:
             list: A list of form field layouts.
         """
-        return []
+        return [
+            Row(
+                Column('new_project_name', css_class='form-group col-12 mb-3'),
+                css_class='row form-row'
+            )
+        ]
 
 
 class ProjectAIBaseForm(BaseMultiModalAIBatchForm):

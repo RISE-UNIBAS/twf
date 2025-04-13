@@ -71,6 +71,9 @@ class BaseTWFTask(CeleryTask):
         # Export tasks
         "export_data_task": "Export of project data to various formats.",
         "export_to_zenodo_task": "Export of project data to Zenodo repository.",
+
+        # Miscellaneous tasks
+        "copy_project": "Copying of a project to create a new instance.",
     }
 
     def before_start(self, task_id, args, kwargs):
@@ -293,7 +296,13 @@ class BaseTWFTask(CeleryTask):
             except Exception as e:
                 failed_items += 1
                 error_msg = str(e)
+                # Log the error with more detail
                 logger.error(f"Error processing item with {client_name}: {error_msg}")
+                
+                # Add error details to the task text
+                self.twf_task.text += f"Error processing item {self.processed_items+1}: {error_msg}\n"
+                
+                # Track the failure in the progress indicators
                 self.advance_task(
                     text=f"Error processing item {self.processed_items+1}/{total_items}",
                     status="failure"
@@ -302,15 +311,70 @@ class BaseTWFTask(CeleryTask):
         # Update task with overall summary
         avg_time = total_time / successful_items if successful_items else 0
         
-        # End task with detailed statistics
-        self.end_task(
-            status="SUCCESS",
-            client_name=client_name,
-            model=self.credentials['default_model'],
-            total_time=total_time,
-            average_time=avg_time,
-            failed_items=failed_items
-        )
+        # Record the final status in the database task
+        if self.twf_task:
+            final_status = "SUCCESS" if failed_items == 0 else "FAILURE"
+            end_time = timezone.now()
+            duration = (end_time - self.start_datetime).total_seconds()
+            
+            # Update database record with results
+            self.twf_task.status = final_status
+            self.twf_task.end_time = end_time
+            
+            # Create metadata for results
+            meta = {
+                'current': 100, 
+                'total': 100, 
+                'text': 'Task finished',
+                'duration': duration,
+                'processed_items': self.processed_items,
+                'successful_items': successful_items,
+                'failed_items': failed_items,
+                'client_name': client_name,
+                'model': self.credentials['default_model'],
+                'total_time': total_time,
+                'average_time': avg_time
+            }
+            self.twf_task.meta = meta
+            
+            # Add task summary to text
+            summary = f"\n---- TASK SUMMARY ----\n"
+            summary += f"Status: {final_status}\n"
+            summary += f"Duration: {duration:.2f} seconds"
+            
+            if duration > 60:
+                minutes = int(duration // 60)
+                seconds = int(duration % 60)
+                summary += f" ({minutes}m {seconds}s)"
+            summary += "\n"
+            
+            summary += f"Total items: {self.total_items}\n"
+            summary += f"Processed items: {self.processed_items}\n"
+            summary += f"Successfully processed: {successful_items}\n"
+            
+            if failed_items > 0:
+                summary += f"Failed to process: {failed_items}\n"
+            
+            if self.processed_items > 0:
+                summary += f"Average processing time per item: {avg_time:.2f} seconds\n"
+                
+            summary += "----------------------\n"
+            self.twf_task.text += summary
+            
+            # Save the database task
+            self.twf_task.save()
+            
+            # Log completion
+            log_msg = f"Task {self.name} (ID: {self.task_id}) completed with status {final_status}"
+            if final_status == "SUCCESS":
+                logger.info(log_msg)
+            else:
+                logger.error(f"{log_msg}: {failed_items} failures")
+        
+        # For Celery, if there were failures, raise an exception
+        if failed_items > 0:
+            # We raise a standard Exception that Celery can serialize properly
+            raise Exception(f"{failed_items} items failed to process")
 
     def process_single_ai_request(self, items, client_name, prompt, role_description, metadata_field, prompt_mode="text_only"):
         """
@@ -421,16 +485,54 @@ class BaseTWFTask(CeleryTask):
             # Images-only should NOT include text context
             self.twf_task.text += "Images-only mode: Using only images without text context.\n"
         
-        # Call the API
-        response, elapsed_time = self.client.prompt(model=self.credentials['default_model'],
-                                                   prompt=full_prompt)
-        response_dict = response.to_dict()
-
-        # Clear image resources from client after use
-        if hasattr(self.client, 'clear_image_resources'):
-            self.client.clear_image_resources()
-
-        self.end_task(ai_result=response_dict)
+        # Call the API with proper error handling
+        try:
+            response, elapsed_time = self.client.prompt(model=self.credentials['default_model'],
+                                                       prompt=full_prompt)
+            response_dict = response.to_dict()
+            
+            # Clear image resources from client after use
+            if hasattr(self.client, 'clear_image_resources'):
+                self.client.clear_image_resources()
+                
+            # Record success in database but don't end the Celery task with end_task
+            if self.twf_task:
+                self.twf_task.status = "SUCCESS"
+                self.twf_task.end_time = timezone.now()
+                self.twf_task.meta = {'ai_result': response_dict}
+                self.twf_task.text += f"\n---- TASK SUMMARY ----\n"
+                self.twf_task.text += f"Status: SUCCESS\n"
+                self.twf_task.text += f"Duration: {(timezone.now() - self.start_datetime).total_seconds():.2f} seconds\n"
+                self.twf_task.text += "----------------------\n"
+                self.twf_task.save()
+            
+            # Let Celery handle the task success
+            return response_dict
+            
+        except Exception as e:
+            # Handle any exceptions that occur during API call
+            error_msg = str(e)
+            logger.error(f"Error in AI request: {error_msg}")
+            
+            # Record the error in the database task
+            if self.twf_task:
+                self.twf_task.text += f"Error: {error_msg}\n"
+                self.twf_task.status = "FAILURE"
+                self.twf_task.end_time = timezone.now()
+                self.twf_task.title = f"Failed: {error_msg[:50]}..." if len(error_msg) > 50 else f"Failed: {error_msg}"
+                self.twf_task.text += f"\n---- TASK SUMMARY ----\n"
+                self.twf_task.text += f"Status: FAILURE\n"
+                self.twf_task.text += f"Duration: {(timezone.now() - self.start_datetime).total_seconds():.2f} seconds\n"
+                self.twf_task.text += f"Error: {error_msg}\n"
+                self.twf_task.text += "----------------------\n"
+                self.twf_task.save()
+            
+            # Clean up resources even in case of error
+            if hasattr(self.client, 'clear_image_resources'):
+                self.client.clear_image_resources()
+            
+            # Let Celery handle the task failure by re-raising the exception
+            raise
 
     def end_task(self, status="SUCCESS", error_msg=None, **kwargs):
         """Mark the task as completed or failed with detailed documentation."""
@@ -576,6 +678,10 @@ class BaseTWFTask(CeleryTask):
             tuple: (response_dict, elapsed_time) containing the parsed response
                   from the AI model and the time taken to receive it
                   
+        Raises:
+            Exception: If there's an error communicating with the AI provider or 
+                      processing the response
+                      
         Related Methods:
             - For multimodal processing, see process_single_ai_request instead
             - For batch processing, see process_ai_request
@@ -586,9 +692,14 @@ class BaseTWFTask(CeleryTask):
             - Does not support images or other media types
             - Returns the response in a standardized dictionary format
         """
-        context = item.get_text()
-        prompt = prompt + "\n\n" + "Context:\n" + context
-        response, elapsed_time = self.client.prompt(model=self.credentials['default_model'],
-                                                    prompt=prompt)
-        response_dict = response.to_dict()
-        return response_dict, elapsed_time
+        try:
+            context = item.get_text()
+            prompt = prompt + "\n\n" + "Context:\n" + context
+            response, elapsed_time = self.client.prompt(model=self.credentials['default_model'],
+                                                      prompt=prompt)
+            response_dict = response.to_dict()
+            return response_dict, elapsed_time
+        except Exception as e:
+            # Reraise the exception to be handled by the calling function
+            logger.error(f"Error in prompt_client: {str(e)}")
+            raise
