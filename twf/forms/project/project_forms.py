@@ -69,24 +69,39 @@ class PasswordInputRetain(forms.PasswordInput):
 class GeneralSettingsForm(forms.ModelForm):
     """Form for creating and updating general settings.
 
-    General settings include the project title, description, owner, members, and selected dictionaries."""
+    General settings include the project title, description, owner, members, and selected dictionaries.
+    
+    It enforces the following restrictions:
+    1. Project owners cannot change ownership to another user
+    2. Project members cannot remove themselves from the project
+    """
 
     class Meta:
         model = Project
-        fields = ['title', 'description', 'owner', 'members', 'selected_dictionaries']
+        fields = ['title', 'description', 'owner', 'members']
         widgets = {
             'description': forms.Textarea(attrs={'rows': 5}),
             'owner': Select2Widget(attrs={'style': 'width: 100%;'}),
             'members': Select2MultipleWidget(attrs={'style': 'width: 100%;'}),
-            'selected_dictionaries': Select2MultipleWidget(attrs={'style': 'width: 100%;'}),
         }
 
     def __init__(self, *args, **kwargs):
+        # Get the current user from kwargs
+        self.current_user = kwargs.pop('current_user', None)
+        
         super().__init__(*args, **kwargs)
         self.helper = FormHelper()
         self.helper.form_method = 'post'
         self.helper.form_class = 'form form-control'
-
+        
+        instance = kwargs.get('instance')
+        
+        # If the current user is the owner, disable the owner field
+        if self.current_user and instance and hasattr(instance, 'owner') and hasattr(self.current_user, 'profile'):
+            if instance.owner == self.current_user.profile:
+                self.fields['owner'].disabled = True
+                self.fields['owner'].help_text = "You cannot change ownership as the current owner."
+        
         self.helper.layout = Layout(
             Row(
                 Column('title', css_class='form-group col-12 mb-3'),
@@ -101,15 +116,40 @@ class GeneralSettingsForm(forms.ModelForm):
                 Column('description', css_class='form-group col-8 mb-3'),
                 css_class='row form-row'
             ),
-            Row(
-                Column('selected_dictionaries', css_class='form-group col-12 mb-3'),
-                css_class='row form-row'
-            ),
             Div(
                 Submit('submit', 'Save Settings', css_class='btn btn-dark'),
                 css_class='text-end pt-3'
             )
         )
+        
+    def clean(self):
+        """
+        Validate that:
+        1. The current user is not changing ownership if they are the owner
+        2. The current user is not removing themselves from members if they are a member
+        """
+        cleaned_data = super().clean()
+        
+        if not self.current_user or not hasattr(self.current_user, 'profile'):
+            return cleaned_data
+            
+        # Check if owner is being changed by the current owner
+        if self.instance and self.instance.owner == self.current_user.profile:
+            # Ensure owner hasn't been changed
+            if 'owner' in cleaned_data and cleaned_data['owner'] != self.current_user.profile:
+                self.add_error('owner', "As the current owner, you cannot transfer ownership to another user.")
+        
+        # Check if the current user is removing themselves from members
+        if self.instance and self.current_user.profile in self.instance.members.all():
+            members_after = cleaned_data.get('members', [])
+            if self.current_user.profile not in members_after:
+                # Add the current user back to the members list
+                members_list = list(members_after)
+                members_list.append(self.current_user.profile)
+                cleaned_data['members'] = members_list
+                self.add_error('members', "You cannot remove yourself from the project members.")
+        
+        return cleaned_data
 
 
 class CredentialsForm(forms.ModelForm):

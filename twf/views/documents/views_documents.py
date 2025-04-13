@@ -65,8 +65,6 @@ class TWFDocumentView(LoginRequiredMixin, TWFView):
                 'options': [
                     {'url': reverse('twf:documents_review'),
                      'value': 'Review Documents', 'permission': 'document_task_review'},
-                    {'url': reverse('twf:documents_create'),
-                     'value': 'Manual Document Creation', 'permission': 'document_create'},
                 ]
             },
 
@@ -252,30 +250,6 @@ class TWFDocumentsSearchView(FormView, TWFDocumentView):
 
     def get_context_data(self, **kwargs):
         """Get the context data for the view."""
-        context = super().get_context_data(**kwargs)
-        return context
-
-
-class TWFDocumentCreateView(FormView, TWFDocumentView):
-    """View for creating a document."""
-    template_name = 'twf/documents/create_document.html'
-    page_title = 'Create Document'
-    form_class = DocumentForm
-    success_url = reverse_lazy('twf:documents_overview')
-    object = None
-
-    def form_valid(self, form):
-        # Save the form
-        self.object = form.save(commit=False)
-        self.object.project_id = self.request.session.get('project_id')
-        self.object.save(current_user=self.request.user)
-
-        # Add a success message
-        messages.success(self.request, 'Document has been created successfully.')
-        # Redirect to the success URL
-        return super().form_valid(form)
-
-    def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         return context
 

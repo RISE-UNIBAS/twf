@@ -26,7 +26,7 @@ from twf.views.dictionaries.views_crud import remove_dictionary_from_project, ad
     delete_variation, delete_dictionary_entry
 from twf.views.documents.views_crud import update_document_metadata, delete_document_metadata
 from twf.views.documents.views_documents import TWFDocumentsOverviewView, TWFDocumentsBrowseView, \
-    TWFDocumentCreateView, TWFDocumentNameView, TWFDocumentDetailView, TWFDocumentReviewView, TWFDocumentsSearchView
+    TWFDocumentNameView, TWFDocumentDetailView, TWFDocumentReviewView, TWFDocumentsSearchView
 from twf.views.documents.views_documents_ai import TWFDocumentOpenAIBatchView, \
     TWFDocumentGeminiBatchView, TWFDocumentClaudeBatchView, TWFDocumentOpenAIPageBatchView, \
     TWFDocumentGeminiPageBatchView, TWFDocumentClaudePageBatchView, TWFDocumentMistralBatchView, \
@@ -153,7 +153,6 @@ urlpatterns = [
     path('documents/', TWFDocumentsOverviewView.as_view(), name='documents_overview'),
     path('documents/browse/', TWFDocumentsBrowseView.as_view(), name='documents_browse'),
     path('documents/search/', TWFDocumentsSearchView.as_view(), name='documents_search'),
-    path('documents/create/', TWFDocumentCreateView.as_view(), name='documents_create'),
     path('documents/review/', TWFDocumentReviewView.as_view(), name='documents_review'),
     path('documents/name/', TWFDocumentNameView.as_view(), name='name_documents'),
     path('document/<int:pk>/', TWFDocumentDetailView.as_view(), name='view_document'),

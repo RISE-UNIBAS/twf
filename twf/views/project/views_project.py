@@ -426,6 +426,7 @@ class TWFProjectGeneralSettingsView(FormView, TWFProjectView):
         """Get the form kwargs."""
         kwargs = super().get_form_kwargs()
         kwargs['instance'] = self.get_project()
+        kwargs['current_user'] = self.request.user
         return kwargs
 
     def form_valid(self, form):
