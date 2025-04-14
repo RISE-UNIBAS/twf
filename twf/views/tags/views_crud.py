@@ -50,3 +50,17 @@ def ungroup_tag(request, pk):
         return HttpResponseRedirect(referer)
 
     return redirect('twf:project_group_tags', pk=tag.page.document.project.pk)
+
+
+def delete_tag(request, pk):
+    """Deletes a tag."""
+    tag = get_object_or_404(PageTag, pk=pk)
+    tag.delete()
+    messages.success(request, f'Tag {pk} has been deleted.')
+
+    # Get the HTTP referer URL
+    referer = request.META.get('HTTP_REFERER')
+    if referer:
+        return HttpResponseRedirect(referer)
+
+    return redirect('twf:project_group_tags', pk=tag.page.document.project.pk)

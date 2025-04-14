@@ -45,7 +45,7 @@ from twf.views.collections.views_collections import TWFCollectionsReviewView, TW
     TWFCollectionsCreateView, TWFCollectionsDetailView, TWFCollectionsEditView, TWFCollectionsAddDocumentView, \
     TWFCollectionItemEditView, TWFCollectionItemView, TWFCollectionListView
 from twf.views.views_base import help_content
-from twf.views.tags.views_crud import park_tag, unpark_tag, ungroup_tag
+from twf.views.tags.views_crud import park_tag, unpark_tag, ungroup_tag, delete_tag
 from twf.views.dictionaries.views_dictionaries import TWFDictionaryOverviewView, TWFDictionaryDictionaryView, \
     TWFDictionaryDictionaryEditView, TWFDictionaryDictionaryEntryEditView, TWFDictionaryDictionaryEntryView, \
     TWFDictionaryNormDataView, TWFDictionaryCreateView, TWFDictionaryDictionariesView, \
@@ -66,7 +66,7 @@ from twf.views.project.views_project_ai import TWFProjectAIQueryView, TWFProject
     TWFProjectClaudeQueryView, TWFProjectMistralQueryView
 from twf.views.tags.views_tags import TWFProjectTagsView, TWFProjectTagsOpenView, \
     TWFProjectTagsParkedView, TWFProjectTagsResolvedView, TWFProjectTagsIgnoredView, TWFTagsDatesGroupView, \
-    TWFTagsGroupView, TWFTagsOverviewView, TWFTagsExtractView
+    TWFTagsGroupView, TWFTagsOverviewView, TWFTagsExtractView, TWFTagsAssignTagView
 from twf.workflows.collection_workflows import start_review_collection_workflow
 from twf.workflows.document_workflows import start_review_document_workflow
 
@@ -178,6 +178,7 @@ urlpatterns = [
                                                  page_title='All Tags'),
          name='tags_all'),
     path('tags/group/', TWFTagsGroupView.as_view(), name='tags_group'),
+    path('tags/assign/<int:pk>/', TWFTagsAssignTagView.as_view(), name='tags_assign'),
     path('tags/dates/', TWFTagsDatesGroupView.as_view(), name='tags_dates'),
     # Tag views
     path('tags/view/parked/', TWFProjectTagsParkedView.as_view(), name='tags_view_parked'),
@@ -188,6 +189,8 @@ urlpatterns = [
     path('tags/park/<int:pk>/', park_tag, name='tags_park'),
     path('tags/unpark/<int:pk>/', unpark_tag, name='tags_unpark'),
     path('tags/ungroup/<int:pk>/', ungroup_tag, name='tags_ungroup'),
+    path('tags/delete/<int:pk>/', delete_tag, name='tags_delete'),
+
 
     #############################
     # DICTIONARIES

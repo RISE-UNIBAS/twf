@@ -1,6 +1,7 @@
 # pylint: disable=too-few-public-methods
 """Table classes for displaying tags."""
 import django_tables2 as tables
+from django.urls import reverse_lazy
 from django.utils.html import format_html
 from twf.models import PageTag
 
@@ -8,15 +9,14 @@ from twf.models import PageTag
 class TagTable(tables.Table):
     variation = tables.Column(verbose_name="Variation", attrs={"td": {"class": "fw-bold"}})
     variation_type = tables.Column(verbose_name="Type")
-
     entry = tables.Column(accessor="dictionary_entry", verbose_name="Entry", empty_values=())
-
     options = tables.Column(empty_values=(), verbose_name="Options", orderable=False)
 
     class Meta:
         model = PageTag
         fields = ("variation", "variation_type", "entry")
-        attrs = {"class": "table table-striped table-hover table-sm"}
+        template_name = "django_tables2/bootstrap4.html"
+        attrs = {"class": "table table-striped table-hover"}
 
     def render_entry(self, value, record):
         date_types = self.get_date_types()
@@ -32,35 +32,31 @@ class TagTable(tables.Table):
     def render_options(self, record):
 
         return format_html(
-            '{} {} {} {} {}',
+            '{} {} {} {}',
             format_html(
-                '<a href="/tags/{}/edit" class="btn btn-sm btn-dark me-1"'
-                '  data-bs-toggle="tooltip" data-bs-placement="bottom" title="Edit tag">'
-                '<i class="fa fa-pen"></i></a>',
-                record.pk
-            ),
-            format_html(
-                '<a href="/tags/{}/edit" class="btn btn-sm btn-dark me-1"'
+                '<a href="{}" class="btn btn-sm btn-dark me-1"'
                 '  data-bs-toggle="tooltip" data-bs-placement="bottom" title="Park tag (put aside for later)">'
                 '<i class="fa fa-box-archive"></i></a>',
-                record.pk
+                reverse_lazy("twf:tags_park", kwargs={"pk": record.pk})
             ),
             format_html(
-                '<a href="/tags/{}/edit" class="btn btn-sm btn-dark me-1"'
+                '<a href="{}" class="btn btn-sm btn-ext me-1" target="_blank"'
                 '  data-bs-toggle="tooltip" data-bs-placement="bottom" title="View on Transkribus">'
                 '<i class="fa fa-scroll"></i></a>',
-                record.pk
+                record.get_transkribus_url()
             ),
             format_html(
-                '<a href="/tags/{}/edit" class="btn btn-sm btn-dark me-1"'
-                '  data-bs-toggle="tooltip" data-bs-placement="bottom" title="Assign to dictionary">'
+                '<a href="{}" class="btn btn-sm btn-dark me-1"'
+                '  data-bs-toggle="tooltip" data-bs-placement="bottom" title="Assign to dictionary entry">'
                 '<i class="fa fa-hand-point-right"></i></a>',
-                record.pk
+                reverse_lazy("twf:tags_assign", kwargs={"pk": record.pk})
             ),
             format_html(
-                '<a href="/tags/{}/delete" class="btn btn-sm btn-danger"'
+                '<a href="#" class="btn btn-sm btn-danger show-danger-modal"'
+                '  data-message="Are you sure you want to delete this tag?" '
+                '  data-redirect-url="{}" '
                 '  data-bs-toggle="tooltip" data-bs-placement="bottom" title="Delete tag">'
                 '<i class="fa fa-trash"></i></a>',
-                record.pk
+                reverse_lazy("twf:tags_delete", kwargs={"pk": record.pk})
             )
         )

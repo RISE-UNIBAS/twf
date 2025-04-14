@@ -328,6 +328,12 @@ class TWFTagsGroupView(TWFTagsView):
         return context
 
 
+class TWFTagsAssignTagView(TWFTagsView):
+    """View for the tag grouping wizard."""
+    template_name = 'twf/tags/assign.html'
+    page_title = 'Assign Tag'
+
+
 class TWFProjectTagsView(SingleTableMixin, FilterView, TWFTagsView):
     """Base class for all tag views."""
     template_name = 'twf/tags/all_tags.html'
