@@ -8,10 +8,12 @@ Functions:
     - send_welcome_email(user_email, username, temp_password): Sends a welcome email with login details.
     - send_reset_email(user_email, username, temp_password): Sends a password reset email with a temporary password.
 """
+import logging
 
 from django.core.mail import send_mail
 from transkribusWorkflow.settings import DEFAULT_FROM_EMAIL
 
+logger = logging.getLogger(__name__)
 
 def send_welcome_email(user_email, username, temp_password):
     """
@@ -32,8 +34,13 @@ def send_welcome_email(user_email, username, temp_password):
                "Best regards,\n"
                "The TWF Team")
 
-    send_mail(subject, message, DEFAULT_FROM_EMAIL, [user_email])
-
+    try:
+        send_mail(subject, message, DEFAULT_FROM_EMAIL, [user_email], fail_silently=False)
+        return True
+    except Exception as e:
+        # Log the error or handle it as needed
+        logger.error(e)
+        return False
 
 def send_reset_email(user_email, username, temp_password):
     """
@@ -53,4 +60,10 @@ def send_reset_email(user_email, username, temp_password):
                "Best regards,\n"
                "The TWF Team")
 
-    send_mail(subject, message, DEFAULT_FROM_EMAIL, [user_email])
+    try:
+        send_mail(subject, message, DEFAULT_FROM_EMAIL, [user_email])
+        return True
+    except Exception as e:
+        # Log the error or handle it as needed
+        logger.error(e)
+        return False

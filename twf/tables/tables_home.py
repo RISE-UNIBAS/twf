@@ -78,8 +78,8 @@ class UserManagementTable(tables.Table):
     date_joined = tables.DateTimeColumn(format="Y-m-d", verbose_name="Joined")
     last_login = tables.DateTimeColumn(format="Y-m-d", verbose_name="Last Login", default="-")
     status = tables.Column(empty_values=(), verbose_name="Status")
-    owned_projects = tables.Column(empty_values=(), verbose_name="Owns Projects")
-    actions = tables.Column(empty_values=(), verbose_name="Options")
+    owned_projects = tables.Column(empty_values=(), verbose_name="Owns Projects", orderable=False)
+    actions = tables.Column(empty_values=(), verbose_name="Options", orderable=False)
 
     class Meta:
         model = User

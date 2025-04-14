@@ -114,11 +114,17 @@ def reset_password(request, pk):
         
         # Send email with new password
         if user.email:
-            send_reset_email(user.email, user.username, new_password)
-            messages.success(
-                request, 
-                f"Password for '{user.username}' has been reset. A new password has been sent to their email."
-            )
+            sent = send_reset_email(user.email, user.username, new_password)
+            if sent:
+                messages.success(
+                    request,
+                    f"Password for '{user.username}' has been reset. A new password has been sent to their email."
+                )
+            else:
+                messages.error(
+                    request,
+                    f"Password for '{user.username}' has been reset, but there was an error sending the email."
+                )
         else:
             messages.warning(
                 request, 

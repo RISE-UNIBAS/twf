@@ -438,8 +438,11 @@ class TWFManageUsersView(SingleTableView, FilterView, LoginRequiredMixin, FormVi
         user.password = initial_password
         user.save()
 
-        send_welcome_email(user.email, user.username, initial_password)
-        messages.success(self.request, 'User created successfully. Message sent to user.')
+        sent = send_welcome_email(user.email, user.username, initial_password)
+        if not sent:
+            messages.error(self.request, 'User was created, but there was an error sending the email.')
+        else:
+            messages.success(self.request, 'User created successfully. Message sent to user.')
         return super().form_valid(form)
 
     def get_context_data(self, **kwargs):
