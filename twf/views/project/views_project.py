@@ -474,7 +474,7 @@ class TWFProjectTaskSettingsView(FormView, TWFProjectView):
     """View for the project task settings."""
 
     template_name = 'twf/project/settings/settings_tasks.html'
-    page_title = 'Tasks Project Settings'
+    page_title = 'Task Settings'
     form_class = TaskSettingsForm
     success_url = reverse_lazy('twf:project_settings_tasks')
 
