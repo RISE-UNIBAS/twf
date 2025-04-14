@@ -9,7 +9,7 @@
             let text = (data.choices && data.choices[0]?.message?.content) || "No response text.";
 
             let aiResultHTML = `
-                <h2>OpenAI AI Result</h2>
+                <h2>ChatGPT Result</h2>
                 <div class="card mt-3">
                     <div class="card-body">
                         <div class="openai-result">${marked.parse(text)}</div>

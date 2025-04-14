@@ -42,11 +42,11 @@ class TWFProjectAIQueryView(AIFormView, TWFProjectView):
         """
         context = super().get_context_data(**kwargs)
         context['ai_heading'] = self.page_title
-        context['ai_lead'] = 'Use OpenAI models to answer questions about your documents. GPT-4 Vision models support both text and images.'
+        context['ai_lead'] = "Use OpenAI's ChatGPT models to answer questions about your documents."
         context['has_ai_credentials'] = self.has_ai_credentials('openai')
         context['ai_credentials_url'] = reverse_lazy('twf:project_settings_credentials') + '?tab=openai'
         context['supports_multimodal'] = True
-        context['multimodal_info'] = 'Supports text-only, images-only, or text+images modes. Use GPT-4 Vision models for image support.'
+        context['multimodal_info'] = 'The default ChatGPT-4o model supports text-only, image-only, and text+image modes.'
         return context
 
 
