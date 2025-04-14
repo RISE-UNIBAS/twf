@@ -184,12 +184,12 @@ FILE_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024  # 10MB
 
 # Email settings
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
-EMAIL_HOST = "smtp.mailersend.net"
-EMAIL_PORT = 587
+EMAIL_HOST = "smtp.unibas.ch"
+EMAIL_PORT = 25
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = "MS_5KacAT@trial-z3m5jgr6xyxgdpyo.mlsender.net"
-EMAIL_HOST_PASSWORD = "mssp.gAyVOEB.pr9084z1r7xgw63d.uu92zpN"
-DEFAULT_FROM_EMAIL = "no-reply@trial-z3m5jgr6xyxgdpyo.mlsender.net"
+EMAIL_HOST_USER = ""  # Leave blank
+EMAIL_HOST_PASSWORD = ""  # Leave blank
+DEFAULT_FROM_EMAIL = "no-reply@rise-test1.philhist.unibas.ch"
 
 # Logging Configuration
 LOGGING = {
