@@ -153,11 +153,11 @@ class UserManagementTable(tables.Table):
         
         # View button
         view_btn = format_html(
-            '<a href="/user/{}" class="btn btn-sm btn-secondary me-1" '
+            '<a href="{}" class="btn btn-sm btn-secondary me-1" '
             'data-bs-toggle="tooltip" data-bs-placement="top" title="View User Details">'
             '<i class="fa-solid fa-eye"></i>'
             '</a>',
-            record.pk
+            reverse_lazy("twf:user_view", kwargs={"pk": record.pk})
         )
         buttons.append(view_btn)
         
@@ -165,11 +165,12 @@ class UserManagementTable(tables.Table):
         reset_btn = format_html(
             '<a href="#" class="btn btn-sm btn-dark me-1 show-confirm-modal" '
             'data-message="Are you sure you want to reset password for <strong>{}</strong>? A new random password will be generated and sent to their email." '
-            'data-redirect-url="/user/{}/reset_password/" '
+            'data-redirect-url="{}" '
             'data-bs-toggle="tooltip" data-bs-placement="top" title="Reset Password">'
             '<i class="fa-solid fa-rotate"></i>'
             '</a>',
-            record.username, record.pk
+            record.username,
+            reverse_lazy("twf:user_adm_reset_password", kwargs={"pk": record.pk})
         )
         buttons.append(reset_btn)
         
@@ -178,21 +179,23 @@ class UserManagementTable(tables.Table):
             toggle_btn = format_html(
                 '<a href="#" class="btn btn-sm btn-warning me-1 show-confirm-modal" '
                 'data-message="Are you sure you want to deactivate <strong>{}</strong>?" '
-                'data-redirect-url="/user/{}/deactivate/" '
+                'data-redirect-url="{}" '
                 'data-bs-toggle="tooltip" data-bs-placement="top" title="Deactivate User">'
                 '<i class="fa-solid fa-lock"></i>'
                 '</a>',
-                record.username, record.pk
+                record.username,
+                reverse_lazy("twf:user_adm_deactivate", kwargs={"pk": record.pk})
             )
         else:
             toggle_btn = format_html(
                 '<a href="#" class="btn btn-sm btn-success me-1 show-confirm-modal" '
                 'data-message="Are you sure you want to activate <strong>{}</strong>?" '
-                'data-redirect-url="/user/{}/activate/" '
+                'data-redirect-url="{}" '
                 'data-bs-toggle="tooltip" data-bs-placement="top" title="Activate User">'
                 '<i class="fa-solid fa-unlock"></i>'
                 '</a>',
-                record.username, record.pk
+                record.username,
+                reverse_lazy("twf:user_adm_activate", kwargs={"pk": record.pk})
             )
         buttons.append(toggle_btn)
         
@@ -202,10 +205,11 @@ class UserManagementTable(tables.Table):
                 '<a href="#" class="btn btn-sm btn-danger show-danger-modal" '
                 'data-message="Are you sure you want to delete the user <strong>{}</strong>? This action cannot be undone!" '
                 'data-bs-toggle="tooltip" data-bs-placement="top" title="Delete User" '
-                'data-redirect-url="/user/{}/delete/">'
+                'data-redirect-url="{}">'
                 '<i class="fa-solid fa-trash"></i>'
                 '</a>',
-                record.username, record.pk
+                record.username,
+                reverse_lazy("twf:user_adm_delete", kwargs={"pk": record.pk}),
             )
         else:
             delete_btn = format_html(
