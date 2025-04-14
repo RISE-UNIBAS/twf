@@ -1,6 +1,7 @@
 """Table classes for displaying user permissions."""
 import django_tables2 as tables
 from django.contrib.auth import get_user_model
+from django.urls import reverse_lazy
 from django.utils.html import format_html
 
 from twf.models import Project
@@ -8,12 +9,13 @@ from twf.models import Project
 User = get_user_model()
 
 class ProjectManagementTable(tables.Table):
+    """Table for managing projects."""
+
     title = tables.Column(verbose_name="Project", attrs={"td": {"class": "fw-bold"}})
     created_at = tables.DateTimeColumn(format="Y-m-d H:i", verbose_name="Created")
     modified_at = tables.DateTimeColumn(format="Y-m-d H:i", verbose_name="Last Updated")
     status = tables.Column(orderable=False, verbose_name="Project Status")
     owner = tables.Column(accessor="owner", verbose_name="Owner")
-
     actions = tables.Column(empty_values=(), verbose_name="Options", orderable=False)
 
     class Meta:
@@ -44,7 +46,7 @@ class ProjectManagementTable(tables.Table):
                 'data-message="Are you sure you want to close the project <strong>{}</strong>?"'
                 'data-redirect-url="{}"><i class="fa fa-toggle-off"></i></a>',
                 record.title,
-                f"/project/close/{record.pk}"
+                reverse_lazy("twf:project_do_close", kwargs={"pk": record.pk})
             )
         else:  # closed
             status_button = format_html(
@@ -52,7 +54,7 @@ class ProjectManagementTable(tables.Table):
                 'data-message="Are you sure you want to reopen the project <strong>{}</strong>?"'
                 'data-redirect-url="{}"><i class="fa fa-toggle-on"></i></a>',
                 record.title,
-                f"/project/reopen/{record.pk}"
+                reverse_lazy("twf:project_do_reopen", kwargs={"pk": record.pk})
             )
 
         # Delete button
@@ -61,7 +63,7 @@ class ProjectManagementTable(tables.Table):
             'data-message="Are you sure you want to delete the project <strong>{}</strong>? This action cannot be undone!"'
             'data-redirect-url="{}"><i class="fa fa-trash"></i></a>',
             record.title,
-            f"/project/delete/{record.pk}"
+            reverse_lazy("twf:project_do_delete", kwargs={"pk": record.pk})
         )
 
         # View button
@@ -74,6 +76,7 @@ class ProjectManagementTable(tables.Table):
 
 
 class UserManagementTable(tables.Table):
+    """Table for managing users."""
     username = tables.Column(verbose_name="Username")
     email = tables.Column(verbose_name="Email") 
     date_joined = tables.DateTimeColumn(format="Y-m-d", verbose_name="Joined")
