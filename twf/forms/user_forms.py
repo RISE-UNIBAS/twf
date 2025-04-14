@@ -50,10 +50,16 @@ class CreateUserForm(forms.ModelForm):
         """Meta class for the form."""
         model = User
         fields = ['username', 'email']
+        widgets = {
+            'username': forms.TextInput(attrs={'placeholder': 'Username'}),
+            'email': forms.EmailInput(attrs={'placeholder': 'Email'}),
+        }
 
     def __init__(self, *args, **kwargs):
         """Initialize the form."""
         super().__init__(*args, **kwargs)
+
+        self.fields['email'].required = True
 
         self.helper = FormHelper()
         self.helper.form_method = 'post'
