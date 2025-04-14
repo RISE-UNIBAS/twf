@@ -77,14 +77,15 @@ class UserManagementTable(tables.Table):
     email = tables.Column(verbose_name="Email") 
     date_joined = tables.DateTimeColumn(format="Y-m-d", verbose_name="Joined")
     last_login = tables.DateTimeColumn(format="Y-m-d", verbose_name="Last Login", default="-")
-    status = tables.Column(empty_values=(), verbose_name="Status")
+    status = tables.Column(empty_values=(), verbose_name="Status", orderable=False)
     owned_projects = tables.Column(empty_values=(), verbose_name="Owns Projects", orderable=False)
     actions = tables.Column(empty_values=(), verbose_name="Options", orderable=False)
 
     class Meta:
         model = User
         fields = ("username", "email", "date_joined", "last_login")
-        attrs = {"class": "table table-striped table-hover table-sm"}
+        template_name = "django_tables2/bootstrap4.html"
+        attrs = {"class": "table table-striped table-hover"}
         
     def render_date_joined(self, value):
         return value.strftime("%Y-%m-%d")

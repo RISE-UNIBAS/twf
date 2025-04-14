@@ -149,6 +149,11 @@ class TWFHomePasswordChangeView(TWFHomeView, PasswordChangeView):
     page_title = 'Change Password'
     form_class = ChangePasswordForm
     success_url = reverse_lazy('twf:home')
+    
+    def form_valid(self, form):
+        """Add success message before redirecting."""
+        messages.success(self.request, "Your password has been changed successfully.")
+        return super().form_valid(form)
 
 
 class TWFHomeUserProfileView(LoginRequiredMixin, FormView, TWFHomeView):
