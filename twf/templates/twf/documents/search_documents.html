@@ -1,7 +1,314 @@
 {% extends 'twf/base/base.html' %}
 {% load crispy_forms_tags %}
 {% load render_table from django_tables2 %}
+{% load twf_filters %}
+{% load static %}
+
+{% block page_title %}
+    <h1>Document Search</h1>
+{% endblock %}
 
 {% block content %}
-    {% crispy form %}
+    <p class="lead">Search for documents in your project by keyword, type, status and more.</p>
+
+    <!-- Document Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3 mb-2">
+            <div class="card text-white bg-dark h-100">
+                <div class="card-body d-flex justify-content-between align-items-center">
+                    <div>
+                        <h3 class="card-title mb-0">{{ document_stats.total }}</h3>
+                        <p class="card-text">Total Documents</p>
+                    </div>
+                    <i class="fas fa-file-alt fa-2x"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-2">
+            <div class="card text-white bg-success h-100">
+                <div class="card-body d-flex justify-content-between align-items-center">
+                    <div>
+                        <h3 class="card-title mb-0">{{ document_stats.active }}</h3>
+                        <p class="card-text">Active Documents</p>
+                    </div>
+                    <i class="fas fa-check-circle fa-2x"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-2">
+            <div class="card text-white bg-warning h-100">
+                <div class="card-body d-flex justify-content-between align-items-center">
+                    <div>
+                        <h3 class="card-title mb-0">{{ document_stats.reviewed }}</h3>
+                        <p class="card-text">Reviewed Documents</p>
+                    </div>
+                    <i class="fas fa-eye fa-2x"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-2">
+            <div class="card text-white bg-secondary h-100">
+                <div class="card-body d-flex justify-content-between align-items-center">
+                    <div>
+                        <h3 class="card-title mb-0">{{ document_stats.ignored }}</h3>
+                        <p class="card-text">Ignored Documents</p>
+                    </div>
+                    <i class="fas fa-ban fa-2x"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search Form in Card -->
+    <div class="card mb-4">
+        <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">
+                <i class="fas fa-search"></i> Document Search
+            </h5>
+            {% if search_submitted %}
+                <span class="badge bg-light text-dark">
+                    {% if results %}{{ results_count }} documents found{% else %}No results{% endif %}
+                </span>
+            {% endif %}
+        </div>
+        <div class="card-body">
+            {% if form_errors %}
+                <div class="alert alert-danger">
+                    <h5 class="alert-heading">Form Errors</h5>
+                    <ul>
+                        {% for field, errors in form_errors.items %}
+                            <li><strong>{{ field }}:</strong> {{ errors|join:', ' }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endif %}
+            
+            {% crispy form %}
+        </div>
+    </div>
+
+    {% if results %}
+        <!-- Search Results Stats -->
+        <div class="row mb-4">
+            <div class="col-lg-12">
+                <div class="card">
+                    <div class="card-header bg-dark text-white">
+                        <h5 class="mb-0">Search Results ({{ results_count }} documents)</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-2 mb-2 text-center">
+                                <div class="card border-dark h-100">
+                                    <div class="card-body py-2">
+                                        <h4>{{ result_stats.total }}</h4>
+                                        <p class="small text-muted mb-0">Total</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-2 mb-2 text-center">
+                                <div class="card border-success h-100">
+                                    <div class="card-body py-2">
+                                        <h4>{{ result_stats.with_pages }}</h4>
+                                        <p class="small text-muted mb-0">With Pages</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-2 mb-2 text-center">
+                                <div class="card border-info h-100">
+                                    <div class="card-body py-2">
+                                        <h4>{{ result_stats.with_tags }}</h4>
+                                        <p class="small text-muted mb-0">With Tags</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-2 mb-2 text-center">
+                                <div class="card border-primary h-100">
+                                    <div class="card-body py-2">
+                                        <h4>{{ result_stats.open }}</h4>
+                                        <p class="small text-muted mb-0">Open</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-2 mb-2 text-center">
+                                <div class="card border-warning h-100">
+                                    <div class="card-body py-2">
+                                        <h4>{{ result_stats.needs_work }}</h4>
+                                        <p class="small text-muted mb-0">Needs Work</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-2 mb-2 text-center">
+                                <div class="card border-secondary h-100">
+                                    <div class="card-body py-2">
+                                        <h4>{{ result_stats.ignored }}</h4>
+                                        <p class="small text-muted mb-0">Ignored</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Search Results Table -->
+        <div class="card mb-4">
+            <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Document Results</h5>
+                <div>
+                    <a href="#" class="btn btn-sm btn-outline-light" id="toggleAdvancedColumns">
+                        <i class="fas fa-columns"></i> Toggle Columns
+                    </a>
+                </div>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Document ID</th>
+                                <th>Title</th>
+                                <th>Status</th>
+                                <th>Pages</th>
+                                <th>Tags</th>
+                                <th class="advanced-column">Created</th>
+                                <th class="advanced-column">Updated</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for document in results %}
+                                <tr>
+                                    <td>{{ document.document_id }}</td>
+                                    <td>
+                                        <a href="{% url 'twf:view_document' document.pk %}">
+                                            {% if search_term and search_type == 'title' %}
+                                                {{ document.title|default:"No title"|highlight_matches:search_term|safe }}
+                                            {% else %}
+                                                {{ document.title|default:"No title" }}
+                                            {% endif %}
+                                        </a>
+                                        {% if document.is_parked %}
+                                            <span class="badge bg-warning text-dark">Parked</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if document.status == 'open' %}
+                                            <span class="badge bg-primary">Open</span>
+                                        {% elif document.status == 'reviewed' %}
+                                            <span class="badge bg-success">Reviewed</span>
+                                        {% elif document.status == 'needs_tk_work' %}
+                                            <span class="badge bg-warning text-dark">Needs Work</span>
+                                        {% elif document.status == 'irrelevant' %}
+                                            <span class="badge bg-secondary">Irrelevant</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ document.pages.count }}</td>
+                                    <td>
+                                        {% with tag_count=document.pages.all|sum_tags %}
+                                            {% if tag_count > 0 %}
+                                                <div class="d-flex align-items-center">
+                                                    <span class="badge bg-info text-dark me-2">{{ tag_count }}</span>
+                                                    <div class="small">
+                                                        {% with tag_types=document.pages.all|get_tag_types %}
+                                                            {% if tag_types %}
+                                                                {% for tag_type in tag_types|slice:":3" %}
+                                                                    <span class="badge bg-light text-dark me-1">{{ tag_type }}</span>
+                                                                {% endfor %}
+                                                                {% if tag_types|length > 3 %}
+                                                                    <span class="badge bg-light text-dark">+{{ tag_types|length|add:"-3" }}</span>
+                                                                {% endif %}
+                                                            {% endif %}
+                                                        {% endwith %}
+                                                    </div>
+                                                </div>
+                                            {% else %}
+                                                <span class="text-muted">No tags</span>
+                                            {% endif %}
+                                        {% endwith %}
+                                    </td>
+                                    <td class="advanced-column">
+                                        <small class="text-muted">{{ document.created_at|date:"M d, Y" }}</small>
+                                    </td>
+                                    <td class="advanced-column">
+                                        <small class="text-muted">{{ document.modified_at|date:"M d, Y" }}</small>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group">
+                                            <a href="{% url 'twf:view_document' document.pk %}" class="btn btn-sm btn-dark" title="View Document">
+                                                <i class="fa-solid fa-eye"></i>
+                                            </a>
+                                            <a href="{{ document.get_transkribus_url }}" class="btn btn-sm btn-secondary" target="_blank" title="View on Transkribus">
+                                                <i class="fa-solid fa-external-link-alt"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            {% if results.count > 10 %}
+                <div class="card-footer">
+                    <p class="text-muted mb-0">
+                        <small>Showing all {{ results.count }} results. Consider refining your search if needed.</small>
+                    </p>
+                </div>
+            {% endif %}
+        </div>
+    {% elif search_submitted %}
+        <div class="alert alert-info">
+            <h4 class="alert-heading">No Documents Found</h4>
+            <p>Your search did not match any documents. Try different keywords or fewer filters.</p>
+            <hr>
+            <p class="mb-0">You can also <a href="{% url 'twf:documents_browse' %}" class="alert-link">browse all documents</a> instead.</p>
+        </div>
+    {% else %}
+        <div class="alert alert-light border">
+            <h4 class="alert-heading">Ready to Search</h4>
+            <p>Use the search form above to find documents in your project. You can search by title, document ID, content, and more.</p>
+            <hr>
+            <p class="mb-0">Need to see all documents? <a href="{% url 'twf:documents_browse' %}" class="alert-link">Browse all documents</a> instead.</p>
+        </div>
+    {% endif %}
+{% endblock %}
+
+{% block script %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize tooltips
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[title]'));
+        tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+        
+        // Hide advanced columns by default
+        const advancedColumns = document.querySelectorAll('.advanced-column');
+        advancedColumns.forEach(column => {
+            column.style.display = 'none';
+        });
+        
+        // Toggle advanced columns
+        const toggleButton = document.getElementById('toggleAdvancedColumns');
+        if (toggleButton) {
+            toggleButton.addEventListener('click', function(e) {
+                e.preventDefault();
+                advancedColumns.forEach(column => {
+                    if (column.style.display === 'none') {
+                        column.style.display = 'table-cell';
+                    } else {
+                        column.style.display = 'none';
+                    }
+                });
+            });
+        }
+        
+        // Focus search input on page load if form is empty
+        const searchInput = document.querySelector('input[name="search_term"]');
+        if (searchInput && searchInput.value === '') {
+            searchInput.focus();
+        }
+    });
+</script>
 {% endblock %}

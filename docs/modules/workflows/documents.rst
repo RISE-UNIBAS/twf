@@ -82,6 +82,46 @@ The "Claude" workflow connects to Anthropic’s Claude model to provide AI-drive
 
 ---
 
+Document Management
+------------------
+
+TWF provides comprehensive tools for browsing and searching documents in your project. These features help you efficiently locate and manage your documents based on various criteria.
+
+### Browse Documents
+
+The **Browse Documents** view displays all documents in your project with filtering options. 
+
+**Key Features:**
+- View all documents in a tabular format
+- Filter documents by status, type, and other attributes
+- Access quick actions for each document
+
+To access this view, navigate to **Documents > Browse Documents** in the sidebar navigation.
+
+### Search Documents
+
+The **Search Documents** view provides a powerful search interface to find specific documents across your project.
+
+**Key Features:**
+- Search documents by keyword across multiple fields
+- Filter search results by document status
+- Apply special filters like "Only Parked Documents," "Has Pages," or "Has Tags"
+- Sort results by title, document ID, or date
+- View detailed information about search results including tag counts and types
+
+**Search Options:**
+- **Search Term**: Enter keywords to search for in documents
+- **Search Type**: Specify where to search (All Fields, Document Title, Document ID, etc.)
+- **Document Status**: Filter by status (Open, Needs Work, Irrelevant, Reviewed)
+- **Special Filters**: Apply additional filters for specific document attributes
+- **Sort By**: Order results by various attributes
+
+To perform a document search:
+1. Navigate to **Documents > Search Documents** in the sidebar
+2. Enter your search criteria in the form
+3. Click "Search Documents" to view matching results
+4. Use the results table to view and access the found documents
+
 Getting Started
 ---------------
 

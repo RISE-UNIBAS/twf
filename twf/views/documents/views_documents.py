@@ -235,22 +235,185 @@ class TWFDocumentsBrowseView(SingleTableView, FilterView, TWFDocumentView):
 
 
 class TWFDocumentsSearchView(FormView, TWFDocumentView):
-    """View for searching documents."""
+    """View for searching documents with simplified interface."""
     template_name = 'twf/documents/search_documents.html'
     page_title = 'Search Documents'
     form_class = DocumentSearchForm
     success_url = reverse_lazy('twf:documents_search')
 
+    def get_form_kwargs(self):
+        """Add project to form kwargs and handle POST and GET requests properly."""
+        kwargs = {'project': self.get_project()}
+        
+        # Handle both GET and POST requests to preserve form values
+        if self.request.method == 'POST':
+            kwargs.update({
+                'data': self.request.POST,
+            })
+        elif self.request.method == 'GET' and self.request.GET:
+            # This allows for bookmarkable search URLs
+            kwargs.update({
+                'data': self.request.GET,
+            })
+            
+        return kwargs
+
     def form_valid(self, form):
-        """Handle the form submission."""
-        # Add a success message
-        logger.debug("WOULD SEARCH FOR DOCUMENTS HERE") # TODO: Implement search
-        # Redirect to the success URL
-        return super().form_valid(form)
+        """Handle valid form submission."""
+        # Get search results
+        results = self.search_documents(form.cleaned_data)
+        
+        # Add results to context and render the same page
+        context = self.get_context_data(form=form, results=results)
+        
+        # Add search term to context for highlighting if needed
+        search_term = form.cleaned_data.get('search_term', '').strip()
+        if search_term:
+            context['search_term'] = search_term
+            
+        return self.render_to_response(context)
+    
+    def form_invalid(self, form):
+        """Handle invalid form submission."""
+        # Log form errors for debugging
+        logger.debug(f"Form errors: {form.errors}")
+        context = self.get_context_data(form=form)
+        context['form_errors'] = form.errors
+        return self.render_to_response(context)
+
+    def search_documents(self, cleaned_data):
+        """Perform simplified document search based on form data."""
+        project = self.get_project()
+        queryset = Document.objects.filter(project=project)
+        
+        # Get form data
+        search_term = cleaned_data.get('search_term', '').strip()
+        search_type = cleaned_data.get('search_type', 'all')
+        status_filters = cleaned_data.get('status', [])
+        special_filters = cleaned_data.get('special_filters', [])
+        sort_by = cleaned_data.get('sort_by', '-created_at')
+        
+        # Log the start of the search
+        logger.debug(f"Starting search with term: '{search_term}', type: {search_type}")
+        logger.debug(f"Status filters: {status_filters}, Special filters: {special_filters}")
+        logger.debug(f"Initial document count: {queryset.count()}")
+        
+        # Apply search term based on search type
+        if search_term:
+            from django.db.models import Q
+            
+            if search_type == 'all' or not search_type:
+                # Search in all text fields
+                queryset = queryset.filter(
+                    Q(title__icontains=search_term) |
+                    Q(document_id__icontains=search_term) |
+                    Q(workflow_remarks__icontains=search_term) |
+                    Q(metadata__icontains=search_term) |
+                    Q(pages__tags__variation__icontains=search_term) |
+                    Q(pages__parsed_data__text__icontains=search_term)
+                ).distinct()
+            elif search_type == 'title':
+                queryset = queryset.filter(title__icontains=search_term)
+            elif search_type == 'document_id':
+                queryset = queryset.filter(document_id__icontains=search_term)
+            elif search_type == 'metadata':
+                # Search in JSON field
+                queryset = queryset.filter(metadata__icontains=search_term)
+            elif search_type == 'workflow_remarks':
+                queryset = queryset.filter(workflow_remarks__icontains=search_term)
+            elif search_type == 'document_text':
+                # Improved JSON search in parsed_data
+                queryset = queryset.filter(
+                    Q(pages__parsed_data__text__icontains=search_term) |
+                    Q(pages__parsed_data__elements__text__icontains=search_term)
+                ).distinct()
+            elif search_type == 'tags':
+                queryset = queryset.filter(pages__tags__variation__icontains=search_term).distinct()
+                
+            logger.debug(f"After search term filtering: {queryset.count()} documents")
+        
+        # Apply status filters (OR logic)
+        if status_filters:
+            status_q = Q()
+            for status in status_filters:
+                status_q |= Q(status=status)
+            queryset = queryset.filter(status_q)
+            logger.debug(f"After status filtering: {queryset.count()} documents")
+        
+        # Apply special filters
+        if special_filters:
+            special_filter_q = Q()
+            for filter_type in special_filters:
+                if filter_type == 'is_parked':
+                    special_filter_q |= Q(is_parked=True)
+                elif filter_type == 'has_pages':
+                    special_filter_q |= Q(pages__isnull=False)
+                elif filter_type == 'has_tags':
+                    special_filter_q |= Q(pages__tags__isnull=False)
+            
+            if special_filter_q:
+                queryset = queryset.filter(special_filter_q).distinct()
+            logger.debug(f"After special filtering: {queryset.count()} documents")
+        
+        # Apply sorting
+        if sort_by:
+            queryset = queryset.order_by(sort_by)
+        
+        # Prefetch related data for performance
+        queryset = queryset.prefetch_related('pages', 'pages__tags')
+        
+        # Add a final debug message
+        logger.debug(f"Final document count: {queryset.count()}")
+        
+        return queryset
 
     def get_context_data(self, **kwargs):
         """Get the context data for the view."""
         context = super().get_context_data(**kwargs)
+        
+        # Add search results if available
+        if 'results' in kwargs:
+            results = kwargs['results']
+            context['results'] = results
+            context['results_count'] = results.count()
+            
+            # Add search parameters for highlighting
+            form = kwargs.get('form')
+            if form and hasattr(form, 'cleaned_data'):
+                context['search_term'] = form.cleaned_data.get('search_term', '')
+                context['search_type'] = form.cleaned_data.get('search_type', 'all')
+            
+            # Add document statistics for the results
+            stats = {
+                'total': results.count(),
+                'with_pages': sum(1 for doc in results if doc.pages.exists()),
+                'with_tags': sum(1 for doc in results if any(page.tags.exists() for page in doc.pages.all())),
+                'ignored': sum(1 for doc in results if doc.is_parked),
+                'open': sum(1 for doc in results if doc.status == 'open'),
+                'reviewed': sum(1 for doc in results if doc.status == 'reviewed'),
+                'needs_work': sum(1 for doc in results if doc.status == 'needs_tk_work'),
+                'irrelevant': sum(1 for doc in results if doc.status == 'irrelevant'),
+            }
+            context['result_stats'] = stats
+            
+        # Add document statistics 
+        all_documents = Document.objects.filter(project=self.get_project())
+        context['document_stats'] = {
+            'total': all_documents.count(),
+            'active': all_documents.filter(is_parked=False).count(),
+            'ignored': all_documents.filter(is_parked=True).count(),
+            'reviewed': all_documents.filter(status='reviewed').count()
+        }
+            
+        # Track if this is a search submission (for template display)
+        is_search = False
+        if self.request.method == 'POST' and self.request.POST.get('search_submitted'):
+            is_search = True
+        elif self.request.method == 'GET' and self.request.GET.get('search_term'):
+            is_search = True
+            
+        context['search_submitted'] = is_search
+        
         return context
 
 

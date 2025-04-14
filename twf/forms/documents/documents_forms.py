@@ -1,70 +1,120 @@
 """Forms for creating and updating documents."""
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Submit, Layout, Row, Column, Div
+from crispy_forms.layout import Submit, Layout, Row, Column, Div, HTML
 from django import forms
 from django_select2.forms import Select2MultipleWidget, Select2Widget
 
-from twf.models import Document
+from twf.models import Document, PageTag
 
 
 class DocumentSearchForm(forms.Form):
-    """Form for searching documents."""
+    """Form for searching documents and their contents."""
 
-    search_term = forms.CharField(label='Search', required=False,
-                                  help_text='Search for any term, you can use regular expressions.')
-    search_in = forms.MultipleChoiceField(label='Search', choices=[
-        ('title', 'Document Title'),
-        ('document_id', 'Transkribus Doc ID'),
-        ('metadata', 'Metadata'),
-        ('workflow_remarks', 'Workflow Remarks'),
-        ('document_text', 'Document Text'),
-    ], widget=Select2MultipleWidget(attrs={'data-placeholder': 'Search in'}),
-       required=False,
-       help_text='Select fields to search in. If none selected, search in all fields.')
+    search_term = forms.CharField(
+        label='Search Term', 
+        required=False,
+        help_text='Enter keywords to search for in documents',
+        widget=forms.TextInput(attrs={'placeholder': 'Enter search term...', 'class': 'form-control'})
+    )
+    
+    search_type = forms.ChoiceField(
+        label='Search Type',
+        choices=[
+            ('all', 'All Fields'),
+            ('title', 'Document Title'),
+            ('document_id', 'Document ID'),
+            ('metadata', 'Document Metadata'),
+            ('workflow_remarks', 'Workflow Remarks'),
+            ('document_text', 'Document Text'),
+            ('tags', 'Document Tags')
+        ],
+        initial='all',
+        widget=forms.RadioSelect(attrs={'class': 'form-check-input'}),
+        required=False,
+    )
+    
+    status = forms.MultipleChoiceField(
+        label='Document Status',
+        choices=[
+            ('open', 'Open'),
+            ('needs_tk_work', 'Needs Work'),
+            ('irrelevant', 'Irrelevant'),
+            ('reviewed', 'Reviewed')
+        ],
+        widget=forms.CheckboxSelectMultiple(attrs={'class': 'form-check-input'}),
+        required=False,
+    )
+    
+    special_filters = forms.MultipleChoiceField(
+        label='Special Filters',
+        choices=[
+            ('is_parked', 'Only Parked Documents'),
+            ('has_pages', 'Has Pages'),
+            ('has_tags', 'Has Tags'),
+        ],
+        widget=forms.CheckboxSelectMultiple(attrs={'class': 'form-check-input'}),
+        required=False,
+    )
+    
+    sort_by = forms.ChoiceField(
+        label='Sort By', 
+        choices=[
+            ('title', 'Title A-Z'),
+            ('-title', 'Title Z-A'),
+            ('document_id', 'Document ID (Ascending)'),
+            ('-document_id', 'Document ID (Descending)'),
+            ('created_at', 'Oldest First'),
+            ('-created_at', 'Newest First'),
+        ], 
+        initial='-created_at',
+        widget=forms.Select(attrs={'class': 'form-select'}),
+        required=False,
+    )
 
-    has_attribute = forms.MultipleChoiceField(label='Has Attribute', choices=[
-        ('is_ignored', 'Ignored'),
-        ('is_parked', 'Parked'),
-        ('is_reserved', 'Reserved'),
-        ('status_open', 'Open'),
-        ('status_needs_tk_work', 'Needs TK Work'),
-        ('status_irrelevant', 'Irrelevant'),
-        ('status_reviewed', 'Reviewed')
-    ], widget=Select2MultipleWidget(attrs={'data-placeholder': 'Attributes'}),
-       required=False,
-       help_text='Select attributes to search for. (OR logic)')
-
-    sort_by = forms.ChoiceField(label='Sort', choices=[
-        ('title', 'Document Title'),
-        ('document_id', 'Transkribus Doc ID'),
-        ('created_at', 'Created At'),
-        ('updated_at', 'Updated At'),
-        ('created_by', 'Created By'),
-        ('updated_by', 'Updated By'),
-    ], widget=Select2Widget(attrs={'data-placeholder': 'Sort by'}),
-       required=False,
-       help_text='Select field to sort by.')
-
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, project=None, **kwargs):
+        self.project = project
         super().__init__(*args, **kwargs)
-
+        
         helper = FormHelper()
         helper.form_method = 'post'
         helper.form_class = 'form form-control'
-
+        helper.form_id = 'document-search-form'
+        
+        # Add a hidden field to indicate this is a search submission
         helper.layout = Layout(
+            HTML('<input type="hidden" name="search_submitted" value="true">'),
             Row(
-                Column('search_term', css_class='form-group col-6 mb-3'),
-                Column('search_in', css_class='form-group col-6 mb-3'),
+                Column('search_term', css_class='form-group col-12 mb-3'),
                 css_class='row form-row'
             ),
             Row(
-                Column('has_attribute', css_class='form-group col-6 mb-3'),
-                Column('sort_by', css_class='form-group col-6 mb-3'),
+                Column(
+                    HTML('<p class="text-muted">Select where to search for the term:</p>'),
+                    'search_type', 
+                    css_class='form-group col-12 mb-3'
+                ),
+                css_class='row form-row'
+            ),
+            Row(
+                Column(
+                    HTML('<p class="text-muted">Filter by document status:</p>'),
+                    'status', 
+                    css_class='form-group col-md-6 mb-3'
+                ),
+                Column(
+                    HTML('<p class="text-muted">Additional filters:</p>'),
+                    'special_filters', 
+                    css_class='form-group col-md-6 mb-3'
+                ),
+                css_class='row form-row'
+            ),
+            Row(
+                Column('sort_by', css_class='form-group col-12 mb-3'),
                 css_class='row form-row'
             ),
             Div(
-                Submit('search', 'Search', css_class='btn btn-dark'),
+                Submit('search', 'Search Documents', css_class='btn btn-dark'),
+                HTML('<a href="{% url "twf:documents_search" %}" class="btn btn-outline-secondary ms-2">Reset Form</a>'),
                 css_class='text-end pt-3'
             ),
         )

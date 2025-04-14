@@ -507,7 +507,7 @@ class BaseTWFTask(CeleryTask):
                 self.twf_task.save()
             
             # Let Celery handle the task success
-            return response_dict
+            return {"ai_result": response_dict}
             
         except Exception as e:
             # Handle any exceptions that occur during API call
