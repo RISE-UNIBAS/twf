@@ -489,7 +489,7 @@ class TWFProjectTaskSettingsView(FormView, TWFProjectView):
         # Save the form and show a success message
         self.object = form.save(commit=False)
         self.object.save(current_user=self.request.user)
-        messages.success(self.request, 'Project Credential settings have been updated successfully.')
+        messages.success(self.request, 'Project task settings have been updated successfully.')
 
         # Retrieve the active tab from form data and include it in the success URL
         active_tab = form.cleaned_data.get('active_tab', 'transkribus')
