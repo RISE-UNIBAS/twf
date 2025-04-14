@@ -5,7 +5,7 @@ specific part of the application. The main forms are located in the `forms` dire
 of the application.
 
 Base Batch Forms
----------------
+----------------
 
 The base batch forms provide the foundation for batch processing in the application, including AI processing with multimodal support.
 
@@ -15,7 +15,7 @@ The base batch forms provide the foundation for batch processing in the applicat
    :show-inheritance:
 
 Multimodal AI Forms
-~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~
 
 The application supports multimodal AI forms that allow combining text and images in AI requests:
 

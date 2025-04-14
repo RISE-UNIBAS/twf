@@ -1,10 +1,10 @@
 Multimodal Quickstart Guide
-========================
+===========================
 
 This quickstart guide provides the essentials for using the multimodal functionality in TWF.
 
 Setup in 5 Minutes
-----------------
+------------------
 
 1. **Check API Key**:
    - Navigate to Project Settings → Credentials
@@ -38,7 +38,7 @@ Setup in 5 Minutes
 That's it! You've completed your first multimodal query.
 
 Key Features
-----------
+------------
 
 - **Three Prompt Modes**: Text only, Images only, or Text + Images
 - **Automatic Image Selection**: System selects up to 5 images per document
@@ -47,7 +47,7 @@ Key Features
 - **Asynchronous Processing**: Tasks run in the background via Celery
 
 Essential Tips
------------
+--------------
 
 For best results:
 
@@ -63,7 +63,7 @@ For best results:
 5. **Response Storage**: Use "Save to Metadata" to store valuable insights
 
 Next Steps
---------
+----------
 
 - Try the comprehensive [Multimodal Tutorial](../tutorials/multimodal_tutorial.html)
 - Read [Best Practices](multimodal_best_practices.html) for advanced techniques
@@ -71,7 +71,7 @@ Next Steps
 - Review [Configuration Options](multimodal_config.html) for customization
 
 Sample Prompts
-------------
+--------------
 
 **Document Overview**:
 ```
@@ -103,7 +103,7 @@ Compare and contrast the documents I've provided:
 ```
 
 Quick Troubleshooting
--------------------
+---------------------
 
 **Issue**: Response ignores images
 **Solution**: Verify you selected "Images only" or "Text + Images" mode

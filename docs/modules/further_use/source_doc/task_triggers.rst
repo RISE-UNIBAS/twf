@@ -1,5 +1,5 @@
 Task Triggers Module
-===================
+====================
 
 The task triggers module provides functions for starting asynchronous tasks from views.
 
@@ -9,7 +9,7 @@ The task triggers module provides functions for starting asynchronous tasks from
    :show-inheritance:
 
 AI Task Triggers
----------------
+----------------
 
 These functions trigger AI-related tasks, including the new multimodal functionality:
 

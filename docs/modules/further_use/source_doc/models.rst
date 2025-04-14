@@ -2,13 +2,13 @@ Models
 ======
 
 Database Models
---------------
+---------------
 
 This module contains the database models for the Transkribus Workflow application.
 These models represent the core entities in the system and their relationships.
 
 Core Models
-~~~~~~~~~~
+~~~~~~~~~~~
 
 .. autoclass:: twf.models.Project
    :members:
@@ -26,7 +26,7 @@ Core Models
    :show-inheritance:
 
 Dictionary and Tag Models
-~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. autoclass:: twf.models.Dictionary
    :members:
@@ -49,7 +49,7 @@ Dictionary and Tag Models
    :show-inheritance:
 
 Collection Models
-~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~
 
 .. autoclass:: twf.models.Collection
    :members:
@@ -62,7 +62,7 @@ Collection Models
    :show-inheritance:
 
 User and Task Related Models
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. autoclass:: twf.models.UserProfile
    :members:
@@ -85,7 +85,7 @@ User and Task Related Models
    :show-inheritance:
 
 Base Classes
-~~~~~~~~~~~
+~~~~~~~~~~~~
 
 .. autoclass:: twf.models.TimeStampedModel
    :members:

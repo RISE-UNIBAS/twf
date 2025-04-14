@@ -1,18 +1,18 @@
 Multimodal Frequently Asked Questions
-=================================
+=====================================
 
 This document addresses common questions about the multimodal functionality in TWF.
 
 General Questions
----------------
+-----------------
 
 What is multimodal AI functionality?
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Multimodal AI functionality refers to the ability to process and analyze both text and images together. In TWF, this allows you to send document images along with text prompts to AI providers for analysis, getting richer insights than would be possible with text-only queries.
 
 Which AI providers support multimodal functionality?
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 TWF currently supports multimodal functionality with the following providers:
 
@@ -22,7 +22,7 @@ TWF currently supports multimodal functionality with the following providers:
 * **Mistral**: Limited support in larger models
 
 Which file formats are supported for images?
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The supported image formats depend on the AI provider:
 
@@ -31,7 +31,7 @@ The supported image formats depend on the AI provider:
 * **Gemini**: Additionally supports GIF (static images only)
 
 Is there a limit to how many images I can include?
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Yes, there are limits:
 
@@ -43,7 +43,7 @@ Yes, there are limits:
   - Mistral: 2-3 images per request
 
 How are images selected from my documents?
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 By default, the system:
 1. Takes up to 5 images per document
@@ -52,10 +52,10 @@ By default, the system:
 4. Uses direct URLs rather than downloading images locally
 
 Usage Questions
--------------
+---------------
 
 How do I enable multimodal functionality?
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Multimodal functionality is enabled by default when you select a provider that supports it. To use it:
 
@@ -66,7 +66,7 @@ Multimodal functionality is enabled by default when you select a provider that s
 5. Submit the query
 
 What's the difference between the different prompt modes?
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The three prompt modes control what content is sent to the AI:
 
@@ -75,7 +75,7 @@ The three prompt modes control what content is sent to the AI:
 * **Text + Images**: Sends both your text prompt and selected images
 
 When should I use each prompt mode?
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Choose your prompt mode based on your specific needs:
 
@@ -84,7 +84,7 @@ Choose your prompt mode based on your specific needs:
 * **Text + Images**: For most mixed content analysis, when you want to guide the AI's analysis of the images with specific questions
 
 How do I write effective prompts for multimodal queries?
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 For effective multimodal prompts:
 
@@ -97,7 +97,7 @@ For effective multimodal prompts:
 See the Multimodal Best Practices document for detailed guidance.
 
 Can I use multimodal functionality with collections?
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Yes, you can use multimodal functionality with collections:
 
@@ -106,10 +106,10 @@ Yes, you can use multimodal functionality with collections:
 3. You can set collection-specific processing parameters in project settings
 
 Technical Questions
-----------------
+-------------------
 
 How are images sent to the AI providers?
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Images can be sent in two ways:
 
@@ -122,7 +122,7 @@ Images can be sent in two ways:
    - More bandwidth-intensive but works for all providers
 
 What image scaling options are available?
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 TWF provides several scaling options via the IIIF protocol:
 
@@ -134,7 +134,7 @@ TWF provides several scaling options via the IIIF protocol:
 The default is 50% scaling, which works well for most use cases.
 
 How does token usage work with multimodal queries?
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Multimodal queries generally use more tokens than text-only queries:
 
@@ -149,7 +149,7 @@ To optimize token usage:
 3. Be concise in your prompts
 
 How secure is the multimodal functionality?
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Security considerations for multimodal functionality:
 
@@ -175,7 +175,7 @@ A: OpenAI recommends images under 20MB and recommends using the 512x512 resoluti
 A: While technically possible to send many images, practical limits are around 20 images per request due to token limitations.
 
 Claude
-~~~~~
+~~~~~~
 
 **Q: Which Claude models support multimodal?**
 A: Claude 3 models (Opus, Sonnet, and Haiku) support multimodal inputs. Older Claude versions do not.
@@ -187,7 +187,7 @@ A: Claude requires the media_type to be specified for images. TWF automatically 
 A: Yes, Claude excels at document analysis and text recognition in images, often providing detailed transcriptions.
 
 Gemini
-~~~~~
+~~~~~~
 
 **Q: How does Gemini handle images differently?**
 A: Gemini processes images using a different underlying architecture (PaLM) that's specifically designed for multimodal content.
@@ -199,7 +199,7 @@ A: Gemini can accept GIF files but only processes them as static images (first f
 A: Gemini is particularly strong at visual recognition tasks and identifying objects/elements in images.
 
 Mistral
-~~~~~~
+~~~~~~~
 
 **Q: Why is Mistral's multimodal support listed as "limited"?**
 A: Mistral's multimodal capabilities are newer and currently support fewer images per request than other providers.
@@ -211,10 +211,10 @@ A: Currently, only Mistral Large supports images. Small and Medium models are te
 A: For multimodal analysis, Mistral is generally not as capable as other providers. It's better suited for text analysis with occasional image support.
 
 Troubleshooting
--------------
+---------------
 
 Why am I getting "Provider does not support multimodal" errors?
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This error occurs when:
 1. You've selected a provider that doesn't support multimodal (e.g., older Claude versions)
@@ -224,7 +224,7 @@ This error occurs when:
 Solution: Select a compatible provider or switch to text-only mode.
 
 Why are my images not appearing in the response?
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 If the AI doesn't seem to acknowledge the images:
 
@@ -235,7 +235,7 @@ If the AI doesn't seem to acknowledge the images:
 5. Make your prompt explicitly reference the images
 
 Why is the image analysis quality poor?
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Poor image analysis can result from:
 
@@ -251,10 +251,10 @@ Solutions:
 - Consider using a specialized computer vision service instead
 
 Best Practices
-------------
+--------------
 
 What's the optimal image resolution for AI analysis?
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The optimal resolution depends on the content type:
 
@@ -265,7 +265,7 @@ The optimal resolution depends on the content type:
 However, very high resolutions waste tokens, so balance quality with efficiency.
 
 How many images should I include in a single query?
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 For best results:
 
@@ -279,7 +279,7 @@ More images means:
 - Longer processing times
 
 What's the best way to combine text and images in prompts?
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 For effective text+image prompts:
 

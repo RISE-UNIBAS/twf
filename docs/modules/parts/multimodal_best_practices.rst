@@ -1,13 +1,13 @@
 Multimodal Best Practices
-======================
+=========================
 
 This guide provides best practices for effectively using the multimodal functionality in TWF to get the best results when combining text and images.
 
 Prompt Engineering
-----------------
+------------------
 
 Effective Prompt Structure
-~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Structure your prompts for optimal multimodal performance:
 
@@ -67,10 +67,10 @@ Optimize prompts for specific AI providers:
 - May need more explicit directions about image content
 
 Image Selection
--------------
+---------------
 
 Optimizing Image Quality
-~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~
 
 Select and optimize images for the best results:
 
@@ -81,7 +81,7 @@ Select and optimize images for the best results:
 5. **Contrast**: Ensure sufficient contrast, especially for handwritten text
 
 Scaling Best Practices
-~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~
 
 When using image scaling:
 
@@ -92,7 +92,7 @@ When using image scaling:
 5. **Maintain aspect ratio**: Always maintain the original aspect ratio when scaling
 
 Strategic Document Selection
-~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 When working with multiple documents:
 
@@ -103,7 +103,7 @@ When working with multiple documents:
 5. **Sequential consideration**: For narrative documents, include sequential pages
 
 Workflow Optimization
-------------------
+---------------------
 
 Multi-Stage Analysis
 ~~~~~~~~~~~~~~~~~
@@ -136,7 +136,7 @@ Stage 4: Cross-document synthesis
 ```
 
 Provider Combination Strategies
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Strategically combine different AI providers:
 
@@ -147,10 +147,10 @@ Strategically combine different AI providers:
 5. **Cost optimization**: Use less expensive providers for initial scans, premium providers for final analysis
 
 Performance Optimization
----------------------
+------------------------
 
 Reducing Token Usage
-~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~
 
 Optimize token usage to reduce costs and improve performance:
 
@@ -161,7 +161,7 @@ Optimize token usage to reduce costs and improve performance:
 5. **Batching**: Process similar documents together to leverage context
 
 Response Optimization
-~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~
 
 Get better formatted and more useful responses:
 
@@ -198,7 +198,7 @@ Case-Specific Best Practices
 --------------------------
 
 Handwritten Document Analysis
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 For handwritten documents:
 
@@ -209,7 +209,7 @@ For handwritten documents:
 5. **Confidence marking**: Request marking of uncertain transcriptions with brackets
 
 Historical Document Analysis
-~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 For historical documents:
 
@@ -220,7 +220,7 @@ For historical documents:
 5. **Abbreviation expansion**: Specifically request expansion of period-specific abbreviations
 
 Technical Document Analysis
-~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 For technical documents:
 
@@ -231,10 +231,10 @@ For technical documents:
 5. **Standards identification**: Ask the AI to identify technical standards referenced
 
 Measuring and Improving Results
-----------------------------
+-------------------------------
 
 Quality Assessment
-~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~
 
 Assess the quality of multimodal analyses:
 
@@ -245,7 +245,7 @@ Assess the quality of multimodal analyses:
 5. **Consistency checks**: Look for internal consistency in the AI's analysis
 
 Iterative Improvement
-~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~
 
 Continuously improve your multimodal prompts:
 

@@ -1,13 +1,13 @@
 Multimodal Troubleshooting
-========================
+==========================
 
 This guide provides solutions to common issues encountered when using the multimodal functionality in TWF.
 
 Common Problems and Solutions
-----------------------------
+-----------------------------
 
 Provider API Errors
-~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~
 
 **Problem**: You receive errors related to the AI provider API.
 
@@ -62,7 +62,7 @@ Specific image issues:
 +--------------------------------------------+-----------------------------------------------+
 
 Token Limit Exceeded
-~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~
 
 **Problem**: Your request exceeds the token limit for the AI provider.
 
@@ -74,7 +74,7 @@ Token Limit Exceeded
 5. Use a provider with larger token limits
 
 Performance Issues
-~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~
 
 **Problem**: Slow processing times or timeouts.
 
@@ -86,7 +86,7 @@ Performance Issues
 5. Try at a different time when provider load might be lower
 
 Quality Issues
-~~~~~~~~~~~
+~~~~~~~~~~~~~~
 
 **Problem**: Poor quality responses from the AI.
 
@@ -113,7 +113,7 @@ Specific quality issues:
 +--------------------------------------------+-----------------------------------------------+
 
 User Interface Issues
-~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~
 
 **Problem**: Issues with the multimodal UI controls.
 
@@ -141,7 +141,7 @@ Common issues:
    **Solution**: Reduce the complexity of your query or number of images
 
 Claude
-~~~~~
+~~~~~~
 
 Common issues:
 
@@ -155,7 +155,7 @@ Common issues:
    **Solution**: Claude has specific token limits; reduce content size
 
 Gemini
-~~~~~
+~~~~~~
 
 Common issues:
 
@@ -169,7 +169,7 @@ Common issues:
    **Solution**: Ensure Gemini API is enabled for your project
 
 Mistral
-~~~~~~
+~~~~~~~
 
 Common issues:
 
@@ -183,7 +183,7 @@ Common issues:
    **Solution**: Mistral has more limited image size constraints; reduce image size
 
 Advanced Troubleshooting
-----------------------
+------------------------
 
 System-Level Diagnosis
 ~~~~~~~~~~~~~~~~~~~
@@ -211,7 +211,7 @@ For persistent issues, perform a system-level diagnosis:
    ```
 
 Debug Mode
-~~~~~~~~
+~~~~~~~~~~
 
 Enable debug mode for more detailed logging:
 
@@ -229,7 +229,7 @@ Enable debug mode for more detailed logging:
    ```
 
 Reporting Issues
---------------
+----------------
 
 When reporting issues to developers, include:
 

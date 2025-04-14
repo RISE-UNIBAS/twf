@@ -1,5 +1,5 @@
 Multimodal AI Features
-=====================
+======================
 
 Overview
 --------
@@ -7,7 +7,7 @@ Overview
 The TWF application supports multimodal AI functionality, allowing users to combine text and images in their prompts when querying AI providers. This feature enhances the capabilities of the platform by enabling users to process both textual and visual information together.
 
 Supported Providers
-------------------
+-------------------
 
 The following AI providers support multimodal functionality:
 
@@ -17,7 +17,7 @@ The following AI providers support multimodal functionality:
 * **Mistral**: Limited multimodal support (check current capabilities)
 
 Prompt Modes
------------
+------------
 
 The multimodal feature supports three different prompt modes:
 
@@ -26,7 +26,7 @@ The multimodal feature supports three different prompt modes:
 3. **Text + Images**: Both text and images are sent together
 
 Image Selection
---------------
+---------------
 
 When using a mode that includes images:
 
@@ -36,7 +36,7 @@ When using a mode that includes images:
 * IIIF protocol is used for image scaling when appropriate
 
 Implementation Details
----------------------
+----------------------
 
 The multimodal functionality is implemented through several key components:
 
@@ -86,7 +86,7 @@ The AI client classes in ``simple_ai_clients.py`` have been extended to handle b
             return self.process_image_file(image_source)
 
 Task Processing
-~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~
 
 The task processing logic in ``task_base.py`` has been updated to handle different prompt modes:
 
@@ -117,7 +117,7 @@ The task processing logic in ``task_base.py`` has been updated to handle differe
             result = client.prompt_with_images(prompt, role_description, images)
 
 User Interface
-~~~~~~~~~~~~~
+~~~~~~~~~~~~~~
 
 The forms include radio buttons for selecting the prompt mode, providing a clear interface for users to choose how they want to interact with the AI providers.
 
@@ -148,15 +148,15 @@ The ``Page`` model includes a ``get_image_url`` method to retrieve image URLs wi
             return None
 
 Fallback Mechanism
-~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~
 
 For providers that don't support multimodal functionality, the system automatically falls back to text-only mode, ensuring compatibility across all supported AI services.
 
 Usage Examples
--------------
+--------------
 
 Project AI Query
-~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~
 
 To use multimodal functionality in a project query:
 
@@ -169,10 +169,10 @@ To use multimodal functionality in a project query:
 The system will process your request according to the selected mode and return results from the AI provider.
 
 Technical Considerations
------------------------
+------------------------
 
 Image Size and API Limits
-~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Different AI providers have varying limits on:
 
@@ -183,7 +183,7 @@ Different AI providers have varying limits on:
 The system implements appropriate scaling and selection logic to stay within these limits while maximizing effectiveness.
 
 Performance Optimization
-~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~
 
 To optimize performance:
 

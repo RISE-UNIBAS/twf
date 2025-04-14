@@ -1,5 +1,5 @@
 Multimodal Integration Guide
-=========================
+============================
 
 This guide explains how to integrate multimodal functionality into existing Django applications, using TWF as an example.
 
@@ -15,10 +15,10 @@ Adding multimodal support (combining text and images) to an existing application
 5. **Model Layer**: Adding methods to access images from model instances
 
 Integration Steps
----------------
+-----------------
 
 Step 1: Extend AI Clients
-~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~
 
 First, extend your AI clients to support multimodal inputs:
 
@@ -54,7 +54,7 @@ First, extend your AI clients to support multimodal inputs:
             # Implementation details...
 
 Step 2: Create Multimodal Form Controls
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Add form controls for selecting multimodal options:
 
@@ -103,7 +103,7 @@ Add form controls for selecting multimodal options:
             super().__init__(*args, **kwargs)
 
 Step 3: Update Task Processing
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Modify your task processing logic to handle multimodal inputs:
 
@@ -180,7 +180,7 @@ Modify your task processing logic to handle multimodal inputs:
         return images
 
 Step 4: Update Task Trigger Functions
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Modify your task trigger functions to accept multimodal parameters:
 
@@ -202,7 +202,7 @@ Modify your task trigger functions to accept multimodal parameters:
                           prompt_mode=prompt_mode)
 
 Step 5: Update Views
-~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~
 
 Modify your views to handle multimodal form submissions:
 
@@ -251,7 +251,7 @@ Modify your views to handle multimodal form submissions:
             return context
 
 Step 6: Add Model Methods for Image Access
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Add methods to your models to access images:
 
@@ -286,7 +286,7 @@ Add methods to your models to access images:
                 return None
 
 Step 7: Update Templates
-~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~
 
 Update your templates to include multimodal controls:
 
@@ -312,7 +312,7 @@ Update your templates to include multimodal controls:
     {% endif %}
 
 Best Practices
--------------
+--------------
 
 1. **Progressive Enhancement**: Add multimodal as an enhancement to existing functionality
 2. **Feature Detection**: Always check if a provider supports multimodal before using it
@@ -322,7 +322,7 @@ Best Practices
 6. **Testing**: Test thoroughly with different combinations of text and images
 
 Troubleshooting
--------------
+---------------
 
 Common issues and solutions:
 

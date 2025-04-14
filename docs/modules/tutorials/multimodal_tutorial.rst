@@ -1,10 +1,10 @@
 Multimodal Tutorial
-=================
+===================
 
 This step-by-step tutorial guides you through a complete multimodal workflow in TWF, from selecting documents to analyzing AI responses.
 
 Tutorial Overview
----------------
+-----------------
 
 In this tutorial, you'll learn how to:
 
@@ -17,7 +17,7 @@ In this tutorial, you'll learn how to:
 By the end, you'll be able to effectively combine text and images in your AI workflows.
 
 Prerequisites
------------
+-------------
 
 Before starting this tutorial, make sure you have:
 
@@ -27,7 +27,7 @@ Before starting this tutorial, make sure you have:
 4. **Basic Knowledge**: Familiarity with the TWF interface and document management
 
 Step 1: Preparing Your Documents
-------------------------------
+--------------------------------
 
 First, let's prepare suitable documents for multimodal analysis:
 
@@ -48,7 +48,7 @@ Document Selection Tips:
    - Consider thematically related documents for comparative analysis
 
 Step 2: Configuring a Basic Multimodal Query
-------------------------------------------
+--------------------------------------------
 
 Now let's set up a basic multimodal query:
 
@@ -84,7 +84,7 @@ Now let's set up a basic multimodal query:
    - Note that processing may take a minute or two depending on the number of images
 
 Step 3: Analyzing the Results
----------------------------
+-----------------------------
 
 Once the query completes, let's analyze the results:
 
@@ -104,7 +104,7 @@ Once the query completes, let's analyze the results:
    - Add to appropriate metadata fields (e.g., "AI Analysis", "Transcription")
 
 Step 4: Crafting Specialized Queries
-----------------------------------
+------------------------------------
 
 Now let's create more specialized queries to get deeper insights:
 
@@ -151,7 +151,7 @@ Now let's create more specialized queries to get deeper insights:
    ```
 
 Step 5: Experimenting with Different AI Providers
-----------------------------------------------
+-------------------------------------------------
 
 Let's compare results from different AI providers:
 
@@ -174,7 +174,7 @@ Let's compare results from different AI providers:
    - Consider which provider would be best for your specific use case
 
 Step 6: Advanced Prompt Engineering
----------------------------------
+-----------------------------------
 
 Now let's refine our prompts for better results:
 
@@ -233,7 +233,7 @@ Now let's refine our prompts for better results:
    ```
 
 Step 7: Saving and Utilizing Results
-----------------------------------
+------------------------------------
 
 Finally, let's put the insights to use:
 
@@ -258,7 +258,7 @@ Finally, let's put the insights to use:
    - Document which prompts work best for which document types
 
 Advanced Applications
-------------------
+---------------------
 
 Here are some advanced applications to try after completing the basic tutorial:
 
@@ -288,7 +288,7 @@ Here are some advanced applications to try after completing the basic tutorial:
    - Automatically tag and categorize based on results
 
 Troubleshooting Common Issues
----------------------------
+-----------------------------
 
 If you encounter issues during this tutorial:
 
@@ -314,7 +314,7 @@ If you encounter issues during this tutorial:
    - Use a supported browser (Chrome recommended)
 
 Conclusion
----------
+----------
 
 In this tutorial, you've learned how to:
 

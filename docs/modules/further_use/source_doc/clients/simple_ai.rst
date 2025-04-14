@@ -1,5 +1,5 @@
 Simple AI Clients
-================
+=================
 
 The Simple AI Clients module provides unified interfaces to various AI providers, including OpenAI, Google Gemini, Anthropic Claude, and Mistral.
 These clients support text-based prompts and (where available) multimodal prompts with images.
@@ -26,7 +26,7 @@ The AI client infrastructure has been extended to support multimodal prompts, co
 - **Fallback Mechanism**: Graceful degradation to text-only for providers without image support
 
 Multimodal Methods
-~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~
 
 .. code-block:: python
 
@@ -105,7 +105,7 @@ The OpenAI client class implements multimodal capabilities using the GPT-4 Visio
             return response.choices[0].message.content
 
 Claude Client
-~~~~~~~~~~~~
+~~~~~~~~~~~~~
 
 The Claude client class implements multimodal capabilities for Claude 3 and above:
 
@@ -175,7 +175,7 @@ The Claude client class implements multimodal capabilities for Claude 3 and abov
             return response.content[0].text
 
 Gemini Client
-~~~~~~~~~~~~
+~~~~~~~~~~~~~
 
 The Gemini client class implements native multimodal capabilities:
 
@@ -234,7 +234,7 @@ The Gemini client class implements native multimodal capabilities:
             return response.text
 
 Mistral Client
-~~~~~~~~~~~~~
+~~~~~~~~~~~~~~
 
 The Mistral client class implements basic multimodal support:
 
@@ -263,7 +263,7 @@ The Mistral client class implements basic multimodal support:
             # ...
 
 Image Processing Example
------------------------
+------------------------
 
 Example of multimodal processing with the OpenAI client:
 
@@ -287,7 +287,7 @@ Example of multimodal processing with the OpenAI client:
     )
 
 Module Contents
---------------
+---------------
 
 .. automodule:: twf.clients.simple_ai_clients
    :members:

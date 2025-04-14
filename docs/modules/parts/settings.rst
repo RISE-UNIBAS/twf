@@ -7,7 +7,7 @@ The Transkribus Workflow (TWF) application has two main types of settings:
 2. Project-specific settings (per project)
 
 Django Application Settings
---------------------------
+---------------------------
 
 These are standard Django settings that configure the entire application and are located in ``transkribusWorkflow/settings.py``:
 
@@ -96,7 +96,7 @@ Metadata for publishing and sharing:
 * **Project DOI**: Digital Object Identifier for the project
 
 Accessing Settings
------------------
+------------------
 
 Project settings can be accessed and modified through the project settings interface:
 

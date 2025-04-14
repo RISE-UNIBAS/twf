@@ -1,10 +1,10 @@
 Multimodal Provider Comparison
-==========================
+==============================
 
 This page compares the implementation differences between the various AI providers when handling multimodal content (text + images).
 
 Provider Capabilities
---------------------
+---------------------
 
 Each AI provider has different capabilities and requirements for handling multimodal inputs:
 
@@ -21,12 +21,12 @@ Each AI provider has different capabilities and requirements for handling multim
 +---------------+----------------+--------------------+---------------------------+
 
 Implementation Comparison
-------------------------
+-------------------------
 
 Below is a detailed comparison of the different implementations for each provider:
 
 OpenAI Implementation
-~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~
 
 OpenAI uses a content array with different types for text and images:
 
@@ -78,7 +78,7 @@ OpenAI uses a content array with different types for text and images:
             return response.choices[0].message.content
 
 Claude Implementation
-~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~
 
 Claude uses a similar content array approach but with different structure:
 
@@ -171,7 +171,7 @@ Claude uses a similar content array approach but with different structure:
             return media_types.get(extension, 'image/jpeg')  # Default to JPEG
 
 Gemini Implementation
-~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~
 
 Gemini uses a different approach with PIL Image objects:
 
@@ -229,7 +229,7 @@ Gemini uses a different approach with PIL Image objects:
             return response.text
 
 Mistral Implementation
-~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~
 
 Mistral has more limited multimodal support:
 
@@ -291,7 +291,7 @@ Mistral has more limited multimodal support:
             return response.choices[0].message.content
 
 Best Practices
--------------
+--------------
 
 When implementing multimodal functionality across multiple providers, consider these best practices:
 
@@ -303,7 +303,7 @@ When implementing multimodal functionality across multiple providers, consider t
 6. **Standardize Interface**: Use a consistent interface across providers for easier integration
 
 Implementation Challenges
-------------------------
+-------------------------
 
 Common challenges when implementing multimodal support:
 

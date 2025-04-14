@@ -1,5 +1,5 @@
 Project AI Views
-==============
+================
 
 The project AI views provide the interface for users to interact with various AI providers, including the new multimodal functionality.
 
@@ -9,7 +9,7 @@ Overview
 The project AI views extend the base ``AIFormView`` class to provide specific functionality for each AI provider. These views support both text-only and multimodal (text + images) interactions.
 
 Common Features
---------------
+---------------
 
 All project AI views share these common features:
 
@@ -20,7 +20,7 @@ All project AI views share these common features:
 5. **Result Handling**: After task completion, the results are displayed to the user
 
 Multimodal Support
------------------
+------------------
 
 For providers that support multimodal functionality, the views include:
 
@@ -30,12 +30,12 @@ For providers that support multimodal functionality, the views include:
 4. **Task Parameter Passing**: The views pass appropriate multimodal parameters to the Celery tasks
 
 Implementation
--------------
+--------------
 
 The key views for AI functionality include:
 
 OpenAI Query View
-~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~
 
 .. code-block:: python
 
@@ -56,7 +56,7 @@ OpenAI Query View
             return start_query_project_openai
 
 Claude Query View
-~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~
 
 .. code-block:: python
 
@@ -77,7 +77,7 @@ Claude Query View
             return start_query_project_claude
 
 Gemini Query View
-~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~
 
 .. code-block:: python
 
@@ -98,7 +98,7 @@ Gemini Query View
             return start_query_project_gemini
 
 Mistral Query View
-~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~
 
 .. code-block:: python
 
@@ -120,7 +120,7 @@ Mistral Query View
             return start_query_project_mistral
 
 Template Integration
-------------------
+--------------------
 
 The templates for the AI views include common elements for multimodal support:
 
@@ -152,7 +152,7 @@ The templates for the AI views include common elements for multimodal support:
     {% endif %}
 
 Usage Flow
----------
+----------
 
 The typical flow for using the multimodal AI features through these views:
 

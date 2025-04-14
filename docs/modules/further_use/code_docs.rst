@@ -3,7 +3,7 @@ Source Code Documentation
 This is the source code documentation for the TWF project.
 
 Guides and Tutorials
--------------------
+--------------------
 
 .. toctree::
    :maxdepth: 1
@@ -12,7 +12,7 @@ Guides and Tutorials
    multimodal_integration_guide.rst
 
 Core Modules
------------
+------------
 
 .. toctree::
    :maxdepth: 1

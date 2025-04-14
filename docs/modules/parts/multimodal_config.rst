@@ -1,10 +1,10 @@
 Multimodal Configuration
-======================
+========================
 
 This page documents the configuration options and settings for the multimodal functionality in TWF.
 
 Default Settings
---------------
+----------------
 
 The multimodal functionality has the following default settings:
 
@@ -27,7 +27,7 @@ Provider-Specific Settings
 Each AI provider has specific settings for multimodal functionality:
 
 OpenAI Settings
-~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~
 
 .. code-block:: python
 
@@ -41,7 +41,7 @@ OpenAI Settings
     }
 
 Claude Settings
-~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~
 
 .. code-block:: python
 
@@ -55,7 +55,7 @@ Claude Settings
     }
 
 Gemini Settings
-~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~
 
 .. code-block:: python
 
@@ -69,7 +69,7 @@ Gemini Settings
     }
 
 Mistral Settings
-~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~
 
 .. code-block:: python
 
@@ -84,7 +84,7 @@ Mistral Settings
     }
 
 Image Scaling Options
--------------------
+---------------------
 
 When using the IIIF protocol for image scaling, the following options are available:
 
@@ -113,7 +113,7 @@ When using the IIIF protocol for image scaling, the following options are availa
 The default scaling method is 'pct:50' (50% of original size).
 
 Form Configuration
-----------------
+------------------
 
 Multimodal form configuration options:
 
@@ -129,7 +129,7 @@ Multimodal form configuration options:
     }
 
 Environment Variables
-------------------
+---------------------
 
 The following environment variables can be used to configure the multimodal functionality:
 
@@ -139,7 +139,7 @@ The following environment variables can be used to configure the multimodal func
 * ``TWF_MAX_TOTAL_IMAGES``: Maximum total images across all documents (default: "10")
 
 URL Configuration
---------------
+-----------------
 
 The default URL configuration for multimodal views:
 

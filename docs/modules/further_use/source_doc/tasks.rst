@@ -2,7 +2,7 @@ Tasks
 =====
 
 Task Base
---------
+---------
 
 The task base module provides the foundation for all asynchronous Celery tasks in the system.
 
@@ -12,7 +12,7 @@ The task base module provides the foundation for all asynchronous Celery tasks i
    :show-inheritance:
 
 Multimodal Task Processing
-~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The task base module has been extended to support multimodal processing with both text and images:
 
@@ -93,7 +93,7 @@ The task base module has been extended to support multimodal processing with bot
         return images
 
 Document Tasks
--------------
+--------------
 
 Tasks for document processing.
 
@@ -102,7 +102,7 @@ Tasks for document processing.
    :undoc-members:
 
 Collection Tasks
----------------
+----------------
 
 Tasks for collection processing.
 
@@ -111,7 +111,7 @@ Tasks for collection processing.
    :undoc-members:
 
 Dictionary Tasks
----------------
+----------------
 
 Tasks for dictionary processing.
 
@@ -120,7 +120,7 @@ Tasks for dictionary processing.
    :undoc-members:
 
 Project Tasks
-------------
+-------------
 
 Tasks for project-level operations, including AI queries.
 
@@ -129,7 +129,7 @@ Tasks for project-level operations, including AI queries.
    :undoc-members:
 
 Multimodal AI Query Tasks
-~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The project tasks module includes several tasks for AI queries that support multimodal functionality:
 
@@ -166,7 +166,7 @@ The project tasks module includes several tasks for AI queries that support mult
         )
 
 Export Tasks
------------
+------------
 
 Tasks for exporting data from the system.
 
@@ -175,7 +175,7 @@ Tasks for exporting data from the system.
    :undoc-members:
 
 Structure Tasks
---------------
+---------------
 
 Tasks for working with document structure.
 
@@ -184,7 +184,7 @@ Tasks for working with document structure.
    :undoc-members:
 
 Metadata Tasks
--------------
+--------------
 
 Tasks for processing metadata.
 
@@ -193,7 +193,7 @@ Tasks for processing metadata.
    :undoc-members:
 
 Tags Tasks
----------
+----------
 
 Tasks for tag processing.
 

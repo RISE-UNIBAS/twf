@@ -4,7 +4,7 @@ Clients
 The TWF application uses various client modules to interact with external services and APIs. These clients provide abstracted interfaces for communicating with different services, including AI providers, geographical databases, and data sources.
 
 AI Clients
----------
+----------
 
 The AI clients provide interfaces to various AI service providers, including multimodal capabilities for combining text and images in prompts.
 
@@ -16,7 +16,7 @@ The AI clients provide interfaces to various AI service providers, including mul
    clients/multimodal_comparison.rst
 
 External Data Clients
---------------------
+---------------------
 
 These clients connect to external data sources for normalized information:
 
@@ -29,7 +29,7 @@ These clients connect to external data sources for normalized information:
    clients/wikidata.rst
 
 Other Clients
-------------
+-------------
 
 Additional utility clients:
 

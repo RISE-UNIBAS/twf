@@ -39,7 +39,7 @@ the project's documents and include them in the prompt in the appropriate format
 for each AI provider.
 
 AIFormView Base Class
-~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~
 
 The `AIFormView` base class provides the foundation for all AI-related views, including multimodal support:
 
@@ -98,7 +98,7 @@ explanation of the provider-specific views and multimodal implementation, see:
    views/project_ai.rst
 
 Template Structure
-~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~
 
 The AI view templates include support for selecting the multimodal prompt mode:
 
