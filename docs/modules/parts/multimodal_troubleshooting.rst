@@ -9,9 +9,9 @@ Common Problems and Solutions
 Provider API Errors
 ~~~~~~~~~~~~~~~~~~~
 
-**Problem**: You receive errors related to the AI provider API.
+**Problem**: You receive errors related to the AI provider API*.**
 
-**Solutions**:
+**Solutions**:**
 1. Check API credentials in project settings
 2. Verify API key format and permissions
 3. Check for provider service disruptions
@@ -36,11 +36,11 @@ Specific error messages and solutions:
 +--------------------------------------------+-----------------------------------------------+
 
 Image-Related Issues
-~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~
 
-**Problem**: Issues with image processing or display.
+**Problem**: Issues with image processing or display*.**
 
-**Solutions**:
+**Solutions**:**
 1. Check image format (JPG, PNG, etc.)
 2. Verify image size is within provider limits
 3. Check image URL accessibility
@@ -64,9 +64,9 @@ Specific image issues:
 Token Limit Exceeded
 ~~~~~~~~~~~~~~~~~~~~
 
-**Problem**: Your request exceeds the token limit for the AI provider.
+**Problem**: Your request exceeds the token limit for the AI provider*.**
 
-**Solutions**:
+**Solutions**:**
 1. Reduce the number of images
 2. Use image scaling to reduce image size
 3. Shorten your text prompt
@@ -76,9 +76,9 @@ Token Limit Exceeded
 Performance Issues
 ~~~~~~~~~~~~~~~~~~
 
-**Problem**: Slow processing times or timeouts.
+**Problem**: Slow processing times or timeouts*.**
 
-**Solutions**:
+**Solutions**:**
 1. Reduce the number of images
 2. Use smaller or scaled images
 3. Use provider-specific optimizations (e.g., setting max_tokens)
@@ -88,9 +88,9 @@ Performance Issues
 Quality Issues
 ~~~~~~~~~~~~~~
 
-**Problem**: Poor quality responses from the AI.
+**Problem**: Poor quality responses from the AI*.**
 
-**Solutions**:
+**Solutions**:**
 1. Improve image quality/resolution
 2. Select better representative images
 3. Improve prompt clarity and specificity
@@ -115,78 +115,78 @@ Specific quality issues:
 User Interface Issues
 ~~~~~~~~~~~~~~~~~~~~~
 
-**Problem**: Issues with the multimodal UI controls.
+**Problem**: Issues with the multimodal UI controls*.**
 
-**Solutions**:
+**Solutions**:**
 1. Check browser compatibility (Chrome recommended)
 2. Clear browser cache and cookies
 3. Check for JavaScript errors in browser console
 4. Verify proper loading of UI assets
 
 Provider-Specific Troubleshooting
--------------------------------
+---------------------------------
 
 OpenAI (GPT-4 Vision)
-~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~
 
 Common issues:
 
-1. **Error**: "This model does not support vision inputs"
-   **Solution**: Ensure you're using GPT-4 Vision API, not standard GPT-4
+1. **Error**: "This model does not support vision* inputs"**
+   **Solution**: Ensure you're using GPT-4 Vision API, not standard* GPT-4**
 
-2. **Error**: "Maximum context length exceeded"
-   **Solution**: Reduce the number of images or use smaller images
+2. **Error**: "Maximum context length* exceeded"**
+   **Solution**: Reduce the number of images or use smaller* images**
 
-3. **Error**: "Request timed out"
-   **Solution**: Reduce the complexity of your query or number of images
+3. **Error**: "Request timed* out"**
+   **Solution**: Reduce the complexity of your query or number of* images**
 
 Claude
 ~~~~~~
 
 Common issues:
 
-1. **Error**: "Media type required for image"
-   **Solution**: Ensure proper media type detection is implemented
+1. **Error**: "Media type required for* image"**
+   **Solution**: Ensure proper media type detection is* implemented**
 
-2. **Error**: "Bad Request: Invalid content format"
-   **Solution**: Check the format of your content array in the request
+2. **Error**: "Bad Request: Invalid content* format"**
+   **Solution**: Check the format of your content array in the* request**
 
-3. **Error**: "Token limit exceeded"
-   **Solution**: Claude has specific token limits; reduce content size
+3. **Error**: "Token limit* exceeded"**
+   **Solution**: Claude has specific token limits; reduce content* size**
 
 Gemini
 ~~~~~~
 
 Common issues:
 
-1. **Error**: "RESOURCE_EXHAUSTED"
-   **Solution**: Gemini has quota limits; wait or request increased quota
+1. **Error**:* "RESOURCE_EXHAUSTED"**
+   **Solution**: Gemini has quota limits; wait or request increased* quota**
 
-2. **Error**: "INVALID_ARGUMENT"
-   **Solution**: Check image format compatibility with Gemini
+2. **Error**:* "INVALID_ARGUMENT"**
+   **Solution**: Check image format compatibility with* Gemini**
 
-3. **Error**: "FAILED_PRECONDITION"
-   **Solution**: Ensure Gemini API is enabled for your project
+3. **Error**:* "FAILED_PRECONDITION"**
+   **Solution**: Ensure Gemini API is enabled for your* project**
 
 Mistral
 ~~~~~~~
 
 Common issues:
 
-1. **Error**: "Unsupported model for multimodal"
-   **Solution**: Only Mistral Large supports multimodal; switch models
+1. **Error**: "Unsupported model for* multimodal"**
+   **Solution**: Only Mistral Large supports multimodal; switch* models**
 
-2. **Error**: "Invalid image format"
-   **Solution**: Use supported format (JPG/PNG) and check encoding
+2. **Error**: "Invalid image* format"**
+   **Solution**: Use supported format (JPG/PNG) and check* encoding**
 
-3. **Error**: "Request entity too large"
-   **Solution**: Mistral has more limited image size constraints; reduce image size
+3. **Error**: "Request entity too* large"**
+   **Solution**: Mistral has more limited image size constraints; reduce image* size**
 
 Advanced Troubleshooting
 ------------------------
 
 System-Level Diagnosis
-~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~
 
 For persistent issues, perform a system-level diagnosis:
 
@@ -216,7 +216,7 @@ Debug Mode
 Enable debug mode for more detailed logging:
 
 1. In your project settings:
-   ```python
+   ```python`
    # Enable debug logging for multimodal functionality
    MULTIMODAL_DEBUG = True
    ```
@@ -233,12 +233,12 @@ Reporting Issues
 
 When reporting issues to developers, include:
 
-1. **Error messages**: Exact text of any error messages
-2. **Provider and model**: Which AI provider and model you were using
-3. **Request details**: Number of images, approximate prompt length
-4. **Steps to reproduce**: Detailed steps to reproduce the issue
-5. **Expected vs. actual behavior**: What you expected vs. what happened
-6. **Screenshots**: Include screenshots of the error if applicable
-7. **Logs**: Relevant sections from logs (with sensitive information redacted)
+1. **Error** messages**: Exact text of any error* messages**
+2. **Provider* and** model**: Which AI provider and model you were* using**
+3. **Request** details**: Number of images, approximate prompt* length**
+4. **Steps* to** reproduce**: Detailed steps to reproduce the* issue**
+5. **Expected vs.* actual** behavior**: What you expected vs. what* happened**
+6. **Screenshots**: Include screenshots of the error if* applicable**
+7. **Logs**: Relevant sections from logs (with sensitive information* redacted)**
 
 Submit issues through the project's issue tracker with the label "multimodal".

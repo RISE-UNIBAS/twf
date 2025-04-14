@@ -87,7 +87,7 @@ The `AIFormView` base class provides the foundation for all AI-related views, in
             return redirect('project_task_monitor')
 
 Provider-Specific Views
-~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~
 
 Each AI provider has its own specific view that extends the base functionality. For a detailed 
 explanation of the provider-specific views and multimodal implementation, see:

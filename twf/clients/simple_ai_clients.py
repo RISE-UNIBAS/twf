@@ -89,10 +89,10 @@ class AiApiClient:
         Args:
             api (str): The API provider to use ('openai', 'genai', 'anthropic', or 'mistral')
             api_key (str): API key for authentication with the provider
-            gpt_role_description (str, optional): System role description for the AI model.
+            gpt_role_description (str, optional): System role description for the AI model.\
                 Defaults to a generic helpful assistant role.
-            temperature (float, optional): Controls randomness in the model's responses.
-                Higher values (e.g., 0.8) make output more random, lower values (e.g., 0.2)
+            temperature (float, optional): Controls randomness in the model's responses. \
+                Higher values (e.g., 0.8) make output more random, lower values (e.g., 0.2) \
                 make it more deterministic. Defaults to 0.5.
                 
         Raises:
@@ -138,7 +138,7 @@ class AiApiClient:
         All these clients support basic text prompts. For multimodal support:
         - OpenAI supports images through the chat completions API
         - Google Gemini supports images through the GenerativeModel API
-        - Anthropic and Mistral clients are initialized but don't yet support
+        - Anthropic and Mistral clients are initialized but don't yet support \
           multimodal content in this implementation
         """
         if self.api == 'openai':
@@ -241,9 +241,9 @@ class AiApiClient:
         including images in subsequent requests and to free up any resources.
         
         For provider-specific details:
-        - OpenAI: Images are processed and encoded during the prompt call,
+        - OpenAI: Images are processed and encoded during the prompt call, \
           so clearing them frees memory and prevents reuse
-        - Google Gemini: Images might remain in memory on the Gemini service side,
+        - Google Gemini: Images might remain in memory on the Gemini service side, \
           but clearing locally prevents them from being re-uploaded
         
         The BaseTWFTask.process_single_ai_request method automatically calls
@@ -261,14 +261,16 @@ class AiApiClient:
         multimodal prompts.
         
         For multimodal prompts, resource handling differs based on type:
-        - URLs: Typically processed by making a request to fetch the content or
+        - URLs: Typically processed by making a request to fetch the content or \
           by passing the URL directly to the AI provider
-        - File paths: Read from the local filesystem and processed according to
+        - File paths: Read from the local filesystem and processed according to \
           each provider's requirements (e.g., base64 encoding for OpenAI)
+        
         
         Args:
             resource (str): The resource string to check
             
+        
         Returns:
             bool: True if the resource is a URL, False if it's likely a file path
         """
@@ -285,26 +287,29 @@ class AiApiClient:
         
         For multimodal prompts (text + images):
         - OpenAI: Uses the Chat Completions API with multimodal content support
-          - Images are sent as image_url content items in the message
-          - Local files are base64 encoded with data URI scheme
-          - Remote URLs are sent directly in the image_url object
-          - Supported in models like gpt-4-vision and later gpt-4 models
+
+          * Images are sent as image_url content items in the message
+          * Local files are base64 encoded with data URI scheme
+          * Remote URLs are sent directly in the image_url object
+          * Supported in models like gpt-4-vision and later gpt-4 models
         
         - Google Gemini: Uses the GenerativeModel API with multimodal support
-          - Images are uploaded via genai.upload_file or genai.upload_blob
-          - Both local files and remote URLs are supported
-          - Supported in models like gemini-pro-vision and gemini-1.5-pro
+
+          * Images are uploaded via genai.upload_file or genai.upload_blob
+          * Both local files and remote URLs are supported
+          * Supported in models like gemini-pro-vision and gemini-1.5-pro
         
         - Claude and Mistral: Currently do not support images in API
-          - Any registered images will be ignored
-          - Only the text prompt will be processed
+
+          * Any registered images will be ignored
+          * Only the text prompt will be processed
         
         Args:
             model (str): The model identifier to use (e.g., "gpt-4", "gemini-pro")
             prompt (str): The text prompt to send to the model
             
         Returns:
-            tuple: A tuple containing (response_object, elapsed_time_in_seconds)
+            tuple: A tuple containing (response_object, elapsed_time_in_seconds) \
                   The response_object structure varies by provider
                   
         Usage Notes:

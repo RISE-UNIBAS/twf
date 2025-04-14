@@ -636,11 +636,13 @@ class BaseTWFTask(CeleryTask):
         - For images_only or text_and_images modes: Image resources are added using
           the add_image_resource method if the provider supports images
         
+        
         Args:
             client_name (str): The name of the AI provider to use
                               ('openai', 'genai', 'anthropic', or 'mistral')
             role_description (str): System role description for the AI model
             
+        
         Provider-Specific Details:
             - OpenAI: Configured for multimodal support with vision models
             - Google Gemini: Configured for multimodal support with vision models

@@ -22,7 +22,7 @@ The multimodal functionality has the following default settings:
 These settings can be overridden in your project settings.py file.
 
 Provider-Specific Settings
-------------------------
+--------------------------
 
 Each AI provider has specific settings for multimodal functionality:
 
@@ -154,7 +154,7 @@ The default URL configuration for multimodal views:
     ]
 
 Project-Level Configuration
--------------------------
+---------------------------
 
 Project model configuration for multimodal functionality:
 

@@ -2,15 +2,6 @@ Source Code Documentation
 =========================
 This is the source code documentation for the TWF project.
 
-Guides and Tutorials
---------------------
-
-.. toctree::
-   :maxdepth: 1
-   :caption: Integration Guides
-   
-   multimodal_integration_guide.rst
-
 Core Modules
 ------------
 

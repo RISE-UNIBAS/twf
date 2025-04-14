@@ -28,7 +28,7 @@ Project-specific Settings
 These settings can be configured for each project in the application through the user interface. They're organized into five main categories:
 
 General Settings
-^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^
 
 Basic project information:
 
@@ -39,7 +39,7 @@ Basic project information:
 * **Selected dictionaries**: Dictionaries assigned to this project
 
 Credential Settings
-^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^
 
 API keys and authentication for external services:
 
@@ -52,7 +52,7 @@ API keys and authentication for external services:
 * **Zenodo**: API token for publishing
 
 Task Settings
-^^^^^^^^^^^^
+^^^^^^^^^^^^^
 
 Configuration for various automation tasks:
 
@@ -76,7 +76,7 @@ Configuration for various automation tasks:
     * Ignored tag types
 
 Export Settings
-^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^
 
 Configure how data is exported from the system:
 
@@ -85,7 +85,7 @@ Configure how data is exported from the system:
 * **Page Export Configuration**: Settings for page-level exports
 
 Repository Settings
-^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^
 
 Metadata for publishing and sharing:
 

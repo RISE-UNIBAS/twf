@@ -21,24 +21,24 @@ Prerequisites
 
 Before starting this tutorial, make sure you have:
 
-1. **TWF Access**: A working TWF installation with appropriate permissions
-2. **API Keys**: Valid API keys configured for at least one AI provider
-3. **Documents**: A few test documents with images uploaded to your project
-4. **Basic Knowledge**: Familiarity with the TWF interface and document management
+1. **TWF** Access**: A working TWF installation with appropriate* permissions**
+2. **API** Keys**: Valid API keys configured for at least one AI* provider**
+3. **Documents**: A few test documents with images uploaded to your* project**
+4. **Basic** Knowledge**: Familiarity with the TWF interface and document* management**
 
 Step 1: Preparing Your Documents
 --------------------------------
 
 First, let's prepare suitable documents for multimodal analysis:
 
-1. **Navigate to Documents** by clicking the "Documents" tab in the main navigation.
+1. **Navigate* to** Documents** by clicking the "Documents" tab in the main navigation*.**
 
-2. **Select Documents with High-Quality Images**:
+2. **Select Documents with* High-Quality** Images**:**
    - Look for documents that have clear, high-resolution images
    - Ideally, select 2-3 documents of the same type (e.g., historical manuscripts, technical diagrams)
    - Check image quality by previewing document pages
 
-3. **Check Document Metadata**:
+3. **Check* Document** Metadata**:**
    - Ensure documents have basic metadata filled out
    - This will help provide context for the AI
 
@@ -52,20 +52,20 @@ Step 2: Configuring a Basic Multimodal Query
 
 Now let's set up a basic multimodal query:
 
-1. **Navigate to AI Query**:
+1. **Navigate to* AI** Query**:**
    - From the Documents view, select your chosen documents
    - Click "Actions" → "AI Query"
 
-2. **Select Provider and Mode**:
+2. **Select Provider* and** Mode**:**
    - Choose "OpenAI" as your AI provider (GPT-4 Vision has strong multimodal capabilities)
    - Select "Text + Images" as the prompt mode
    - Note that the system will automatically select up to 5 images from each document
 
-3. **Configure Basic Settings**:
+3. **Configure* Basic** Settings**:**
    - Set an appropriate role description (e.g., "You are an expert document analyst specializing in historical manuscripts")
    - Leave other settings at their defaults for now
 
-4. **Craft a Simple Prompt**:
+4. **Craft a* Simple** Prompt**:**
    For your first query, use this basic prompt:
 
    ```
@@ -78,7 +78,7 @@ Now let's set up a basic multimodal query:
    Organize your response by page number.
    ```
 
-5. **Submit the Query**:
+5. **Submit* the** Query**:**
    - Review your configuration one last time
    - Click "Submit Query"
    - Note that processing may take a minute or two depending on the number of images
@@ -88,17 +88,17 @@ Step 3: Analyzing the Results
 
 Once the query completes, let's analyze the results:
 
-1. **Review the Response**:
+1. **Review* the** Response**:**
    - Read through the AI's analysis of each page
    - Note how it identifies both textual and visual elements
    - Pay attention to how it organizes information by page
 
-2. **Evaluate Accuracy**:
+2. **Evaluate** Accuracy**:**
    - Compare the AI's descriptions to the actual document pages
    - Note any misinterpretations or omissions
    - Pay special attention to text transcription accuracy
 
-3. **Save Important Insights**:
+3. **Save* Important** Insights**:**
    - Use the "Save to Metadata" option to store valuable insights
    - Select key sections of the response to save
    - Add to appropriate metadata fields (e.g., "AI Analysis", "Transcription")
@@ -108,7 +108,7 @@ Step 4: Crafting Specialized Queries
 
 Now let's create more specialized queries to get deeper insights:
 
-1. **Visual Element Analysis**:
+1. **Visual* Element** Analysis**:**
    
    Try an image-focused query using "Images only" mode:
    
@@ -122,7 +122,7 @@ Now let's create more specialized queries to get deeper insights:
    Be as detailed as possible in your visual analysis.
    ```
 
-2. **Text Transcription Query**:
+2. **Text* Transcription** Query**:**
    
    Try a text-focused query while still in multimodal mode:
    
@@ -136,7 +136,7 @@ Now let's create more specialized queries to get deeper insights:
    Present the transcription separately for each page.
    ```
 
-3. **Comparative Analysis**:
+3. **Comparative** Analysis**:**
    
    If you selected related documents, try this comparative query:
    
@@ -155,19 +155,19 @@ Step 5: Experimenting with Different AI Providers
 
 Let's compare results from different AI providers:
 
-1. **Claude Query**:
+1. **Claude** Query**:**
    - Return to the AI Query page
    - Select the same documents
    - Choose "Claude" as the provider
    - Use the same prompt from your first OpenAI query
    - Submit and compare results with OpenAI's response
 
-2. **Gemini Query**:
+2. **Gemini** Query**:**
    - Repeat with Gemini as the provider
    - Use the same prompt again
    - Submit and add this to your comparison
 
-3. **Compare Provider Strengths**:
+3. **Compare* Provider** Strengths**:**
    - Note which provider gave the most accurate text transcription
    - Compare visual analysis capabilities
    - Observe differences in response structure and detail
@@ -178,7 +178,7 @@ Step 6: Advanced Prompt Engineering
 
 Now let's refine our prompts for better results:
 
-1. **Structured Output Prompt**:
+1. **Structured* Output** Prompt**:**
    
    Try this prompt designed to get more structured results:
    
@@ -207,7 +207,7 @@ Now let's refine our prompts for better results:
    - [Your best estimate with reasoning]
    ```
 
-2. **Expert Role Prompt**:
+2. **Expert* Role** Prompt**:**
    
    Try enhancing the system prompt with more expertise:
    
@@ -237,22 +237,22 @@ Step 7: Saving and Utilizing Results
 
 Finally, let's put the insights to use:
 
-1. **Create Document Tags**:
+1. **Create* Document** Tags**:**
    - Based on AI analysis, create appropriate tags for your documents
    - For example: "Contains_Illustrations", "19th_Century", "Handwritten"
    - Use the Tags management interface to add these tags
 
-2. **Update Metadata**:
+2. **Update** Metadata**:**
    - Add key information to document metadata fields
    - For example, add transcribed text to a "Transcription" field
    - Add visual descriptions to a "Visual Elements" field
 
-3. **Create Analysis Notes**:
+3. **Create* Analysis** Notes**:**
    - Compile the most valuable insights into document notes
    - Summarize findings across different AI providers
    - Note which providers performed best for which tasks
 
-4. **Save Effective Prompts**:
+4. **Save* Effective** Prompts**:**
    - Save your most effective prompts for future use
    - Create a prompt library in your project settings
    - Document which prompts work best for which document types
@@ -262,27 +262,27 @@ Advanced Applications
 
 Here are some advanced applications to try after completing the basic tutorial:
 
-1. **Document Classification Workflow**:
+1. **Document* Classification** Workflow**:**
    - Use multimodal queries to automatically classify documents
    - Create a classification prompt that assigns categories
    - Use results to tag and organize your document collection
 
-2. **Transcription Verification**:
+2. **Transcription** Verification**:**
    - Compare transcriptions across multiple AI providers
    - Use differences to identify potentially problematic text
    - Create a consensus transcription from multiple results
 
-3. **Visual Element Extraction**:
+3. **Visual* Element** Extraction**:**
    - Use image-only queries to catalog visual elements
    - Create a database of illustrations, seals, or other visual elements
    - Link these to appropriate metadata for search and retrieval
 
-4. **Historical Context Enhancement**:
+4. **Historical* Context** Enhancement**:**
    - Use multimodal AI to suggest historical context
    - Add this information to document descriptions
    - Build relationships between documents based on AI-suggested connections
 
-5. **Batch Processing Workflow**:
+5. **Batch* Processing** Workflow**:**
    - Apply successful prompts to larger document batches
    - Use Celery tasks to process documents asynchronously 
    - Automatically tag and categorize based on results
@@ -292,23 +292,23 @@ Troubleshooting Common Issues
 
 If you encounter issues during this tutorial:
 
-1. **Long Processing Times**:
+1. **Long* Processing** Times**:**
    - Reduce the number of images selected
    - Use a smaller prompt
    - Check system resources and network connectivity
 
-2. **Poor Quality Responses**:
+2. **Poor* Quality** Responses**:**
    - Check image quality and resolution
    - Try a different AI provider
    - Be more specific in your prompt
    - Provide more context about the document type
 
-3. **API Errors**:
+3. **API** Errors**:**
    - Verify your API keys in project settings
    - Check provider service status
    - Ensure you have sufficient API quota/credits
 
-4. **Interface Issues**:
+4. **Interface** Issues**:**
    - Try refreshing the page
    - Clear browser cache
    - Use a supported browser (Chrome recommended)
