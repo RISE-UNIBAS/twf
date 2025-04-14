@@ -11,15 +11,16 @@ class ProjectManagementTable(tables.Table):
     title = tables.Column(verbose_name="Project", attrs={"td": {"class": "fw-bold"}})
     created_at = tables.DateTimeColumn(format="Y-m-d H:i", verbose_name="Created")
     modified_at = tables.DateTimeColumn(format="Y-m-d H:i", verbose_name="Last Updated")
-    status = tables.Column()
+    status = tables.Column(orderable=False, verbose_name="Project Status")
     owner = tables.Column(accessor="owner", verbose_name="Owner")
 
-    actions = tables.Column(empty_values=(), verbose_name="Options")
+    actions = tables.Column(empty_values=(), verbose_name="Options", orderable=False)
 
     class Meta:
         model = Project
         fields = ("title", "created_at", "modified_at", "owner", "status")
-        attrs = {"class": "table table-striped table-hover table-sm"}
+        template_name = "django_tables2/bootstrap4.html"
+        attrs = {"class": "table table-striped table-hover"}
 
     def render_status(self, value):
         class_map = {
