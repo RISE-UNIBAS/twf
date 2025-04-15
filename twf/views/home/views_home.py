@@ -440,7 +440,7 @@ class TWFManageUsersView(SingleTableView, FilterView, LoginRequiredMixin, FormVi
     def form_valid(self, form):
         user = form.save(commit=False)
         initial_password = get_random_string(length=8)
-        user.password = initial_password
+        user.set_password(initial_password)
         user.save()
 
         sent = send_welcome_email(user.email, user.username, initial_password)
