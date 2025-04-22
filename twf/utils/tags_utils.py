@@ -11,7 +11,12 @@ def get_translated_tag_type(project, tag_type):
     if "tag_type_translator" not in task_configurations:
         return tag_type
 
-    tag_type_translator = json.loads(task_configurations["tag_type_translator"])
+    try:
+        tag_type_translator = json.loads(task_configurations["tag_type_translator"])
+    except json.JSONDecodeError:
+        # Handle JSON decoding error
+        return tag_type
+
     if tag_type in tag_type_translator:
         return tag_type_translator[tag_type]
 
@@ -37,19 +42,24 @@ def get_excluded_types(project):
     """Get the excluded tag types."""
     task_configurations = project.get_task_configuration("tag_types")
     if "ignored_tag_types" in task_configurations:
-        conf = json.loads(task_configurations["ignored_tag_types"])
-        if "excluded" in conf:
-            return conf["excluded"]
-        return []
+        try:
+            conf = json.loads(task_configurations["ignored_tag_types"])
+            if "excluded" in conf:
+                return conf["excluded"]
+        except json.JSONDecodeError:
+            return []
     return []
 
 def get_date_types(project):
     """Get the date tag types."""
     task_configurations = project.get_task_configuration("tag_types")
     if "ignored_tag_types" in task_configurations:
-        conf = json.loads(task_configurations["ignored_tag_types"])
-        if "dates" in conf:
-            return conf["dates"]
+        try:
+            conf = json.loads(task_configurations["ignored_tag_types"])
+            if "dates" in conf:
+                return conf["dates"]
+        except json.JSONDecodeError:
+            return []
         return []
     return []
 

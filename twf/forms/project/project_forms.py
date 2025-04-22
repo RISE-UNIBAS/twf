@@ -1,6 +1,7 @@
 """Forms for creating and updating project settings.
 The settings views are separated into different forms for each section of the settings."""
 import json
+import re
 
 from crispy_forms.bootstrap import TabHolder, Tab
 from crispy_forms.helper import FormHelper
@@ -318,7 +319,12 @@ class TaskSettingsForm(forms.ModelForm):
                                                    ('auto', 'Auto Detect'),
                                                    ('DMY', 'DMY'), ('YMD', 'YMD')],
                                           widget=Select2Widget(attrs={'style': 'width: 100%;'}))
-    resolve_to_date = forms.CharField(required=False, widget=TextInput(attrs={'placeholder': 'Resolve to Precision'}))
+    resolve_to_date = forms.ChoiceField(required=False, label="Resolve to Precision",
+                                        choices=[('', 'Select Resolve to Precision'),
+                                                 ('day', 'Day'),
+                                                 ('month', 'Month'),
+                                                 ('year', 'Year')],
+                                        widget=Select2Widget(attrs={'style': 'width: 100%;'}))
 
     # Define the fields for the form: Tag Type Settings
     tag_type_translator = forms.CharField(required=False, widget=forms.Textarea(attrs={'rows': 5}),
@@ -406,29 +412,80 @@ class TaskSettingsForm(forms.ModelForm):
         )
 
     def clean(self):
-        """Clean and save task data back into the JSONField `conf_tasks`."""
         cleaned_data = super().clean()
+
+        # Grab values from cleaned_data
+        sheet_id = cleaned_data.get("google_sheet_id")
+        sheet_range = cleaned_data.get("google_sheet_range")
+        valid_cols = cleaned_data.get("google_sheet_valid_columns")
+        doc_id_col = cleaned_data.get("google_sheet_document_id_column")
+        doc_title_col = cleaned_data.get("google_sheet_document_title_column")
+
+        # Require sheet_id if any other field is set
+        if (sheet_range or valid_cols or doc_id_col or doc_title_col) and not sheet_id:
+            self.add_error("google_sheet_id", "This field is required if other Google Sheet fields are set.")
+
+        # Validate sheet range using regex
+        # Format: Sheet1!A1:D100 or A1:D100
+        if sheet_range:
+            pattern = r"^([a-zA-Z0-9_ ]+!)?[A-Z]+\d+(:[A-Z]+\d+)?$"
+            if not re.match(pattern, sheet_range):
+                self.add_error("google_sheet_range", "Invalid range format. Use A1:B10 or Sheet1!A1:B10.")
+
+        # Validate valid columns as comma-separated list
+        if valid_cols:
+            cols = [c.strip() for c in valid_cols.split(",")]
+            if not all(cols):
+                self.add_error("google_sheet_valid_columns", "Please enter a comma-separated list of column names.")
+            elif any(" " in col for col in cols):
+                self.add_error("google_sheet_valid_columns", "Column names should not contain spaces.")
+
+        # Validate doc_id_col and doc_title_col to be non-empty and space-free (if filled)
+        if doc_id_col and " " in doc_id_col:
+            self.add_error("google_sheet_document_id_column", "Column name must not contain spaces.")
+        if doc_title_col and " " in doc_title_col:
+            self.add_error("google_sheet_document_title_column", "Column name must not contain spaces.")
+
+        # Validate all metadata_review and tag_type fields are valid JSON
+        json_fields = [
+            ("page_metadata_review", "Page Metadata Review"),
+            ("document_metadata_review", "Document Metadata Review"),
+            ("tag_type_translator", "Tag Type Translator"),
+            ("ignored_tag_types", "Ignored Tag Types")
+        ]
+
+        for field_name, label in json_fields:
+            raw_value = cleaned_data.get(field_name)
+            if raw_value:
+                try:
+                    json.loads(raw_value)
+                except json.JSONDecodeError:
+                    self.add_error(field_name, f"{label} must be valid JSON.")
+
+
+        # Reconstruct JSON field
         self.instance.conf_tasks = {
-            'google_sheet': {
-                'sheet_id': cleaned_data.get('google_sheet_id'),
-                'range': cleaned_data.get('google_sheet_range'),
-                'valid_columns': cleaned_data.get('google_sheet_valid_columns'),
-                'document_id_column': cleaned_data.get('google_sheet_document_id_column'),
-                'document_title_column': cleaned_data.get('google_sheet_document_title_column')
+            "google_sheet": {
+                "sheet_id": sheet_id,
+                "range": sheet_range,
+                "valid_columns": valid_cols,
+                "document_id_column": doc_id_col,
+                "document_title_column": doc_title_col
             },
-            'metadata_review': {
-                'page_metadata_review': cleaned_data.get('page_metadata_review'),
-                'document_metadata_review': cleaned_data.get('document_metadata_review')
+            "metadata_review": {
+                "page_metadata_review": cleaned_data.get("page_metadata_review"),
+                "document_metadata_review": cleaned_data.get("document_metadata_review")
             },
-            'date_normalization': {
-                'date_input_format': cleaned_data.get('date_input_format'),
-                'resolve_to_date': cleaned_data.get('resolve_to_date')
+            "date_normalization": {
+                "date_input_format": cleaned_data.get("date_input_format"),
+                "resolve_to_date": cleaned_data.get("resolve_to_date")
             },
-            'tag_types': {
-                'tag_type_translator': cleaned_data.get('tag_type_translator'),
-                'ignored_tag_types': cleaned_data.get('ignored_tag_types')
+            "tag_types": {
+                "tag_type_translator": cleaned_data.get("tag_type_translator"),
+                "ignored_tag_types": cleaned_data.get("ignored_tag_types")
             }
         }
+
         return cleaned_data
 
 
