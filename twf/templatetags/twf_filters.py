@@ -66,3 +66,7 @@ def highlight_matches(text, search_term):
     highlighted = pattern.sub(r'<mark>\g<0></mark>', text)
     
     return highlighted
+
+@register.filter
+def get_item(dictionary, key):
+    return dictionary.get(key)

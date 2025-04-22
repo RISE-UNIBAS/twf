@@ -1,8 +1,11 @@
 """Views for the project documents."""
 import logging
+import re
+
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.db.models import Count, Avg
+from django.core.exceptions import ValidationError
+from django.db.models import Count, Avg, Q
 from django.shortcuts import redirect
 from django.urls import reverse, reverse_lazy
 from django.views.generic import FormView
@@ -241,23 +244,6 @@ class TWFDocumentsSearchView(FormView, TWFDocumentView):
     form_class = DocumentSearchForm
     success_url = reverse_lazy('twf:documents_search')
 
-    def get_form_kwargs(self):
-        """Add project to form kwargs and handle POST and GET requests properly."""
-        kwargs = {'project': self.get_project()}
-        
-        # Handle both GET and POST requests to preserve form values
-        if self.request.method == 'POST':
-            kwargs.update({
-                'data': self.request.POST,
-            })
-        elif self.request.method == 'GET' and self.request.GET:
-            # This allows for bookmarkable search URLs
-            kwargs.update({
-                'data': self.request.GET,
-            })
-            
-        return kwargs
-
     def form_valid(self, form):
         """Handle valid form submission."""
         # Get search results
@@ -282,89 +268,218 @@ class TWFDocumentsSearchView(FormView, TWFDocumentView):
         return self.render_to_response(context)
 
     def search_documents(self, cleaned_data):
-        """Perform simplified document search based on form data."""
+        import re
         project = self.get_project()
-        queryset = Document.objects.filter(project=project)
-        
-        # Get form data
-        search_term = cleaned_data.get('search_term', '').strip()
-        search_type = cleaned_data.get('search_type', 'all')
-        status_filters = cleaned_data.get('status', [])
-        special_filters = cleaned_data.get('special_filters', [])
-        sort_by = cleaned_data.get('sort_by', '-created_at')
-        
-        # Log the start of the search
-        logger.debug(f"Starting search with term: '{search_term}', type: {search_type}")
-        logger.debug(f"Status filters: {status_filters}, Special filters: {special_filters}")
-        logger.debug(f"Initial document count: {queryset.count()}")
-        
-        # Apply search term based on search type
-        if search_term:
-            from django.db.models import Q
-            
-            if search_type == 'all' or not search_type:
-                # Search in all text fields
-                queryset = queryset.filter(
-                    Q(title__icontains=search_term) |
-                    Q(document_id__icontains=search_term) |
-                    Q(workflow_remarks__icontains=search_term) |
-                    Q(metadata__icontains=search_term) |
-                    Q(pages__tags__variation__icontains=search_term) |
-                    Q(pages__parsed_data__text__icontains=search_term)
-                ).distinct()
-            elif search_type == 'title':
-                queryset = queryset.filter(title__icontains=search_term)
-            elif search_type == 'document_id':
-                queryset = queryset.filter(document_id__icontains=search_term)
-            elif search_type == 'metadata':
-                # Search in JSON field
-                queryset = queryset.filter(metadata__icontains=search_term)
-            elif search_type == 'workflow_remarks':
-                queryset = queryset.filter(workflow_remarks__icontains=search_term)
-            elif search_type == 'document_text':
-                # Improved JSON search in parsed_data
-                queryset = queryset.filter(
-                    Q(pages__parsed_data__text__icontains=search_term) |
-                    Q(pages__parsed_data__elements__text__icontains=search_term)
-                ).distinct()
-            elif search_type == 'tags':
-                queryset = queryset.filter(pages__tags__variation__icontains=search_term).distinct()
-                
-            logger.debug(f"After search term filtering: {queryset.count()} documents")
-        
-        # Apply status filters (OR logic)
-        if status_filters:
+        queryset = Document.objects.filter(project=project).prefetch_related('pages', 'pages__tags')
+        match_reasons = {}
+
+        # Filter by title
+        title = cleaned_data.get("title")
+        if title:
+            queryset = queryset.filter(title__icontains=title)
+            for doc in queryset:
+                if title.lower() in (doc.title or "").lower():
+                    match_reasons.setdefault(doc.id, []).append(
+                        {
+                            "type": "info",
+                            "text": f'Title contains “{title}”'
+                        }
+                    )
+
+        # Filter by document ID
+        doc_id = cleaned_data.get("document_id")
+        if doc_id:
+            queryset = queryset.filter(document_id__icontains=doc_id)
+            for doc in queryset:
+                if doc_id.lower() in doc.document_id.lower():
+                    match_reasons.setdefault(doc.id, []).append(
+                        {
+                            "type": "info",
+                            "text": f'ID contains “{doc_id}”'
+                        }
+                    )
+
+        # Filter by status and parked
+        statuses = cleaned_data.get("status")
+        if statuses:
             status_q = Q()
-            for status in status_filters:
-                status_q |= Q(status=status)
+            for s in statuses:
+                if s == "parked":
+                    status_q |= Q(is_parked=True)
+                else:
+                    status_q |= Q(status=s)
             queryset = queryset.filter(status_q)
-            logger.debug(f"After status filtering: {queryset.count()} documents")
-        
-        # Apply special filters
-        if special_filters:
-            special_filter_q = Q()
-            for filter_type in special_filters:
-                if filter_type == 'is_parked':
-                    special_filter_q |= Q(is_parked=True)
-                elif filter_type == 'has_pages':
-                    special_filter_q |= Q(pages__isnull=False)
-                elif filter_type == 'has_tags':
-                    special_filter_q |= Q(pages__tags__isnull=False)
-            
-            if special_filter_q:
-                queryset = queryset.filter(special_filter_q).distinct()
-            logger.debug(f"After special filtering: {queryset.count()} documents")
-        
-        # Apply sorting
-        if sort_by:
-            queryset = queryset.order_by(sort_by)
-        
-        # Prefetch related data for performance
-        queryset = queryset.prefetch_related('pages', 'pages__tags')
-        
-        # Add a final debug message
-        logger.debug(f"Final document count: {queryset.count()}")
-        
+
+        # Dictionary Entry filtering
+        has_entries = cleaned_data.get("has_entries")
+        if has_entries:
+            queryset = queryset.filter(pages__tags__dictionary_entry__in=has_entries).distinct()
+            for doc in queryset:
+                matched_entries = {tag.dictionary_entry for page in doc.pages.all() for tag in page.tags.all()
+                                   if tag.dictionary_entry in has_entries}
+                for entry in matched_entries:
+                    match_reasons.setdefault(doc.id, []).append(f'Referenced entry: “{entry.label}”')
+
+        # Tag text filtering
+        has_tags = cleaned_data.get("has_tags", "").strip()
+        if has_tags:
+            queryset = queryset.filter(pages__tags__variation__icontains=has_tags).distinct()
+            for doc in queryset:
+                for page in doc.pages.all():
+                    for tag in page.tags.all():
+                        if has_tags.lower() in tag.variation.lower():
+                            match_reasons.setdefault(doc.id, []).append(
+                                {
+                                    "type": "info",
+                                    "text": f'Tag text: “{tag.variation}”'
+                                }
+                            )
+                            break
+
+        # Search in document text
+        document_text = cleaned_data.get("document_text", "").strip()
+        use_regex = cleaned_data.get("use_regex_for_text")
+
+        if document_text:
+            matching_ids = []
+
+            for doc in queryset:
+                page_matches = []
+                for page in doc.pages.all():
+                    page_text = page.get_text()
+                    match_count = 0
+                    found_snippet = None
+
+                    try:
+                        if use_regex:
+                            matches = list(re.finditer(document_text, page_text, flags=re.IGNORECASE))
+                            match_count = len(matches)
+                            if matches:
+                                found_snippet = self.get_highlighted_snippet(page_text, document_text, use_regex)
+                        else:
+                            lowered_text = page_text.lower()
+                            lowered_term = document_text.lower()
+                            match_count = lowered_text.count(lowered_term)
+
+                            if match_count > 0:
+                                found_snippet = self.get_highlighted_snippet(page_text, document_text, use_regex)
+                    except re.error:
+                        messages.warning(self.request, "Invalid regex pattern.")
+                        continue
+
+                    if match_count > 0:
+                        page_matches.append((page.tk_page_number, match_count))
+                        if found_snippet:
+                            if found_snippet:
+                                match_reasons.setdefault(doc.id, []).append({
+                                    "type": "snippet",
+                                    "text": found_snippet,
+                                    "page": page.tk_page_number
+                                })
+
+                if page_matches:
+                    matching_ids.append(doc.id)
+                    total_matches = sum(c for _, c in page_matches)
+                    page_str = ", ".join(f"p{num} ({cnt})" for num, cnt in page_matches)
+                    match_reasons.setdefault(doc.id, []).append({
+                        "type": "info",
+                        "text": f'Matched on {len(page_matches)} page(s): {page_str}, total matches: {total_matches}'
+                    })
+
+            queryset = queryset.filter(id__in=matching_ids)
+
+        for i in range(5):
+            doc_or_page = cleaned_data.get(f"type_field_{i}")
+            obj = cleaned_data.get(f"what_field_{i}")
+            key = cleaned_data.get(f"key_field_{i}")
+            op = cleaned_data.get(f"has_field_{i}")
+            val = cleaned_data.get(f"query_field_{i}", "").strip()
+
+            if not (doc_or_page and obj and key and val):
+                continue
+
+            target_path = f"{obj}.{key}"
+
+            def matches(value):
+                try:
+                    if value is None:
+                        return False
+                    if op == "contains":
+                        return val.lower() in str(value).lower()
+                    elif op == "not_contain":
+                        return val.lower() not in str(value).lower()
+                    elif op == "exact":
+                        return str(value) == str(val)
+                    elif op == "regex":
+                        return re.search(val, str(value))
+                    else:
+                        return False
+                except Exception as e:
+                    messages.warning(self.request, f"Error matching {target_path}: {e}")
+                    return False
+
+            matching_ids = set()
+            if doc_or_page == "document":
+                for doc in queryset:
+                    value = doc.metadata.get(obj, {}).get(key)
+                    if matches(value):
+                        matching_ids.add(doc.id)
+                        match_reasons.setdefault(doc.id, []).append(
+                            {"type": "info", "text": f'{obj}.{key} matched "{val}"'}
+                        )
+            elif doc_or_page == "page":
+                for doc in queryset:
+                    found = False
+                    for page in doc.pages.all():
+                        value = page.metadata.get(obj, {}).get(key)
+                        if matches(value):
+                            found = True
+                            break
+                    if found:
+                        matching_ids.add(doc.id)
+                        match_reasons.setdefault(doc.id, []).append(
+                            {"type": "info", "text": f'Page {obj}.{key} matched "{val}"'}
+                        )
+
+            queryset = queryset.filter(id__in=matching_ids)
+
+        # Internal Metadata Filters
+        if cleaned_data.get("created_by"):
+            queryset = queryset.filter(created_by=cleaned_data["created_by"])
+            for doc in queryset:
+                if doc.created_by == cleaned_data["created_by"]:
+                    match_reasons.setdefault(doc.id, []).append(
+                        {
+                            "type": "info",
+                            "text": f'Created by: {doc.created_by}'
+                        }
+                    )
+
+        if cleaned_data.get("modified_by"):
+            queryset = queryset.filter(modified_by=cleaned_data["modified_by"])
+            for doc in queryset:
+                if doc.modified_by == cleaned_data["modified_by"]:
+                    match_reasons.setdefault(doc.id, []).append(
+                        {
+                            "type": "info",
+                            "text": f'Modified by: {doc.modified_by}'
+                        }
+                    )
+
+        if cleaned_data.get("created_from"):
+            queryset = queryset.filter(created_at__gte=cleaned_data["created_from"])
+
+        if cleaned_data.get("created_to"):
+            queryset = queryset.filter(created_at__lte=cleaned_data["created_to"])
+
+        if cleaned_data.get("modified_from"):
+            queryset = queryset.filter(modified_at__gte=cleaned_data["modified_from"])
+
+        if cleaned_data.get("modified_to"):
+            queryset = queryset.filter(modified_at__lte=cleaned_data["modified_to"])
+
+        # Return both results and match reasons
+        self.match_reasons = match_reasons
         return queryset
 
     def get_context_data(self, **kwargs):
@@ -407,14 +522,51 @@ class TWFDocumentsSearchView(FormView, TWFDocumentView):
             
         # Track if this is a search submission (for template display)
         is_search = False
-        if self.request.method == 'POST' and self.request.POST.get('search_submitted'):
+        if self.request.method == 'POST' and self.request.POST.get('search_submitted') == '1':
             is_search = True
-        elif self.request.method == 'GET' and self.request.GET.get('search_term'):
-            is_search = True
+
             
         context['search_submitted'] = is_search
+        context['match_reasons'] = getattr(self, 'match_reasons', {})
         
         return context
+
+    @staticmethod
+    def get_highlighted_snippet(text, pattern, use_regex=False, context_chars=30):
+        import re
+
+        try:
+            if use_regex:
+                matches = list(re.finditer(pattern, text, flags=re.IGNORECASE))
+                if not matches:
+                    return None
+
+                match = matches[0]
+                start = max(match.start() - context_chars, 0)
+                end = min(match.end() + context_chars, len(text))
+                snippet = text[start:end].strip()
+
+                highlighted = re.sub(
+                    f"({pattern})", r"<mark>\1</mark>", snippet, flags=re.IGNORECASE
+                )
+                return highlighted
+
+            else:
+                index = text.lower().find(pattern.lower())
+                if index == -1:
+                    return None
+
+                start = max(index - context_chars, 0)
+                end = index + len(pattern) + context_chars
+                snippet = text[start:end].strip()
+
+                pattern_escaped = re.escape(pattern)
+                highlighted = re.sub(
+                    f"({pattern_escaped})", r"<mark>\1</mark>", snippet, flags=re.IGNORECASE
+                )
+                return highlighted
+        except re.error:
+            return None
 
 
 class TWFDocumentDetailView(TWFDocumentView):

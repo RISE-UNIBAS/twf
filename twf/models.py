@@ -522,10 +522,16 @@ class Document(TimeStampedModel):
     def get_text(self):
         text = ""
         for page in self.pages.all():
-            for element in page.parsed_data['elements']:
-                if "text" in element:
-                    text += element['text'] + "\n"
+           text += page.get_text() + "\n"
         return text
+
+    @staticmethod
+    def get_distinct_metadata_keys():
+        keys = set()
+        for item in Document.objects.values_list('metadata', flat=True):
+            if isinstance(item, dict):
+                keys.update(item.keys())
+        return sorted(keys)
 
     def __str__(self):
         """Return the string representation of the Document."""
@@ -605,6 +611,14 @@ class Page(TimeStampedModel):
             if "text" in element:
                 text += element['text'] + "\n"
         return text # TODO CHeck if this is correct
+
+    @staticmethod
+    def get_distinct_metadata_keys():
+        keys = set()
+        for item in Page.objects.values_list('metadata', flat=True):
+            if isinstance(item, dict):
+                keys.update(item.keys())
+        return sorted(keys)
 
     def get_annotations(self):
         """Return the annotations of the page."""
