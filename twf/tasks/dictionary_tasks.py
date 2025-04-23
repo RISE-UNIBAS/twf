@@ -91,6 +91,11 @@ def search_geonames_entries(self, project_id, user_id, **kwargs):
     similarity_threshold = kwargs.get('similarity_threshold')
     country_restriction = kwargs.get('country_restriction')
 
+    if geonames_username == '' or not geonames_username:
+        error_message = "Geonames username is required"
+        self.end_task(status="FAILURE", error_msg=error_message)
+        raise ValueError(error_message)
+
     if country_restriction == '':
         country_restriction = None
 
