@@ -110,7 +110,10 @@
         {% endif %}
  {% else %}
         <div class="alert alert-danger mt-3">
-            There is no dictionary for the selected tag type "{{ selected_dict_type }}".
+            There is no dictionary for the selected tag type <strong>"{{ selected_dict_type }}"</strong>.
+            Either <a href="{% url 'twf:dictionary_create' %}">create</a> or <a href="{% url 'twf:dictionaries_add' %}">add</a>
+            a dictionary with the same type to your project or assign you tag type
+            to an existing dictionary type in the <a href="{% url 'twf:project_settings_tasks' %}?tab=tag_types">Task Settings</a>
         </div>
  {% endif %}
 {% endblock %}
