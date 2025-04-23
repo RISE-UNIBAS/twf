@@ -327,10 +327,22 @@ class TaskSettingsForm(forms.ModelForm):
                                         widget=Select2Widget(attrs={'style': 'width: 100%;'}))
 
     # Define the fields for the form: Tag Type Settings
-    tag_type_translator = forms.CharField(required=False, widget=forms.Textarea(attrs={'rows': 5}),
-                                            help_text='Enter a JSON object to map tag types to a common format')
-    ignored_tag_types = forms.CharField(required=False, widget=forms.Textarea(attrs={'rows': 5}),
-                                        help_text='Enter a JSON array of tag types to ignore')
+    tag_type_translator = forms.CharField(required=False, widget=forms.Textarea(attrs={'rows': 10}),
+                                            help_text=mark_safe('Map different tag types to one type of dictionary.<br/>'
+                                                                'Example: <br/>'
+                                                                '<code>{</code><br/>'
+                                                                '<code>&nbsp;&nbsp;"sender": "person",</code><br/>'
+                                                                '<code>&nbsp;&nbsp;"recipient": "person"</code><br/>'
+                                                                '<code>}</code><br/>'
+                                                                '(Assuming you have a dictionary with the type "person")<br/>'))
+    ignored_tag_types = forms.CharField(label='Tag Type Configurations',
+                                        required=False, widget=forms.Textarea(attrs={'rows': 10}),
+                                        help_text=mark_safe('Configure certain tag types to be ignored or to be of specific types.<br/>'
+                                                            'Example: <br/>'
+                                                            '<code>{</code><br/>'
+                                                            '<code>&nbsp;&nbsp;"ignored": ["marginalia"],</code><br/>'
+                                                            '<code>&nbsp;&nbsp;"dates": ["date_of_birth", "date_of_death"]</code><br/>'
+                                                            '<code>}</code><br/>'))
 
     class Meta:
         model = Project
