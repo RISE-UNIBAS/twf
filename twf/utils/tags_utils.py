@@ -44,8 +44,8 @@ def get_excluded_types(project):
     if "ignored_tag_types" in task_configurations:
         try:
             conf = json.loads(task_configurations["ignored_tag_types"])
-            if "excluded" in conf:
-                return conf["excluded"]
+            if "ignored" in conf:
+                return conf["ignored"]
         except json.JSONDecodeError:
             return []
     return []
