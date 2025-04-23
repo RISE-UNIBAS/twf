@@ -99,7 +99,7 @@ def start_dict_gnd_batch(request):
         latest_birth_year = int(latest_birth_year)
 
     return trigger_task(request, search_gnd_entries,
-                        dictionary_id,
+                        dictionary_id=dictionary_id,
                         earliest_birth_year=earliest_birth_year,
                         latest_birth_year=latest_birth_year,
                         show_empty=show_empty)
