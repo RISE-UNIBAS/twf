@@ -105,7 +105,7 @@ class DictionaryEntryTable(tables.Table):
         if variations.count() > 5:
             html += format_html('<span class="badge bg-info">+{} more</span>', variations.count() - 5)
             
-        return html
+        return mark_safe(html)
     
     def render_metadata(self, record):
         """Renders the metadata column with truncated content and status badge."""
