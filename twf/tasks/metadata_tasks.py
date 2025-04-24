@@ -104,7 +104,7 @@ def load_sheets_metadata(self, project_id, user_id, **kwargs):
         cols_to_check = valid_cols + special_cols
         doc_id = int(table_line[doc_id_column_index])
         try:
-            doc = Document.objects.get(document_id=doc_id)
+            doc = Document.objects.get(project=self.project, document_id=doc_id)
             doc.metadata['google_sheets'] = {}
             for column in cols_to_check:
                 try:

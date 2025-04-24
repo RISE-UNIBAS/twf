@@ -32,7 +32,7 @@ class Command(BaseCommand):
         for item in data:
             for key, value in item.items():
                 try:
-                    document = Document.objects.get(document_id=key)
+                    document = Document.objects.get(project=project, document_id=key)
                     document.metadata = {'pages': []}
                     for document_data in value:
                         #
