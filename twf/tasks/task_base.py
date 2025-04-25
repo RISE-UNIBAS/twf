@@ -15,7 +15,7 @@ import logging
 from django.utils import timezone
 from celery import Task as CeleryTask
 
-from twf.clients.simple_ai_clients import AiApiClient
+from twf.clients.ai_client import create_ai_client
 from twf.models import Task, Project, User, Document, Page, CollectionItem
 
 logger = logging.getLogger(__name__)
@@ -620,9 +620,9 @@ class BaseTWFTask(CeleryTask):
         """
         self.client_name = client_name
         self.credentials = self.project.get_credentials(client_name)
-        self.client = AiApiClient(api=client_name,
-                                  api_key=self.credentials['api_key'],
-                                  gpt_role_description=role_description)
+        self.client = create_ai_client(client_name, self.credentials['api_key'],
+                                       )
+        #TODO role_description
 
     def prompt_client(self, item, prompt):
         """

@@ -9,7 +9,7 @@ These views support both text-only and multimodal (text + images) interactions.
 from django.urls import reverse_lazy
 
 from twf.forms.project.project_forms_batches import OpenAIQueryDatabaseForm, GeminiQueryDatabaseForm, \
-    ClaudeQueryDatabaseForm, MistralQueryDatabaseForm
+    ClaudeQueryDatabaseForm, MistralQueryDatabaseForm, DeepSeekQueryDatabaseForm, QwenQueryDatabaseForm
 from twf.views.project.views_project import TWFProjectView
 from twf.views.views_base import AIFormView
 
@@ -154,10 +154,65 @@ class TWFProjectMistralQueryView(AIFormView, TWFProjectView):
         """
         context = super().get_context_data(**kwargs)
         context['ai_heading'] = self.page_title
-        context['ai_lead'] = ('Query Mistral models for predictions. '
-                              'Mistral models currently only support text input.')
+        context['ai_lead'] = 'Query Mistral models for predictions.'
         context['has_ai_credentials'] = self.has_ai_credentials('mistral')
         context['ai_credentials_url'] = reverse_lazy('twf:project_settings_credentials') + '?tab=mistral'
         context['supports_multimodal'] = False
         context['multimodal_info'] = 'Limited to text-only mode. Mistral models do not support image input.'
+        return context
+
+
+class TWFProjectDeepSeekQueryView(AIFormView, TWFProjectView):
+    """
+    View for querying DeepSeek models.
+
+    This view provides an interface for querying Mistral models,
+    which currently only support text-only inputs.
+    """
+    template_name = 'twf/project/query/deepseek.html'
+    page_title = 'Ask DeepSeek'
+    form_class = DeepSeekQueryDatabaseForm
+    success_url = reverse_lazy('twf:project_deepseek_query')
+    start_url = reverse_lazy('twf:task_project_query_deepseek')
+    message = "Are you sure you want to start the DeepSeek task?"
+
+    def get_context_data(self, **kwargs):
+        """
+        Get the context data for the template.
+        """
+        context = super().get_context_data(**kwargs)
+        context['ai_heading'] = self.page_title
+        context['ai_lead'] = 'Query DeepSeek models for predictions.'
+        context['has_ai_credentials'] = self.has_ai_credentials('mistral')
+        context['ai_credentials_url'] = reverse_lazy('twf:project_settings_credentials') + '?tab=deepseek'
+        context['supports_multimodal'] = False
+        context['multimodal_info'] = 'Limited to text-only mode. DeepSeek models do not support image input.'
+        return context
+
+
+class TWFProjectQwenQueryView(AIFormView, TWFProjectView):
+    """
+    View for querying Qwen models.
+
+    This view provides an interface for querying Mistral models,
+    which currently only support text-only inputs.
+    """
+    template_name = 'twf/project/query/qwen.html'
+    page_title = 'Ask Qwen'
+    form_class = QwenQueryDatabaseForm
+    success_url = reverse_lazy('twf:project_qwen_query')
+    start_url = reverse_lazy('twf:task_project_query_qwen')
+    message = "Are you sure you want to start the Qwen task?"
+
+    def get_context_data(self, **kwargs):
+        """
+        Get the context data for the template.
+        """
+        context = super().get_context_data(**kwargs)
+        context['ai_heading'] = self.page_title
+        context['ai_lead'] = 'Query Qwen models for predictions.'
+        context['has_ai_credentials'] = self.has_ai_credentials('qwen')
+        context['ai_credentials_url'] = reverse_lazy('twf:project_settings_credentials') + '?tab=qwen'
+        context['supports_multimodal'] = False
+        context['multimodal_info'] = 'Limited to text-only mode. Qwen models do not support image input.'
         return context

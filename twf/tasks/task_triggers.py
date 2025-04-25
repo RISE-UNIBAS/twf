@@ -32,7 +32,7 @@ from twf.tasks.dictionary_tasks import search_gnd_entries, search_geonames_entri
 from twf.tasks.metadata_tasks import load_sheets_metadata, load_json_metadata
 from twf.tasks.tags_tasks import create_page_tags
 from twf.tasks.project_tasks import copy_project, query_project_openai, query_project_gemini, query_project_claude, \
-    query_project_mistral
+    query_project_mistral, query_project_deepseek, query_project_qwen
 from twf.tasks.export_tasks import export_documents_task, export_collections_task, export_project_task, \
     export_to_zenodo_task
 from twf.views.views_base import TWFView
@@ -640,6 +640,28 @@ def start_query_project_mistral(request):
                         role_description=role_description,
                         documents=documents,
                         prompt_mode=prompt_mode)
+
+
+def start_query_project_deepseek(request):
+    prompt = request.POST.get('prompt')
+    role_description = request.POST.get('role_description')
+    documents = request.POST.getlist('documents')
+
+    return trigger_task(request, query_project_deepseek,
+                        prompt=prompt,
+                        role_description=role_description,
+                        documents=documents)
+
+
+def start_query_project_qwen(request):
+    prompt = request.POST.get('prompt')
+    role_description = request.POST.get('role_description')
+    documents = request.POST.getlist('documents')
+
+    return trigger_task(request, query_project_qwen,
+                        prompt=prompt,
+                        role_description=role_description,
+                        documents=documents)
 
 
 def start_export_documents(request):

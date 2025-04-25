@@ -267,3 +267,63 @@ class MistralQueryDatabaseForm(ProjectAIBaseForm):
             str: The button label.
         """
         return 'Ask Mistral'
+
+
+class DeepSeekQueryDatabaseForm(ProjectAIBaseForm):
+    """
+    Form for querying DeepSeek models.
+
+    This form configures the project AI form for DeepSeek models,
+    which currently do not support multimodal inputs.
+    """
+
+    def __init__(self, *args, **kwargs):
+        """
+        Initialize the DeepSeek query form.
+
+        Args:
+            *args: Variable length argument list.
+            **kwargs: Arbitrary keyword arguments.
+        """
+        # DeepSeek doesn't support multimodal
+        kwargs['multimodal_support'] = False
+        super().__init__(*args, **kwargs)
+
+    def get_button_label(self):
+        """
+        Get the label for the submit button.
+
+        Returns:
+            str: The button label.
+        """
+        return 'Ask DeepSeek'
+
+
+class QwenQueryDatabaseForm(ProjectAIBaseForm):
+    """
+    Form for querying Qwen models.
+
+    This form configures the project AI form for Qwen models,
+    which currently do not support multimodal inputs.
+    """
+
+    def __init__(self, *args, **kwargs):
+        """
+        Initialize the Qwen query form.
+
+        Args:
+            *args: Variable length argument list.
+            **kwargs: Arbitrary keyword arguments.
+        """
+        # Qwen doesn't support multimodal
+        kwargs['multimodal_support'] = False
+        super().__init__(*args, **kwargs)
+
+    def get_button_label(self):
+        """
+        Get the label for the submit button.
+
+        Returns:
+            str: The button label.
+        """
+        return 'Ask Qwen'

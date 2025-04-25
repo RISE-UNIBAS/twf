@@ -63,7 +63,7 @@ from twf.views.project.views_project import TWFProjectQueryView, TWFProjectOverv
     TWFProjectSetupView, TWFProjectTranskribusExtractView, TWFProjectNotesView, TWFProjectPromptDetailView, \
     TWFProjectNoteEditView, TWFProjectNoteDetailView, TWFProjectPromptSettingsView
 from twf.views.project.views_project_ai import TWFProjectAIQueryView, TWFProjectGeminiQueryView, \
-    TWFProjectClaudeQueryView, TWFProjectMistralQueryView
+    TWFProjectClaudeQueryView, TWFProjectMistralQueryView, TWFProjectDeepSeekQueryView, TWFProjectQwenQueryView
 from twf.views.tags.views_tags import TWFProjectTagsView, TWFProjectTagsOpenView, \
     TWFProjectTagsParkedView, TWFProjectTagsResolvedView, TWFProjectTagsIgnoredView, TWFTagsDatesGroupView, \
     TWFTagsGroupView, TWFTagsOverviewView, TWFTagsExtractView, TWFTagsAssignTagView
@@ -147,6 +147,8 @@ urlpatterns = [
     path('project/gemini/query/', TWFProjectGeminiQueryView.as_view(), name='project_gemini_query'),
     path('project/claude/query/', TWFProjectClaudeQueryView.as_view(), name='project_claude_query'),
     path('project/mistral/query/', TWFProjectMistralQueryView.as_view(), name='project_mistral_query'),
+    path('project/deepseek/query/', TWFProjectDeepSeekQueryView.as_view(), name='project_deepseek_query'),
+    path('project/qwen/query/', TWFProjectQwenQueryView.as_view(), name='project_qwen_query'),
 
 
     #############################
@@ -305,7 +307,8 @@ urlpatterns = [
     path('celery/project/query/gemini/', start_query_project_gemini, name='task_project_query_gemini'),
     path('celery/project/query/claude/', start_query_project_claude, name='task_project_query_claude'),
     path('celery/project/query/mistral/', start_query_project_mistral, name='task_project_query_mistral'),
-
+    path('celery/project/query/deepseek/', start_query_project_deepseek, name='task_project_query_deepseek'),
+    path('celery/project/query/qwen/', start_query_project_qwen, name='task_project_query_qwen'),
 
     path('celery/transkribus/tags/extract/', start_tags_creation, name='task_transkribus_extract_tags'),
 

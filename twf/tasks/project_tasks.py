@@ -618,3 +618,43 @@ def query_project_mistral(self, project_id, user_id, **kwargs):
         'mistral',
         prompt_mode=prompt_mode
     )
+
+
+@shared_task(bind=True, base=BaseTWFTask)
+def query_project_deepseek(self, project_id, user_id, **kwargs):
+    self.validate_task_parameters(kwargs, ['prompt', 'role_description', 'documents'])
+
+    doc_ids = kwargs.pop('documents')
+    documents = self.project.documents.filter(pk__in=doc_ids)
+    prompt_mode = 'text_only'
+
+    # Let the process_single_ai_request function handle exceptions
+    # The error will be logged in our DB and the exception will be raised for Celery
+    return self.process_single_ai_request(
+        documents,
+        'deepseek',
+        kwargs['prompt'],
+        kwargs['role_description'],
+        'deepseek',
+        prompt_mode=prompt_mode
+    )
+
+
+@shared_task(bind=True, base=BaseTWFTask)
+def query_project_qwen(self, project_id, user_id, **kwargs):
+    self.validate_task_parameters(kwargs, ['prompt', 'role_description', 'documents'])
+
+    doc_ids = kwargs.pop('documents')
+    documents = self.project.documents.filter(pk__in=doc_ids)
+    prompt_mode = 'text_only'
+
+    # Let the process_single_ai_request function handle exceptions
+    # The error will be logged in our DB and the exception will be raised for Celery
+    return self.process_single_ai_request(
+        documents,
+        'qwen',
+        kwargs['prompt'],
+        kwargs['role_description'],
+        'qwen',
+        prompt_mode=prompt_mode
+    )

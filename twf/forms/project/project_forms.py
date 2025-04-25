@@ -174,6 +174,14 @@ class CredentialsForm(forms.ModelForm):
     mistral_default_model = forms.CharField(required=False,
                                             widget=TextInput(attrs={'placeholder': 'Mistral Default Model'}))
 
+    deepseek_api_key = forms.CharField(required=False, widget=TextInput(attrs={'placeholder': 'DeepSeek API Key'}))
+    deepseek_default_model = forms.CharField(required=False,
+                                             widget=TextInput(attrs={'placeholder': 'DeepSeek Default Model'}))
+
+    qwen_api_key = forms.CharField(required=False, widget=TextInput(attrs={'placeholder': 'Qwen API Key'}))
+    qwen_default_model = forms.CharField(required=False,
+                                         widget=TextInput(attrs={'placeholder': 'Qwen Default Model'}))
+
     transkribus_username = forms.CharField(required=False,
                                            widget=TextInput(attrs={'placeholder': 'Transkribus Username'}))
     transkribus_password = forms.CharField(required=False,
@@ -203,6 +211,12 @@ class CredentialsForm(forms.ModelForm):
 
         self.fields['mistral_api_key'].initial = conf_credentials.get('mistral', {}).get('api_key', '')
         self.fields['mistral_default_model'].initial = conf_credentials.get('mistral', {}).get('default_model', '')
+
+        self.fields['deepseek_api_key'].initial = conf_credentials.get('deepseek', {}).get('api_key', '')
+        self.fields['deepseek_default_model'].initial = conf_credentials.get('deepseek', {}).get('default_model', '')
+
+        self.fields['qwen_api_key'].initial = conf_credentials.get('qwen', {}).get('api_key', '')
+        self.fields['qwen_default_model'].initial = conf_credentials.get('qwen', {}).get('default_model', '')
 
         self.fields['transkribus_username'].initial = conf_credentials.get('transkribus', {}).get('username', '')
         self.fields['transkribus_password'].initial = conf_credentials.get('transkribus', {}).get('password', '')
@@ -248,6 +262,18 @@ class CredentialsForm(forms.ModelForm):
                     css_id='mistral'
                 ),
                 Tab(
+                    'DeepSeek',
+                    Row(Column('deepseek_api_key', css_class='col-12')),
+                    Row(Column('deepseek_default_model', css_class='col-12')),
+                    css_id='deepseek'
+                ),
+                Tab(
+                    'Qwen',
+                    Row(Column('qwen_api_key', css_class='col-12')),
+                    Row(Column('qwen_default_model', css_class='col-12')),
+                    css_id='qwen'
+                ),
+                Tab(
                     'Geonames',
                     Row(Column('geonames_username', css_class='col-12')),
                     css_id='geonames'
@@ -277,6 +303,10 @@ class CredentialsForm(forms.ModelForm):
                           'default_model': cleaned_data.get('anthropic_default_model')},
             'mistral': {'api_key': cleaned_data.get('mistral_api_key'),
                         'default_model': cleaned_data.get('mistral_default_model')},
+            'deepseek': {'api_key': cleaned_data.get('deepseek_api_key'),
+                         'default_model': cleaned_data.get('deepseek_default_model')},
+            'qwen': {'api_key': cleaned_data.get('qwen_api_key'),
+                     'default_model': cleaned_data.get('qwen_default_model')},
             'transkribus': {
                 'username': cleaned_data.get('transkribus_username'),
                 'password': cleaned_data.get('transkribus_password')
@@ -983,6 +1013,118 @@ class PromptSettingsForm(forms.ModelForm):
         widget=forms.NumberInput(attrs={'step': '0.1'}),
         help_text="Penalizes tokens based on presence (min: -2.0, max: 2.0, default: 0.0)"
     )
+
+    # DeepSeek Settings
+    deepseek_temperature = forms.FloatField(
+        label="Temperature",
+        required=False,
+        min_value=0.0,
+        max_value=1.0,
+        initial=0.5,
+        widget=forms.NumberInput(attrs={'step': '0.1'}),
+        help_text="Controls randomness (min: 0.0, max: 1.0, default: 0.5)"
+    )
+    deepseek_max_tokens = forms.IntegerField(
+        label="Max Tokens",
+        required=False,
+        min_value=1,
+        max_value=4096,
+        initial=1024,
+        help_text="Maximum tokens to generate (min: 1, max: 4096, default: 1024)"
+    )
+    deepseek_image_resize = forms.ChoiceField(
+        label="Image Resize",
+        required=False,
+        choices=[
+            ('', 'Default'),
+            ('512x512', '512x512'),
+            ('1024x1024', '1024x1024'),
+            ('none', 'No Resize')
+        ],
+        initial='1024x1024',
+        help_text="Image size for upload (default: 1024x1024)"
+    )
+    deepseek_frequency_penalty = forms.FloatField(
+        label="Frequency Penalty",
+        required=False,
+        min_value=-2.0,
+        max_value=2.0,
+        initial=0.0,
+        widget=forms.NumberInput(attrs={'step': '0.1'}),
+        help_text="Penalizes repeated tokens (min: -2.0, max: 2.0, default: 0.0)"
+    )
+    deepseek_seed = forms.IntegerField(
+        label="Seed",
+        required=False,
+        min_value=0,
+        initial=None,
+        help_text="Random seed for deterministic results (min: 0, default: None)"
+    )
+    deepseek_top_p = forms.FloatField(
+        label="Top P",
+        required=False,
+        min_value=0.0,
+        max_value=1.0,
+        initial=1.0,
+        widget=forms.NumberInput(attrs={'step': '0.01'}),
+        help_text="Nucleus sampling parameter (min: 0.0, max: 1.0, default: 1.0)"
+    )
+
+    # Qwen Settings
+    qwen_temperature = forms.FloatField(
+        label="Temperature",
+        required=False,
+        min_value=0.0,
+        max_value=1.0,
+        initial=0.5,
+        widget=forms.NumberInput(attrs={'step': '0.1'}),
+        help_text="Controls randomness (min: 0.0, max: 1.0, default: 0.5)"
+    )
+    qwen_max_tokens = forms.IntegerField(
+        label="Max Tokens",
+        required=False,
+        min_value=1,
+        max_value=4096,
+        initial=1024,
+        help_text="Maximum tokens to generate (min: 1, max: 4096, default: 1024)"
+    )
+    qwen_image_resize = forms.ChoiceField(
+        label="Image Resize",
+        required=False,
+        choices=[
+            ('', 'Default'),
+            ('512x512', '512x512'),
+            ('1024x1024', '1024x1024'),
+            ('none', 'No Resize')
+        ],
+        initial='1024x1024',
+        help_text="Image size for upload (default: 1024x1024)"
+    )
+    qwen_frequency_penalty = forms.FloatField(
+        label="Frequency Penalty",
+        required=False,
+        min_value=-2.0,
+        max_value=2.0,
+        initial=0.0,
+        widget=forms.NumberInput(attrs={'step': '0.1'}),
+        help_text="Penalizes repeated tokens (min: -2.0, max: 2.0, default: 0.0)"
+    )
+    qwen_seed = forms.IntegerField(
+        label="Seed",
+        required=False,
+        min_value=0,
+        initial=None,
+        help_text="Random seed for deterministic results (min: 0, default: None)"
+    )
+    qwen_top_p = forms.FloatField(
+        label="Top P",
+        required=False,
+        min_value=0.0,
+        max_value=1.0,
+        initial=1.0,
+        widget=forms.NumberInput(attrs={'step': '0.01'}),
+        help_text="Nucleus sampling parameter (min: 0.0, max: 1.0, default: 1.0)"
+    )
     
     class Meta:
         model = Project
@@ -1026,7 +1168,25 @@ class PromptSettingsForm(forms.ModelForm):
         self.fields['mistral_max_tokens'].initial = mistral_settings.get('max_tokens', 1024)
         self.fields['mistral_random_seed'].initial = mistral_settings.get('random_seed')
         self.fields['mistral_presence_penalty'].initial = mistral_settings.get('presence_penalty', 0.0)
-        
+
+        # DeepSeek
+        deepseek_settings = conf_ai_settings.get('deepseek', {})
+        self.fields['deepseek_temperature'].initial = deepseek_settings.get('temperature', 0.5)
+        self.fields['deepseek_max_tokens'].initial = deepseek_settings.get('max_tokens', 1024)
+        self.fields['deepseek_image_resize'].initial = deepseek_settings.get('image_resize', '1024x1024')
+        self.fields['deepseek_frequency_penalty'].initial = deepseek_settings.get('frequency_penalty', 0.0)
+        self.fields['deepseek_seed'].initial = deepseek_settings.get('seed')
+        self.fields['deepseek_top_p'].initial = deepseek_settings.get('top_p', 1.0)
+
+        # Qwen
+        qwen_settings = conf_ai_settings.get('qwen', {})
+        self.fields['qwen_temperature'].initial = qwen_settings.get('temperature', 0.5)
+        self.fields['qwen_max_tokens'].initial = qwen_settings.get('max_tokens', 1024)
+        self.fields['qwen_image_resize'].initial = qwen_settings.get('image_resize', '1024x1024')
+        self.fields['qwen_frequency_penalty'].initial = qwen_settings.get('frequency_penalty', 0.0)
+        self.fields['qwen_seed'].initial = qwen_settings.get('seed')
+        self.fields['qwen_top_p'].initial = qwen_settings.get('top_p', 1.0)
+
         self.helper = FormHelper()
         self.helper.form_method = 'post'
         self.helper.form_class = 'form form-control'
@@ -1090,6 +1250,36 @@ class PromptSettingsForm(forms.ModelForm):
                         Column('mistral_presence_penalty', css_class='col-6'),
                     ),
                     css_id='mistral'
+                ),
+                Tab(
+                    'DeepSeek',
+                    Row(
+                        Column('deepseek_temperature', css_class='col-6'),
+                        Column('deepseek_max_tokens', css_class='col-6'),
+                    ),
+                    Row(
+                        Column('deepseek_frequency_penalty', css_class='col-6'),
+                        Column('deepseek_seed', css_class='col-6'),
+                    ),
+                    Row(
+                        Column('deepseek_image_resize', css_class='col-12'),
+                    ),
+                    css_id='deepseek'
+                ),
+                Tab(
+                    'Qwen',
+                    Row(
+                        Column('qwen_temperature', css_class='col-6'),
+                        Column('qwen_max_tokens', css_class='col-6'),
+                    ),
+                    Row(
+                        Column('qwen_frequency_penalty', css_class='col-6'),
+                        Column('qwen_seed', css_class='col-6'),
+                    ),
+                    Row(
+                        Column('qwen_image_resize', css_class='col-12'),
+                    ),
+                    css_id='qwen'
                 )
             ),
             Div(
