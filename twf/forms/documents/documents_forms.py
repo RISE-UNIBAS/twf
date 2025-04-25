@@ -220,7 +220,7 @@ class DocumentForm(forms.ModelForm):
         helper.form_method = 'post'
         helper.form_class = 'form form-control'
 
-        layout = helper.layout = Layout(
+        helper.layout = Layout(
             Row(
                 Column('title', css_class='form-group col-6 mb-3'),
                 Column('document_id', css_class='form-group col-6 mb-3'),
