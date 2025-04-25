@@ -276,6 +276,12 @@ class Project(TimeStampedModel):
                                   help_text='A dictionary of task configurations.')
     """A dictionary of task configurations. In order to keep these settings as dynamic as possible, they are
     stored as JSONField. The keys in the dictionary are the services, and the values are the task configurations."""
+    
+    conf_ai_settings = models.JSONField(default=dict, blank=True,
+                                       verbose_name='AI Settings',
+                                       help_text='Configurations for AI providers including temperature, token limits, etc.')
+    """A dictionary of AI settings for different providers. Includes temperature, max tokens, and other parameters
+    that control the behavior of AI providers like OpenAI, Google Gemini, Anthropic Claude, and Mistral."""
 
     keywords = models.JSONField(default=list, blank=True,
                                 verbose_name='Keywords',

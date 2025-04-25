@@ -17,7 +17,7 @@ from twf.forms.dynamic_forms import DynamicForm
 from twf.forms.filters.filters import TaskFilter, PromptFilter, NoteFilter
 from twf.forms.project.project_forms_batches import ProjectCopyBatchForm, DocumentExtractionBatchForm
 from twf.forms.project.project_forms import QueryDatabaseForm, GeneralSettingsForm, CredentialsForm, \
-    TaskSettingsForm, ExportSettingsForm, RepositorySettingsForm, PromptForm, NoteForm
+    TaskSettingsForm, ExportSettingsForm, RepositorySettingsForm, PromptForm, NoteForm, PromptSettingsForm
 from twf.models import Page, PageTag, Prompt, Task, Note
 from twf.permissions import get_actions_grouped_by_category, get_available_actions
 from twf.tables.tables_project import TaskTable, PromptTable, NoteTable
@@ -64,6 +64,8 @@ class TWFProjectView(LoginRequiredMixin, TWFView):
                      'value': 'Task Settings', 'permission': 'change_task_settings'},
                     {'url': reverse('twf:project_settings_export'),
                      'value': 'Export Settings', 'permission': 'change_export_settings'},
+                    {'url': reverse('twf:project_settings_prompt'),
+                     'value': 'AI Prompt Settings', 'permission': 'change_task_settings'},
                     {'url': reverse('twf:project_settings_repository'),
                      'value': 'Repository Settings', 'permission': 'export_to_zenodo'},
                     {'url': reverse('twf:user_management'),
@@ -548,6 +550,36 @@ class TWFProjectRepositorySettingsView(FormView, TWFProjectView):
         messages.success(self.request, 'Project Repository settings have been updated successfully.')
         # Redirect to the success URL
         return super().form_valid(form)
+
+
+class TWFProjectPromptSettingsView(FormView, TWFProjectView):
+    """View for the project AI prompt settings."""
+
+    template_name = 'twf/project/settings/settings_prompt.html'
+    page_title = 'AI Prompt Settings'
+    form_class = PromptSettingsForm
+    success_url = reverse_lazy('twf:project_settings_prompt')
+
+    def get_form_kwargs(self):
+        """Get the form kwargs."""
+        kwargs = super().get_form_kwargs()
+        kwargs['instance'] = self.get_project()
+        return kwargs
+
+    def form_valid(self, form):
+        """Handle the form submission."""
+        # Save the form
+        self.object = form.save(commit=False)
+        self.object.save(current_user=self.request.user)
+
+        # Add a success message
+        messages.success(self.request, 'AI Prompt settings have been updated successfully.')
+        
+        # Retrieve the active tab from form data and include it in the success URL
+        active_tab = form.cleaned_data.get('active_tab', 'openai')
+        success_url = f"{self.success_url}?tab={active_tab}"
+
+        return HttpResponseRedirect(success_url)
 
 
 class TWFProjectQueryView(FormView, TWFProjectView):

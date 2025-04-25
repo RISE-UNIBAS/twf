@@ -779,3 +779,358 @@ class NoteForm(forms.ModelForm):
                 css_class='text-end pt-3'
             )
         )
+        
+        
+class PromptSettingsForm(forms.ModelForm):
+    """Form for creating and updating AI prompt settings.
+    
+    This form provides controls for configuring AI-specific parameters such as
+    temperature, max tokens, and image resize settings across different AI providers.
+    """
+    
+    active_tab = forms.CharField(widget=forms.HiddenInput(), required=False)
+    
+    # OpenAI Settings
+    openai_temperature = forms.FloatField(
+        label="Temperature",
+        required=False,
+        min_value=0.0,
+        max_value=1.0,
+        initial=0.5,
+        widget=forms.NumberInput(attrs={'step': '0.1'}),
+        help_text="Controls randomness (min: 0.0, max: 1.0, default: 0.5)"
+    )
+    openai_max_tokens = forms.IntegerField(
+        label="Max Tokens",
+        required=False,
+        min_value=1,
+        max_value=4096,
+        initial=1024,
+        help_text="Maximum tokens to generate (min: 1, max: 4096, default: 1024)"
+    )
+    openai_image_resize = forms.ChoiceField(
+        label="Image Resize",
+        required=False,
+        choices=[
+            ('', 'Default'),
+            ('512x512', '512x512'),
+            ('1024x1024', '1024x1024'),
+            ('none', 'No Resize')
+        ],
+        initial='1024x1024',
+        help_text="Image size for upload (default: 1024x1024)"
+    )
+    openai_frequency_penalty = forms.FloatField(
+        label="Frequency Penalty",
+        required=False,
+        min_value=-2.0,
+        max_value=2.0,
+        initial=0.0,
+        widget=forms.NumberInput(attrs={'step': '0.1'}),
+        help_text="Penalizes repeated tokens (min: -2.0, max: 2.0, default: 0.0)"
+    )
+    openai_seed = forms.IntegerField(
+        label="Seed",
+        required=False,
+        min_value=0,
+        initial=None,
+        help_text="Random seed for deterministic results (min: 0, default: None)"
+    )
+    openai_top_p = forms.FloatField(
+        label="Top P",
+        required=False,
+        min_value=0.0,
+        max_value=1.0,
+        initial=1.0,
+        widget=forms.NumberInput(attrs={'step': '0.01'}),
+        help_text="Nucleus sampling parameter (min: 0.0, max: 1.0, default: 1.0)"
+    )
+    
+    # Google Gemini Settings
+    gemini_temperature = forms.FloatField(
+        label="Temperature",
+        required=False,
+        min_value=0.0,
+        max_value=1.0,
+        initial=0.5,
+        widget=forms.NumberInput(attrs={'step': '0.1'}),
+        help_text="Controls randomness (min: 0.0, max: 1.0, default: 0.5)"
+    )
+    gemini_max_tokens = forms.IntegerField(
+        label="Max Tokens",
+        required=False,
+        min_value=1,
+        max_value=2048,
+        initial=1024,
+        help_text="Maximum tokens to generate (min: 1, max: 2048, default: 1024)"
+    )
+    gemini_image_resize = forms.ChoiceField(
+        label="Image Resize",
+        required=False,
+        choices=[
+            ('', 'Default'),
+            ('512x512', '512x512'),
+            ('1024x1024', '1024x1024'),
+            ('none', 'No Resize')
+        ],
+        initial='1024x1024',
+        help_text="Image size for upload (default: 1024x1024)"
+    )
+    gemini_top_k = forms.IntegerField(
+        label="Top K",
+        required=False,
+        min_value=1,
+        max_value=40,
+        initial=40,
+        help_text="Number of highest probability tokens (min: 1, max: 40, default: 40)"
+    )
+    gemini_top_p = forms.FloatField(
+        label="Top P",
+        required=False,
+        min_value=0.0,
+        max_value=1.0,
+        initial=0.95,
+        widget=forms.NumberInput(attrs={'step': '0.01'}),
+        help_text="Nucleus sampling parameter (min: 0.0, max: 1.0, default: 0.95)"
+    )
+    gemini_seed = forms.IntegerField(
+        label="Seed",
+        required=False,
+        min_value=0,
+        initial=None,
+        help_text="Random seed for deterministic results (min: 0, default: None)"
+    )
+    
+    # Anthropic Claude Settings
+    claude_temperature = forms.FloatField(
+        label="Temperature",
+        required=False,
+        min_value=0.0,
+        max_value=1.0,
+        initial=0.5,
+        widget=forms.NumberInput(attrs={'step': '0.1'}),
+        help_text="Controls randomness (min: 0.0, max: 1.0, default: 0.5)"
+    )
+    claude_max_tokens = forms.IntegerField(
+        label="Max Tokens",
+        required=False,
+        min_value=1,
+        max_value=4096,
+        initial=1024,
+        help_text="Maximum tokens to generate (min: 1, max: 4096, default: 1024)"
+    )
+    claude_image_resize = forms.ChoiceField(
+        label="Image Resize",
+        required=False,
+        choices=[
+            ('', 'Default'),
+            ('512x512', '512x512'),
+            ('1024x1024', '1024x1024'),
+            ('none', 'No Resize')
+        ],
+        initial='1024x1024',
+        help_text="Image size for upload (default: 1024x1024)"
+    )
+    claude_top_p = forms.FloatField(
+        label="Top P",
+        required=False,
+        min_value=0.0,
+        max_value=1.0,
+        initial=1.0,
+        widget=forms.NumberInput(attrs={'step': '0.01'}),
+        help_text="Nucleus sampling parameter (min: 0.0, max: 1.0, default: 1.0)"
+    )
+    claude_top_k = forms.IntegerField(
+        label="Top K",
+        required=False,
+        min_value=1,
+        max_value=500,
+        initial=250,
+        help_text="Number of highest probability tokens (min: 1, max: 500, default: 250)"
+    )
+    
+    # Mistral Settings
+    mistral_temperature = forms.FloatField(
+        label="Temperature",
+        required=False,
+        min_value=0.0,
+        max_value=1.0,
+        initial=0.5,
+        widget=forms.NumberInput(attrs={'step': '0.1'}),
+        help_text="Controls randomness (min: 0.0, max: 1.0, default: 0.5)"
+    )
+    mistral_max_tokens = forms.IntegerField(
+        label="Max Tokens",
+        required=False,
+        min_value=1,
+        max_value=2048,
+        initial=1024,
+        help_text="Maximum tokens to generate (min: 1, max: 2048, default: 1024)"
+    )
+    mistral_random_seed = forms.IntegerField(
+        label="Random Seed",
+        required=False,
+        min_value=0,
+        initial=None,
+        help_text="Random seed for deterministic results (min: 0, default: None)"
+    )
+    mistral_presence_penalty = forms.FloatField(
+        label="Presence Penalty",
+        required=False,
+        min_value=-2.0,
+        max_value=2.0,
+        initial=0.0,
+        widget=forms.NumberInput(attrs={'step': '0.1'}),
+        help_text="Penalizes tokens based on presence (min: -2.0, max: 2.0, default: 0.0)"
+    )
+    
+    class Meta:
+        model = Project
+        fields = ['conf_ai_settings']
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        
+        # Populate fields from conf_ai_settings JSON if data exists
+        conf_ai_settings = self.instance.conf_ai_settings or {}
+        
+        # OpenAI
+        openai_settings = conf_ai_settings.get('openai', {})
+        self.fields['openai_temperature'].initial = openai_settings.get('temperature', 0.5)
+        self.fields['openai_max_tokens'].initial = openai_settings.get('max_tokens', 1024)
+        self.fields['openai_image_resize'].initial = openai_settings.get('image_resize', '1024x1024')
+        self.fields['openai_frequency_penalty'].initial = openai_settings.get('frequency_penalty', 0.0)
+        self.fields['openai_seed'].initial = openai_settings.get('seed')
+        self.fields['openai_top_p'].initial = openai_settings.get('top_p', 1.0)
+        
+        # Gemini
+        gemini_settings = conf_ai_settings.get('gemini', {})
+        self.fields['gemini_temperature'].initial = gemini_settings.get('temperature', 0.5)
+        self.fields['gemini_max_tokens'].initial = gemini_settings.get('max_tokens', 1024)
+        self.fields['gemini_image_resize'].initial = gemini_settings.get('image_resize', '1024x1024')
+        self.fields['gemini_top_k'].initial = gemini_settings.get('top_k', 40)
+        self.fields['gemini_top_p'].initial = gemini_settings.get('top_p', 0.95)
+        self.fields['gemini_seed'].initial = gemini_settings.get('seed')
+        
+        # Claude
+        claude_settings = conf_ai_settings.get('claude', {})
+        self.fields['claude_temperature'].initial = claude_settings.get('temperature', 0.5)
+        self.fields['claude_max_tokens'].initial = claude_settings.get('max_tokens', 1024)
+        self.fields['claude_image_resize'].initial = claude_settings.get('image_resize', '1024x1024')
+        self.fields['claude_top_p'].initial = claude_settings.get('top_p', 1.0)
+        self.fields['claude_top_k'].initial = claude_settings.get('top_k', 250)
+        
+        # Mistral
+        mistral_settings = conf_ai_settings.get('mistral', {})
+        self.fields['mistral_temperature'].initial = mistral_settings.get('temperature', 0.5)
+        self.fields['mistral_max_tokens'].initial = mistral_settings.get('max_tokens', 1024)
+        self.fields['mistral_random_seed'].initial = mistral_settings.get('random_seed')
+        self.fields['mistral_presence_penalty'].initial = mistral_settings.get('presence_penalty', 0.0)
+        
+        self.helper = FormHelper()
+        self.helper.form_method = 'post'
+        self.helper.form_class = 'form form-control'
+        self.helper.layout = Layout(
+            TabHolder(
+                Tab(
+                    'OpenAI',
+                    Row(
+                        Column('openai_temperature', css_class='col-6'),
+                        Column('openai_max_tokens', css_class='col-6'),
+                    ),
+                    Row(
+                        Column('openai_top_p', css_class='col-6'),
+                        Column('openai_frequency_penalty', css_class='col-6'),
+                    ),
+                    Row(
+                        Column('openai_seed', css_class='col-6'),
+                        Column('openai_image_resize', css_class='col-6'),
+                    ),
+                    css_id='openai'
+                ),
+                Tab(
+                    'Google Gemini',
+                    Row(
+                        Column('gemini_temperature', css_class='col-6'),
+                        Column('gemini_max_tokens', css_class='col-6'),
+                    ),
+                    Row(
+                        Column('gemini_top_k', css_class='col-6'),
+                        Column('gemini_top_p', css_class='col-6'),
+                    ),
+                    Row(
+                        Column('gemini_seed', css_class='col-6'),
+                        Column('gemini_image_resize', css_class='col-6'),
+                    ),
+                    css_id='gemini'
+                ),
+                Tab(
+                    'Anthropic Claude',
+                    Row(
+                        Column('claude_temperature', css_class='col-6'),
+                        Column('claude_max_tokens', css_class='col-6'),
+                    ),
+                    Row(
+                        Column('claude_top_k', css_class='col-6'),
+                        Column('claude_top_p', css_class='col-6'),
+                    ),
+                    Row(
+                        Column('claude_image_resize', css_class='col-12'),
+                    ),
+                    css_id='claude'
+                ),
+                Tab(
+                    'Mistral',
+                    Row(
+                        Column('mistral_temperature', css_class='col-6'),
+                        Column('mistral_max_tokens', css_class='col-6'),
+                    ),
+                    Row(
+                        Column('mistral_random_seed', css_class='col-6'),
+                        Column('mistral_presence_penalty', css_class='col-6'),
+                    ),
+                    css_id='mistral'
+                )
+            ),
+            Div(
+                Submit('submit', 'Save Settings', css_class='btn btn-dark'),
+                css_class='text-end pt-3'
+            ),
+            'active_tab'
+        )
+    
+    def clean(self):
+        """Clean and save AI settings data back into the JSONField `conf_ai_settings`."""
+        cleaned_data = super().clean()
+        self.instance.conf_ai_settings = {
+            'openai': {
+                'temperature': cleaned_data.get('openai_temperature'),
+                'max_tokens': cleaned_data.get('openai_max_tokens'),
+                'image_resize': cleaned_data.get('openai_image_resize'),
+                'frequency_penalty': cleaned_data.get('openai_frequency_penalty'),
+                'seed': cleaned_data.get('openai_seed'),
+                'top_p': cleaned_data.get('openai_top_p')
+            },
+            'gemini': {
+                'temperature': cleaned_data.get('gemini_temperature'),
+                'max_tokens': cleaned_data.get('gemini_max_tokens'),
+                'image_resize': cleaned_data.get('gemini_image_resize'),
+                'top_k': cleaned_data.get('gemini_top_k'),
+                'top_p': cleaned_data.get('gemini_top_p'),
+                'seed': cleaned_data.get('gemini_seed')
+            },
+            'claude': {
+                'temperature': cleaned_data.get('claude_temperature'),
+                'max_tokens': cleaned_data.get('claude_max_tokens'),
+                'image_resize': cleaned_data.get('claude_image_resize'),
+                'top_p': cleaned_data.get('claude_top_p'),
+                'top_k': cleaned_data.get('claude_top_k')
+            },
+            'mistral': {
+                'temperature': cleaned_data.get('mistral_temperature'),
+                'max_tokens': cleaned_data.get('mistral_max_tokens'),
+                'random_seed': cleaned_data.get('mistral_random_seed'),
+                'presence_penalty': cleaned_data.get('mistral_presence_penalty')
+            }
+        }
+        return cleaned_data
