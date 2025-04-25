@@ -9,7 +9,7 @@
     <h3>Prerequisites</h3>
     <ul>
         <li><strong>Transkribus Account:</strong> You must have a valid Transkribus account with access to the collection</li>
-        <li><strong>Credentials Configured:</strong> Your Transkribus username and password must be configured in the <a href="{% url 'twf:help' 'project_settings_credentials' %}" class="help-link btn">Credential Settings</a></li>
+        <li><strong>Credentials Configured:</strong> Your Transkribus username and password must be configured in the <a href="{% url 'twf:project_settings_credentials' %}">Credential Settings</a></li>
         <li><strong>Collection ID:</strong> Your project must be associated with a valid Transkribus collection ID</li>
     </ul>
 
@@ -86,16 +86,13 @@
         After successfully downloading the export:
     </p>
     <ol>
-        <li>Proceed to <a href="{% url 'twf:help' 'project_tk_structure' %}" class="help-link btn">Extract Transkribus Export</a> to process and structure the data within the system</li>
+        <li>Proceed to <a href="{% url 'twf:project_tk_structure' %}">Extract Transkribus Export</a> to process and structure the data within the system</li>
         <li>The extracted data will be organized into documents and pages</li>
         <li>You can then begin working with your Transkribus content using the system's features</li>
     </ol>
 
     <h3>Related Topics</h3>
     <ul class="help-topics">
-        <li><a href="{% url 'twf:help' 'project_tk_structure' %}" class="help-link btn">Extract Transkribus Export</a></li>
-        <li><a href="{% url 'twf:help' 'project_settings_credentials' %}" class="help-link btn">Credential Settings</a></li>
-        <li><a href="{% url 'twf:help' 'export_overview' %}" class="help-link btn">Export Overview</a></li>
         <li><a href="{% help_url 'modules/workflows/documents.html' %}" target="_blank" class="help-link btn-ext">Document Workflows</a></li>
         <li><a href="{% help_url 'modules/parts/settings.html' %}" target="_blank" class="help-link btn-ext">Project Settings</a></li>
     </ul>
