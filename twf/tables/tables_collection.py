@@ -1,7 +1,6 @@
 """Table classes for displaying Collection and CollectionItem objects."""
 import django_tables2 as tables
 from django.urls import reverse_lazy
-from django.utils.safestring import mark_safe
 from django.utils.html import format_html
 
 from twf.models import CollectionItem, Collection

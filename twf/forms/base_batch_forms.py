@@ -9,7 +9,7 @@ from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Row, Column, HTML, Div, Button
 from django import forms
 
-from twf.models import Prompt, Page
+from twf.models import Prompt
 
 
 class BaseBatchForm(forms.Form):

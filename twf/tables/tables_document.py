@@ -2,7 +2,6 @@
 """This module contains the tables for displaying documents and dictionary entries."""
 import django_tables2 as tables
 from django.utils.html import format_html_join, format_html
-from django.utils.safestring import mark_safe
 from twf.models import Document
 
 class DocumentTable(tables.Table):

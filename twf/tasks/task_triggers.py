@@ -11,7 +11,6 @@ Key features:
 - Specialized handlers for multimodal content (text + images) in project queries
 - Comprehensive support for dictionary, document, collection, and export tasks
 """
-import os
 import uuid
 from pathlib import Path
 
@@ -19,7 +18,6 @@ from django.conf import settings
 from django.core.files.storage import default_storage
 from django.http import JsonResponse
 
-from twf.models import Prompt
 from twf.tasks.collection_tasks import search_openai_for_collection, search_gemini_for_collection, \
     search_claude_for_collection, search_openai_for_collection_item, search_gemini_for_collection_item, \
     search_claude_for_collection_item, search_mistral_for_collection_item
@@ -266,20 +264,24 @@ def start_openai_doc_batch(request):
     """ Start the OpenAI requests as a Celery task."""
     prompt = request.POST.get('prompt')
     role_description = request.POST.get('role_description')
+    prompt_mode = request.POST.get('prompt_mode')
 
     return trigger_task(request, search_openai_for_docs,
                         prompt=prompt,
-                        role_description=role_description)
+                        role_description=role_description,
+                        prompt_mode=prompt_mode)
 
 
 def start_gemini_doc_batch(request):
     """ Start the Gemini requests as a Celery task."""
     prompt = request.POST.get('prompt')
     role_description = request.POST.get('role_description')
+    prompt_mode = request.POST.get('prompt_mode')
 
     return trigger_task(request, search_gemini_for_docs,
                         prompt=prompt,
-                        role_description=role_description)
+                        role_description=role_description,
+                        prompt_mode=prompt_mode)
 
 
 def start_claude_doc_batch(request):

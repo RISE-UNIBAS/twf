@@ -26,6 +26,7 @@ Technical implementation details:
 For multimodal support, see the add_image_resource() and clear_image_resources() methods.
 """
 import base64
+import tempfile
 import time
 from datetime import datetime, timezone
 
@@ -276,6 +277,21 @@ class AiApiClient:
         """
         return resource.startswith(('http://', 'https://'))
 
+    def has_multimodal_support(self):
+        """
+        Check if the current API provider supports multimodal content.
+
+        This method checks the selected API provider and returns True if
+        it supports multimodal content (text + images) in the prompt method.
+
+        Currently, only OpenAI and Google Gemini support multimodal prompts.
+        Anthropic Claude and Mistral do not support images in this implementation.
+
+        Returns:
+            bool: True if the provider supports multimodal content, False otherwise
+        """
+        return self.api in ['openai', 'genai']
+
     def prompt(self, model, prompt):
         """
         Send a prompt to the AI model and get the response.
@@ -369,10 +385,11 @@ class AiApiClient:
                         import requests
                         response = requests.get(resource)
                         if response.status_code == 200:
-                            # Use the content bytes directly
-                            blob = response.content
-                            image_parts = genai.upload_blob(blob)
-                            images.append(image_parts)
+                            with tempfile.NamedTemporaryFile(suffix=".jpg", delete=True) as tmp:
+                                tmp.write(response.content)
+                                tmp.flush()  # Ensure everything is written before upload
+                                image_part = genai.upload_file(path=tmp.name)
+                                images.append(image_part)
                     except Exception as e:
                         print(f"Error fetching image from URL {resource}: {e}")
                 else:

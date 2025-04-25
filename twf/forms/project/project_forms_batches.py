@@ -9,7 +9,7 @@ from crispy_forms.layout import Row, Column
 from django import forms
 from django_select2.forms import Select2MultipleWidget
 
-from twf.forms.base_batch_forms import BaseBatchForm, BaseAIBatchForm, BaseMultiModalAIBatchForm
+from twf.forms.base_batch_forms import BaseBatchForm, BaseMultiModalAIBatchForm
 from twf.models import Document
 
 

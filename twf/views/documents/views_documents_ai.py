@@ -25,6 +25,8 @@ class TWFDocumentOpenAIBatchView(AIFormView, TWFDocumentView):
                               'prompt with its content. All documents are processed in one batch.')
         context['has_ai_credentials'] = self.has_ai_credentials('openai')
         context['ai_credentials_url'] = reverse_lazy('twf:project_settings_credentials') + '?tab=openai'
+        context['supports_multimodal'] = True
+        context['multimodal_info'] = 'The default ChatGPT-4o model supports text-only, image-only, and text+image modes.'
         return context
 
 

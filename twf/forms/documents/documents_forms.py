@@ -1,13 +1,12 @@
 """Forms for creating and updating documents."""
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Submit, Layout, Row, Column, Div, HTML, Fieldset
+from crispy_forms.layout import Submit, Layout, Row, Column, Div, HTML
 from django import forms
 from django.contrib.auth import get_user_model
 from django.template.defaultfilters import safe
-from django.utils.html import html_safe
-from django_select2.forms import Select2MultipleWidget, Select2Widget
+from django_select2.forms import Select2MultipleWidget
 
-from twf.models import Document, PageTag, Variation, DictionaryEntry, Page
+from twf.models import Document, DictionaryEntry, Page
 
 
 class DocumentSearchForm(forms.Form):

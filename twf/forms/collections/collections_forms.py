@@ -1,11 +1,9 @@
-from click import style
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Row, Column, HTML, Div, Submit
 from django import forms
 from django.db.models import Subquery
 from django.urls import reverse_lazy
 from django_select2.forms import Select2Widget
-from isort.profiles import attrs
 
 from twf.forms.twf_form_widgets import JSONAnnotationsWidget
 from twf.models import Collection, Document, CollectionItem

@@ -1,11 +1,8 @@
 """Forms for creating and updating documents."""
-from crispy_forms.layout import Row, Column
-from django import forms
-
-from twf.forms.base_batch_forms import BaseAIBatchForm
+from twf.forms.base_batch_forms import BaseAIBatchForm, BaseMultiModalAIBatchForm
 
 
-class DocumentBatchOpenAIForm(BaseAIBatchForm):
+class DocumentBatchOpenAIForm(BaseMultiModalAIBatchForm):
     """Form for running a batch of documents through OpenAI."""
 
     def get_button_label(self):
@@ -13,7 +10,7 @@ class DocumentBatchOpenAIForm(BaseAIBatchForm):
         return 'Run ChatGPT Batch'
 
 
-class DocumentBatchGeminiForm(BaseAIBatchForm):
+class DocumentBatchGeminiForm(BaseMultiModalAIBatchForm):
     """Form for running a batch of documents through OpenAI."""
 
     def get_button_label(self):

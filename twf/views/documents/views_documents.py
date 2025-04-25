@@ -4,7 +4,6 @@ import re
 
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.core.exceptions import ValidationError
 from django.db.models import Count, Avg, Q
 from django.shortcuts import redirect
 from django.urls import reverse, reverse_lazy
@@ -13,7 +12,7 @@ from django_filters.views import FilterView
 from django_tables2 import SingleTableView
 
 from twf.forms.filters.filters import DocumentFilter
-from twf.forms.documents.documents_forms import DocumentForm, DocumentSearchForm
+from twf.forms.documents.documents_forms import DocumentSearchForm
 from twf.models import Document, Workflow
 from twf.tables.tables_document import DocumentTable
 from twf.views.views_base import TWFView

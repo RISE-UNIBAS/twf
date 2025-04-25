@@ -10,15 +10,13 @@ The primary class, BaseTWFTask, extends Celery's Task class with TWF-specific tr
 reporting, and AI interaction capabilities.
 """
 import time
-import traceback
 import logging
-from datetime import datetime
 
 from django.utils import timezone
 from celery import Task as CeleryTask
 
 from twf.clients.simple_ai_clients import AiApiClient
-from twf.models import Task, Project, User
+from twf.models import Task, Project, User, Document, Page, CollectionItem
 
 logger = logging.getLogger(__name__)
 
@@ -176,17 +174,17 @@ class BaseTWFTask(CeleryTask):
         """Return a descriptive name for the type of items being processed.
         Subclasses can override this if needed."""
         if "collection" in self.name.lower():
-            return "collection items"
+            return "Collection Items"
         elif "document" in self.name.lower() or "doc" in self.name.lower():
-            return "documents"
+            return "Documents"
         elif "page" in self.name.lower():
-            return "pages"
+            return "Pages"
         elif "dict" in self.name.lower():
-            return "dictionary entries"
+            return "Dictionary Entries"
         elif "export" in self.name.lower():
-            return "items"
+            return "Items"
         else:
-            return "items"
+            return "Items"
 
     def advance_task(self, text="In progress", status="success"):
         """Increment the progress counter and update task progress.
@@ -232,16 +230,13 @@ class BaseTWFTask(CeleryTask):
             
             self.twf_task.save(update_fields=["progress", "title"])
 
-    def process_ai_request(self, items, client_name, prompt, role_description, metadata_field):
+    def process_ai_request(self, items, client_name, prompt, role_description,
+                           metadata_field, prompt_mode="text_only"):
         """
-        Generalized function to process text-only AI requests for multiple items.
+        Generalized function to process AI requests for multiple items.
         
-        This method handles sending text-only requests to AI providers for a batch of items.
+        This method handles sending requests to AI providers for a batch of items.
         It tracks progress, manages the AI client, and stores results in each item's metadata.
-        
-        Unlike process_single_ai_request, this method does not support multimodal content
-        (text + images) and is designed for batch processing rather than single queries.
-        Each item is processed individually with its own context.
         
         Args:
             items (QuerySet): Collection of items to process (documents, collection items, etc.)
@@ -249,36 +244,40 @@ class BaseTWFTask(CeleryTask):
             prompt (str): The text prompt to send to the model
             role_description (str): System role description for the AI model
             metadata_field (str): Field name for storing results in each item's metadata
-            
-        Note:
-            For multimodal processing of a single query with images, use 
-            process_single_ai_request with an appropriate prompt_mode instead.
+            prompt_mode (str): One of "text_only", "images_only", or "text_and_images".
         """
         # Set up the task with detailed tracking information
         total_items = len(items)
         self.set_total_items(total_items)
-        
-        # Configure AI client and update task description
         self.create_configured_client(client_name, role_description)
-        
-        if self.twf_task:
-            self.twf_task.text += f"AI Client: {client_name.upper()}\n"
-            self.twf_task.text += f"Model: {self.credentials['default_model']}\n"
-            self.twf_task.text += f"Role: {role_description[:100]}...\n" if len(role_description) > 100 else f"Role: {role_description}\n"
-            self.twf_task.text += f"Prompt: {prompt[:100]}...\n" if len(prompt) > 100 else f"Prompt: {prompt}\n"
-            self.twf_task.save(update_fields=["text"])
-        
+        self._generate_task_init_description(prompt, role_description, prompt_mode)
+        is_image_prompt_mode = self._clean_prompt_mode(prompt_mode)
+
         # Track success, failure, and timing stats
         successful_items = 0
         failed_items = 0
         total_time = 0
-        
-        # Process each item
+
+        # Process each item.
         for item in items:
             try:
-                start_time = time.time()
+                image_count = 0
+                if is_image_prompt_mode:
+                    if isinstance(item, Document):
+                        image_count = self._prepare_page_images(item.pages.all())
+                    elif isinstance(item, Page):
+                        image_count = self._prepare_page_images([item])
+                    elif isinstance(item, CollectionItem):
+                        # Handle collection items with images
+                        # TODO: Implement image handling for collection items
+                        pass
+                    else:
+                        # Handle item types without images
+                        pass
+
                 response_dict, elapsed_time = self.prompt_client(item, prompt)
-                
+                self.client.clear_image_resources()
+
                 # Save the AI response to the item's metadata
                 item.metadata[metadata_field] = response_dict
                 item.save(current_user=self.user)
@@ -307,70 +306,18 @@ class BaseTWFTask(CeleryTask):
                     text=f"Error processing item {self.processed_items+1}/{total_items}",
                     status="failure"
                 )
-        
-        # Update task with overall summary
+
         avg_time = total_time / successful_items if successful_items else 0
-        
-        # Record the final status in the database task
-        if self.twf_task:
-            final_status = "SUCCESS" if failed_items == 0 else "FAILURE"
-            end_time = timezone.now()
-            duration = (end_time - self.start_datetime).total_seconds()
-            
-            # Update database record with results
-            self.twf_task.status = final_status
-            self.twf_task.end_time = end_time
-            
-            # Create metadata for results
-            meta = {
-                'current': 100, 
-                'total': 100, 
-                'text': 'Task finished',
-                'duration': duration,
-                'processed_items': self.processed_items,
-                'successful_items': successful_items,
-                'failed_items': failed_items,
-                'client_name': client_name,
-                'model': self.credentials['default_model'],
-                'total_time': total_time,
-                'average_time': avg_time
-            }
-            self.twf_task.meta = meta
-            
-            # Add task summary to text
-            summary = f"\n---- TASK SUMMARY ----\n"
-            summary += f"Status: {final_status}\n"
-            summary += f"Duration: {duration:.2f} seconds"
-            
-            if duration > 60:
-                minutes = int(duration // 60)
-                seconds = int(duration % 60)
-                summary += f" ({minutes}m {seconds}s)"
-            summary += "\n"
-            
-            summary += f"Total items: {self.total_items}\n"
-            summary += f"Processed items: {self.processed_items}\n"
-            summary += f"Successfully processed: {successful_items}\n"
-            
-            if failed_items > 0:
-                summary += f"Failed to process: {failed_items}\n"
-            
-            if self.processed_items > 0:
-                summary += f"Average processing time per item: {avg_time:.2f} seconds\n"
-                
-            summary += "----------------------\n"
-            self.twf_task.text += summary
-            
-            # Save the database task
-            self.twf_task.save()
-            
-            # Log completion
-            log_msg = f"Task {self.name} (ID: {self.task_id}) completed with status {final_status}"
-            if final_status == "SUCCESS":
-                logger.info(log_msg)
-            else:
-                logger.error(f"{log_msg}: {failed_items} failures")
-        
+
+        self._handle_task_success(
+                processed_items=self.processed_items,
+                successful_items=successful_items,
+                failed_items=failed_items,
+                client_name=client_name,
+                model=self.credentials['default_model'],
+                total_time=total_time,
+                average_time=avg_time)
+
         # For Celery, if there were failures, raise an exception
         if failed_items > 0:
             # We raise a standard Exception that Celery can serialize properly
@@ -422,44 +369,26 @@ class BaseTWFTask(CeleryTask):
         """
         self.set_total_items(1)
         self.create_configured_client(client_name, role_description)
+        self._generate_task_init_description(prompt, role_description, prompt_mode)
 
-        # Log the prompt mode
-        self.twf_task.text += f"Prompt mode: {prompt_mode}\n"
-        
-        # Check if this client supports images
-        supports_images = client_name in ['openai', 'genai'] and hasattr(self.client, 'add_image_resource')
-        
-        # If mode involves images but client doesn't support them, warn and fall back to text
-        if prompt_mode in ['images_only', 'text_and_images'] and not supports_images:
-            fallback_message = f"Warning: {client_name} does not support images. Falling back to text-only mode.\n"
-            self.twf_task.text += fallback_message
-            prompt_mode = "text_only"
+        is_image_prompt_mode = self._clean_prompt_mode(prompt_mode)
         
         # Process images if needed based on mode
-        if prompt_mode in ['images_only', 'text_and_images'] and supports_images:
+        if is_image_prompt_mode:
             # Collect up to 5 images from each document
             image_count = 0
             for item in items:
-                if hasattr(item, 'pages'):  # Verify this is a document
-                    # Get up to 5 pages from this document, ordered by page number
-                    pages = item.pages.all().order_by('tk_page_number')[:5]
-                    
-                    for page in pages:
-                        # Use our new method to get image URL with 50% scaling
-                        img_url = page.get_image_url(scale_percent=50)
-                        if img_url:
-                            self.client.add_image_resource(img_url)
-                            self.twf_task.text += f"Added image from page {page.tk_page_number} of document {item.title}\n"
-                            image_count += 1
+                # Get up to 5 pages from this document, ordered by page number
+                pages = item.pages.all().order_by('tk_page_number')[:5]
+                image_count += self._prepare_page_images(pages)
 
-            
             if image_count > 0:
                 self.twf_task.text += f"Included {image_count} images in the prompt.\n"
             else:
                 self.twf_task.text += "No valid images found in the selected documents.\n"
                 
                 # If we're in images-only mode but found no images, warn user and fall back to text
-                if prompt_mode == 'images_only':
+                if is_image_prompt_mode:
                     self.twf_task.text += "Warning: No images found but 'Images only' mode selected. Including text context instead.\n"
                     prompt_mode = "text_only"
 
@@ -490,46 +419,17 @@ class BaseTWFTask(CeleryTask):
             response, elapsed_time = self.client.prompt(model=self.credentials['default_model'],
                                                        prompt=full_prompt)
             response_dict = response.to_dict()
+            self.client.clear_image_resources()
+            self._generate_task_success_description()
             
-            # Clear image resources from client after use
-            if hasattr(self.client, 'clear_image_resources'):
-                self.client.clear_image_resources()
-                
-            # Record success in database but don't end the Celery task with end_task
-            if self.twf_task:
-                self.twf_task.status = "SUCCESS"
-                self.twf_task.end_time = timezone.now()
-                self.twf_task.meta = {'ai_result': response_dict}
-                self.twf_task.text += f"\n---- TASK SUMMARY ----\n"
-                self.twf_task.text += f"Status: SUCCESS\n"
-                self.twf_task.text += f"Duration: {(timezone.now() - self.start_datetime).total_seconds():.2f} seconds\n"
-                self.twf_task.text += "----------------------\n"
-                self.twf_task.save()
-            
-            # Let Celery handle the task success
+            # Return the result for display on the page
             return {"ai_result": response_dict}
             
         except Exception as e:
             # Handle any exceptions that occur during API call
             error_msg = str(e)
-            logger.error(f"Error in AI request: {error_msg}")
-            
-            # Record the error in the database task
-            if self.twf_task:
-                self.twf_task.text += f"Error: {error_msg}\n"
-                self.twf_task.status = "FAILURE"
-                self.twf_task.end_time = timezone.now()
-                self.twf_task.title = f"Failed: {error_msg[:50]}..." if len(error_msg) > 50 else f"Failed: {error_msg}"
-                self.twf_task.text += f"\n---- TASK SUMMARY ----\n"
-                self.twf_task.text += f"Status: FAILURE\n"
-                self.twf_task.text += f"Duration: {(timezone.now() - self.start_datetime).total_seconds():.2f} seconds\n"
-                self.twf_task.text += f"Error: {error_msg}\n"
-                self.twf_task.text += "----------------------\n"
-                self.twf_task.save()
-            
-            # Clean up resources even in case of error
-            if hasattr(self.client, 'clear_image_resources'):
-                self.client.clear_image_resources()
+            self._generate_task_failure_description(error_msg)
+            self.client.clear_image_resources()
             
             # Let Celery handle the task failure by re-raising the exception
             raise
@@ -586,7 +486,72 @@ class BaseTWFTask(CeleryTask):
                 logger.info(log_msg)
             else:
                 logger.error(f"{log_msg}: {error_msg}")
-    
+
+    def _clean_prompt_mode(self, prompt_mode):
+        """Check if the client supports images and adjust prompt mode accordingly."""
+        img_support = self.client.has_multimodal_support()
+
+        if prompt_mode in ['images_only', 'text_and_images'] and not img_support:
+            fallback_message = f"Warning: {self.client.api} does not support images. Falling back to text-only mode.\n"
+            self.twf_task.text += fallback_message
+            return False
+
+        if prompt_mode in ['images_only', 'text_and_images'] and img_support:
+            return True
+
+        return False
+
+    def _prepare_page_images(self, pages):
+        image_count = 0
+        for page in pages:
+            # Use our new method to get image URL with 50% scaling
+            img_url = page.get_image_url(scale_percent=50)
+            if img_url:
+                self.client.add_image_resource(img_url)
+                self.twf_task.text += f"Added image from page {page.tk_page_number} of document {page.document.title}\n"
+                image_count += 1
+        return image_count
+
+    def _generate_task_init_description(self, prompt, role_description, prompt_mode):
+        if self.twf_task:
+            self.twf_task.text += f"AI Client: {self.client.api.upper()}\n"
+            self.twf_task.text += f"Model: {self.credentials['default_model']}\n"
+            self.twf_task.text += f"Role: {role_description[:100]}...\n" if len(role_description) > 100 else f"Role: {role_description}\n"
+            self.twf_task.text += f"Prompt: {prompt[:100]}...\n" if len(prompt) > 100 else f"Prompt: {prompt}\n"
+            self.twf_task.text += f"Prompt mode: {prompt_mode}\n"
+            self.twf_task.save(update_fields=["text"])
+
+    def _handle_task_success(self, **kwargs):
+        if self.twf_task:
+            self.twf_task.status = "SUCCESS"
+            self.twf_task.end_time = timezone.now()
+
+            self.twf_task.meta = {}
+            for key, value in kwargs.items():
+                self.twf_task.meta[key] = value
+
+            self.twf_task.text += f"\n---- TASK SUMMARY ----\n"
+            self.twf_task.text += f"Status: SUCCESS\n"
+            self.twf_task.text += f"Duration: {(timezone.now() - self.start_datetime).total_seconds():.2f} seconds\n"
+            self.twf_task.text += "----------------------\n"
+            self.twf_task.save()
+
+    def _generate_task_failure_description(self, error_msg):
+        logger.error(f"Error in AI request: {error_msg}")
+
+        # Record the error in the database task
+        if self.twf_task:
+            self.twf_task.text += f"Error: {error_msg}\n"
+            self.twf_task.status = "FAILURE"
+            self.twf_task.end_time = timezone.now()
+            self.twf_task.title = f"Failed: {error_msg[:50]}..." if len(error_msg) > 50 else f"Failed: {error_msg}"
+            self.twf_task.text += f"\n---- TASK SUMMARY ----\n"
+            self.twf_task.text += f"Status: FAILURE\n"
+            self.twf_task.text += f"Duration: {(timezone.now() - self.start_datetime).total_seconds():.2f} seconds\n"
+            self.twf_task.text += f"Error: {error_msg}\n"
+            self.twf_task.text += "----------------------\n"
+            self.twf_task.save()
+
     def _generate_task_summary(self, status, duration, error_msg=None):
         """Generate a detailed summary of the task for documentation purposes."""
         summary = f"\n---- TASK SUMMARY ----\n"

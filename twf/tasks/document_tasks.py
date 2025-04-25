@@ -15,11 +15,12 @@ def search_openai_for_docs(self, project_id, user_id, **kwargs):
     prompt and saving the results to the document's metadata.
     """
     try:
-        self.validate_task_parameters(kwargs, ['prompt', 'role_description'])
+        self.validate_task_parameters(kwargs, ['prompt', 'role_description', 'prompt_mode'])
         
         # Get document count and filter active documents if needed
         documents = self.project.documents.all()
         doc_count = documents.count()
+        prompt_mode = kwargs.get('prompt_mode')
         
         # Update task with document count information
         if self.twf_task:
@@ -28,7 +29,10 @@ def search_openai_for_docs(self, project_id, user_id, **kwargs):
         
         # Process all documents with OpenAI
         self.process_ai_request(documents, 'openai',
-                                kwargs['prompt'], kwargs['role_description'], 'openai')
+                                kwargs['prompt'],
+                                kwargs['role_description'],
+                                'openai',
+                                prompt_mode=prompt_mode)
         
         return {
             'status': 'completed',
@@ -44,9 +48,10 @@ def search_openai_for_docs(self, project_id, user_id, **kwargs):
 
 @shared_task(bind=True, base=BaseTWFTask)
 def search_gemini_for_docs(self, project_id, user_id, **kwargs):
-    self.validate_task_parameters(kwargs, ['prompt', 'role_description'])
+    self.validate_task_parameters(kwargs, ['prompt', 'role_description', 'prompt_mode'])
     self.process_ai_request(self.project.documents.all(), 'genai',
-                            kwargs['prompt'], kwargs['role_description'], 'gemini')
+                            kwargs['prompt'], kwargs['role_description'], 'gemini',
+                            prompt_mode=kwargs['prompt_mode'])
 
 
 @shared_task(bind=True, base=BaseTWFTask)

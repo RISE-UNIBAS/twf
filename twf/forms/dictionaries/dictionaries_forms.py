@@ -2,8 +2,6 @@
 from django import forms
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Submit, Column, Row, Div
-from django_select2 import forms as s2forms
-from jsoneditor.forms import JSONEditor
 
 from twf.models import DictionaryEntry, Dictionary
 
