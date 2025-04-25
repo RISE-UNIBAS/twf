@@ -6,12 +6,12 @@ from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView, PasswordChangeView
 from django.http import StreamingHttpResponse
-from django.shortcuts import redirect, get_object_or_404, render
+from django.shortcuts import redirect, get_object_or_404
 from django.urls import reverse, reverse_lazy
 from django.utils.crypto import get_random_string
 from django.utils.timezone import now, timedelta
 from django.views.decorators.csrf import csrf_exempt
-from django.views.generic import FormView, DetailView
+from django.views.generic import FormView
 from django_filters.views import FilterView
 from django_tables2 import SingleTableView
 
@@ -24,7 +24,7 @@ from twf.models import Project, Document, Page, Dictionary, DictionaryEntry, Pag
 from twf.permissions import get_available_actions, check_permission
 from twf.tables.tables_home import ProjectManagementTable, UserManagementTable
 from twf.tasks.instant_tasks import save_instant_task_create_project
-from twf.utils.mail_utils import send_welcome_email, send_reset_email
+from twf.utils.mail_utils import send_welcome_email
 from twf.utils.project_statistics import get_document_statistics
 from twf.views.views_base import TWFView
 

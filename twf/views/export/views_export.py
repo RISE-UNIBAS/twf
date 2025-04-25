@@ -9,20 +9,18 @@ from django.http import JsonResponse, HttpResponse
 from django.views.generic import FormView
 from django_filters.views import FilterView
 from django_tables2 import SingleTableView
-
-logger = logging.getLogger(__name__)
-
-from twf.clients.zenodo_client import get_zenodo_uploads
 from twf.forms.dictionaries.dictionaries_forms import DictionaryImportForm
 from twf.forms.export_forms import ExportDocumentsForm, ExportCollectionsForm, ExportProjectForm, ExportZenodoForm
 from twf.forms.filters.filters import ExportFilter
 from twf.forms.project.project_forms import ExportSettingsForm
 from twf.models import Export
 from twf.tables.tables_export import ExportTable
-from twf.utils.create_export_utils import create_data, flatten_dict_keys
+from twf.utils.create_export_utils import create_data
 from twf.utils.export_utils import get_dictionary_json_data, get_dictionary_csv_data, get_tags_json_data, \
     get_tags_csv_data
 from twf.views.views_base import TWFView
+
+logger = logging.getLogger(__name__)
 
 
 class TWFExportView(LoginRequiredMixin, TWFView):

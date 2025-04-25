@@ -1,7 +1,6 @@
 """Celery tasks for extracting Transkribus export files."""
 import logging
 import os
-import time
 import uuid
 import zipfile
 import xml.etree.ElementTree as ET

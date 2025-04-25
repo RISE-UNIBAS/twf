@@ -11,7 +11,7 @@ from django.urls import reverse_lazy
 from django.utils.safestring import mark_safe
 from django.views.decorators.csrf import csrf_exempt
 
-from twf.models import Collection, CollectionItem, Workflow, Document
+from twf.models import Collection, CollectionItem, Workflow
 from twf.permissions import check_permission
 
 logger = logging.getLogger(__name__)
