@@ -12,17 +12,17 @@ class TWFDocumentOpenAIBatchView(AIFormView, TWFDocumentView):
     """Ask ChatGPT."""
 
     template_name = 'twf/base/base_ai_batch.html'
-    page_title = 'OpenAI Batch'
+    page_title = 'ChatGPT Batch'
     form_class = DocumentBatchOpenAIForm
     success_url = reverse_lazy('twf:documents_batch_openai')
     start_url = reverse_lazy('twf:task_documents_batch_openai')
-    message = "Are you sure you want to start the openai task?"
+    message = "Do you want to start the ChatGPT batch process now?"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['ai_heading'] = 'ChatGPT Document Batch'
-        context['ai_lead'] = ('Ask ChatGPT to generate text based on the provided prompt.'
-                              'Your prompt will be expanded with the document text.')
+        context['ai_lead'] = ('ChatGPT will generate a separate response for each document by combining your '
+                              'prompt with its content. All documents are processed in one batch.')
         context['has_ai_credentials'] = self.has_ai_credentials('openai')
         context['ai_credentials_url'] = reverse_lazy('twf:project_settings_credentials') + '?tab=openai'
         return context

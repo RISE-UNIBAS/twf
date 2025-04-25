@@ -10,7 +10,7 @@ class DocumentBatchOpenAIForm(BaseAIBatchForm):
 
     def get_button_label(self):
         """Get the label for the submit button."""
-        return 'Run OpenAI Project Batch'
+        return 'Run ChatGPT Batch'
 
 
 class DocumentBatchGeminiForm(BaseAIBatchForm):
