@@ -176,28 +176,16 @@ def get_available_actions(project=None, profile=None, for_group=None):
             "description": "User is allowed to start a Mistral batch workflow.",
             "default_for": ["manager"]
         },
-        "document_page_batch_workflow_openai": {
+        "document_batch_workflow_deepseek": {
             "group": "document",
-            "label": "OpenAI Page Batch Workflow",
-            "description": "User is allowed to start an OpenAI page batch workflow.",
+            "label": "DeepSeek Batch Workflow",
+            "description": "User is allowed to start a DeepSeek batch workflow.",
             "default_for": ["manager"]
         },
-        "document_page_batch_workflow_gemini": {
+        "document_batch_workflow_qwen": {
             "group": "document",
-            "label": "Gemini Page Batch Workflow",
-            "description": "User is allowed to start a Gemini page batch workflow.",
-            "default_for": ["manager"]
-        },
-        "document_page_batch_workflow_claude": {
-            "group": "document",
-            "label": "Claude Page Batch Workflow",
-            "description": "User is allowed to start a Claude page batch workflow.",
-            "default_for": ["manager"]
-        },
-        "document_page_batch_workflow_mistral": {
-            "group": "document",
-            "label": "Mistral Page Batch Workflow",
-            "description": "User is allowed to start a Mistral page batch workflow.",
+            "label": "Qwen Batch Workflow",
+            "description": "User is allowed to start a Qwen batch workflow.",
             "default_for": ["manager"]
         },
         "document_task_review": {

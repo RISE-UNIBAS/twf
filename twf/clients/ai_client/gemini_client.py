@@ -101,7 +101,7 @@ class GeminiClient(BaseAIClient):
         
         return images
     
-    def prompt(self, model: str, prompt: str) -> Tuple[Any, float]:
+    def do_prompt(self, model: str, prompt: str) -> Any:
         """
         Send a prompt to the Gemini model and get the response.
         
@@ -112,8 +112,6 @@ class GeminiClient(BaseAIClient):
         Returns:
             tuple: (response_object, elapsed_time_in_seconds)
         """
-        start_time = time.time()
-        
         # Initialize the model with generation config
         generation_config = {}
         
@@ -145,10 +143,14 @@ class GeminiClient(BaseAIClient):
         
         # Generate content with text and any images
         response = gemini_model.generate_content([prompt] + images)
-        
-        elapsed_time = time.time() - start_time
-        return response, elapsed_time
-    
+
+        return response
+
+    def transpose_response(self, response: Any) -> dict:
+        return_value = self.get_empty_generic_response()
+        return_value['text'] = response.candidates[0].content.parts[0].text
+        return return_value
+
     def get_model_list(self) -> List[Tuple[str, Optional[str]]]:
         """
         Get a list of available models from Gemini.

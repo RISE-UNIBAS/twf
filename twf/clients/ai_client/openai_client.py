@@ -93,7 +93,7 @@ class OpenAIClient(BaseAIClient):
             }
         ]
     
-    def prompt(self, model: str, prompt: str) -> Tuple[Any, float]:
+    def do_prompt(self, model: str, prompt: str) -> Any:
         """
         Send a prompt to the OpenAI model and get the response.
         
@@ -104,7 +104,6 @@ class OpenAIClient(BaseAIClient):
         Returns:
             tuple: (response_object, elapsed_time_in_seconds)
         """
-        start_time = time.time()
         
         # Prepare messages with any images
         messages = self._prepare_message_with_images(prompt)
@@ -127,10 +126,14 @@ class OpenAIClient(BaseAIClient):
         
         # Send the request to OpenAI
         response = self.api_client.chat.completions.create(**params)
-        
-        elapsed_time = time.time() - start_time
-        return response, elapsed_time
-    
+
+        return response
+
+    def transpose_response(self, response: Any) -> dict:
+        return_value = self.get_empty_generic_response()
+        return_value['text'] = response.choices[0].message.content
+        return return_value
+
     def get_model_list(self) -> List[Tuple[str, Optional[str]]]:
         """
         Get a list of available models from OpenAI.

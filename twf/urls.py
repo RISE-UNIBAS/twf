@@ -28,9 +28,8 @@ from twf.views.documents.views_crud import update_document_metadata, delete_docu
 from twf.views.documents.views_documents import TWFDocumentsOverviewView, TWFDocumentsBrowseView, \
     TWFDocumentNameView, TWFDocumentDetailView, TWFDocumentReviewView, TWFDocumentsSearchView
 from twf.views.documents.views_documents_ai import TWFDocumentOpenAIBatchView, \
-    TWFDocumentGeminiBatchView, TWFDocumentClaudeBatchView, TWFDocumentOpenAIPageBatchView, \
-    TWFDocumentGeminiPageBatchView, TWFDocumentClaudePageBatchView, TWFDocumentMistralBatchView, \
-    TWFDocumentMistralPageBatchView
+    TWFDocumentGeminiBatchView, TWFDocumentClaudeBatchView, TWFDocumentMistralBatchView, \
+     TWFDocumentDeepSeekBatchView, TWFDocumentQwenBatchView
 from twf.views.export.views_crud import delete_export
 from twf.views.home.views_home import TWFHomeView, TWFHomeLoginView, TWFHomePasswordChangeView, TWFHomeUserOverView, \
     TWFSelectProjectView, TWFHomeUserProfileView, TWFCreateProjectView, TWFManageProjectsView, TWFManageUsersView, \
@@ -164,14 +163,8 @@ urlpatterns = [
     path('documents/batch/gemini/', TWFDocumentGeminiBatchView.as_view(), name='documents_batch_gemini'),
     path('documents/batch/claude/', TWFDocumentClaudeBatchView.as_view(), name='documents_batch_claude'),
     path('documents/batch/mistral/', TWFDocumentMistralBatchView.as_view(), name='documents_batch_mistral'),
-    path('documents/page/batch/openai/', TWFDocumentOpenAIPageBatchView.as_view(),
-         name='documents_page_batch_openai'),
-    path('documents/page/batch/gemini/', TWFDocumentGeminiPageBatchView.as_view(),
-         name='documents_page_batch_gemini'),
-    path('documents/page/batch/claude/', TWFDocumentClaudePageBatchView.as_view(),
-         name='documents_page_batch_claude'),
-    path('documents/page/batch/mistral/', TWFDocumentMistralPageBatchView.as_view(),
-         name='documents_page_batch_mistral'),
+    path('documents/batch/deepseek/', TWFDocumentDeepSeekBatchView.as_view(), name='documents_batch_deepseek'),
+    path('documents/batch/qwen/', TWFDocumentQwenBatchView.as_view(), name='documents_batch_qwen'),
 
     #############################
     # TAGS
@@ -319,10 +312,8 @@ urlpatterns = [
     path('celery/documents/batch/gemini/', start_gemini_doc_batch, name='task_documents_batch_gemini'),
     path('celery/documents/batch/claude/', start_claude_doc_batch, name='task_documents_batch_claude'),
     path('celery/documents/batch/mistral/', start_mistral_doc_batch, name='task_documents_batch_mistral'),
-    path('celery/documents/page/batch/openai/', start_openai_page_batch, name='task_documents_page_batch_openai'),
-    path('celery/documents/page/batch/gemini/', start_gemini_page_batch, name='task_documents_page_batch_gemini'),
-    path('celery/documents/page/batch/claude/', start_claude_page_batch, name='task_documents_page_batch_claude'),
-    path('celery/documents/page/batch/mistral/', start_mistral_page_batch, name='task_documents_page_batch_mistral'),
+    path('celery/documents/batch/deepseek/', start_deepseek_doc_batch, name='task_documents_batch_deepseek'),
+    path('celery/documents/batch/qwen/', start_qwen_doc_batch, name='task_documents_batch_qwen'),
 
     path('celery/dictionaries/batch/gnd/', start_dict_gnd_batch, name='task_dictionaries_batch_gnd'),
     path('celery/dictionaries/batch/geonames/', start_dict_geonames_batch, name='task_dictionaries_batch_geonames'),

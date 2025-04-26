@@ -22,8 +22,7 @@ from twf.tasks.collection_tasks import search_openai_for_collection, search_gemi
     search_claude_for_collection, search_openai_for_collection_item, search_gemini_for_collection_item, \
     search_claude_for_collection_item, search_mistral_for_collection_item
 from twf.tasks.document_tasks import search_openai_for_docs, search_gemini_for_docs, search_claude_for_docs, \
-    search_openai_for_pages, search_gemini_for_pages, search_claude_for_pages, search_mistral_for_docs, \
-    search_mistral_for_pages
+    search_mistral_for_docs, search_deepseek_for_docs, search_qwen_for_docs
 from twf.tasks.structure_tasks import extract_zip_export_task
 from twf.tasks.dictionary_tasks import search_gnd_entries, search_geonames_entries, search_wikidata_entries, \
     search_openai_entries, search_gnd_entry, search_geonames_entry, search_wikidata_entry, search_openai_entry, \
@@ -59,6 +58,21 @@ def trigger_task(request, task_function, *args, **kwargs):
 
     task = task_function.delay(project.id, user_id, *args, **kwargs)
     return JsonResponse({'status': 'success', 'task_id': task.id})
+
+def trigger_ai_task(request, task_function, **kwargs):
+    """
+    Trigger an AI task and return a JSON response with the task ID.
+    """
+    prompt = request.POST.get('prompt')
+    role_description = request.POST.get('role_description')
+    prompt_mode = request.POST.get('prompt_mode')
+
+    kwargs['prompt'] = prompt
+    kwargs['role_description'] = role_description
+    kwargs['prompt_mode'] = prompt_mode
+
+    return trigger_task(request, task_function, **kwargs)
+
 
 ##############################
 ## PROJECT TASKS
@@ -262,87 +276,42 @@ def start_dict_mistral_request(request):
 ## DOCUMENT TASKS
 def start_openai_doc_batch(request):
     """ Start the OpenAI requests as a Celery task."""
-    prompt = request.POST.get('prompt')
-    role_description = request.POST.get('role_description')
-    prompt_mode = request.POST.get('prompt_mode')
-
-    return trigger_task(request, search_openai_for_docs,
-                        prompt=prompt,
-                        role_description=role_description,
-                        prompt_mode=prompt_mode)
+    return trigger_ai_task(request,
+                           search_openai_for_docs,
+                           request_level=request.POST.get('request_level'))
 
 
 def start_gemini_doc_batch(request):
     """ Start the Gemini requests as a Celery task."""
-    prompt = request.POST.get('prompt')
-    role_description = request.POST.get('role_description')
-    prompt_mode = request.POST.get('prompt_mode')
-
-    return trigger_task(request, search_gemini_for_docs,
-                        prompt=prompt,
-                        role_description=role_description,
-                        prompt_mode=prompt_mode)
+    return trigger_ai_task(request,
+                           search_gemini_for_docs,
+                           request_level=request.POST.get('request_level'))
 
 
 def start_claude_doc_batch(request):
     """ Start the Claude requests as a Celery task."""
-    prompt = request.POST.get('prompt')
-    role_description = request.POST.get('role_description')
-
-    return trigger_task(request, search_claude_for_docs,
-                        prompt=prompt,
-                        role_description=role_description)
+    return trigger_ai_task(request,
+                           search_claude_for_docs,
+                           request_level=request.POST.get('request_level'))
 
 
 def start_mistral_doc_batch(request):
     """ Start the Mistral requests as a Celery task."""
-    prompt = request.POST.get('prompt')
-    role_description = request.POST.get('role_description')
+    return trigger_ai_task(request,
+                           search_mistral_for_docs,
+                           request_level=request.POST.get('request_level'))
 
-    return trigger_task(request, search_mistral_for_docs,
-                        prompt=prompt,
-                        role_description=role_description)
+def start_deepseek_doc_batch(request):
+    """ Start the DeepSeek requests as a Celery task."""
+    return trigger_ai_task(request,
+                           search_deepseek_for_docs,
+                           request_level=request.POST.get('request_level'))
 
-
-def start_openai_page_batch(request):
-    """ Start the OpenAI requests as a Celery task."""
-    prompt = request.POST.get('prompt')
-    role_description = request.POST.get('role_description')
-
-    return trigger_task(request, search_openai_for_pages,
-                        prompt=prompt,
-                        role_description=role_description)
-
-
-def start_gemini_page_batch(request):
-    """ Start the Gemini requests as a Celery task."""
-    prompt = request.POST.get('prompt')
-    role_description = request.POST.get('role_description')
-
-    return trigger_task(request, search_gemini_for_pages,
-                        prompt=prompt,
-                        role_description=role_description)
-
-
-def start_claude_page_batch(request):
-    """ Start the Claude requests as a Celery task."""
-    prompt = request.POST.get('prompt')
-    role_description = request.POST.get('role_description')
-
-    return trigger_task(request, search_claude_for_pages,
-                        prompt=prompt,
-                        role_description=role_description)
-
-
-def start_mistral_page_batch(request):
-    """ Start the Claude requests as a Celery task."""
-    prompt = request.POST.get('prompt')
-    role_description = request.POST.get('role_description')
-
-    return trigger_task(request, search_mistral_for_pages,
-                        prompt=prompt,
-                        role_description=role_description)
-
+def start_qwen_doc_batch(request):
+    """ Start the Qwen requests as a Celery task."""
+    return trigger_ai_task(request,
+                           search_qwen_for_docs,
+                           request_level=request.POST.get('request_level'))
 
 ##############################
 ## METADATA TASKS
@@ -464,203 +433,58 @@ def start_copy_project(request):
 
 def start_query_project_openai(request):
     """
-    Trigger an OpenAI query task for the project with multimodal support.
-    
-    This function extracts parameters from the request and starts a Celery task
-    to process a query using OpenAI models. It fully supports multimodal prompts with
-    both text and images through OpenAI's vision capabilities.
-    
-    The function passes the prompt_mode parameter to control how content is sent:
-    - text_only: Only text content from documents is included
-    - images_only: Only images from documents are included with minimal text
-    - text_and_images: Both document text and images are included
-    
-    For image-based modes, the task will automatically select up to 5 representative
-    images from each document, using the Page model's get_image_url method with 50%
-    scaling to optimize for performance.
-    
-    Args:
-        request (HttpRequest): The request object containing POST data
-        
-    Returns:
-        JsonResponse: Response with task_id for tracking progress
-        
-    Post Parameters:
-        prompt (str): The text prompt to send to the model
-        prompt_mode (str): One of "text_only", "images_only", or "text_and_images"
-        role_description (str): System role description for the AI
-        documents (list): List of document IDs to include in the query
-        
-    Technical Details:
-        - Uses OpenAI's GPT-4 Vision capabilities (or compatible models)
-        - Images are sent via URLs directly to OpenAI, not uploaded first
-        - Transkribus server provides the images through its API
-        - IIIF protocol is used for image scaling when available
+    Trigger an OpenAI query task for the project (text-only).
     """
-    prompt = request.POST.get('prompt')
-    prompt_mode = request.POST.get('prompt_mode')
-    role_description = request.POST.get('role_description')
     documents = request.POST.getlist('documents')
 
-    return trigger_task(request, query_project_openai,
-                        prompt=prompt,
-                        role_description=role_description,
-                        documents=documents,
-                        prompt_mode=prompt_mode)
+    return trigger_ai_task(request, query_project_openai,
+                           documents=documents)
 
 
 def start_query_project_gemini(request):
     """
     Trigger a Google Gemini query task for the project with multimodal support.
-    
-    This function extracts parameters from the request and starts a Celery task
-    to process a query using Google Gemini models. It fully supports multimodal prompts
-    with both text and images through Gemini's vision capabilities.
-    
-    The function passes the prompt_mode parameter to control how content is sent:
-    - text_only: Only text content from documents is included
-    - images_only: Only images from documents are included with minimal text
-    - text_and_images: Both document text and images are included
-    
-    For image-based modes, the task will automatically select up to 5 representative
-    images from each document, using the Page model's get_image_url method with 50%
-    scaling to optimize for performance.
-    
-    Args:
-        request (HttpRequest): The request object containing POST data
-        
-    Returns:
-        JsonResponse: Response with task_id for tracking progress
-        
-    Post Parameters:
-        prompt (str): The text prompt to send to the model
-        prompt_mode (str): One of "text_only", "images_only", or "text_and_images"
-        role_description (str): System role description for the AI
-        documents (list): List of document IDs to include in the query
-        
-    Technical Details:
-        - Uses Google's Gemini Pro Vision capabilities (or compatible models)
-        - Images are downloaded from their URLs before being sent to Gemini
-        - Transkribus server provides the images through its API
-        - IIIF protocol is used for image scaling when available
     """
-    prompt = request.POST.get('prompt')
-    prompt_mode = request.POST.get('prompt_mode')
-    role_description = request.POST.get('role_description')
     documents = request.POST.getlist('documents')
 
-    return trigger_task(request, query_project_gemini,
-                        prompt=prompt,
-                        role_description=role_description,
-                        documents=documents,
-                        prompt_mode=prompt_mode)
+    return trigger_ai_task(request, query_project_gemini,
+                           documents=documents)
 
 
 def start_query_project_claude(request):
     """
     Trigger an Anthropic Claude query task for the project (text-only).
-    
-    This function extracts parameters from the request and starts a Celery task
-    to process a query using Anthropic Claude models. Note that while the prompt_mode
-    parameter is accepted for API consistency, Claude implementation currently
-    falls back to text-only mode regardless of the setting.
-    
-    The function takes the same parameters as other AI query functions for consistency,
-    but internally it will convert any multimodal requests to text-only with an
-    appropriate warning message in the task log.
-    
-    Args:
-        request (HttpRequest): The request object containing POST data
-        
-    Returns:
-        JsonResponse: Response with task_id for tracking progress
-        
-    Post Parameters:
-        prompt (str): The text prompt to send to the model
-        prompt_mode (str): Parameter accepted but internally converted to "text_only"
-        role_description (str): System role description for the AI
-        documents (list): List of document IDs to include in the query
-        
-    Implementation Notes:
-        - Future versions may support multimodal content when Claude API adds this capability
-        - The UI indicates this limitation to users through context variables
-        - The task handling automatically converts multimodal requests to text-only
-          with appropriate warnings
     """
-    prompt = request.POST.get('prompt')
-    prompt_mode = request.POST.get('prompt_mode', 'text_only')
-    role_description = request.POST.get('role_description')
     documents = request.POST.getlist('documents')
 
-    return trigger_task(request, query_project_claude,
-                        prompt=prompt,
-                        role_description=role_description,
-                        documents=documents,
-                        prompt_mode=prompt_mode)
+    return trigger_ai_task(request, query_project_claude,
+                           documents=documents)
 
 
 def start_query_project_mistral(request):
     """
     Trigger a Mistral query task for the project (text-only).
-    
-    This function extracts parameters from the request and starts a Celery task
-    to process a query using Mistral models. Note that while the prompt_mode
-    parameter is accepted for API consistency, Mistral implementation currently
-    falls back to text-only mode regardless of the setting.
-    
-    The function takes the same parameters as other AI query functions for consistency,
-    but internally it will convert any multimodal requests to text-only with an
-    appropriate warning message in the task log.
-    
-    Args:
-        request (HttpRequest): The request object containing POST data
-        
-    Returns:
-        JsonResponse: Response with task_id for tracking progress
-        
-    Post Parameters:
-        prompt (str): The text prompt to send to the model
-        prompt_mode (str): Parameter accepted but internally converted to "text_only"
-        role_description (str): System role description for the AI
-        documents (list): List of document IDs to include in the query
-        
-    Implementation Notes:
-        - Future versions may support multimodal content when Mistral API adds this capability
-        - The UI indicates this limitation to users through context variables
-        - The task handling automatically converts multimodal requests to text-only
-          with appropriate warnings
     """
-    prompt = request.POST.get('prompt')
-    prompt_mode = request.POST.get('prompt_mode', 'text_only')
-    role_description = request.POST.get('role_description')
     documents = request.POST.getlist('documents')
 
-    return trigger_task(request, query_project_mistral,
-                        prompt=prompt,
-                        role_description=role_description,
-                        documents=documents,
-                        prompt_mode=prompt_mode)
+    return trigger_ai_task(request, query_project_mistral,
+                           documents=documents)
 
 
 def start_query_project_deepseek(request):
-    prompt = request.POST.get('prompt')
-    role_description = request.POST.get('role_description')
+    """
+    Trigger a DeepSeek query task for the project (text-only).
+    """
     documents = request.POST.getlist('documents')
 
-    return trigger_task(request, query_project_deepseek,
-                        prompt=prompt,
-                        role_description=role_description,
-                        documents=documents)
+    return trigger_ai_task(request, query_project_deepseek,
+                           documents=documents)
 
 
 def start_query_project_qwen(request):
-    prompt = request.POST.get('prompt')
-    role_description = request.POST.get('role_description')
     documents = request.POST.getlist('documents')
 
     return trigger_task(request, query_project_qwen,
-                        prompt=prompt,
-                        role_description=role_description,
                         documents=documents)
 
 

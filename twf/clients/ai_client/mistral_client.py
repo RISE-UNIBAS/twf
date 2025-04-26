@@ -33,7 +33,7 @@ class MistralClient(BaseAIClient):
         """Initialize the Mistral client with the provided API key."""
         self.api_client = Mistral(api_key=self.api_key)
     
-    def prompt(self, model: str, prompt: str) -> Tuple[Any, float]:
+    def do_prompt(self, model: str, prompt: str) -> Any:
         """
         Send a prompt to the Mistral model and get the response.
         
@@ -44,7 +44,6 @@ class MistralClient(BaseAIClient):
         Returns:
             tuple: (response_object, elapsed_time_in_seconds)
         """
-        start_time = time.time()
         
         # Prepare the base message structure
         messages = [
@@ -85,10 +84,14 @@ class MistralClient(BaseAIClient):
         
         # Send the request to Mistral
         response = self.api_client.chat.complete(**params)
-        
-        elapsed_time = time.time() - start_time
-        return response, elapsed_time
-    
+
+        return response
+
+    def transpose_response(self, response: Any) -> dict:
+        return_value = self.get_empty_generic_response()
+        return_value['text'] = response.content[0].text
+        return return_value
+
     def get_model_list(self) -> List[Tuple[str, Optional[str]]]:
         """
         Get a list of available models from Mistral.

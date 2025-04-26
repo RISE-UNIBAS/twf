@@ -226,7 +226,7 @@ class ClaudeQueryDatabaseForm(ProjectAIBaseForm):
             **kwargs: Arbitrary keyword arguments.
         """
         # Temporarily disable multimodal for Claude
-        kwargs['multimodal_support'] = False 
+        kwargs['multimodal_support'] = True
         super().__init__(*args, **kwargs)
 
     def get_button_label(self):
@@ -286,7 +286,7 @@ class DeepSeekQueryDatabaseForm(ProjectAIBaseForm):
             **kwargs: Arbitrary keyword arguments.
         """
         # DeepSeek doesn't support multimodal
-        kwargs['multimodal_support'] = False
+        kwargs['multimodal_support'] = True
         super().__init__(*args, **kwargs)
 
     def get_button_label(self):
@@ -316,7 +316,7 @@ class QwenQueryDatabaseForm(ProjectAIBaseForm):
             **kwargs: Arbitrary keyword arguments.
         """
         # Qwen doesn't support multimodal
-        kwargs['multimodal_support'] = False
+        kwargs['multimodal_support'] = True
         super().__init__(*args, **kwargs)
 
     def get_button_label(self):

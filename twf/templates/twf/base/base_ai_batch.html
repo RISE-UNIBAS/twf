@@ -49,16 +49,15 @@
 {% block script %}
     <script>
         function format_ai_result(data) {
-            console.log("Base format_ai_result called", data);
+            let text = (data.text) || "No response text.";
 
-            let formattedJSON = JSON.stringify(data, null, 2);
             let aiResultHTML = `
+                <h2>AI Result</h2>
                 <div class="card mt-3">
-                    <div class="card-header">AI Result</div>
                     <div class="card-body">
-                        <pre class="json-output"><code>${formattedJSON}</code></pre>
+                        <div class="ai-result">${marked.parse(text)}</div>
                         <div class="mt-3 text-end">
-                            <button id="save_as_note_btn" class="btn btn-sm btn-secondary">
+                            <button id="save_as_note_btn" class="btn btn-sm btn-dark">
                                 <i class="fa fa-save me-1"></i> Save as Note
                             </button>
                         </div>
@@ -86,49 +85,25 @@
         function getAIResultContent() {
             // This is a base implementation that can be overridden in child templates
             
-            // First, check if there's a model-specific result container
-            const claudeResult = $(".claude-result").text();
-            if (claudeResult) {
-                return claudeResult;
+            // For OpenAI, extract the raw text without markdown formatting
+            const openaiData = $(".ai-result").text();
+            if (openaiData) {
+                return openaiData;
             }
-            
-            const geminiResult = $(".gemini-result").text();
-            if (geminiResult) {
-                return geminiResult;
-            }
-            
-            const openaiResult = $(".openai-result").text();
-            if (openaiResult) {
-                return openaiResult;
-            }
-            
-            const mistralResult = $(".mistral-result").text();
-            if (mistralResult) {
-                return mistralResult;
-            }
-            
-            // Fallback to checking the json-output
-            const jsonOutput = $(".json-output").text();
-            if (jsonOutput) {
-                try {
-                    // Try to parse it as JSON and extract common result patterns
+
+            // Fallback to looking for OpenAI-specific data structure
+            try {
+                const jsonOutput = $(".json-output").text();
+                if (jsonOutput) {
                     const data = JSON.parse(jsonOutput);
-                    // Different AI services might return results in different formats
-                    if (data.content && data.content[0] && data.content[0].text) {
-                        return data.content[0].text; // Claude format
-                    } else if (data.text) {
-                        return data.text; // Some APIs return direct text
-                    } else if (data.choices && data.choices[0] && data.choices[0].message) {
-                        return data.choices[0].message.content; // OpenAI format
-                    } else {
-                        // Fallback to the entire JSON
-                        return jsonOutput;
+                    if (data.text) {
+                        return data.text;
                     }
-                } catch (e) {
-                    // If it's not valid JSON, just return the text
-                    return jsonOutput;
                 }
+            } catch (e) {
+                console.error("Error parsing AI JSON:", e);
             }
+
             return null;
         }
         

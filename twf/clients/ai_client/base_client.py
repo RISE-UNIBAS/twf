@@ -117,9 +117,26 @@ class BaseAIClient(abc.ABC):
             bool: True if the resource is a URL, False if it's a file path
         """
         return resource.startswith(('http://', 'https://'))
-    
-    @abc.abstractmethod
-    def prompt(self, model: str, prompt: str) -> Tuple[Any, float]:
+
+    def get_empty_generic_response(self) -> dict:
+        """
+        Convert the raw response from the provider into a generic format.
+
+        Args:
+            response (Any): The raw response from the provider
+
+        Returns:
+            dict: The transposed response in a generic format
+        """
+        ret_val = {
+            "text": '',
+            "json": {},
+            "model": '',
+            "duration": ''
+        }
+        return ret_val
+
+    def prompt(self, model: str, prompt: str) -> Tuple[dict, float]:
         """
         Send a prompt to the AI model and get the response.
         
@@ -130,8 +147,29 @@ class BaseAIClient(abc.ABC):
         Returns:
             tuple: (response_object, elapsed_time_in_seconds)
         """
+        start_time = time.time()
+        response = self.do_prompt(model, prompt)
+        generic_response = self.transpose_response(response)
+        elapsed_time = time.time() - start_time
+        return generic_response, elapsed_time
+
+    @abc.abstractmethod
+    def do_prompt(self, model: str, prompt: str) -> Any:
         pass
-    
+
+    @abc.abstractmethod
+    def transpose_response(self, response: Any) -> dict:
+        """
+        Convert the raw response from the provider into a generic format.
+
+        Args:
+            response (Any): The raw response from the provider
+
+        Returns:
+            Any: The transposed response in a generic format
+        """
+        pass
+
     @abc.abstractmethod
     def get_model_list(self) -> List[Tuple[str, Optional[str]]]:
         """

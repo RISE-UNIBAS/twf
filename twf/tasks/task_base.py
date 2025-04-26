@@ -59,12 +59,16 @@ class BaseTWFTask(CeleryTask):
         "search_gemini_for_docs": "Gemini AI processing of documents for content extraction or enhancement.",
         "search_claude_for_docs": "Claude AI processing of documents for content extraction or enhancement.",
         "search_mistral_for_docs": "Mistral AI processing of documents for content extraction or enhancement.",
+        "search_deepseek_for_docs": "DeepSeek AI processing of documents for content extraction or enhancement.",
+        "search_qwen_for_docs": "Qwen AI processing of documents for content extraction or enhancement.",
         
         # AI project query tasks (including multimodal)
         "query_project_openai": "OpenAI query with selected documents and optional image content.",
         "query_project_gemini": "Google Gemini query with selected documents and optional image content.",
-        "query_project_claude": "Claude query with selected documents (text-only).",
+        "query_project_claude": "Claude query with selected documents and optional image content.",
         "query_project_mistral": "Mistral query with selected documents (text-only).",
+        "query_project_deepseek": "DeepSeek query with selected documents and optional image content.",
+        "query_project_qwen": "Qwen query with selected documents and optional image content.",
         
         # Export tasks
         "export_data_task": "Export of project data to various formats.",
@@ -418,12 +422,11 @@ class BaseTWFTask(CeleryTask):
         try:
             response, elapsed_time = self.client.prompt(model=self.credentials['default_model'],
                                                        prompt=full_prompt)
-            response_dict = response.to_dict()
             self.client.clear_image_resources()
-            self._handle_task_success(ai_result=response_dict)
+            self._handle_task_success(ai_result=response)
             
             # Return the result for display on the page
-            return {"ai_result": response_dict}
+            return {"ai_result": response}
             
         except Exception as e:
             # Handle any exceptions that occur during API call
@@ -621,8 +624,7 @@ class BaseTWFTask(CeleryTask):
         self.client_name = client_name
         self.credentials = self.project.get_credentials(client_name)
         self.client = create_ai_client(client_name, self.credentials['api_key'],
-                                       )
-        #TODO role_description
+                                       system_prompt=role_description)
 
     def prompt_client(self, item, prompt):
         """
@@ -663,9 +665,8 @@ class BaseTWFTask(CeleryTask):
             context = item.get_text()
             prompt = prompt + "\n\n" + "Context:\n" + context
             response, elapsed_time = self.client.prompt(model=self.credentials['default_model'],
-                                                      prompt=prompt)
-            response_dict = response.to_dict()
-            return response_dict, elapsed_time
+                                                        prompt=prompt)
+            return response, elapsed_time
         except Exception as e:
             # Reraise the exception to be handled by the calling function
             logger.error(f"Error in prompt_client: {str(e)}")

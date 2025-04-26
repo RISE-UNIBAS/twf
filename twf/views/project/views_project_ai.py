@@ -21,7 +21,7 @@ class TWFProjectAIQueryView(AIFormView, TWFProjectView):
     This view provides an interface for querying OpenAI models with
     both text-only and multimodal (text + images) capabilities.
     """
-    template_name = 'twf/project/query/openai.html'
+    template_name = 'twf/project/query/ai.html'
     page_title = 'Ask ChatGPT'
     form_class = OpenAIQueryDatabaseForm
     success_url = reverse_lazy('twf:project_ai_query')
@@ -57,7 +57,7 @@ class TWFProjectGeminiQueryView(AIFormView, TWFProjectView):
     This view provides an interface for querying Google Gemini models with
     native multimodal (text + images) capabilities.
     """
-    template_name = 'twf/project/query/gemini.html'
+    template_name = 'twf/project/query/ai.html'
     page_title = 'Ask Gemini'
     form_class = GeminiQueryDatabaseForm
     success_url = reverse_lazy('twf:project_gemini_query')
@@ -95,7 +95,7 @@ class TWFProjectClaudeQueryView(AIFormView, TWFProjectView):
     Multimodal support is temporarily disabled but will be enabled
     for Claude 3 models in a future update.
     """
-    template_name = 'twf/project/query/claude.html'
+    template_name = 'twf/project/query/ai.html'
     page_title = 'Ask Claude'
     form_class = ClaudeQueryDatabaseForm
     success_url = reverse_lazy('twf:project_claude_query')
@@ -121,8 +121,8 @@ class TWFProjectClaudeQueryView(AIFormView, TWFProjectView):
         context['has_ai_credentials'] = self.has_ai_credentials('anthropic')
         context['ai_credentials_url'] = reverse_lazy('twf:project_settings_credentials') + '?tab=anthropic'
         # Temporarily disable multimodal for Claude
-        context['supports_multimodal'] = False
-        context['multimodal_info'] = 'Currently limited to text-only mode. Image support is disabled in this version.'
+        context['supports_multimodal'] = True
+        context['multimodal_info'] = 'Claude supports text-only, image-only, and text+image modes.'
         return context
 
 
@@ -133,7 +133,7 @@ class TWFProjectMistralQueryView(AIFormView, TWFProjectView):
     This view provides an interface for querying Mistral models,
     which currently only support text-only inputs.
     """
-    template_name = 'twf/project/query/mistral.html'
+    template_name = 'twf/project/query/ai.html'
     page_title = 'Ask Mistral'
     form_class = MistralQueryDatabaseForm  # This is the text-only form
     success_url = reverse_lazy('twf:project_mistral_query')
@@ -169,7 +169,7 @@ class TWFProjectDeepSeekQueryView(AIFormView, TWFProjectView):
     This view provides an interface for querying Mistral models,
     which currently only support text-only inputs.
     """
-    template_name = 'twf/project/query/deepseek.html'
+    template_name = 'twf/project/query/ai.html'
     page_title = 'Ask DeepSeek'
     form_class = DeepSeekQueryDatabaseForm
     success_url = reverse_lazy('twf:project_deepseek_query')
@@ -185,8 +185,8 @@ class TWFProjectDeepSeekQueryView(AIFormView, TWFProjectView):
         context['ai_lead'] = 'Query DeepSeek models for predictions.'
         context['has_ai_credentials'] = self.has_ai_credentials('deepseek')
         context['ai_credentials_url'] = reverse_lazy('twf:project_settings_credentials') + '?tab=deepseek'
-        context['supports_multimodal'] = False
-        context['multimodal_info'] = 'Limited to text-only mode. DeepSeek models do not support image input.'
+        context['supports_multimodal'] = True
+        context['multimodal_info'] = 'DeepSeek supports text-only, image-only, and text+image modes.'
         return context
 
 
@@ -197,7 +197,7 @@ class TWFProjectQwenQueryView(AIFormView, TWFProjectView):
     This view provides an interface for querying Mistral models,
     which currently only support text-only inputs.
     """
-    template_name = 'twf/project/query/qwen.html'
+    template_name = 'twf/project/query/ai.html'
     page_title = 'Ask Qwen'
     form_class = QwenQueryDatabaseForm
     success_url = reverse_lazy('twf:project_qwen_query')
@@ -213,6 +213,6 @@ class TWFProjectQwenQueryView(AIFormView, TWFProjectView):
         context['ai_lead'] = 'Query Qwen models for predictions.'
         context['has_ai_credentials'] = self.has_ai_credentials('qwen')
         context['ai_credentials_url'] = reverse_lazy('twf:project_settings_credentials') + '?tab=qwen'
-        context['supports_multimodal'] = False
-        context['multimodal_info'] = 'Limited to text-only mode. Qwen models do not support image input.'
+        context['supports_multimodal'] = True
+        context['multimodal_info'] = 'Qwen supports text-only, image-only, and text+image modes.'
         return context

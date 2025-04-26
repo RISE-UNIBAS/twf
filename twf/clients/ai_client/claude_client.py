@@ -36,7 +36,7 @@ class ClaudeClient(BaseAIClient):
         """Initialize the Anthropic client with the provided API key."""
         self.api_client = Anthropic(api_key=self.api_key)
     
-    def prompt(self, model: str, prompt: str) -> Tuple[Any, float]:
+    def do_prompt(self, model: str, prompt: str) -> Any:
         """
         Send a prompt to the Claude model and get the response.
         
@@ -47,8 +47,6 @@ class ClaudeClient(BaseAIClient):
         Returns:
             tuple: (response_object, elapsed_time_in_seconds)
         """
-        start_time = time.time()
-        
         # Extract Claude-specific parameters from settings
         params = {
             'model': model,
@@ -72,10 +70,13 @@ class ClaudeClient(BaseAIClient):
         
         # Send the request to Anthropic
         response = self.api_client.messages.create(**params)
-        
-        elapsed_time = time.time() - start_time
-        return response, elapsed_time
-    
+        return response
+
+    def transpose_response(self, response: Any) -> dict:
+        return_value = self.get_empty_generic_response()
+        return_value['text'] = response.content[0].text
+        return return_value
+
     def get_model_list(self) -> List[Tuple[str, Optional[str]]]:
         """
         Get a list of available models from Claude.

@@ -15,7 +15,7 @@ def search_openai_for_docs(self, project_id, user_id, **kwargs):
     prompt and saving the results to the document's metadata.
     """
     try:
-        self.validate_task_parameters(kwargs, ['prompt', 'role_description', 'prompt_mode'])
+        self.validate_task_parameters(kwargs, ['prompt', 'role_description', 'prompt_mode', 'request_level'])
         
         # Get document count and filter active documents if needed
         documents = self.project.documents.all()
@@ -48,7 +48,7 @@ def search_openai_for_docs(self, project_id, user_id, **kwargs):
 
 @shared_task(bind=True, base=BaseTWFTask)
 def search_gemini_for_docs(self, project_id, user_id, **kwargs):
-    self.validate_task_parameters(kwargs, ['prompt', 'role_description', 'prompt_mode'])
+    self.validate_task_parameters(kwargs, ['prompt', 'role_description', 'prompt_mode', 'request_level'])
     self.process_ai_request(self.project.documents.all(), 'genai',
                             kwargs['prompt'], kwargs['role_description'], 'gemini',
                             prompt_mode=kwargs['prompt_mode'])
@@ -56,39 +56,27 @@ def search_gemini_for_docs(self, project_id, user_id, **kwargs):
 
 @shared_task(bind=True, base=BaseTWFTask)
 def search_claude_for_docs(self, project_id, user_id, **kwargs):
-    self.validate_task_parameters(kwargs, ['prompt', 'role_description'])
+    self.validate_task_parameters(kwargs, ['prompt', 'role_description', 'prompt_mode', 'request_level'])
     self.process_ai_request(self.project.documents.all(), 'anthropic',
                             kwargs['prompt'], kwargs['role_description'], 'claude')
 
+
 @shared_task(bind=True, base=BaseTWFTask)
 def search_mistral_for_docs(self, project_id, user_id, **kwargs):
-    self.validate_task_parameters(kwargs, ['prompt', 'role_description'])
+    self.validate_task_parameters(kwargs, ['prompt', 'role_description', 'prompt_mode'])
     self.process_ai_request(self.project.documents.all(), 'mistral',
                             kwargs['prompt'], kwargs['role_description'], 'mistral')
 
-@shared_task(bind=True, base=BaseTWFTask)
-def search_openai_for_pages(self, project_id, user_id, **kwargs):
-    self.validate_task_parameters(kwargs, ['prompt', 'role_description'])
-    pages = Page.objects.filter(document__project=self.project, is_ignored=False)
-    self.process_ai_request(pages, 'openai', kwargs['prompt'], kwargs['role_description'], 'openai')
-
 
 @shared_task(bind=True, base=BaseTWFTask)
-def search_gemini_for_pages(self, project_id, user_id, **kwargs):
-    self.validate_task_parameters(kwargs, ['prompt', 'role_description'])
-    pages = Page.objects.filter(document__project=self.project, is_ignored=False)
-    self.process_ai_request(pages, 'genai', kwargs['prompt'], kwargs['role_description'], 'gemini')
+def search_deepseek_for_docs(self, project_id, user_id, **kwargs):
+    self.validate_task_parameters(kwargs, ['prompt', 'role_description', 'prompt_mode', 'request_level'])
+    self.process_ai_request(self.project.documents.all(), 'deepseek',
+                            kwargs['prompt'], kwargs['role_description'], 'deepseek')
 
 
 @shared_task(bind=True, base=BaseTWFTask)
-def search_claude_for_pages(self, project_id, user_id, **kwargs):
-    self.validate_task_parameters(kwargs, ['prompt', 'role_description'])
-    pages = Page.objects.filter(document__project=self.project, is_ignored=False)
-    self.process_ai_request(pages, 'anthropic', kwargs['prompt'], kwargs['role_description'], 'claude')
-
-
-@shared_task(bind=True, base=BaseTWFTask)
-def search_mistral_for_pages(self, project_id, user_id, **kwargs):
-    self.validate_task_parameters(kwargs, ['prompt', 'role_description'])
-    pages = Page.objects.filter(document__project=self.project, is_ignored=False)
-    self.process_ai_request(pages, 'mistral', kwargs['prompt'], kwargs['role_description'], 'mistral')
+def search_qwen_for_docs(self, project_id, user_id, **kwargs):
+    self.validate_task_parameters(kwargs, ['prompt', 'role_description', 'prompt_mode', 'request_level'])
+    self.process_ai_request(self.project.documents.all(), 'qwen',
+                            kwargs['prompt'], kwargs['role_description'], 'qwen')
