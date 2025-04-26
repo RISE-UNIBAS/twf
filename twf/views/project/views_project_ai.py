@@ -183,7 +183,7 @@ class TWFProjectDeepSeekQueryView(AIFormView, TWFProjectView):
         context = super().get_context_data(**kwargs)
         context['ai_heading'] = self.page_title
         context['ai_lead'] = 'Query DeepSeek models for predictions.'
-        context['has_ai_credentials'] = self.has_ai_credentials('mistral')
+        context['has_ai_credentials'] = self.has_ai_credentials('deepseek')
         context['ai_credentials_url'] = reverse_lazy('twf:project_settings_credentials') + '?tab=deepseek'
         context['supports_multimodal'] = False
         context['multimodal_info'] = 'Limited to text-only mode. DeepSeek models do not support image input.'

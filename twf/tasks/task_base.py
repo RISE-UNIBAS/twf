@@ -420,7 +420,7 @@ class BaseTWFTask(CeleryTask):
                                                        prompt=full_prompt)
             response_dict = response.to_dict()
             self.client.clear_image_resources()
-            self._generate_task_success_description()
+            self._handle_task_success(ai_result=response_dict)
             
             # Return the result for display on the page
             return {"ai_result": response_dict}
@@ -492,7 +492,7 @@ class BaseTWFTask(CeleryTask):
         img_support = self.client.has_multimodal_support()
 
         if prompt_mode in ['images_only', 'text_and_images'] and not img_support:
-            fallback_message = f"Warning: {self.client.api} does not support images. Falling back to text-only mode.\n"
+            fallback_message = f"Warning: {self.client} does not support images. Falling back to text-only mode.\n"
             self.twf_task.text += fallback_message
             return False
 
@@ -514,7 +514,7 @@ class BaseTWFTask(CeleryTask):
 
     def _generate_task_init_description(self, prompt, role_description, prompt_mode):
         if self.twf_task:
-            self.twf_task.text += f"AI Client: {self.client.api.upper()}\n"
+            self.twf_task.text += f"AI Client: {self.client}\n"
             self.twf_task.text += f"Model: {self.credentials['default_model']}\n"
             self.twf_task.text += f"Role: {role_description[:100]}...\n" if len(role_description) > 100 else f"Role: {role_description}\n"
             self.twf_task.text += f"Prompt: {prompt[:100]}...\n" if len(prompt) > 100 else f"Prompt: {prompt}\n"

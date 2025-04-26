@@ -143,6 +143,23 @@ class BaseAIClient(abc.ABC):
         """
         pass
 
+    def has_multimodal_support(self) -> bool:
+        """
+        Check if the provider supports multimodal content.
+
+        Returns:
+            bool: True if the provider supports multimodal content, False otherwise
+        """
+        return self.SUPPORTS_MULTIMODAL
+
+    def __str__(self):
+        """
+        String representation of the AI client.
+
+        Returns:
+            str: The string representation of the client
+        """
+        return self.PROVIDER_ID
 
 def create_ai_client(provider: str, api_key: str, system_prompt: str = None, **settings) -> BaseAIClient:
     """
