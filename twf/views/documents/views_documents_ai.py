@@ -38,13 +38,13 @@ class TWFDocumentGeminiBatchView(AIFormView, TWFDocumentView):
     form_class = DocumentBatchGeminiForm
     success_url = reverse_lazy('twf:documents_batch_gemini')
     start_url = reverse_lazy('twf:task_documents_batch_gemini')
-    message = "Are you sure you want to start the gemini task?"
+    message = "Do you want to start the Gemini batch process now?"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['ai_heading'] = 'Ask Gemini'
-        context['ai_lead'] = ('Ask Gemini to generate text based on the provided prompt.'
-                              'Your prompt will be expanded with the document text.')
+        context['ai_heading'] = 'Gemini Document Batch'
+        context['ai_lead'] = ('Gemini will generate a separate response for each document by combining your '
+                              'prompt with its content. All documents are processed in one batch.')
         context['has_ai_credentials'] = self.has_ai_credentials('genai')
         context['ai_credentials_url'] = reverse_lazy('twf:project_settings_credentials') + '?tab=genai'
         context['supports_multimodal'] = True
