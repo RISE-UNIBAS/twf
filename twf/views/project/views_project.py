@@ -83,7 +83,7 @@ class TWFProjectView(LoginRequiredMixin, TWFView):
                      'value': 'Extract Transkribus Export', 'permission': 'extract_transkribus_export'},
                     {'url': reverse('twf:project_copy'),
                      'value': 'Create Copy of Project', 'permission': 'copy_project'},
-                    {'url': reverse('twf:project_reset'), 'value': 'Reset Functions'},
+                    {'url': reverse('twf:project_reset'), 'value': 'Reset Project'},
                 ]
             },
         ]
