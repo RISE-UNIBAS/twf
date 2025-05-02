@@ -30,7 +30,7 @@ from twf.views.documents.views_documents import TWFDocumentsOverviewView, TWFDoc
 from twf.views.documents.views_documents_ai import TWFDocumentOpenAIBatchView, \
     TWFDocumentGeminiBatchView, TWFDocumentClaudeBatchView, TWFDocumentMistralBatchView, \
      TWFDocumentDeepSeekBatchView, TWFDocumentQwenBatchView
-from twf.views.export.views_crud import delete_export
+from twf.views.export.views_crud import delete_export, delete_export_configuration
 from twf.views.home.views_home import TWFHomeView, TWFHomeLoginView, TWFHomePasswordChangeView, TWFHomeUserOverView, \
     TWFSelectProjectView, TWFHomeUserProfileView, TWFCreateProjectView, TWFManageProjectsView, TWFManageUsersView, \
     TWFSystemHealthView, check_system_health, TWFHomeIndexView, TWFHomeAboutView, TWFProjectViewDetailView, \
@@ -49,15 +49,16 @@ from twf.views.dictionaries.views_dictionaries import TWFDictionaryOverviewView,
     TWFDictionaryDictionaryEditView, TWFDictionaryDictionaryEntryEditView, TWFDictionaryDictionaryEntryView, \
     TWFDictionaryNormDataView, TWFDictionaryCreateView, TWFDictionaryDictionariesView, \
     TWFDictionaryAddView, TWFDictionaryMergeEntriesView
-from twf.views.export.views_export import TWFExportDocumentsView, TWFExportCollectionsView, TWFExportProjectView, \
-    TWFExportOverviewView, TWFExportTagsView, TWFExportDictionariesView, TWFImportDictionaryView, \
-    TWFExportConfigurationView, TWFExportZenodoView, TWFExportListView
+from twf.views.export.views_export import TWFExportProjectView, \
+    TWFExportOverviewView, TWFImportDictionaryView, \
+    TWFExportConfigurationView, TWFExportZenodoView, TWFExportListView, TWFExportConfListView, TWFExportRunView, \
+    TWFExportSampleView
 from twf.views.metadata.views_metadata import TWFMetadataReviewDocumentsView, TWFMetadataExtractTagsView, \
     TWFMetadataReviewPagesView, TWFMetadataOverviewView
 from twf.views.project.views_project import TWFProjectQueryView, TWFProjectOverviewView, \
     TWFProjectTaskMonitorView, TWFProjectTaskDetailView, TWFProjectGeneralSettingsView, \
     TWFProjectCredentialsSettingsView, \
-    TWFProjectPromptsView, TWFProjectTaskSettingsView, TWFProjectExportSettingsView, TWFProjectCopyView, \
+    TWFProjectPromptsView, TWFProjectTaskSettingsView, TWFProjectCopyView, \
     TWFProjectResetView, TWFProjectUserManagementView, TWFProjectRepositorySettingsView, TWFProjectPromptEditView, \
     TWFProjectSetupView, TWFProjectTranskribusExtractView, TWFProjectNotesView, TWFProjectPromptDetailView, \
     TWFProjectNoteEditView, TWFProjectNoteDetailView, TWFProjectPromptSettingsView
@@ -134,7 +135,6 @@ urlpatterns = [
     path('project/settings/credentials/', TWFProjectCredentialsSettingsView.as_view(),
          name='project_settings_credentials'),
     path('project/settings/tasks/', TWFProjectTaskSettingsView.as_view(), name='project_settings_tasks'),
-    path('project/settings/export/', TWFProjectExportSettingsView.as_view(), name='project_settings_export'),
     path('project/settings/prompt/', TWFProjectPromptSettingsView.as_view(), name='project_settings_prompt'),
     path('project/settings/repositories/', TWFProjectRepositorySettingsView.as_view(),
          name='project_settings_repository'),
@@ -271,14 +271,18 @@ urlpatterns = [
     path('export/', TWFExportOverviewView.as_view(), name='export_overview'),
     path('export/exports/', TWFExportListView.as_view(), name='export_view_exports'),
     path('export/exports/<int:pk>/delete/', delete_export, name='export_exports_delete'),
-    path('export/configuration/', TWFExportConfigurationView.as_view(), name='export_configure'),
-    path('export/documents/', TWFExportDocumentsView.as_view(), name='export_documents'),
-    path('export/collections/', TWFExportCollectionsView.as_view(), name='export_collections'),
+
+
+    path('export/run/', TWFExportRunView.as_view(), name='export_run'),
     path('export/project/', TWFExportProjectView.as_view(), name='export_project'),
     path('export/zenodo/', TWFExportZenodoView.as_view(), name='export_to_zenodo'),
-    path('export/tags/', TWFExportTagsView.as_view(), name='export_tags'),
 
-    path('export/dictionaries/', TWFExportDictionariesView.as_view(), name='export_dictionaries'),
+    path('export/configurations/', TWFExportConfListView.as_view(), name='export_view_export_confs'),
+    path('export/configuration/', TWFExportConfigurationView.as_view(), name='export_configure'),
+    path('export/configuration/<int:pk>/edit/', TWFExportConfigurationView.as_view(), name='export_configure_edit'),
+    path('export/configuration/<int:pk>/view/sample/', TWFExportSampleView.as_view(), name='export_configure_view_sample'),
+    path('export/configuration/<int:pk>/delete/', delete_export_configuration, name='export_conf_delete'),
+
     path('import/dictionaries/', TWFImportDictionaryView.as_view(), name='import_dictionaries'),
 
     #############################
@@ -339,8 +343,7 @@ urlpatterns = [
     path('celery/collections/request/claude/', start_claude_collection_request, name='task_collection_request_claude'),
     path('celery/collections/request/mistral/', start_mistral_collection_request, name='task_collection_request_mistral'),
 
-    path('celery/export/documents/', start_export_documents, name='task_export_documents'),
-    path('celery/export/collections/', start_export_collections, name='task_export_collections'),
+    path('celery/export/run/', start_export, name='task_export'),
     path('celery/export/project/', start_export_project, name='task_export_project'),
     path('celery/export/zenodo/', start_export_to_zenodo, name='task_export_zenodo'),
 

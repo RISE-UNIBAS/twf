@@ -55,7 +55,6 @@ def copy_project(self, project_id, user_id, **kwargs):
                 description=self.project.description,
                 conf_credentials=self.project.conf_credentials,
                 conf_tasks=self.project.conf_tasks,
-                conf_export=self.project.conf_export,
                 keywords=self.project.keywords,
                 license=self.project.license,
                 version=self.project.version,

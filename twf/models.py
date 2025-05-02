@@ -13,6 +13,7 @@ from django.conf import settings
 from django.db import models
 from django.contrib.auth import get_user_model
 from django.db.models import Q
+from django.db.models.functions import Random
 from django.utils import timezone
 from django.utils.timezone import now
 
@@ -265,12 +266,6 @@ class Project(TimeStampedModel):
     stored as JSONField. The keys in the dictionary are the services, and the values are the credentials for the 
     services."""
 
-    conf_export = models.JSONField(default=dict, blank=True,
-                                   verbose_name='Export Configurations',
-                                   help_text='A dictionary of export configurations.')
-    """A dictionary of export configurations. In order to keep these settings as dynamic as possible, they are
-    stored as JSONField. The keys in the dictionary are the services, and the values are the export configurations."""
-
     conf_tasks = models.JSONField(default=dict, blank=True,
                                   verbose_name='Task Configurations',
                                   help_text='A dictionary of task configurations.')
@@ -325,26 +320,6 @@ class Project(TimeStampedModel):
         - geonames: The Geonames credentials (Username).
         """
         return self.conf_credentials.get(service, {})
-
-    def get_export_configuration(self, service, return_json=True):
-        """Return the export configuration for a service.
-
-        Available services
-        ------------------
-        - document_export_configuration: The document export configuration.
-        - page_export_configuration: The page export configuration.
-        - project_export_configuration: The project export configuration.
-        """
-        if return_json:
-            value = self.conf_export.get(service, None)
-            if value:
-                try:
-                    return json.loads(value)
-                except json.JSONDecodeError:
-                    return {}
-            return {}
-        return self.conf_export.get(service, '')
-
 
     def get_task_configuration(self, service, return_json=True):
         """Return the task configuration for a service.
@@ -1233,22 +1208,59 @@ class Workflow(models.Model):
         return self.current_item_index+1 < self.item_count
 
 
+class ExportConfiguration(TimeStampedModel):
+    EXPORT_TYPES = [
+        ('document', 'Document Export'),
+        ('page', 'Page Export'),
+        ('collection', 'Collection Export'),
+        ('dictionary', 'Dictionary Export'),
+        ('tag_report', 'Tag Occurrence Report'),
+    ]
+
+    OUTPUT_FORMATS = [
+        ('json', 'JSON'),
+        ('csv', 'CSV'),
+    ]
+
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name="export_configurations")
+    name = models.CharField(max_length=255)
+    description = models.TextField(blank=True)
+    export_type = models.CharField(max_length=20, choices=EXPORT_TYPES)
+    output_format = models.CharField(max_length=10, choices=OUTPUT_FORMATS, default='json')
+    config = models.JSONField(default=dict)
+    is_default = models.BooleanField(default=False)
+
+    def save(self, *args, **kwargs):
+        user = kwargs.pop('current_user', None)
+
+        # If this config is marked as default, unset others for this project and type
+        if self.is_default:
+            ExportConfiguration.objects.filter(
+                project=self.project,
+                export_type=self.export_type,
+                is_default=True
+            ).exclude(pk=self.pk).update(is_default=False)
+
+        super().save(*args, **kwargs)
+
+        if user:
+            if not self.created_by:
+                self.created_by = user
+            self.modified_by = user
+            super().save(update_fields=["created_by", "modified_by"])
+
+    def __str__(self):
+        return self.name
+
+
 class Export(TimeStampedModel):
     """Model to store export information."""
 
-    EXPORT_TYPE_CHOICES = [
-        ("documents", "Documents"),
-        ("pages", "Pages"),
-        ("collection", "Collection"),
-        ("project", "Project"),
-    ]
-
-    project = models.ForeignKey(Project, on_delete=models.CASCADE)
+    export_configuration = models.ForeignKey(ExportConfiguration, on_delete=models.CASCADE, related_name="exports")
     export_file = models.FileField(upload_to='exports/', blank=True, null=True)
-    export_type = models.CharField(max_length=20, choices=EXPORT_TYPE_CHOICES)
 
     def __str__(self):
-        return f"Export - {self.export_type} - {self.created_by}"
+        return f"Export - {self.export_configuration}"
 
 
 class Note(TimeStampedModel):

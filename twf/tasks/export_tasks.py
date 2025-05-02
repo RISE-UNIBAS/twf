@@ -17,103 +17,58 @@ from django.core.files.storage import default_storage
 from django.core.serializers import serialize
 from django.utils.text import slugify
 
-from twf.models import Project, Export, Page, PageTag, CollectionItem, DictionaryEntry, Variation, DateVariation
+from twf.models import Project, Export, Page, PageTag, CollectionItem, DictionaryEntry, Variation, DateVariation, \
+    ExportConfiguration
 from twf.tasks.task_base import BaseTWFTask
 from twf.utils.create_export_utils import create_data
+from twf.utils.export_utils import ExportCreator
 
 
 @shared_task(bind=True, base=BaseTWFTask)
-def export_documents_task(self, project_id, user_id, **kwargs):
-    print(kwargs)
-    self.validate_task_parameters(kwargs, ['export_type', 'export_single_file'])
-
-    docs_to_export = self.project.documents.all()
-    self.set_total_items(docs_to_export.count())
-
-    export_type = kwargs.get('export_type')
-    export_single_file = kwargs.get('export_single_file')
-
-    # 1st step: Create a temporary directory
-    temp_dir = tempfile.mkdtemp()
+def export_task(self, project_id, user_id, **kwargs):
+    self.validate_task_parameters(kwargs, ['export_configuration_id'])
+    export_configuration_id = kwargs.get('export_configuration_id')
+    export_configuration = ExportConfiguration.objects.get(id=export_configuration_id)
+    download_url = None
 
     try:
-        # 2nd step: Export documents
-        processed_entries = 0
-        export_data_list = []
+        export_creator = ExportCreator(self.project, export_configuration)
+        number_of_items = export_creator.get_number_of_items()
+        self.set_total_items(number_of_items)
 
-        for doc in docs_to_export:
-            if export_type == "documents":
-                export_doc_data = create_data(doc)
+        export_data = export_creator.create_item_data(self.project)
+        export_data['items'] = []
+        for item in export_creator.get_items():
+            item_data = export_creator.create_item_data(item)
+            export_data['items'].append(item_data)
+            self.advance_task(f"Exporting {item}")
 
-                if export_single_file:
-                    export_filename = f"document_{doc.document_id}.json"
-                    export_filepath = Path(temp_dir) / export_filename
-                    with open(export_filepath, "w", encoding="utf8") as sf:
-                        json.dump(export_doc_data, sf, indent=4)
-                else:
-                    export_data_list.append(export_doc_data)
+        # Create ZIP
+        temp_dir = tempfile.mkdtemp()
+        with open(os.path.join(temp_dir, "data.json"), "w", encoding="utf8") as sf:
+            json.dump(export_data, sf, indent=4)
 
-            elif export_type == "pages":
-                for page in doc.pages.all():
-                    export_page_data = create_data(page)
-
-                    if export_single_file:
-                        export_filename = f"page_{page.tk_page_id}.json"
-                        export_filepath = os.path.join(temp_dir, export_filename)
-                        with open(export_filepath, "w", encoding="utf8") as sf:
-                            json.dump(export_page_data, sf, indent=4)
-                    else:
-                        export_data_list.append(export_page_data)
-
-            self.advance_task()
-
-        # 3rd step: Store the final result
-        if export_single_file:
-            zip_filename = f"export_{self.project.id}.zip"
-            zip_filepath = shutil.make_archive(zip_filename.replace(".zip", ""), "zip", temp_dir)
-            result_filepath = zip_filepath
-        else:
-            export_filename = f"export_{self.project.id}.json"
-            export_filepath = Path(temp_dir) / export_filename
-            with open(export_filepath, "w", encoding="utf8") as sf:
-                json.dump(export_data_list, sf, indent=4)
-            result_filepath = export_filepath
-
-        # Move to a persistent storage location for download
-        result_filename = Path(result_filepath).name
+        zip_filename = f"export_{self.project.id}"
+        zip_filepath = shutil.make_archive(zip_filename, "zip", temp_dir)
+        result_filename = Path(zip_filepath).name
         relative_export_path = f"exports/{result_filename}"
-        final_result_path = Path(settings.MEDIA_ROOT) / relative_export_path
 
-        # Ensure the directory exists
+        final_result_path = Path(settings.MEDIA_ROOT) / relative_export_path
         final_result_path.parent.mkdir(parents=True, exist_ok=True)
 
-        with open(result_filepath, "rb") as f:
+        with open(zip_filepath, "rb") as f:
             saved_filename = default_storage.save(relative_export_path, File(f))
 
-    finally:
-        # Cleanup temporary files AFTER successful storage
-        if os.path.exists(temp_dir):
-            shutil.rmtree(temp_dir)
+        export = Export(
+            export_file=saved_filename,
+            export_configuration=export_configuration)
+        export.save(current_user=self.user)
+        download_url = export.export_file.url
+        self.end_task(download_url=download_url)
 
-
-    export_instance = Export(
-        project=self.project,
-        export_file=saved_filename,  # Save the path to the file
-        export_type=export_type
-    )
-    export_instance.save(current_user=self.user)
-
-    # 4th step: End task and return the download URL
-    download_url = export_instance.export_file.url
-    self.end_task(download_url=download_url)
-
-
-@shared_task(bind=True, base=BaseTWFTask)
-def export_collections_task(self, project_id, user_id, **kwargs):
-
-    collection_id = None
-    export_single_file = True
-    self.end_task()
+    except Exception as e:
+        self.end_task(text="Export failed", status="ERROR")
+        raise e
 
 
 @shared_task(bind=True, base=BaseTWFTask)
@@ -193,92 +148,8 @@ def export_project_task(self, project_id, user_id, **kwargs):
                   download_url=export.export_file.url)
 
 
-
-
 @shared_task(bind=True, base=BaseTWFTask)
 def export_to_zenodo_task(self, project_id, user_id, **kwargs):
 
     export_type = 'sql' # Can be 'sql' or 'json'
     self.end_task()
-
-
-def export_data_task(self, project_id, export_type, export_format, schema):
-    """Export data from a project.
-    :param self: Celery task
-    :param project_id: Project ID
-    :param export_type: Type of data to export (documents or collections)
-    :param export_format: Format of the export (json, csv, excel)
-    :param schema: Optional schema for filtering the data
-    :return: Exported data in the specified format"""
-
-    try:
-        # Fetch the project
-        project = Project.objects.get(id=project_id)
-        data = []
-
-        # Retrieve documents or collections based on export_type
-        if export_type == 'documents':
-            data = project.documents.all()
-        elif export_type == 'collections':
-            data = project.collections.all()
-
-        # Apply schema if provided (optional filtering)
-        if schema:
-            schema_fields = json.loads(schema)
-            data = filter_data_by_schema(data, schema_fields)
-
-        # Export based on format
-        if export_format == 'json':
-            return generate_json(data)
-        elif export_format == 'csv':
-            return generate_csv(data)
-        elif export_format == 'excel':
-            return generate_excel(data)
-
-    except Exception as e:
-        self.update_state(state='FAILURE', meta={'error': str(e)})
-        raise
-
-
-def filter_data_by_schema(data, schema_fields):
-    """Filter data based on the provided schema fields (attributes) of the model.
-    :param data: Data to filter
-    :param schema_fields: Fields to include in the filtered data
-    :return: Filtered data"""
-    # This function filters the data based on the provided schema
-    filtered_data = []
-    for item in data:
-        filtered_item = {field: getattr(item, field, '') for field in schema_fields}
-        filtered_data.append(filtered_item)
-    return filtered_data
-
-
-def generate_json(data):
-    """Convert data to JSON string
-    :param data: Data to export
-    :return: JSON string"""
-    return json.dumps([item.to_dict() for item in data], indent=4)
-
-
-def generate_csv(data):
-    """Convert data to CSV string
-    :param data: Data to export
-    :return: CSV string"""
-    output = []
-    fieldnames = data[0].keys() if data else []
-
-    csv_output = csv.DictWriter(output, fieldnames=fieldnames)
-    csv_output.writeheader()
-    for row in data:
-        csv_output.writerow(row)
-
-    return ''.join(output)
-
-
-def generate_excel(data):
-    """Convert data to Excel file
-    :param data: Data to export
-    :return: Excel file"""
-    df = pd.DataFrame(data)
-    output = df.to_excel(index=False)
-    return output

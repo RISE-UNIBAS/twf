@@ -1,0 +1,12 @@
+{% extends 'twf/base/base.html' %}
+{% load crispy_forms_tags %}
+{% load nav_tags %}
+
+{% block content %}
+    <p class="lead">This is a sample of the data that will be exported for each item in your project.</p>
+    <p><strong>Configuration:</strong> {{ export_conf.name }}</p>
+    <code>
+        {{ sample_data|pretty_json }}
+    </code>
+
+{% endblock %}

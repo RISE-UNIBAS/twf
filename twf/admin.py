@@ -2,7 +2,8 @@
 from django.contrib import admin
 from .models import (
     UserProfile, Project, Document, Page, Dictionary, DictionaryEntry,
-    Variation, PageTag, Collection, CollectionItem, DateVariation, Workflow
+    Variation, PageTag, Collection, CollectionItem, DateVariation, Workflow,
+    Task, Prompt, ExportConfiguration, Export, Note
 )
 
 
@@ -87,9 +88,49 @@ class DateVariationAdmin(admin.ModelAdmin):
 
 @admin.register(Workflow)
 class WorkflowAdmin(admin.ModelAdmin):
-    """Admin View for DateVariation."""
-    list_filter = ['created_at']
-    search_fields = ['user']
+    """Admin View for Workflow."""
+    list_filter = ['workflow_type', 'status', 'created_at']
+    search_fields = ['user__username', 'project__title']
+
+
+@admin.register(Task)
+class TaskAdmin(admin.ModelAdmin):
+    """Admin View for Task."""
+    list_display = ['title', 'project', 'status', 'progress', 'start_time', 'end_time']
+    list_filter = ['status', 'project', 'start_time']
+    search_fields = ['title', 'celery_task_id', 'user__username']
+
+
+@admin.register(Prompt)
+class PromptAdmin(admin.ModelAdmin):
+    """Admin View for Prompt."""
+    list_display = ['system_role', 'project', 'created_at']
+    list_filter = ['project', 'created_at']
+    search_fields = ['system_role', 'prompt']
+
+
+@admin.register(ExportConfiguration)
+class ExportConfigurationAdmin(admin.ModelAdmin):
+    """Admin View for ExportConfiguration."""
+    list_display = ['name', 'project', 'export_type', 'output_format', 'is_default']
+    list_filter = ['project', 'export_type', 'output_format', 'is_default']
+    search_fields = ['name', 'description']
+
+
+@admin.register(Export)
+class ExportAdmin(admin.ModelAdmin):
+    """Admin View for Export."""
+    list_display = ['export_configuration', 'created_at']
+    list_filter = ['export_configuration__project', 'created_at']
+    search_fields = ['export_configuration__name']
+
+
+@admin.register(Note)
+class NoteAdmin(admin.ModelAdmin):
+    """Admin View for Note."""
+    list_display = ['title', 'project', 'created_at']
+    list_filter = ['project', 'created_at'] 
+    search_fields = ['title', 'note']
 
 
 # Register all models without custom admin classes

@@ -3,21 +3,17 @@ import json
 import logging
 
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.shortcuts import redirect
 from django.urls import reverse_lazy
-from django.http import JsonResponse, HttpResponse
 from django.views.generic import FormView
 from django_filters.views import FilterView
 from django_tables2 import SingleTableView
 from twf.forms.dictionaries.dictionaries_forms import DictionaryImportForm
-from twf.forms.export_forms import ExportDocumentsForm, ExportCollectionsForm, ExportProjectForm, ExportZenodoForm
-from twf.forms.filters.filters import ExportFilter
-from twf.forms.project.project_forms import ExportSettingsForm
-from twf.models import Export
-from twf.tables.tables_export import ExportTable
-from twf.utils.create_export_utils import create_data
-from twf.utils.export_utils import get_dictionary_json_data, get_dictionary_csv_data, get_tags_json_data, \
-    get_tags_csv_data
+from twf.forms.export_forms import ExportProjectForm, ExportZenodoForm, \
+    ExportConfigurationForm, RunExportForm
+from twf.forms.filters.filters import ExportFilter, ExportConfigFilter
+from twf.models import Export, ExportConfiguration, Project, Document, Page, CollectionItem, DictionaryEntry
+from twf.tables.tables_export import ExportTable, ExportConfigTable
+from twf.utils.export_utils import ExportCreator
 from twf.views.views_base import TWFView
 
 logger = logging.getLogger(__name__)
@@ -39,8 +35,9 @@ class TWFExportView(LoginRequiredMixin, TWFView):
                 'name': 'Overview',
                 'options': [
                     {'url': reverse_lazy('twf:export_overview'), 'value': 'Export Overview'},
+                    {'url': reverse_lazy('twf:export_view_export_confs'), 'value': 'Export Configurations'},
                     {'url': reverse_lazy('twf:export_view_exports'),
-                     'value': 'Export List', 'permission': 'exports_download'},
+                     'value': 'Exports', 'permission': 'exports_download'},
                 ]
             },
             {
@@ -57,24 +54,12 @@ class TWFExportView(LoginRequiredMixin, TWFView):
                 'options': [
                     {'url': reverse_lazy('twf:export_configure'),
                      'value': 'Configure Exports', 'permission': 'export_configure'},
-                    {'url': reverse_lazy('twf:export_documents'),
-                     'value': 'Export Documents', 'permission': 'export_documents'},
-                    {'url': reverse_lazy('twf:export_collections'),
-                     'value': 'Export Collections', 'permission': 'export_collections'},
-                    {'url': reverse_lazy('twf:export_dictionaries'),
-                     'value': 'Export Dictionaries', 'permission': 'export_dictionaries'},
-                    {'url': reverse_lazy('twf:export_tags'),
-                     'value': 'Export Tags', 'permission': 'export_tags'},
-                ]
-            },
-
-            {
-                'name': 'Export Project',
-                'options': [
+                    {'url': reverse_lazy('twf:export_run'),
+                     'value': 'Run Exports', 'permission': 'export_documents'},
                     {'url': reverse_lazy('twf:export_project'),
                      'value': 'Export Project', 'permission': 'export_project'},
                     {'url': reverse_lazy('twf:export_to_zenodo'),
-                     'value': 'Export to Zenodo', 'permission': 'export_to_zenodo'},
+                     'value': 'Connect to Zenodo', 'permission': 'export_to_zenodo'},
                 ]
             },
 
@@ -93,6 +78,14 @@ class TWFExportOverviewView(TWFExportView):
         """Get the context data for the view."""
         context = super().get_context_data(**kwargs)
         return context
+        
+    def get_breadcrumbs(self):
+        """Get the breadcrumbs for the view."""
+        breadcrumbs = [
+            {'url': reverse_lazy('twf:home'), 'value': '<i class="fas fa-home"></i>'},
+            {'url': '#', 'value': self.page_title}
+        ]
+        return breadcrumbs
 
 
 class TWFExportListView(SingleTableView, FilterView, TWFExportView):
@@ -104,10 +97,21 @@ class TWFExportListView(SingleTableView, FilterView, TWFExportView):
     filterset_class = ExportFilter
     paginate_by = 10
     model = Export
+    navigation_anchor = reverse_lazy('twf:export_view_exports')
+    navigation_anchor = "export_view_exports"
+    
+    def get_breadcrumbs(self):
+        """Get the breadcrumbs for the view."""
+        breadcrumbs = [
+            {'url': reverse_lazy('twf:home'), 'value': '<i class="fas fa-home"></i>'},
+            {'url': reverse_lazy('twf:export_overview'), 'value': 'Import/Export'},
+            {'url': '#', 'value': self.page_title}
+        ]
+        return breadcrumbs
 
     def get_queryset(self):
         """Get the queryset for the view."""
-        queryset = Export.objects.filter(project_id=self.request.session.get('project_id')).order_by('-created_at')
+        queryset = Export.objects.filter(export_configuration__project_id=self.request.session.get('project_id')).order_by('-created_at')
         self.filterset = self.filterset_class(self.request.GET, queryset=queryset)
         return self.filterset.qs
 
@@ -124,199 +128,272 @@ class TWFExportListView(SingleTableView, FilterView, TWFExportView):
         return context
 
 
+class TWFExportConfListView(SingleTableView, FilterView, TWFExportView):
+    """View for the export overview."""
+
+    template_name = "twf/export/export_conf_list.html"
+    page_title = 'Export Configurations Overview'
+    table_class = ExportConfigTable
+    filterset_class = ExportConfigFilter
+    paginate_by = 10
+    model = ExportConfiguration
+    navigation_anchor = reverse_lazy('twf:export_view_export_confs')
+    
+    def get_breadcrumbs(self):
+        """Get the breadcrumbs for the view."""
+        breadcrumbs = [
+            {'url': reverse_lazy('twf:home'), 'value': '<i class="fas fa-home"></i>'},
+            {'url': reverse_lazy('twf:export_overview'), 'value': 'Import/Export'},
+            {'url': '#', 'value': self.page_title}
+        ]
+        return breadcrumbs
+
+    def get_queryset(self):
+        """Get the queryset for the view."""
+        queryset = ExportConfiguration.objects.filter(project_id=self.request.session.get('project_id')).order_by('-created_at')
+        self.filterset = self.filterset_class(self.request.GET, queryset=queryset)
+        return self.filterset.qs
+
+    def get(self, request, *args, **kwargs):
+        """Get the view."""
+        self.object_list = self.get_queryset()
+        context = self.get_context_data()
+        return self.render_to_response(context)
+
+    def get_context_data(self, **kwargs):
+        """Get the context data for the view."""
+        context = super().get_context_data(**kwargs)
+        context['filter'] = self.get_filterset(self.filterset_class)
+        return context
+
+
+class TWFExportSampleView(TWFExportView):
+    template_name = "twf/export/export_configuration_sample.html"
+    page_title = 'View Sample Export'
+    navigation_anchor = reverse_lazy('twf:export_view_export_confs')
+
+    def get_context_data(self, **kwargs):
+        """Get the context data for the view."""
+        context = super().get_context_data(**kwargs)
+        export_conf = ExportConfiguration.objects.get(pk=self.kwargs['pk'], project=self.get_project())
+        context['export_conf'] = export_conf
+        export_creator = ExportCreator(self.get_project(), export_conf)
+        context['sample_data'] = export_creator.create_sample_data()
+        return context
+        
+    def get_breadcrumbs(self):
+        """Get the breadcrumbs for the view."""
+        breadcrumbs = [
+            {'url': reverse_lazy('twf:home'), 'value': '<i class="fas fa-home"></i>'},
+            {'url': reverse_lazy('twf:export_overview'), 'value': 'Import/Export'},
+            {'url': reverse_lazy('twf:export_view_export_confs'), 'value': 'Export Configurations'},
+            {'url': '#', 'value': self.page_title}
+        ]
+        return breadcrumbs
+
 class TWFExportConfigurationView(FormView, TWFExportView):
     """View for exporting documents."""
 
     template_name = "twf/export/export_configuration.html"
     page_title = 'Export Configuration'
-    form_class = ExportSettingsForm
-    success_url = reverse_lazy('twf:export_configure')
+    form_class = ExportConfigurationForm
+    success_url = reverse_lazy('twf:export_view_export_confs')
+    navigation_anchor = reverse_lazy('twf:export_configure')
+    
+    def get_breadcrumbs(self):
+        """Get the breadcrumbs for the view."""
+        breadcrumbs = [
+            {'url': reverse_lazy('twf:home'), 'value': '<i class="fas fa-home"></i>'},
+            {'url': reverse_lazy('twf:export_overview'), 'value': 'Import/Export'},
+            {'url': '#', 'value': self.page_title}
+        ]
+        return breadcrumbs
 
     def get_context_data(self, **kwargs):
         """Get the context data for the view."""
         context = super().get_context_data(**kwargs)
-        project = self.get_project()
 
-        sample_document = project.documents.order_by('?').first()
-        if not sample_document:
-            return context
-        
-        transformed_metadata, warnings = create_data(sample_document, return_warnings=True)
+        (db_fields, special_fields,
+         metadata_doc_services, metadata_doc_fields,
+         metadata_page_service, metadata_page_fields,
+         metadata_entry_service, metadata_entry_fields) = self.get_export_context_data()
+        context['db_fields_json'] = json.dumps(db_fields)
+        context['special_fields_json'] = json.dumps(special_fields)
+        context['metadata_doc_services_json'] = json.dumps(metadata_doc_services)
+        context['metadata_doc_fields_json'] = json.dumps(metadata_doc_fields)
+        context['metadata_page_services_json'] = json.dumps(metadata_page_service)
+        context['metadata_page_fields_json'] = json.dumps(metadata_page_fields)
+        context['metadata_entry_services_json'] = json.dumps(metadata_entry_service)
+        context['metadata_entry_fields_json'] = json.dumps(metadata_entry_fields)
 
-        # Document Data
-        doc_key_list = [
-            {"group": "document",
-             "data": {
-                 "title": sample_document.title,
-                 "document_id": sample_document.document_id,
-                 "db_id": sample_document.id,
-                 "status": sample_document.status,
-                 "num_pages": sample_document.pages.all().count(),
-                 "transkribus_url": sample_document.get_transkribus_url(),
-             }}
-        ]
-        for key in sample_document.metadata:
-            doc_key_list.append({"group": key, "data": sample_document.metadata[key]})
-        context['doc_key_list'] = doc_key_list
-
-        first_page = sample_document.pages.first()
-        if not first_page:
-            return context
-
-        context['page_key_list'] = [
-            {"group": "page",
-             "data": {
-                    "page_id": first_page.tk_page_id,
-                    "db_id": first_page.id,
-                    "page_num": first_page.tk_page_number,
-             }},
-            {"group": "parsed_data",
-             "data": {"annos": first_page.get_annotations()}}
-        ]
-        for key in first_page.parsed_data:
-            context['page_key_list'].append({"group": key, "data":first_page.parsed_data[key]})
-
-        context['page_parsed_data'] = first_page.parsed_data
-
-        context['warnings'] = warnings
-
-        context['doc_output'] = transformed_metadata
-        context['page_output'] = {}
-        context['project_output'] = {}
         return context
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        kwargs['instance'] = self.get_project()
-        kwargs['show_help'] = False
+        project = self.get_project()
+        if 'pk' in self.kwargs:
+            kwargs['instance'] = ExportConfiguration.objects.get(pk=self.kwargs['pk'], project=project)
         return kwargs
 
     def form_valid(self, form):
-        logger.debug("Export forms saved")
-        form.save()
+        export_conf = form.save(commit=False)
+        export_conf.project = self.get_project()
 
-        if 'export' in form.cleaned_data:
-            project = self.get_project()
-            # Start the export process using Celery
-            # task = export_data_task.delay(project.id, export_type, export_format, schema)
-            # Return the task ID for progress tracking (assuming this view is called via AJAX)
-            logger.info('Exporting data for project %s', project.id)
+        raw_config = form.cleaned_data.get('config', '{}')
+        try:
+            export_conf.config = json.loads(raw_config)
+        except json.JSONDecodeError:
+            export_conf.config = {}
+        export_conf.save(current_user=self.request.user)
         return super().form_valid(form)
 
+    def get_export_context_data(self):
+        project = self.get_project()
+        sample_doc = project.documents.first()
+        sample_page = sample_doc.pages.first()
+        sample_entry = project.selected_dictionaries.first().entries.first()
 
-    def form_invalid(self, form):
-        # If the form is invalid, return the errors
-        return JsonResponse({'status': 'error', 'errors': form.errors}, status=400)
+        db_fields = {
+            'general': [
+                ('project.title', 'Project Title', project.title),
+                ('project.description', 'Project Description', project.description),
+                ('project.collection_id', 'Transkribus Collection ID', project.collection_id),
+                ('project.downloaded_at', 'Downloaded At', project.downloaded_at.strftime('%Y-%m-%d %H:%M:%S')),
+            ],
+            'documents': [
+                ('document.title', 'Document Title', sample_doc.title),
+                ('document.document_id', 'Transkribus Document ID', sample_doc.document_id),
+                ('document.is_parked', 'Is Parked', sample_doc.is_parked),
+                ('document.workflow_remarks', 'Workflow Remarks', sample_doc.workflow_remarks),
+                ('document.status', 'Status', sample_doc.status),
+            ],
+            'pages': [
+                ('page.tk_page_id', 'Transkribus Page ID', sample_page.tk_page_id),
+                ('page.tk_page_number', 'Transkribus Page Number', sample_page.tk_page_number),
+                ('page.is_ignored', 'Is Ignored', sample_page.is_ignored),
+            ],
+            'items': [
+                ('collection_item.title', 'Collection Item Title', ''),
+                ('collection_item.description', 'Collection Item Description', ''),
+            ],
+            'entries': [],
+            'tags': []
+        }
+
+        special_fields = {
+            'general_project': [
+                ('project_members', 'List of Project Members', '[{"name": "User 1", "orcid": "123-123", ...}]'),
+                ('dictionaries', 'List of used Dictionaries', '[{"name": "Dictionary 1", "id": 1, ...}]'),
+                ('no_of_docs', 'Number of Documents', '123'),
+            ],
+            'general_collection': [
+                ('collection_items_count', 'Number of Collection Items', '123'),
+            ],
+            'documents': [
+                ('tag_list', 'List of tags', '["tag1", "tag2", ...]'),
+                ('tag_list_unique', 'Unique List of tags', '["tag1", "tag2", ...]'),
+                ('tags_count', 'Number of tags', '123'),
+                ('linked_tags_list', 'List of linked tags', '["tag1", "tag2", ...]'),
+                ('linked_tags_list_unique', 'Unique List of linked tags', '["tag1", "tag2", ...]'),
+                ('linked_tags_count', 'Number of linked tags', '123'),
+                ('entry_list', 'List of Dictionary entries', '[{"name": "Entry 1", "id": 1, ...}]'),
+                ('word_count', 'Word Count', '123'),
+                ('last_twf_edit', 'Last TWF Edit', '2025-10-01 12:00:00'),
+            ],
+            'pages': [
+                ('tag_list', 'List of tags', '["tag1", "tag2", ...]'),
+                ('tag_list_unique', 'Unique List of tags', '["tag1", "tag2", ...]'),
+                ('tags_count', 'Number of tags', '123'),
+                ('linked_tags_list', 'List of linked tags', '["tag1", "tag2", ...]'),
+                ('linked_tags_list_unique', 'Unique List of linked tags', '["tag1", "tag2", ...]'),
+                ('linked_tags_count', 'Number of linked tags', '123'),
+                ('entry_list', 'List of Dictionary entries', '[{"name": "Entry 1", "id": 1, ...}]'),
+                ('word_count', 'Word Count', '123'),
+                ('last_twf_edit', 'Last TWF Edit', '2025-10-01 12:00:00'),
+            ],
+            'items': [
+                ('no_of_annotations', 'Number of Annotations', '12'),
+                ('item_context', 'Item Context', '{"type": "document", "id": 1}'),
+            ],
+            'entries': [
+                ('last_twf_edit', 'Last TWF Edit', '2025-10-01 12:00:00'),
+            ],
+            'tags': [
+                ('last_twf_edit', 'Last TWF Edit', '2025-10-01 12:00:00'),
+            ]
+        }
+
+        metadata_doc_services = []
+        metadata_doc_fields = {}
+        if sample_doc:
+            for key, value in sample_doc.metadata.items():
+                metadata_doc_services.append((key, key, str(value)))
+                metadata_doc_fields[key] = self.flatten_metadata('', value)
+
+        metadata_page_service = []
+        metadata_page_fields = {}
+        if sample_page:
+            for key, value in sample_page.metadata.items():
+                metadata_page_service.append((key, key , str(value)))
+                metadata_page_fields[key] = self.flatten_metadata('', value)
+
+        metadata_entry_service = []
+        metadata_entry_fields = {}
+        if sample_entry:
+            for key, value in sample_entry.metadata.items():
+                metadata_entry_service.append((key, key , str(value)))
+                metadata_entry_fields[key] = self.flatten_metadata('', value)
+
+        return (db_fields, special_fields, metadata_doc_services,
+                metadata_doc_fields, metadata_page_service, metadata_page_fields,
+                metadata_entry_service, metadata_entry_fields)
+
+    def flatten_metadata(self, prefix, metadata, max_list_items=3):
+        fields = []
+        if isinstance(metadata, dict):
+            for key, value in metadata.items():
+                full_key = f"{prefix}.{key}" if prefix else key
+                if isinstance(value, dict):
+                    fields.extend(self.flatten_metadata(full_key, value, max_list_items))
+                elif isinstance(value, list):
+                    # Handle lists: take first few elements only
+                    for idx, item in enumerate(value[:max_list_items]):
+                        item_key = f"{full_key}[{idx}]"
+                        if isinstance(item, dict):
+                            fields.extend(self.flatten_metadata(item_key, item, max_list_items))
+                        else:
+                            fields.append((item_key, f"{key}[{idx}]", str(item)))
+                else:
+                    fields.append((full_key, full_key, str(value)))
+        return fields
 
 
-class TWFExportDocumentsView(FormView, TWFExportView):
+class TWFExportRunView(FormView, TWFExportView):
     """View for the export overview."""
 
     template_name = "twf/export/export_documents.html"
-    page_title = 'Export Documents'
-    form_class = ExportDocumentsForm
-    success_url = reverse_lazy('twf:export_documents')
+    page_title = 'Run Export'
+    form_class = RunExportForm
+    success_url = reverse_lazy('twf:export_run')
+    navigation_anchor = reverse_lazy('twf:export_run')
+    
+    def get_breadcrumbs(self):
+        """Get the breadcrumbs for the view."""
+        breadcrumbs = [
+            {'url': reverse_lazy('twf:home'), 'value': '<i class="fas fa-home"></i>'},
+            {'url': reverse_lazy('twf:export_overview'), 'value': 'Import/Export'},
+            {'url': '#', 'value': self.page_title}
+        ]
+        return breadcrumbs
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
         kwargs['project'] = self.get_project()
 
-        kwargs['data-start-url'] = reverse_lazy('twf:task_export_documents')
-        kwargs['data-message'] = "Are you sure you want to export documents?"
+        kwargs['data-start-url'] = reverse_lazy('twf:task_export')
+        kwargs['data-message'] = "Are you sure you want to start the export?"
 
         return kwargs
-
-    def get_context_data(self, **kwargs):
-        """Get the context data for the view."""
-        context = super().get_context_data(**kwargs)
-        return context
-
-class TWFExportCollectionsView(FormView, TWFExportView):
-    """View for exporting collections."""
-    template_name = "twf/export/export_collections.html"
-    page_title = 'Export Collections'
-    form_class = ExportCollectionsForm
-    success_url = reverse_lazy('twf:export_collections')
-
-    def get_form_kwargs(self):
-        kwargs = super().get_form_kwargs()
-        kwargs['project'] = self.get_project()
-
-        kwargs['data-start-url'] = reverse_lazy('twf:task_export_collections')
-        kwargs['data-message'] = "Are you sure you want to export collections?"
-
-        return kwargs
-
-
-class TWFExportDictionariesView(TWFExportView):
-    """View for exporting dictionaries."""
-    template_name = "twf/export/export_dictionaries.html"
-    page_title = 'Export Dictionaries'
-
-    def post(self, request, *args, **kwargs):
-        """Handle the POST request."""
-        pk = request.POST.get('dictionary_id', 0)
-        if "export_json" in request.POST:
-            json_data = get_dictionary_json_data(pk)
-            json_str = json.dumps(json_data, indent=4)
-            filename = f'dictionary_{pk}.json'
-            response = HttpResponse(json_str, content_type='application/json')
-            response['Content-Disposition'] = f'attachment; filename="{filename}"'
-        elif "export_json_w_uses" in request.POST:
-            json_data = get_dictionary_json_data(pk, include_uses=True)
-            json_str = json.dumps(json_data, indent=4)
-            filename = f'dictionary_{pk}_with_uses.json'
-            response = HttpResponse(json_str, content_type='application/json')
-            response['Content-Disposition'] = f'attachment; filename="{filename}"'
-        elif "export_simple_csv" in request.POST:
-            csv_data = get_dictionary_csv_data(pk, include_metadata=False, include_uses=False)
-            filename = f'dictionary_simple_{pk}.csv'
-            response = HttpResponse(csv_data, content_type='text/csv')
-            response['Content-Disposition'] = f'attachment; filename="{filename}"'
-        elif "export_csv" in request.POST:
-            csv_data = get_dictionary_csv_data(pk, include_metadata=True, include_uses=False)
-            filename = f'dictionary_{pk}.csv'
-            response = HttpResponse(csv_data, content_type='text/csv')
-            response['Content-Disposition'] = f'attachment; filename="{filename}"'
-        elif "export_csv_w_uses" in request.POST:
-            csv_data = get_dictionary_csv_data(pk, include_metadata=True, include_uses=True)
-            filename = f'dictionary_{pk}_with_uses.csv'
-            response = HttpResponse(csv_data, content_type='text/csv')
-            response['Content-Disposition'] = f'attachment; filename="{filename}"'
-        else:
-            response = redirect('twf:export_dictionaries')
-
-        return response
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        return context
-
-
-class TWFExportTagsView(TWFExportView):
-    """View for exporting tags."""
-
-    template_name = "twf/export/export_tags.html"
-    page_title = 'Export Tags'
-
-    def post(self, request, *args, **kwargs):
-        """Handle the POST request."""
-        pk = self.get_project().id
-        if "export_json" in request.POST:
-            json_data = get_tags_json_data(pk)
-            json_str = json.dumps(json_data, indent=4)
-            filename = f'tags_{pk}.json'
-            response = HttpResponse(json_str, content_type='application/json')
-            response['Content-Disposition'] = f'attachment; filename="{filename}"'
-        elif "export_csv" in request.POST:
-            csv_data = get_tags_csv_data(pk)
-            filename = f'tags_{pk}.csv'
-            response = HttpResponse(csv_data, content_type='text/csv')
-            response['Content-Disposition'] = f'attachment; filename="{filename}"'
-        else:
-            response = redirect('twf:export_tags')
-
-        return response
 
     def get_context_data(self, **kwargs):
         """Get the context data for the view."""
@@ -331,6 +408,16 @@ class TWFExportProjectView(FormView, TWFExportView):
     page_title = 'Export Project'
     form_class = ExportProjectForm
     success_url = reverse_lazy('twf:export_project')
+    navigation_anchor = reverse_lazy('twf:export_project')
+    
+    def get_breadcrumbs(self):
+        """Get the breadcrumbs for the view."""
+        breadcrumbs = [
+            {'url': reverse_lazy('twf:home'), 'value': '<i class="fas fa-home"></i>'},
+            {'url': reverse_lazy('twf:export_overview'), 'value': 'Import/Export'},
+            {'url': '#', 'value': self.page_title}
+        ]
+        return breadcrumbs
 
     def get_context_data(self, **kwargs):
         """Get the context data for the view."""
@@ -353,6 +440,16 @@ class TWFExportZenodoView(FormView, TWFExportView):
     page_title = 'Export to Zenodo'
     form_class = ExportZenodoForm
     success_url = reverse_lazy('twf:export_to_zenodo')
+    navigation_anchor = reverse_lazy('twf:export_to_zenodo')
+    
+    def get_breadcrumbs(self):
+        """Get the breadcrumbs for the view."""
+        breadcrumbs = [
+            {'url': reverse_lazy('twf:home'), 'value': '<i class="fas fa-home"></i>'},
+            {'url': reverse_lazy('twf:export_overview'), 'value': 'Import/Export'},
+            {'url': '#', 'value': self.page_title}
+        ]
+        return breadcrumbs
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
@@ -374,7 +471,17 @@ class TWFImportDictionaryView(FormView, TWFExportView):
     template_name = 'twf/export/import_dictionaries.html'
     page_title = 'Import Dictionary'
     form_class = DictionaryImportForm   # TODO Move form class
+    navigation_anchor = reverse_lazy('twf:import_dictionaries')
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
         return kwargs
+        
+    def get_breadcrumbs(self):
+        """Get the breadcrumbs for the view."""
+        breadcrumbs = [
+            {'url': reverse_lazy('twf:home'), 'value': '<i class="fas fa-home"></i>'},
+            {'url': reverse_lazy('twf:export_overview'), 'value': 'Import/Export'},
+            {'url': '#', 'value': self.page_title}
+        ]
+        return breadcrumbs

@@ -32,8 +32,8 @@ from twf.tasks.metadata_tasks import load_sheets_metadata, load_json_metadata
 from twf.tasks.tags_tasks import create_page_tags
 from twf.tasks.project_tasks import copy_project, query_project_openai, query_project_gemini, query_project_claude, \
     query_project_mistral, query_project_deepseek, query_project_qwen
-from twf.tasks.export_tasks import export_documents_task, export_collections_task, export_project_task, \
-    export_to_zenodo_task
+from twf.tasks.export_tasks import export_project_task, \
+    export_to_zenodo_task, export_task
 from twf.views.views_base import TWFView
 
 def trigger_task(request, task_function, *args, **kwargs):
@@ -488,16 +488,10 @@ def start_query_project_qwen(request):
                         documents=documents)
 
 
-def start_export_documents(request):
-    export_type = request.POST.get('export_type')
-    export_single_file = request.POST.get('export_single_file')
-
-    return trigger_task(request, export_documents_task,
-                        export_type=export_type,
-                        export_single_file=export_single_file)
-
-def start_export_collections(request):
-    return trigger_task(request, export_collections_task)
+def start_export(request):
+    """Start the export task."""
+    configuration_id = request.POST.get('export_conf')
+    return trigger_task(request, export_task, export_configuration_id=configuration_id)
 
 def start_export_project(request):
     include_dictionaries = request.POST.get('include_dictionaries', False)

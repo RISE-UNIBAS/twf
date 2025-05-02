@@ -8,7 +8,6 @@ from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Submit, Layout, Row, Column, Div, HTML
 from django import forms
 from django.forms import TextInput
-from django.template.loader import render_to_string
 from django.urls import reverse
 from django.utils.safestring import mark_safe
 from django_select2.forms import Select2MultipleWidget, Select2Widget, Select2TagWidget
@@ -528,104 +527,6 @@ class TaskSettingsForm(forms.ModelForm):
             }
         }
 
-        return cleaned_data
-
-
-class ExportSettingsForm(forms.ModelForm):
-    """Form for creating and updating task settings."""
-
-    # Define the fields for the form: Google Sheets Connection
-    project_export_configuration = forms.CharField(required=False, widget=forms.Textarea(attrs={'rows': 5}))
-    document_export_configuration = forms.CharField(required=False, widget=forms.Textarea(attrs={'rows': 5}))
-    page_export_configuration = forms.CharField(required=False, widget=forms.Textarea(attrs={'rows': 5}))
-
-    class Meta:
-        model = Project
-        fields = ['conf_export']
-
-    def __init__(self, *args, **kwargs):
-        show_help = kwargs.pop('show_help', True)
-        super().__init__(*args, **kwargs)
-        self.helper = FormHelper()
-        self.helper.form_method = 'post'
-        self.helper.form_class = 'form form-control'
-
-        if not show_help:
-            self.helper.form_class += ' h-100'
-
-        # Populate the fields from `conf_export` JSON if data exists
-        conf_export = self.instance.conf_export or {}
-        self.fields['project_export_configuration'].initial = conf_export.get('project_export_configuration', '')
-        self.fields['document_export_configuration'].initial = conf_export.get('document_export_configuration', '')
-        self.fields['page_export_configuration'].initial = conf_export.get('page_export_configuration', '')
-
-        help_text_html = ('Enter a JSON object to configure the export settings. '
-                          'For each output field, you can specify the source field '
-                          'from the document or page metadata.<br/>Example: <br/>'
-                          '<code>{</code><br/>'
-                          '<code>&nbsp;&nbsp;"id": {"value": "<b>{</b>metadata_key<b>}</b>"}</code><br/>'
-                          '<code>&nbsp;&nbsp;"project": {"value": "Static project title"}</code><br/>'
-                          '<code>&nbsp;&nbsp;"tags": {"value": ""}</code><br/>'
-                          '<code>}</code><br/>')
-
-        static_keys_html = render_to_string('twf/forms/static_keys_tab.html')
-
-        self.helper.layout = Layout()
-        tab_holder = TabHolder(
-                Tab(
-                    'Document Export Settings',
-                    Row(
-                        Column('document_export_configuration', css_class='col-12'),
-                    ), css_id='document_export_settings'
-                ),
-                Tab(
-                    'Page Export Settings',
-                    Row(
-                        Column('page_export_configuration', css_class='col-12'),
-                    ), css_id='page_export_settings'
-                ),
-                Tab(
-                    'Project Export Settings',
-                    Row(
-                        Column('project_export_configuration', css_class='col-12'),
-                    ), css_id='project_export_settings'
-                )
-        )
-
-        if show_help:
-            tab_holder.append(
-                Tab(
-                    'Help',
-                    Row(
-                        Column(HTML(help_text_html), css_class='col-12'),
-                    ), css_id='export_settings_help'
-                )
-            )
-            tab_holder.append(
-                Tab(
-                    'Additional Data Fields',
-                    Row(
-                        Column(HTML(static_keys_html), css_class='col-12'),
-                    ), css_id='export_static_keys'
-                ),
-            )
-
-        self.helper.layout.append(tab_holder)
-        self.helper.layout.append(
-            Div(
-                Submit('submit', 'Save Settings', css_class='btn btn-dark'),
-                css_class='text-end pt-3'
-            )
-        )
-
-    def clean(self):
-        """Clean and save export data back into the JSONField `conf_export`."""
-        cleaned_data = super().clean()
-        self.instance.conf_export = {
-            'project_export_configuration': cleaned_data.get('project_export_configuration'),
-            'document_export_configuration': cleaned_data.get('document_export_configuration'),
-            'page_export_configuration': cleaned_data.get('page_export_configuration')
-        }
         return cleaned_data
 
 

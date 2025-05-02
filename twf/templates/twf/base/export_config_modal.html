@@ -1,0 +1,40 @@
+<div class="modal fade" id="sourceEditorModal" tabindex="-1" aria-labelledby="sourceEditorModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="sourceEditorModalLabel">Edit Source</h5>
+        <div id="source-key-display" class="mb-3 text-muted small"></div>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="source-editor-form">
+          <div class="mb-3">
+            <label for="source-type" class="form-label">Source Type</label>
+            <select class="form-select" id="source-type">
+              <option value="db_field">DB Field</option>
+              <option value="metadata">Metadata Field</option>
+              <option value="text_content">Text Content</option>
+              <option value="special">Special Field</option>
+              <option value="static">Static Value</option>
+            </select>
+          </div>
+
+          <div id="source-options-container">
+            <!-- dynamically filled based on Source Type -->
+          </div>
+
+          <div class="mb-3">
+            <label for="fallback-value" class="form-label">Fallback Value (optional)</label>
+            <input type="text" class="form-control" id="fallback-value" placeholder="Fallback if empty">
+          </div>
+
+          <!-- Future: Add condition and formatting options here -->
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary" id="save-source-button">Save Source</button>
+      </div>
+    </div>
+  </div>
+</div>
