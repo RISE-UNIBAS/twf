@@ -112,8 +112,8 @@ class PromptAdmin(admin.ModelAdmin):
 @admin.register(ExportConfiguration)
 class ExportConfigurationAdmin(admin.ModelAdmin):
     """Admin View for ExportConfiguration."""
-    list_display = ['name', 'project', 'export_type', 'output_format', 'is_default']
-    list_filter = ['project', 'export_type', 'output_format', 'is_default']
+    list_display = ['name', 'project', 'export_type', 'output_format']
+    list_filter = ['project', 'export_type', 'output_format']
     search_fields = ['name', 'description']
 
 

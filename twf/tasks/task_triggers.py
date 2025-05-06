@@ -501,4 +501,4 @@ def start_export_project(request):
                         include_media_files=include_media_files)
 
 def start_export_to_zenodo(request):
-    return trigger_task(request, export_to_zenodo_task)
+    return trigger_task(request, export_to_zenodo_task, export_id=request.POST.get('export_id'),)

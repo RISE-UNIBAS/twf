@@ -8,7 +8,7 @@ from django_select2.forms import Select2Widget
 
 from twf.clients.zenodo_client import get_zenodo_uploads
 from twf.forms.base_batch_forms import BaseBatchForm
-from twf.models import ExportConfiguration, Export
+from twf.models import ExportConfiguration, Export, Dictionary, Collection
 
 
 class ExportConfigurationForm(forms.ModelForm):
@@ -24,12 +24,16 @@ class ExportConfigurationForm(forms.ModelForm):
         widget=forms.HiddenInput(),
     )
 
+    dictionary = forms.ModelChoiceField(queryset=Dictionary.objects.none(), required=False)
+    collection = forms.ModelChoiceField(queryset=Collection.objects.none(), required=False)
+
     class Meta:
         model = ExportConfiguration
-        fields = ['name', 'description', 'export_type', 'output_format', 'config', 'is_default']
+        fields = ['name', 'description', 'export_type', 'output_format', 'config']
 
 
     def __init__(self, *args, **kwargs):
+        project = kwargs.pop('project', None)
         super().__init__(*args, **kwargs)
 
         # Dynamically adjust output format choices based on export_type
@@ -39,6 +43,10 @@ class ExportConfigurationForm(forms.ModelForm):
             export_type = self.instance.export_type
         else:
             export_type = None
+
+        # Get the queryset for dictionaries and collections
+        self.fields['dictionary'].queryset = project.selected_dictionaries.all()
+        self.fields['collection'].queryset = project.collections.all()
 
         allowed_formats = {
             'document': ['json'],
@@ -64,7 +72,7 @@ class ExportConfigurationForm(forms.ModelForm):
         self.helper.layout = Layout(
             Row(
                 Column('name', css_class='form-group col-6 mb-0'),
-                Column('is_default', css_class='form-group col-6 mb-0'),
+                Column(Div(css_id='id_type_help'), css_class='form-group col-6 mb-0'),
                 css_class='row form-row'
             ),
             Row(
@@ -72,6 +80,14 @@ class ExportConfigurationForm(forms.ModelForm):
                 Column(
                     'export_type', 'output_format', css_class='form-group col-6 mb-0',
                 ),
+                css_class='row form-row'
+            ),
+            Row(
+                Column('dictionary', css_class='form-group col-12 mb-0'),
+                css_class='row form-row'
+            ),
+            Row(
+                Column('collection', css_class='form-group col-12 mb-0'),
                 css_class='row form-row'
             ),
             Div(
@@ -88,9 +104,18 @@ class ExportConfigurationForm(forms.ModelForm):
 
     def clean(self):
         cleaned_data = super().clean()
+        export_type = cleaned_data.get('export_type')
         config = cleaned_data.get('config')
+
         if not config:
             raise forms.ValidationError("Configuration is required.")
+
+        if export_type == 'collection' and not cleaned_data.get('collection'):
+            self.add_error('collection', 'This field is required for collection exports.')
+
+        if export_type == 'dictionary' and not cleaned_data.get('dictionary'):
+            self.add_error('dictionary', 'This field is required for dictionary exports.')
+
         return cleaned_data
 
 
@@ -143,39 +168,23 @@ class ExportProjectForm(BaseBatchForm):
             )
         ]
 
-
 class ExportZenodoForm(BaseBatchForm):
 
-    choose_repository = forms.ChoiceField(choices=[('new', 'Create New Repository')],
-                                          label='Choose Repository',
-                                          widget=Select2Widget(attrs={'style': 'width: 100%;'}),
-                                          required=True)
-
-    choose_export = forms.ModelChoiceField(queryset=None,
-                                           label='Choose Export...',
-                                           widget=Select2Widget(attrs={'style': 'width: 100%;'}),
-                                           required=True)
+    export_id = forms.CharField(widget=forms.HiddenInput())
 
     def __init__(self, *args, **kwargs):
+        export_id = kwargs.pop('hidden-export-id', None)
         super().__init__(*args, **kwargs)
+        self.fields['export_id'].initial = export_id
 
-        existing_zenodo_uploads = get_zenodo_uploads(self.project)
-        if existing_zenodo_uploads:
-            existing_repositories = [(upload['id'], upload['metadata']['title']) for upload in existing_zenodo_uploads]
-        else:
-            existing_repositories = []
-        self.fields['choose_repository'].choices += existing_repositories
-
-        self.fields['choose_export'].queryset = Export.objects.filter(export_configuration__project=self.project)
 
     def get_button_label(self):
-        return 'Export Project to Zenodo'
+        return 'Upload Data to Zenodo'
 
     def get_dynamic_fields(self):
         return [
             Row(
-                Column('choose_repository', css_class='form-group col-6 mb-0'),
-                Column('choose_export', css_class='form-group col-6 mb-0'),
+                Column('export_id', css_class='form-group col-12 mb-0'),
                 css_class='row form-row'
             )
         ]

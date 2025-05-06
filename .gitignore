@@ -8,3 +8,4 @@ docs/_build/
 .env
 transkribusWorkflow/google_key.json
 screenshots/
+**/.claude/settings.local.json

@@ -7,33 +7,105 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
-        <form id="source-editor-form">
-          <div class="mb-3">
-            <label for="source-type" class="form-label">Source Type</label>
-            <select class="form-select" id="source-type">
-              <option value="db_field">DB Field</option>
-              <option value="metadata">Metadata Field</option>
-              <option value="text_content">Text Content</option>
-              <option value="special">Special Field</option>
-              <option value="static">Static Value</option>
-            </select>
-          </div>
+       <form id="source-editor-form">
+  <div class="text-muted small mb-3" id="source-key-display"></div>
 
-          <div id="source-options-container">
-            <!-- dynamically filled based on Source Type -->
-          </div>
+  <!-- VALUE SECTION -->
+  <fieldset class="mb-4">
+    <legend class="h6 border-bottom pb-1 mb-3">Value Source</legend>
 
-          <div class="mb-3">
-            <label for="fallback-value" class="form-label">Fallback Value (optional)</label>
-            <input type="text" class="form-control" id="fallback-value" placeholder="Fallback if empty">
-          </div>
+    <div class="row mb-3">
+      <label for="source-type" class="col-sm-3 col-form-label">Source Type</label>
+      <div class="col-sm-9">
+        <select class="form-select" id="source-type">
+          <option value="db_field">DB Field</option>
+          <option value="metadata">Metadata Field</option>
+          <option value="text_content">Text Content</option>
+          <option value="special">Special Field</option>
+          <option value="static">Static Value</option>
+        </select>
+      </div>
+    </div>
 
-          <!-- Future: Add condition and formatting options here -->
-        </form>
+    <div id="source-options-container" class="row mb-3">
+      <!-- dynamically filled -->
+      <label class="col-sm-3 col-form-label">Value</label>
+      <div class="col-sm-9" id="source-options-field"></div>
+    </div>
+  </fieldset>
+
+  <!-- OPTIONS SECTION -->
+  <fieldset>
+    <legend class="h6 border-bottom pb-1 mb-3">Options <span class="text-muted small">(optional)</span></legend>
+
+    <div class="row mb-3">
+      <label for="output-type" class="col-sm-3 col-form-label">Output Type</label>
+      <div class="col-sm-9">
+        <select class="form-select config-output-type" id="output-type" data-key="output_type">
+          <option value="string" selected>String</option>
+          <option value="integer">Integer</option>
+          <option value="float">Float</option>
+        </select>
+      </div>
+    </div>
+    
+    <div class="row mb-3">
+      <label for="fallback-value" class="col-sm-3 col-form-label">Fallback Value</label>
+      <div class="col-sm-9">
+        <input type="text" class="form-control" id="fallback-value" placeholder="Used if source is empty">
+        <small class="text-muted">Value to use if the source field is empty</small>
+      </div>
+    </div>
+
+    <!-- String Options -->
+    <div class="row mb-3 conditional-field string-options" style="display: none;">
+      <label class="col-sm-3 col-form-label">String Format</label>
+      <div class="col-sm-9">
+        <input class="form-control config-format" type="text" data-key="format" placeholder="e.g. '{} documents'" id="string-format-input">
+        <small class="text-muted">Must contain {} if not empty. Example: '{} pages found'</small>
+        <div class="invalid-feedback">Format must contain {} as placeholder for the value</div>
+      </div>
+    </div>
+
+    <div class="row mb-3 conditional-field string-options" style="display: none;">
+      <label class="col-sm-3 col-form-label">Text Case</label>
+      <div class="col-sm-9">
+        <select class="form-select config-text-case" data-key="text_case">
+          <option value="">No change</option>
+          <option value="upper">UPPER</option>
+          <option value="lower">lower</option>
+          <option value="title">Title Case</option>
+        </select>
+        <small class="text-muted">Change the case of text values</small>
+      </div>
+    </div>
+
+    <!-- Float Options -->
+    <div class="row mb-3 conditional-field float-options" style="display: none;">
+      <label class="col-sm-3 col-form-label">Decimal Precision</label>
+      <div class="col-sm-9">
+        <input class="form-control config-precision" type="number" data-key="precision" placeholder="e.g. 2" min="0" max="10" id="float-precision-input">
+        <small class="text-muted">Number of decimal places (0-10)</small>
+        <div class="invalid-feedback">Precision must be between 0 and 10</div>
+      </div>
+    </div>
+
+    <!-- Integer Options -->
+    <div class="row mb-3 conditional-field integer-options" style="display: none;">
+      <label class="col-sm-3 col-form-label">NaN Label</label>
+      <div class="col-sm-9">
+        <input class="form-control config-int-nan" type="text" data-key="nan_label" placeholder="e.g. N/A">
+        <small class="text-muted">Text to display when a value is not a number</small>
+      </div>
+    </div>
+  </fieldset>
+</form>
+
+
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-        <button type="button" class="btn btn-primary" id="save-source-button">Save Source</button>
+        <button type="button" class="btn btn-dark" id="save-source-button">Save Source</button>
       </div>
     </div>
   </div>

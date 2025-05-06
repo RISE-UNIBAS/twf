@@ -32,13 +32,6 @@
         const metadataDocFields = {{ metadata_doc_fields_json|safe }};
         const metadataPageServices = {{ metadata_page_services_json|safe }};
         const metadataPageFields = {{ metadata_page_fields_json|safe }};
-
-        const metadataKeys = {
-            "curated": ["author", "title", "year"],
-            "openai": ["summary", "topics"],
-            "transkribus": ["layout", "handwritten"],
-        };
-
     </script>
      <script src="{% static 'twf/js/export_config_editor.js' %}"></script>
 {% endblock %}

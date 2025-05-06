@@ -5,8 +5,16 @@
 {% block content %}
     <p class="lead">This is a sample of the data that will be exported for each item in your project.</p>
     <p><strong>Configuration:</strong> {{ export_conf.name }}</p>
-    <code>
-        {{ sample_data|pretty_json }}
-    </code>
+
+    {% for key, value in sample_data.items %}
+        <div class="card mb-3">
+            <div class="card-header">{{ key }}</div>
+            <div class="card-body">
+                <code>
+                    {{ value|pretty_json }}
+                </code>
+            </div>
+        </div>
+    {% endfor %}
 
 {% endblock %}

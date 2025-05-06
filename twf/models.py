@@ -10,6 +10,8 @@ import json
 from datetime import timedelta
 
 from django.conf import settings
+from django.contrib.contenttypes.fields import GenericForeignKey
+from django.contrib.contenttypes.models import ContentType
 from django.db import models
 from django.contrib.auth import get_user_model
 from django.db.models import Q
@@ -297,6 +299,8 @@ class Project(TimeStampedModel):
                                            help_text='The description of the workflow for this project.'
                                                      'You can use Markdown to format the text.')
     """The description of the workflow for this project. You can use Markdown to format the text."""
+
+    zenodo_deposition_id = models.CharField(max_length=128, blank=True, null=True)
 
     project_doi = models.CharField(max_length=255, blank=True, null=True,
                                   verbose_name='Project DOI',
@@ -1228,26 +1232,10 @@ class ExportConfiguration(TimeStampedModel):
     export_type = models.CharField(max_length=20, choices=EXPORT_TYPES)
     output_format = models.CharField(max_length=10, choices=OUTPUT_FORMATS, default='json')
     config = models.JSONField(default=dict)
-    is_default = models.BooleanField(default=False)
 
-    def save(self, *args, **kwargs):
-        user = kwargs.pop('current_user', None)
-
-        # If this config is marked as default, unset others for this project and type
-        if self.is_default:
-            ExportConfiguration.objects.filter(
-                project=self.project,
-                export_type=self.export_type,
-                is_default=True
-            ).exclude(pk=self.pk).update(is_default=False)
-
-        super().save(*args, **kwargs)
-
-        if user:
-            if not self.created_by:
-                self.created_by = user
-            self.modified_by = user
-            super().save(update_fields=["created_by", "modified_by"])
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, null=True, blank=True)
+    object_id = models.PositiveIntegerField(null=True, blank=True)
+    content_object = GenericForeignKey('content_type', 'object_id')
 
     def __str__(self):
         return self.name

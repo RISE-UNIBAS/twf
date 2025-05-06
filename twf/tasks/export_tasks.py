@@ -17,6 +17,8 @@ from django.core.files.storage import default_storage
 from django.core.serializers import serialize
 from django.utils.text import slugify
 
+from twf.clients.zenodo_client import get_deposition, create_new_version_from_deposition, create_new_deposition, \
+    update_deposition_metadata, upload_file_to_deposition, publish_deposition, create_temp_readme_from_project
 from twf.models import Project, Export, Page, PageTag, CollectionItem, DictionaryEntry, Variation, DateVariation, \
     ExportConfiguration
 from twf.tasks.task_base import BaseTWFTask
@@ -36,7 +38,10 @@ def export_task(self, project_id, user_id, **kwargs):
         number_of_items = export_creator.get_number_of_items()
         self.set_total_items(number_of_items)
 
+        # For every export, the "project" part is always the same
         export_data = export_creator.create_item_data(self.project)
+
+        # The export creator provides a list of items to handle
         export_data['items'] = []
         for item in export_creator.get_items():
             item_data = export_creator.create_item_data(item)
@@ -150,6 +155,42 @@ def export_project_task(self, project_id, user_id, **kwargs):
 
 @shared_task(bind=True, base=BaseTWFTask)
 def export_to_zenodo_task(self, project_id, user_id, **kwargs):
+    self.validate_task_parameters(kwargs, ['export_id'])
 
-    export_type = 'sql' # Can be 'sql' or 'json'
-    self.end_task()
+    export_id = kwargs.get('export_id')
+    export = Export.objects.get(id=export_id)
+
+    try:
+        self.update_progress(0, "Starting Zenodo export...")
+        depo = get_deposition(self.project)
+        self.update_progress(5, "Zenodo deposition fetched.")
+        if depo.get('submitted'):
+            self.update_progress(10, "Existing deposition already published. Creating new version...")
+            depo = create_new_version_from_deposition(self.project)
+            self.project.zenodo_deposition_id = depo['id']
+            self.project.save(update_fields=['zenodo_deposition_id'])
+        else:
+            self.update_progress(10, "Creating initial version...")
+
+        # STEP 2: Update metadata
+        update_deposition_metadata(self.project, depo['id'])
+        self.update_progress(20, "Metadata uploaded.")
+
+        # STEP 3: Upload files
+        readme_path = create_temp_readme_from_project(self.project)
+        try:
+            upload_file_to_deposition(self.project, depo['id'], readme_path, "README.md")
+        finally:
+            os.remove(readme_path)
+        upload_file_to_deposition(self.project, depo['id'], export.export_file.path, "twf_dataset.zip")
+        self.update_progress(80, "Files uploaded.")
+
+        # STEP 4: Publish
+        result = publish_deposition(self.project, depo['id'])
+        self.project.project_doi = result.get("doi")
+        self.project.save(update_fields=["project_doi"])
+        self.update_progress(100, f"Published. DOI: {self.project.project_doi}")
+
+    except Exception as e:
+        self.end_task(status="FAILURE", error_msg=str(e))
+        raise

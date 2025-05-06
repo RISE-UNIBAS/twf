@@ -18,17 +18,23 @@ class ExportCreator:
         data = {}
         config = self.configuration.config
 
+        # Determine the configuration based on the item type
         if isinstance(item, Project):
-            config = self.configuration.config["general"]
+            config = self.configuration.config.get("general", {})
         elif isinstance(item, Document):
-            config = self.configuration.config["documents"]
+            config = self.configuration.config.get("documents", {})
         elif isinstance(item, Page):
-            config = self.configuration.config["pages"]
+            config = self.configuration.config.get("pages", {})
 
+        # Add all configured fields to the item's data
         for field_key, field_config in config.items():
             source_type = field_config.get("source_type", "static")
             source = field_config.get("source", None)
             fallback = field_config.get("fallback", None)
+            output_type = field_config.get("output_type", "string")
+            txt_format = field_config.get("format", None)
+            txt_case = field_config.get("text_case", None)
+            nan_value = field_config.get("nan_label", "NaN")
 
             value = None
 
@@ -41,43 +47,103 @@ class ExportCreator:
                 meta_source = getattr(item, "metadata", None)
                 if meta_source:
                     value = self.get_nested_metadata(meta_source, source)
+            elif source_type == "text_content":
+                value = item.get_text()
             elif source_type == "special":
-                value = self.compute_special_field(field_key, item)
+                value = self.compute_special_field(source, item)
 
+            # Apply optional formatting; first ask for output type
+            if output_type == "string":
+                if txt_format:
+                    try:
+                        value = txt_format.format(value)
+                    except Exception as e:
+                        value = str(value)
+
+                if txt_case:
+                    if txt_case == "upper":
+                        value = str(value).upper()
+                    elif txt_case == "lower":
+                        value = str(value).lower()
+                    elif txt_case == "capitalize":
+                        value = str(value).capitalize()
+
+            elif output_type == "integer":
+                try:
+                    value = int(value)
+                except (ValueError, TypeError):
+                    value = nan_value
+
+            elif output_type == "float":
+                pass
 
             if value in [None, ""]:
                 value = fallback
 
-            data[field_key] = value
+            self.set_nested_value(data, field_key, value)
 
+        # Add sub item data if applicable
+        if isinstance(item, Document):
+            data["pages"] = []
+            for page in item.pages.all():
+                page_data = self.create_item_data(page)
+                data["pages"].append(page_data)
         return data
 
     def compute_special_field(self, field_key, item):
         if field_key == "tag_list":
-            return [tag.variation for tag in item.tags.all()]
+            tags = []
+            if isinstance(item, Document):
+                for page in item.pages.all():
+                    tags += [tag.variation for tag in page.tags.all()]
+            elif isinstance(item, Page):
+                tags = [tag.variation for tag in item.tags.all()]
+            return tags
+
         elif field_key == "tag_list_unique":
-            return list(set(tag.variation for tag in item.tags.all()))
+            tags = []
+            if isinstance(item, Document):
+                for page in item.pages.all():
+                    tags += [tag.variation for tag in page.tags.all()]
+            elif isinstance(item, Page):
+                tags = [tag.variation for tag in item.tags.all()]
+            return set(tags)
+
         elif field_key == "tags_count":
-            return item.tags.count()
+            count = 0
+            if isinstance(item, Document):
+                for page in item.pages.all():
+                    count += page.tags.count()
+            elif isinstance(item, Page):
+                count = item.tags.count()
+            return count
+
         elif field_key == "linked_tags_list":
             return [tag.dictionary_entry.label for tag in item.tags.all() if tag.dictionary_entry]
+
         elif field_key == "linked_tags_list_unique":
             return list(set(tag.dictionary_entry.label for tag in item.tags.all() if tag.dictionary_entry))
+
         elif field_key == "linked_tags_count":
             return sum(1 for tag in item.tags.all() if tag.dictionary_entry)
+
         elif field_key == "entry_list":
             return [
                 {"label": tag.dictionary_entry.label, "id": tag.dictionary_entry.id}
                 for tag in item.tags.all() if tag.dictionary_entry
             ]
+
         elif field_key == "word_count":
             return len(item.get_text().split())
+
         elif field_key == "no_of_annotations":
             return len(item.document_configuration.get("annotations", []))
+
         elif field_key == "item_context":
             if hasattr(item, 'document'):
                 return {"type": "document", "id": item.document.id}
             return {}
+
         elif field_key == "project_members":
             return [
                 {
@@ -86,17 +152,22 @@ class ExportCreator:
                 }
                 for p in self.project.get_project_members()
             ]
+
         elif field_key == "dictionaries":
             return [
                 {"name": d.label, "id": d.id}
                 for d in self.project.selected_dictionaries.all()
             ]
+
         elif field_key == "no_of_docs":
             return self.project.documents.count()
+
         elif field_key == "collection_items_count":
             return self.project.collections.count()
+
         elif field_key == "last_twf_edit":
             return item.modified_at.strftime("%Y-%m-%d %H:%M:%S")
+
         else:
             return None
 
@@ -122,26 +193,59 @@ class ExportCreator:
             else:
                 return None
         return current
+        
+    def set_nested_value(self, data, field_key, value):
+        """Assign value to a possibly nested dictionary key using dot notation.
+        
+        If field_key contains dots (e.g., 'metadata.author.name'), it creates
+        nested dictionaries as needed and assigns the value to the deepest level.
+        """
+        if '.' not in field_key:
+            # Simple case: direct assignment
+            data[field_key] = value
+            return
+            
+        # Split the key into parts for nested assignment
+        parts = field_key.split('.')
+        current = data
+        
+        # Navigate through or create nested dictionaries
+        for i, part in enumerate(parts[:-1]):  # All parts except the last one
+            if part not in current:
+                current[part] = {}  # Create a new nested dictionary if it doesn't exist
+            elif not isinstance(current[part], dict):
+                # If the current value is not a dict, replace it with a dict
+                current[part] = {}
+            current = current[part]  # Move to the next level
+            
+        # Assign the value to the final key
+        current[parts[-1]] = value
 
     def create_sample_data(self):
         """Create sample data."""
         random_document = self.project.documents.order_by(Random()).first()
+        project_data = self.create_item_data(self.project)
+        sample_data = {
+            "project": project_data,
+        }
 
         if self.configuration.export_type == 'document':
-            return self.create_item_data(random_document)
+            sample_data.update({"document": self.create_item_data(random_document)})
         elif self.configuration.export_type == 'page':
             random_page = random_document.pages.order_by(Random()).first()
-            return self.create_item_data(random_page)
+            sample_data.update({"page": self.create_item_data(random_page)})
         elif self.configuration.export_type == 'collection':
             random_collection = self.project.collections.order_by(Random()).first()
             random_item = random_collection.items.order_by(Random()).first()
-            return self.create_item_data(random_item)
+            sample_data.update({"item": self.create_item_data(random_item)})
         elif self.configuration.export_type == 'dictionary':
-            return {"msg": "niy"}
+            sample_data = {"msg": "niy"}
         elif self.configuration.export_type == 'tag_report':
-            return {"msg": "niy"}
+            sample_data = {"msg": "niy"}
         else:
             raise ValueError("Invalid export type")
+
+        return sample_data
 
     def get_number_of_items(self):
         if self.configuration.export_type == 'document':

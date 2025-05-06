@@ -1,8 +1,264 @@
 {% extends 'twf/base/base.html' %}
-{% load crispy_forms_tags %}
 
 {% block content %}
-     <p class="lead">Upload your project to Zenodo. You can choose to create a new repository
-     or create a new version for an existing one.</p>
-     {% crispy form %}
+
+    {% if not has_zenodo_token %}
+        <div class="alert alert-danger">
+            <i class="fa-solid fa-x"></i>
+            <strong>No Zenodo Token present</strong> - You need to set up a Zenodo token in your credential settings.
+        </div>
+    {% endif %}
+    {% if project.zenodo_deposition_id %}
+        <div class="alert alert-info">
+            <i class="fa-solid fa-link"></i>
+            <strong>Connected to Zenodo</strong> - Your project is connected to Zenodo deposit ID: {{ project.zenodo_deposition_id }}
+        </div>
+    {% else %}
+        <div class="alert alert-warning">
+            <i class="fa-solid fa-unlink"></i>
+            <strong>Not Connected</strong> - Your project is not yet connected to Zenodo. Connect or create a new deposit below.
+        </div>
+    {% endif %}
+
+    {% if project.zenodo_deposition_id %}
+        <div class="card mb-4">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-8">
+                        <form method="POST">
+                            {% csrf_token %}
+
+                            <!-- Step 1: Select Export -->
+                            <div class="mb-4">
+                                <h5><span class="badge bg-secondary me-2">1</span>Select Export File</h5>
+                                <div class="form-group border-start ps-3">
+                                    <select class="form-select" name="export_id" id="id_export_id" required>
+                                        <option value="">-- Select an export file --</option>
+                                        {% for export in exports %}
+                                            <option value="{{ export.id }}">
+                                                {{ export.export_configuration.name }}
+                                                ({{ export.created_at|date:"Y-m-d H:i" }})
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                    <small class="form-text text-muted">
+                                        Choose which export file to upload to Zenodo
+                                    </small>
+                                </div>
+                            </div>
+
+                            <!-- Step 2: Review README -->
+                            <div class="mb-4">
+                                <h5><span class="badge bg-secondary me-2">2</span>Review README</h5>
+                                <div class="form-group border-start ps-3">
+                                    <div class="card">
+                                        <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                                            <span>README.md</span>
+                                            <a href="{% url 'twf:project_settings_repository' %}" class="btn btn-sm btn-outline-secondary">
+                                                <i class="fa-solid fa-edit"></i> Edit Workflow Description
+                                            </a>
+                                        </div>
+                                        <div class="card-body">
+                                            <div id="readme-preview" class="p-3 bg-light" style="max-height: 300px; overflow-y: auto; white-space: pre-wrap;">
+{{ project.workflow_description|default:"No workflow description provided. Please add one in project settings." }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <small class="form-text text-muted">
+                                        This project workflow description will be included as README.md in your Zenodo deposit.
+                                        You can edit this content in the project settings.
+                                    </small>
+                                </div>
+                            </div>
+
+                            <!-- Step 3: Review Metadata -->
+                            <div class="mb-4">
+                                <h5><span class="badge bg-secondary me-2">3</span>Review Metadata</h5>
+                                <div class="form-group border-start ps-3">
+                                    <div class="card">
+                                        <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                                            <span>Zenodo Metadata</span>
+                                            <a href="{% url 'twf:project_settings_repository' %}" class="btn btn-sm btn-outline-secondary">
+                                                <i class="fa-solid fa-edit"></i> Edit Metadata
+                                            </a>
+                                        </div>
+                                        <div class="card-body">
+                                            <dl class="row">
+                                                <dt class="col-sm-3">Title</dt>
+                                                <dd class="col-sm-9">{{ project.title }}</dd>
+
+                                                <dt class="col-sm-3">Description</dt>
+                                                <dd class="col-sm-9">{{ project.description }}</dd>
+
+                                                <dt class="col-sm-3">Keywords</dt>
+                                                <dd class="col-sm-9">{{ project.keywords|default:"None" }}</dd>
+
+                                                <dt class="col-sm-3">License</dt>
+                                                <dd class="col-sm-9">{{ project.license|default:"Not specified" }}</dd>
+
+                                                <dt class="col-sm-3">Version</dt>
+                                                <dd class="col-sm-9">{{ project.version|default:"1.0.0" }}</dd>
+
+                                                <dt class="col-sm-3">DOI</dt>
+                                                <dd class="col-sm-9">{{ project.project_doi|default:"Will be assigned by Zenodo" }}</dd>
+                                            </dl>
+                                        </div>
+                                    </div>
+                                    <small class="form-text text-muted mt-2">
+                                        These metadata fields will be included in your Zenodo deposit.
+                                        Any missing fields can be edited in project settings.
+                                    </small>
+                                </div>
+                            </div>
+
+                            <!-- Step 4: Upload to Zenodo -->
+                            <div class="mb-4">
+                                <h5><span class="badge bg-secondary me-2">4</span>Upload to Zenodo</h5>
+                                <div class="form-group border-start ps-3">
+                                    <button type="submit" class="btn btn-dark" id="upload-button">
+                                        <i class="fa-solid fa-cloud-upload-alt me-2"></i>Continue to Upload
+                                    </button>
+                                    <small class="form-text text-muted d-block mt-2">
+                                        You'll be able to review file details before the final upload.
+                                    </small>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="card bg-light">
+                            <div class="card-header">
+                                <h5 class="mb-0">Information</h5>
+                            </div>
+                            <div class="card-body">
+                                <h6>About Zenodo</h6>
+                                <p>Zenodo is a general-purpose open repository developed by CERN that allows researchers to deposit research papers, data sets, software, and more.</p>
+
+                                <h6>What happens when you upload?</h6>
+                                <ul>
+                                    <li>Your export file will be uploaded</li>
+                                    <li>A README.md file will be created</li>
+                                    <li>Project metadata will be included</li>
+                                    <li>A new version will be created (if updating)</li>
+                                </ul>
+
+                                <h6>After upload</h6>
+                                <p>You'll need to log into Zenodo to publish your deposit. This step can't be automated due to Zenodo's policies.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+
+    <div class="card">
+        <div class="card-header bg-dark text-white">
+            <h5 class="mb-0"><i class="fa-solid fa-link me-2"></i>Zenodo Connection</h5>
+        </div>
+        <div class="card-body">
+            {% if project.zenodo_deposition_id %}
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <h5>Connected Deposit</h5>
+                        <p class="mb-0">
+                            <strong>Deposit ID:</strong> {{ project.zenodo_deposition_id }}
+                            <a href="https://zenodo.org/deposit/{{ project.zenodo_deposition_id }}" target="_blank" class="ms-2">
+                                <i class="fa-solid fa-external-link-alt"></i> View on Zenodo
+                            </a>
+                        </p>
+                    </div>
+                    <a href="#"
+                       class="btn btn-outline-danger show-danger-modal"
+                       data-message="Are you sure you want to disconnect your project from Zenodo?
+                                     This will not delete any data on Zenodo or in the TWF, but will break the connection between the two."
+                       data-redirect-url="{% url 'twf:zenodo_disconnect' %}">
+                       <i class="fa-solid fa-unlink me-2"></i>Disconnect from Zenodo
+                    </a>
+                </div>
+            {% else %}
+                <div class="row">
+                    <div class="col-md-6">
+                        <h5><i class="fa-solid fa-plus-circle me-2"></i>Create New Deposit</h5>
+                        <p>Create a new, empty Zenodo deposit that will be connected to this project.</p>
+                        <a href="#"
+                           class="btn btn-dark show-confirm-modal"
+                           data-message="Are you sure you want to create a new Zenodo deposit?
+                                         This will create an empty, unpublished upload in Zenodo. You can add files to it in the next view."
+                           data-redirect-url="{% url 'twf:zenodo_create_connection' %}">
+                           <i class="fa-solid fa-plus me-2"></i>Create New Deposit
+                        </a>
+                    </div>
+
+                    {% if existing_zenodo_uploads %}
+                        <div class="col-md-6 border-start">
+                            <h5><i class="fa-solid fa-plug me-2"></i>Connect to Existing Deposit</h5>
+                            <form method="POST">
+                                {% csrf_token %}
+                                <div class="mb-3">
+                                    <label for="id_zenodo_uploads" class="form-label">Select an existing deposit</label>
+                                    <select class="form-select" name="zenodo_upload" id="id_zenodo_uploads">
+                                        <option value="">-- Select a Zenodo Deposit --</option>
+                                        {% for item in existing_zenodo_uploads %}
+                                            <option value="{{ item.id }}">
+                                                {{ item.metadata.title|default:item.id }}
+                                                {% if item.metadata.version %}(v{{ item.metadata.version }}){% endif %}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <button type="submit" class="btn btn-outline-dark show-confirm-modal"
+                                        data-message="Are you sure you want to connect your project to this Zenodo deposit?
+                                                      You will create a new version of this dataset when you upload.">
+                                    <i class="fa-solid fa-plug me-2"></i>Connect to Existing Deposit
+                                </button>
+                            </form>
+                        </div>
+                    {% else %}
+                        <div class="col-md-6 border-start">
+                            <h5><i class="fa-solid fa-plug me-2"></i>Connect to Existing Deposit</h5>
+                            <p class="text-muted">You have no existing Zenodo deposits available.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block script %}
+<script>
+    // Update README preview based on selected export
+    document.addEventListener('DOMContentLoaded', function() {
+        const exportSelect = document.getElementById('id_export_id');
+        if (exportSelect) {
+            exportSelect.addEventListener('change', function() {
+                // In a real implementation, you might want to fetch the actual README preview via AJAX
+                // For now, we just update the existing preview with a message
+                const readmePreview = document.getElementById('readme-preview');
+                if (this.value) {
+                    readmePreview.classList.remove('text-muted');
+                } else {
+                    readmePreview.classList.add('text-muted');
+                }
+            });
+        }
+        
+        // Disable submit button until export is selected
+        const uploadForm = document.getElementById('zenodo-upload-form');
+        if (uploadForm) {
+            const exportSelect = document.getElementById('id_export_id');
+            const uploadButton = document.getElementById('upload-button');
+            
+            function updateButtonState() {
+                uploadButton.disabled = !exportSelect.value;
+            }
+            
+            exportSelect.addEventListener('change', updateButtonState);
+            updateButtonState(); // Initial state
+        }
+    });
+</script>
 {% endblock %}

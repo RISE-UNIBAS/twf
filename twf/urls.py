@@ -30,7 +30,8 @@ from twf.views.documents.views_documents import TWFDocumentsOverviewView, TWFDoc
 from twf.views.documents.views_documents_ai import TWFDocumentOpenAIBatchView, \
     TWFDocumentGeminiBatchView, TWFDocumentClaudeBatchView, TWFDocumentMistralBatchView, \
      TWFDocumentDeepSeekBatchView, TWFDocumentQwenBatchView
-from twf.views.export.views_crud import delete_export, delete_export_configuration
+from twf.views.export.views_crud import delete_export, delete_export_configuration, disconnect_zenodo, connect_zenodo, \
+    create_zenodo_connection
 from twf.views.home.views_home import TWFHomeView, TWFHomeLoginView, TWFHomePasswordChangeView, TWFHomeUserOverView, \
     TWFSelectProjectView, TWFHomeUserProfileView, TWFCreateProjectView, TWFManageProjectsView, TWFManageUsersView, \
     TWFSystemHealthView, check_system_health, TWFHomeIndexView, TWFHomeAboutView, TWFProjectViewDetailView, \
@@ -52,7 +53,7 @@ from twf.views.dictionaries.views_dictionaries import TWFDictionaryOverviewView,
 from twf.views.export.views_export import TWFExportProjectView, \
     TWFExportOverviewView, TWFImportDictionaryView, \
     TWFExportConfigurationView, TWFExportZenodoView, TWFExportListView, TWFExportConfListView, TWFExportRunView, \
-    TWFExportSampleView
+    TWFExportSampleView, TWFExportZenodoVersionView
 from twf.views.metadata.views_metadata import TWFMetadataReviewDocumentsView, TWFMetadataExtractTagsView, \
     TWFMetadataReviewPagesView, TWFMetadataOverviewView
 from twf.views.project.views_project import TWFProjectQueryView, TWFProjectOverviewView, \
@@ -275,7 +276,12 @@ urlpatterns = [
 
     path('export/run/', TWFExportRunView.as_view(), name='export_run'),
     path('export/project/', TWFExportProjectView.as_view(), name='export_project'),
+
     path('export/zenodo/', TWFExportZenodoView.as_view(), name='export_to_zenodo'),
+    path('export/zenodo/upload/<int:export_id>/', TWFExportZenodoVersionView.as_view(), name='zenodo_upload'),
+    path('export/zenodo/disconnect/', disconnect_zenodo, name='zenodo_disconnect'),
+    path('export/zenodo/connect/<str:deposition_id>/', connect_zenodo, name='zenodo_connect'),
+    path('export/zenodo/new/connection/', create_zenodo_connection, name='zenodo_create_connection'),
 
     path('export/configurations/', TWFExportConfListView.as_view(), name='export_view_export_confs'),
     path('export/configuration/', TWFExportConfigurationView.as_view(), name='export_configure'),

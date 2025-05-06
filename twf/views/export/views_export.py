@@ -3,10 +3,14 @@ import json
 import logging
 
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.contenttypes.models import ContentType
+from django.shortcuts import redirect
 from django.urls import reverse_lazy
 from django.views.generic import FormView
 from django_filters.views import FilterView
 from django_tables2 import SingleTableView
+
+from twf.clients.zenodo_client import get_zenodo_uploads
 from twf.forms.dictionaries.dictionaries_forms import DictionaryImportForm
 from twf.forms.export_forms import ExportProjectForm, ExportZenodoForm, \
     ExportConfigurationForm, RunExportForm
@@ -231,8 +235,18 @@ class TWFExportConfigurationView(FormView, TWFExportView):
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
         project = self.get_project()
+        kwargs['project'] = project
         if 'pk' in self.kwargs:
-            kwargs['instance'] = ExportConfiguration.objects.get(pk=self.kwargs['pk'], project=project)
+            instance = ExportConfiguration.objects.get(pk=self.kwargs['pk'], project=project)
+
+            if instance.content_object:
+                if instance.export_type == 'collection':
+                    kwargs.setdefault('initial', {})['collection'] = instance.content_object
+                elif instance.export_type == 'dictionary':
+                    kwargs.setdefault('initial', {})['dictionary'] = instance.content_object
+
+            kwargs['instance'] = instance
+
         return kwargs
 
     def form_valid(self, form):
@@ -244,6 +258,23 @@ class TWFExportConfigurationView(FormView, TWFExportView):
             export_conf.config = json.loads(raw_config)
         except json.JSONDecodeError:
             export_conf.config = {}
+
+        # Set GenericForeignKey fields conditionally
+        export_type = export_conf.export_type
+
+        if export_type == 'collection' and form.cleaned_data.get('collection'):
+            collection = form.cleaned_data['collection']
+            export_conf.content_type = ContentType.objects.get_for_model(collection)
+            export_conf.object_id = collection.pk
+
+        elif export_type == 'dictionary' and form.cleaned_data.get('dictionary'):
+            dictionary = form.cleaned_data['dictionary']
+            export_conf.content_type = ContentType.objects.get_for_model(dictionary)
+            export_conf.object_id = dictionary.pk
+        else:
+            export_conf.content_type = None
+            export_conf.object_id = None
+
         export_conf.save(current_user=self.request.user)
         return super().form_valid(form)
 
@@ -433,36 +464,62 @@ class TWFExportProjectView(FormView, TWFExportView):
 
         return kwargs
 
-class TWFExportZenodoView(FormView, TWFExportView):
-    """View for exporting a project"""
 
+class TWFExportZenodoView(TWFExportView):
+    """ View for exporting a project to Zenodo.
+    This view allows users to create and/or connect their project to a Zenodo deposition,
+    or unlink the two. Furthermore, it provides the starting point for the
+    actual upload process. If a connection between TWF and Zenodo is established,
+    a user can select the export they want to upload to Zenodo and review their
+    upload metadata.
+    This view does not handle the actual upload process."""
     template_name = "twf/export/export_zenodo.html"
     page_title = 'Export to Zenodo'
+
+    def get_context_data(self, **kwargs):
+        """Get the context data for the view."""
+        context = super().get_context_data(**kwargs)
+        context['has_zenodo_token'] = self.get_project().get_credentials('zenodo').get('zenodo_token') not in [None, '']
+        context['existing_zenodo_uploads'] = get_zenodo_uploads(self.get_project())
+        context['exports'] = Export.objects.filter(export_configuration__project=self.get_project())
+        return context
+
+    def post(self, request, *args, **kwargs):
+        """Handle 'Prepare Upload' Form"""
+        export_id = request.POST.get('export_id')
+        if export_id:
+            return redirect('twf:zenodo_upload', export_id=int(export_id))
+
+
+class TWFExportZenodoVersionView(FormView, TWFExportView):
+    """View for exporting a project to Zenodo.
+    This view is called from the Zenodo upload view. A connection
+    to the Zenodo repository is required to upload the export."""
+
+    template_name = "twf/export/export_zenodo_upload.html"
+    page_title = 'Upload Export to Zenodo'
     form_class = ExportZenodoForm
-    success_url = reverse_lazy('twf:export_to_zenodo')
     navigation_anchor = reverse_lazy('twf:export_to_zenodo')
-    
-    def get_breadcrumbs(self):
-        """Get the breadcrumbs for the view."""
-        breadcrumbs = [
-            {'url': reverse_lazy('twf:home'), 'value': '<i class="fas fa-home"></i>'},
-            {'url': reverse_lazy('twf:export_overview'), 'value': 'Import/Export'},
-            {'url': '#', 'value': self.page_title}
-        ]
-        return breadcrumbs
+
+    def get_success_url(self):
+        """Get the success URL for the view."""
+        return reverse_lazy('twf:zenodo_upload', export_id=self.kwargs['export_id'])
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
         kwargs['project'] = self.get_project()
-
+        kwargs['hidden-export-id'] = self.kwargs['export_id']
         kwargs['data-start-url'] = reverse_lazy('twf:task_export_zenodo')
-        kwargs['data-message'] = "Are you sure you want to export your project to Zenodo?"
+        kwargs['data-message'] = "Are you sure you want to upload your data to Zenodo?"
 
         return kwargs
 
     def get_context_data(self, **kwargs):
         """Get the context data for the view."""
         context = super().get_context_data(**kwargs)
+        export = Export.objects.get(pk=self.kwargs['export_id'])
+        context['export'] = export
+        context['total_size'] = len(self.get_project().workflow_description) + export.export_file.size
         return context
 
 class TWFImportDictionaryView(FormView, TWFExportView):

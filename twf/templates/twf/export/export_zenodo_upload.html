@@ -1,0 +1,159 @@
+{% extends 'twf/base/base.html' %}
+{% load crispy_forms_tags %}
+{% load humanize %}
+
+{% block content %}
+<div class="container mt-3">
+    <div class="alert alert-info">
+        <i class="fa-solid fa-info-circle me-2"></i>
+        <strong>Final Review</strong> - Please review the files that will be uploaded to your Zenodo deposit.
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card mb-4">
+                <div class="card-header bg-dark text-white">
+                    <h5 class="mb-0"><i class="fa-solid fa-file-archive me-2"></i>Files to Upload</h5>
+                </div>
+                <div class="card-body">
+                    <h6 class="card-title">Export File</h6>
+                    <div class="table-responsive mb-4">
+                        <table class="table table-striped table-bordered">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>File</th>
+                                    <th>Type</th>
+                                    <th>Size</th>
+                                    <th>Created</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>
+                                        <i class="fa-solid fa-file-code me-2"></i>
+                                        <strong>dataset.zip</strong>
+                                    </td>
+                                    <td>{{ export.export_configuration.export_type }} / {{ export.export_configuration.output_format }}</td>
+                                    <td>{{ export.export_file.size|filesizeformat }}</td>
+                                    <td>{{ export.created_at|date:"Y-m-d H:i" }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <h6 class="card-title">Additional Files</h6>
+                    <div class="table-responsive">
+                        <table class="table table-striped table-bordered">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>File</th>
+                                    <th>Type</th>
+                                    <th>Size</th>
+                                    <th>Description</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>
+                                        <i class="fa-solid fa-file-alt me-2"></i>
+                                        <strong>README.md</strong>
+                                    </td>
+                                    <td>Markdown</td>
+                                    <td>~{{ project.workflow_description|length|filesizeformat }}</td>
+                                    <td>Project documentation</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <h6>Total Size: <span class="badge bg-secondary">{{ total_size|filesizeformat }}</span></h6>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card mb-4">
+                <div class="card-header bg-dark text-white">
+                    <h5 class="mb-0"><i class="fa-solid fa-cloud-upload-alt me-2"></i>Upload to Zenodo</h5>
+                </div>
+                <div class="card-body">
+                        
+                    <div class="alert alert-warning">
+                        <i class="fa-solid fa-exclamation-triangle me-2"></i>
+                        <strong>Important!</strong> Once uploaded, you'll need to publish your deposit from the Zenodo interface.
+                    </div>
+
+                    {% crispy form %}
+
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4">
+            <div class="card mb-4">
+                <div class="card-header bg-dark text-white">
+                    <h5 class="mb-0"><i class="fa-solid fa-info-circle me-2"></i>Deposit Information</h5>
+                </div>
+                <div class="card-body">
+                    <h6>Deposit Details</h6>
+                    <dl class="row mb-4">
+                        <dt class="col-sm-4">Deposit ID</dt>
+                        <dd class="col-sm-8">
+                            {{ project.zenodo_deposition_id }}
+                            <a href="https://zenodo.org/deposit/{{ project.zenodo_deposition_id }}" target="_blank" class="ms-2">
+                                <i class="fa-solid fa-external-link-alt"></i>
+                            </a>
+                        </dd>
+                        
+                        <dt class="col-sm-4">Export Name</dt>
+                        <dd class="col-sm-8">{{ export.export_configuration.name }}</dd>
+                        
+                        <dt class="col-sm-4">Version</dt>
+                        <dd class="col-sm-8">{{ project.version|default:"1.0.0" }}</dd>
+                        
+                        <dt class="col-sm-4">Status</dt>
+                        <dd class="col-sm-8"><span class="badge bg-warning">Unpublished</span></dd>
+                    </dl>
+                    
+                    <h6>What happens next?</h6>
+                    <ol class="small">
+                        <li>Files will be uploaded to your Zenodo deposit</li>
+                        <li>If this is an update, a new version will be created</li>
+                        <li>You'll need to log into Zenodo to publish your deposit</li>
+                        <li>After publishing, you'll receive a DOI for citation</li>
+                    </ol>
+                    
+                    <div class="alert alert-light small mt-3">
+                        <i class="fa-solid fa-lightbulb me-2"></i>
+                        <strong>Tip:</strong> Verify all metadata on Zenodo before publishing. Once published, you
+                        cannot change some fields without creating a new version.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block script %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const confirmCheck = document.getElementById('confirm-upload');
+        const uploadButton = document.getElementById('upload-button');
+        
+        function updateButtonState() {
+            uploadButton.disabled = !confirmCheck.checked;
+        }
+        
+        confirmCheck.addEventListener('change', updateButtonState);
+        updateButtonState(); // Initial state
+        
+        // Show waiting overlay when submitting
+        const form = document.getElementById('zenodo-upload-form');
+        form.addEventListener('submit', function() {
+            uploadButton.disabled = true;
+            uploadButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Uploading...';
+        });
+    });
+</script>
+{% endblock %}

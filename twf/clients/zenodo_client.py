@@ -1,8 +1,15 @@
+import os
+import tempfile
+
 import requests
 from django.conf import settings
 
 
-ZENODO_URL = "https://zenodo.org/api/deposit/depositions"
+ZENODO_LIVE_URL = "https://zenodo.org"
+ZENODO_TEST_URL = "https://sandbox.zenodo.org"
+
+ZENODO_URL = ZENODO_TEST_URL + "/api/deposit/depositions"
+
 LICENSE_CHOICES = [
     ('CC BY 4.0', 'Creative Commons Attribution 4.0 International (CC BY 4.0)'),
     ('CC BY-SA 4.0', 'Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0)'),
@@ -21,8 +28,8 @@ def create_metadata_json(project):
             "description": project.description,
             "creators": [
                 {
-                    "name": f"{project.owner.profile.last_name}, {project.owner.profile.first_name}",
-                    "affiliation": project.owner.profile.affiliation
+                    "name": f"{project.owner.user.last_name}, {project.owner.user.first_name}",
+                    "affiliation": project.owner.affiliation
                 }
             ]
         },
@@ -40,6 +47,7 @@ def create_metadata_json(project):
             "affiliation": member.affiliation
         })
     return project_metadata
+
 
 def create_project_md(project):
     project_md = f"""
@@ -75,13 +83,10 @@ injected by the TWF.
 """
     return project_md
 
-def upload_to_zenodo(project):
-    pass
 
 def get_zenodo_uploads(project):
     """Returns a list of uploads to Zenodo."""
     access_token = project.get_credentials('zenodo').get('zenodo_token')
-    print("", access_token)
     r = requests.get(ZENODO_URL,
                      params={'access_token': access_token})
 
@@ -89,3 +94,74 @@ def get_zenodo_uploads(project):
         return None
 
     return r.json()
+
+def create_new_deposition(project):
+    access_token = project.get_credentials('zenodo').get('zenodo_token')
+    headers = {"Content-Type": "application/json"}
+    r = requests.post(
+        ZENODO_URL,
+        params={'access_token': access_token},
+        json={},  # Start with empty metadata
+        headers=headers
+    )
+    r.raise_for_status()
+    return r.json()
+
+
+def get_deposition(project):
+    token = project.get_credentials("zenodo")["zenodo_token"]
+    depo_id = project.zenodo_deposition_id
+    r = requests.get(f"{ZENODO_URL}/{depo_id}", params={"access_token": token})
+    r.raise_for_status()
+    return r.json()
+
+def create_new_version_from_deposition(project):
+    token = project.get_credentials("zenodo")["zenodo_token"]
+    depo_id = project.zenodo_deposition_id
+    r = requests.post(f"{ZENODO_URL}/{depo_id}/actions/newversion", params={"access_token": token})
+    r.raise_for_status()
+
+    # Get new draft from the 'latest_draft' link
+    latest_draft = r.json()["links"]["latest_draft"]
+    r2 = requests.get(latest_draft, params={"access_token": token})
+    r2.raise_for_status()
+    return r2.json()
+
+
+def upload_file_to_deposition(project, deposition_id, file_path, filename=None):
+    token = project.get_credentials("zenodo")["zenodo_token"]
+    bucket_url = get_deposition(project)["links"]["bucket"]
+
+    with open(file_path, "rb") as fp:
+        file_name = filename or os.path.basename(file_path)
+        r = requests.put(f"{bucket_url}/{file_name}", data=fp, params={"access_token": token})
+        r.raise_for_status()
+
+
+def update_deposition_metadata(project, deposition_id):
+    access_token = project.get_credentials('zenodo').get('zenodo_token')
+    metadata = create_metadata_json(project)
+    r = requests.put(
+        f"{ZENODO_URL}/{deposition_id}",
+        params={'access_token': access_token},
+        json=metadata
+    )
+    r.raise_for_status()
+
+
+def publish_deposition(project, deposition_id):
+    access_token = project.get_credentials('zenodo').get('zenodo_token')
+    r = requests.post(
+        f"{ZENODO_URL}/{deposition_id}/actions/publish",
+        params={'access_token': access_token}
+    )
+    r.raise_for_status()
+    return r.json()
+
+
+def create_temp_readme_from_project(project):
+    readme_content = project.workflow_description or "No description provided."
+    temp = tempfile.NamedTemporaryFile(delete=False, suffix=".md", mode='w+', encoding='utf-8')
+    temp.write(readme_content)
+    temp.flush()
+    return temp.name

@@ -8,10 +8,11 @@ class ExportTable(tables.Table):
     created = tables.DateTimeColumn(accessor="created_at", verbose_name="Created")
     updated = tables.Column(accessor="modified_at", verbose_name="Updated")
     actions = tables.Column(empty_values=(), verbose_name="Options", orderable=False)
+    export_size = tables.Column(verbose_name="Size", accessor="id")
 
     class Meta:
         model = Export
-        fields = ("export_configuration__name", "created", "updated")
+        fields = ("export_configuration__name", "created", "updated", "export_size")
         attrs = {"class": "table table-striped table-hover table-sm"}
 
     def render_created(self, value, record):
@@ -25,6 +26,17 @@ class ExportTable(tables.Table):
             '<span class="badge bg-light text-dark">{}</span> by {}',
             value.strftime("%Y-%m-%d %H:%M"), record.modified_by.username,
         )
+
+    def render_export_size(self, value, record):
+        size = record.export_file.size
+        if size < 1024:
+            return f"{size} bytes"
+        elif size < 1024 ** 2:
+            return f"{size / 1024:.2f} KB"
+        elif size < 1024 ** 3:
+            return f"{size / (1024 ** 2):.2f} MB"
+        else:
+            return f"{size / (1024 ** 3):.2f} GB"
 
     def render_actions(self, record):
         # export_exports_delete

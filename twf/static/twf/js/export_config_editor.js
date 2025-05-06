@@ -50,7 +50,14 @@ document.addEventListener('DOMContentLoaded', function () {
             // Load existing fields if any
             if (initialData && initialData[section]) {
                 Object.entries(initialData[section]).forEach(([exportKey, details]) => {
-                    addField(section, exportKey, details.source_type, details.source);
+                    // Pass all details including options
+                    const sourceType = details.source_type || '';
+                    const source = details.source || '';
+                    const fallback = details.fallback || '';
+                    
+                    console.log(`Loading field ${exportKey}:`, details);
+                    // Pass the entire details object as the last parameter
+                    addField(section, exportKey, sourceType, source, fallback, details);
                 });
             }
         });
@@ -91,6 +98,12 @@ document.addEventListener('DOMContentLoaded', function () {
         if (!exportKey) {
             valid = false;
         }
+        
+        // Highlight nested key format nicely
+        const isNested = exportKey.includes('.');
+        const keyDisplay = isNested ? 
+            `<span class="text-success">${exportKey}</span>` : 
+            exportKey;
 
         try {
             const sourceInfo = JSON.parse(sourceDataInput.value);
@@ -117,12 +130,18 @@ document.addEventListener('DOMContentLoaded', function () {
             if (fallback) {
                 summary += ` (fallback: "${fallback}")`;
             }
+            
+            // Add key path visualization for nested keys
+            if (isNested) {
+                const parts = exportKey.split('.');
+                preview.innerHTML = `<strong>${keyDisplay}</strong>: ${summary}`;
+            } else {
+                preview.innerHTML = `<strong>${keyDisplay}</strong>: ${summary}`;
+            }
         } catch (e) {
             valid = false;
-            summary = 'Invalid source data';
+            preview.innerHTML = 'Invalid source data';
         }
-
-        preview.textContent = summary || 'No configuration';
 
         if (valid) {
             fieldDiv.classList.remove('border', 'border-danger');
@@ -133,7 +152,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
     function renderSourceOptions(section, sourceType, selectedSource) {
-        const container = document.getElementById('source-options-container');
+        const container = document.getElementById('source-options-field');
         container.innerHTML = '';
 
         if (sourceType === 'db_field') {
@@ -290,17 +309,24 @@ document.addEventListener('DOMContentLoaded', function () {
 
             const textOptions = {
                 general: [],
-                documents: ['Document Text', 'List of Page Texts', 'List of Lists of Annotations'],
-                pages: ['Page Text', 'List of Annotations']
+                documents: [
+                    {option: 'doc_text', value: 'Document Text'},
+                    {option: 'page_text_list', value: 'List of Page Texts'},
+                    {option: 'page_anno_list', value: 'List of Lists of Annotations'}
+                ],
+                pages: [
+                    {option: 'page_text', value: 'Page Text'},
+                    {option: 'anno_list', value: 'List of Annotations'}
+                ]
             };
 
             const values = textOptions[section] || [];
 
             values.forEach(opt => {
                 const option = document.createElement('option');
-                option.value = opt;
-                option.textContent = opt;
-                if (opt === selectedSource) {
+                option.value = opt.option;
+                option.textContent = opt.value;
+                if (opt.option === selectedSource) {
                     option.selected = true;
                 }
                 select.appendChild(option);
@@ -338,6 +364,53 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
+    function updateConditionalFields(modal, outputType = null) {
+        // Support both jQuery and vanilla DOM elements
+        const isJQuery = typeof modal.find === 'function';
+        
+        // Get the selected output type
+        let type;
+        if (outputType) {
+            // Use provided output type if available
+            type = outputType;
+        } else if (isJQuery) {
+            type = modal.find('.config-output-type').val();
+        } else {
+            const select = document.querySelector('.config-output-type');
+            type = select ? select.value : 'string';
+        }
+        
+        // Hide all conditional fields first
+        const conditionalFields = document.querySelectorAll('.conditional-field');
+        conditionalFields.forEach(field => field.style.display = 'none');
+        
+        // Show only the relevant ones
+        if (type === 'string') {
+            document.querySelectorAll('.string-options').forEach(el => el.style.display = 'flex');
+        } else if (type === 'float') {
+            document.querySelectorAll('.float-options').forEach(el => el.style.display = 'flex');
+        } else if (type === 'integer') {
+            document.querySelectorAll('.integer-options').forEach(el => el.style.display = 'flex');
+        }
+        
+        console.log(`Showing fields for output type: ${type}`);
+    }
+
+    function updateExportTypeDependentFields(val) {
+        const showCollection = (val === 'collection');
+        const showDictionary = (val === 'dictionary');
+
+        const collectionDiv = document.querySelector('#div_id_collection');
+        const dictionaryDiv = document.querySelector('#div_id_dictionary');
+
+        if (collectionDiv) {
+            collectionDiv.style.display = showCollection ? 'block' : 'none';
+        }
+        if (dictionaryDiv) {
+            dictionaryDiv.style.display = showDictionary ? 'block' : 'none';
+        }
+    }
+
     window.openSourceEditor = function(section, buttonElement) {
         const fieldDiv = buttonElement.closest('.row');
 
@@ -345,23 +418,97 @@ document.addEventListener('DOMContentLoaded', function () {
         let sourceType = 'db_field';
         let source = '';
         let fallback = '';
-
+        let outputType = 'string';
+        let format = '';
+        let textCase = '';
+        let precision = '';
+        let nanLabel = '';
+        let isNew = true;
+        
+        console.log("Opening source editor for", fieldDiv);
+        
+        // Load existing configuration if available
         if (sourceDataInput && sourceDataInput.value) {
             try {
                 const sourceInfo = JSON.parse(sourceDataInput.value);
+                console.log("Loaded source data:", sourceInfo);
+                
+                // Load main required values
                 sourceType = sourceInfo.source_type || 'db_field';
                 source = sourceInfo.source || '';
+                
+                // Load all options (fallback is just one of many options)
                 fallback = sourceInfo.fallback || '';
+                outputType = sourceInfo.output_type || 'string';
+                
+                // Load type-specific options
+                if (outputType === 'string') {
+                    format = sourceInfo.format || '';
+                    textCase = sourceInfo.text_case || '';
+                } 
+                else if (outputType === 'float') {
+                    precision = sourceInfo.precision !== undefined ? sourceInfo.precision : '';
+                }
+                else if (outputType === 'integer') {
+                    nanLabel = sourceInfo.nan_label || '';
+                }
+
+                const nonEmpty = sourceType && source;
+                isNew = !nonEmpty;
             } catch (e) {
-                console.error('Invalid source-data JSON:', e);
+                console.error('Invalid source-data JSON:', e, sourceDataInput.value);
             }
         }
 
-        const sourceTypeSelect = document.getElementById('source-type');
-        const fallbackInput = document.getElementById('fallback-value');
+        console.log('Field details:', {
+            isNew,
+            sourceType,
+            source,
+            fallback,
+            outputType,
+            format,
+            textCase,
+            precision,
+            nanLabel
+        });
 
+        // Set source type
+        const sourceTypeSelect = document.getElementById('source-type');
         sourceTypeSelect.value = sourceType;
+
+        // Set all options fields
+        const fallbackInput = document.getElementById('fallback-value');
         fallbackInput.value = fallback;
+        
+        // Set output type 
+        const outputTypeSelect = document.querySelector('.config-output-type');
+        if (outputTypeSelect) {
+            outputTypeSelect.value = outputType;
+        }
+        
+        // Set String format options
+        const formatInput = document.querySelector('.config-format');
+        if (formatInput) {
+            formatInput.value = format;
+        }
+        
+        // Set text case options
+        const textCaseSelect = document.querySelector('.config-text-case');
+        if (textCaseSelect) {
+            textCaseSelect.value = textCase;
+        }
+        
+        // Set precision option for float
+        const precisionInput = document.querySelector('.config-precision');
+        if (precisionInput) {
+            precisionInput.value = precision;
+        }
+        
+        // Set NaN label for integer
+        const nanLabelInput = document.querySelector('.config-int-nan');
+        if (nanLabelInput) {
+            nanLabelInput.value = nanLabel;
+        }
 
         const sectionLabels = {
           general: "Project",
@@ -404,36 +551,55 @@ document.addEventListener('DOMContentLoaded', function () {
         sourceTypeSelect._changeListener = changeListener;
         // ----------------------------------------------------------
 
+        // Show/hide conditional fields based on output type
+        const modalEl = document.getElementById('sourceEditorModal');
+        updateConditionalFields(modalEl, outputType);
+
         currentEditingField = { section, fieldDiv };
 
-        const modal = new bootstrap.Modal(document.getElementById('sourceEditorModal'));
+        const modal = new bootstrap.Modal(modalEl);
         modal.show();
     };
 
 
 
-    window.addField = function(section, exportKey = '', sourceType = '', source = '', fallback = '') {
+    window.addField = function(section, exportKey = '', sourceType = '', source = '', fallback = '', details = null) {
         const container = document.getElementById(`${section}-fields`);
         const fieldDiv = document.createElement('div');
         fieldDiv.classList.add('row', 'mb-2');
 
-        const sourceInfo = {
-            source_type: sourceType,
-            source: source,
-            fallback: fallback
-        };
+        // Use all properties from details if provided, otherwise create basic sourceInfo
+        let sourceInfo;
+        if (details && typeof details === 'object') {
+            sourceInfo = {...details};  // Clone the details object
+            
+            // Ensure core properties are set (source_type and source are the main values)
+            sourceInfo.source_type = sourceType;
+            sourceInfo.source = source;
+            
+            // Fallback is just another option, only set if explicitly provided in this call
+            if (fallback) sourceInfo.fallback = fallback;
+            
+            console.log("Using provided details for field:", sourceInfo);
+        } else {
+            // Create basic sourceInfo with just the required main values
+            sourceInfo = {
+                source_type: sourceType,
+                source: source
+            };
+            
+            // Only add fallback if it's provided (it's an optional field)
+            if (fallback) sourceInfo.fallback = fallback;
+        }
 
         fieldDiv.innerHTML = `
-            <div class="col-3">
-                <input type="text" class="form-control" placeholder="Export Key" value="${exportKey}">
+            <div class="col-5">
+                <input type="text" class="form-control" placeholder="Export Key (use dots for nesting)" value="${exportKey}">
+                <small class="text-muted">For nested keys use: parent.child.leaf</small>
             </div>
-            <div class="col-3">
+            <div class="col-5">
                 <button type="button" class="btn btn-outline-secondary btn-sm" onclick="openSourceEditor('${section}', this)">Edit Source</button>
-                <input type="hidden" class="source-data" value='${JSON.stringify({
-                    source_type: sourceType,
-                    source: source,
-                    fallback: fallback
-                })}'>
+                <input type="hidden" class="source-data" value='${JSON.stringify(sourceInfo)}'>
                 <div class="source-preview small text-muted mt-1"></div>
             </div>
             <div class="col-2">
@@ -463,10 +629,17 @@ document.addEventListener('DOMContentLoaded', function () {
     document.getElementById('save-source-button').addEventListener('click', function () {
         if (!currentEditingField) return;
 
+        // Reset all validation states
+        document.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
+        
+        // Validate form before saving
+        let formValid = true;
+        
         const sourceType = document.getElementById('source-type').value;
         let source = '';
 
-        const sourceContainer = document.getElementById('source-options-container');
+        // Get the source value from the appropriate input/select field
+        const sourceContainer = document.getElementById('source-options-field');
         if (sourceType === 'metadata') {
             const serviceSelect = sourceContainer.querySelector('select');
             const keyInputOrSelect = sourceContainer.querySelector('#metadata-key-container select, #metadata-key-container input');
@@ -481,17 +654,108 @@ document.addEventListener('DOMContentLoaded', function () {
             const sourceInput = sourceContainer.querySelector('input, select');
             source = sourceInput ? sourceInput.value.trim() : '';
         }
-
-        const fallback = document.getElementById('fallback-value').value.trim();
-
-        const sourceData = {
-            source_type: sourceType,
-            source: source,
-            fallback: fallback
-        };
-
+        
+        // Validate source is not empty
+        if (!source) {
+            // Mark source input as invalid
+            const sourceInput = sourceContainer.querySelector('input, select');
+            if (sourceInput) {
+                sourceInput.classList.add('is-invalid');
+                formValid = false;
+            }
+        }
+        
+        // Get any existing sourceData from the hidden input to preserve other properties
         const sourceDataInput = currentEditingField.fieldDiv.querySelector('.source-data');
+        let sourceData = {};
+        
+        if (sourceDataInput && sourceDataInput.value) {
+            try {
+                sourceData = JSON.parse(sourceDataInput.value);
+            } catch (e) {
+                console.error('Invalid existing source data:', e);
+            }
+        }
+        
+        // Update the core properties - source_type and source are the main values
+        sourceData.source_type = sourceType;
+        sourceData.source = source;
+
+        // Gather all options - fallback is just another option like output_type, format, etc.
+        const fallback = document.getElementById('fallback-value').value.trim();
+        // Always set fallback to whatever value is in the form (even if empty)
+        sourceData.fallback = fallback;
+        
+        // Get output formatting options
+        const outputType = document.querySelector('.config-output-type')?.value;
+        if (outputType) {
+            sourceData.output_type = outputType;
+            
+            // Add type-specific options
+            if (outputType === 'string') {
+                const formatInput = document.querySelector('.config-format');
+                const format = formatInput?.value.trim();
+                
+                // Validate string format contains {} if not empty
+                if (format && !format.includes('{}')) {
+                    formatInput.classList.add('is-invalid');
+                    formValid = false;
+                } else {
+                    // Always set format (even if empty) to overwrite existing
+                    sourceData.format = format;
+                }
+                
+                const textCase = document.querySelector('.config-text-case')?.value;
+                sourceData.text_case = textCase || "";
+                
+                // Remove non-string options that might exist from previous change
+                delete sourceData.precision;
+                delete sourceData.nan_label;
+            } 
+            else if (outputType === 'float') {
+                const precisionInput = document.querySelector('.config-precision');
+                const precision = precisionInput?.value.trim();
+                
+                // Validate precision is a number between 0 and 10
+                if (precision !== '') {
+                    const precisionNum = parseInt(precision);
+                    if (isNaN(precisionNum) || precisionNum < 0 || precisionNum > 10) {
+                        precisionInput.classList.add('is-invalid');
+                        formValid = false;
+                    } else {
+                        sourceData.precision = precisionNum;
+                    }
+                } else {
+                    sourceData.precision = "";
+                }
+                
+                // Remove non-float options
+                delete sourceData.format;
+                delete sourceData.text_case;
+                delete sourceData.nan_label;
+            }
+            else if (outputType === 'integer') {
+                const nanLabel = document.querySelector('.config-int-nan')?.value.trim();
+                sourceData.nan_label = nanLabel || "";
+                
+                // Remove non-integer options
+                delete sourceData.format;
+                delete sourceData.text_case;
+                delete sourceData.precision;
+            }
+        }
+
+        // If validation failed, don't save and return
+        if (!formValid) {
+            return;
+        }
+        
+        console.log("Saving source data:", sourceData);
+
+        // Save the updated sourceData to the hidden input
         sourceDataInput.value = JSON.stringify(sourceData);
+        
+        // Update the preview to show the new source info
         updateFieldPreview(currentEditingField.fieldDiv);
 
         const modal = bootstrap.Modal.getInstance(document.getElementById('sourceEditorModal'));
@@ -503,7 +767,7 @@ document.addEventListener('DOMContentLoaded', function () {
     if (!form) {
         console.error('Form not found — check placement of script or crispy output.');
     } else {
-        console.log("Form found5", form);
+        console.log("Form found", form);
         form.addEventListener('submit', function (event) {
             event.preventDefault();
             console.log("SAVE FORM");
@@ -532,18 +796,21 @@ document.addEventListener('DOMContentLoaded', function () {
 
                         try {
                             sourceInfo = JSON.parse(sourceDataInput.value);
+                            console.log(`Adding field ${exportKey} with source data:`, sourceInfo);
                         } catch (e) {
                             console.error('Invalid source-data JSON:', e);
                             return;
                         }
 
                         if (exportKey && sourceInfo.source_type && sourceInfo.source) {
+                            // Ensure we preserve all properties of sourceInfo
                             result[section][exportKey] = sourceInfo;
                         }
                     });
                 }
             });
 
+            console.log("Final form configuration:", result);
             hiddenConfigField.value = JSON.stringify(result);
             form.submit();
         });
@@ -553,6 +820,8 @@ document.addEventListener('DOMContentLoaded', function () {
     // Listen for export_type changes
     exportTypeSelect.addEventListener('change', function () {
         const currentSections = exportTypeSections[this.getAttribute('data-prev-value')] || ['general'];
+        const val = this.value;
+        updateExportTypeDependentFields(val);
         let hasExistingFields = false;
 
         // Check if any fields exist
@@ -576,6 +845,23 @@ document.addEventListener('DOMContentLoaded', function () {
             this.setAttribute('data-prev-value', this.value);
         }
     });
+
+    // Listen for changes in the output type select
+    const outputTypeSelect = document.querySelector('.config-output-type');
+    if (outputTypeSelect) {
+        outputTypeSelect.addEventListener('change', function() {
+            // Reset validation states when changing output type
+            document.querySelectorAll('.is-invalid').forEach(el => {
+                el.classList.remove('is-invalid');
+            });
+            
+            // Hide/show the appropriate conditional fields
+            updateConditionalFields(document.getElementById('sourceEditorModal'));
+        });
+    }
+
+    // Initial form state
+    updateExportTypeDependentFields(exportTypeSelect.value);
 
     // Load existing config if available
     try {
