@@ -1,7 +1,7 @@
 {% extends 'twf/base/base.html' %}
 
 {% block content %}
-    <p class="lead">This is dangerous!</p>
+    <p class="lead">These actions may result in data loss. Please read carefully before proceeding.</p>
         
     <div class="container"
       
@@ -13,12 +13,12 @@
         <!-- Unpark All Tags -->
         <div class="row mb-2">
           <div class="col-8">
-              <p><strong>Unpark all tags:</strong> All parked tags in the project are un-parked.</p>
+              <p><strong>Unpark all tags:</strong> Unparks all parked tags in the project.</p>
           </div>
           <div class="col-4 text-end">
             <button
               class="btn btn-secondary show-confirm-modal" 
-              data-message="Are you sure you want to un-park all tags?"
+              data-message="Are you sure you want to unpark all tags?"
               data-redirect-url="{% url 'twf:reset_unpark_all_tags' %}">
               Unpark All Tags
             </button>
@@ -28,27 +28,28 @@
         <!-- Remove All Prompts -->
         <div class="row mb-2">
           <div class="col-8">
-              <p><strong>Remove all saved prompts:</strong> Removes all saved prompts from the project</p>
+              <p><strong>Delete all saved prompts:</strong> Deletes all saved prompts associated with this project.</p>
           </div>
           <div class="col-4 text-end">
             <button
               class="btn btn-secondary show-confirm-modal" 
-              data-message="Are you sure you want to remove all saved prompts?"
+              data-message="Are you sure you want to delete all saved prompts?"
               data-redirect-url="{% url 'twf:reset_remove_all_prompts' %}">
-              Remove All Prompts
+              Delete All Prompts
             </button>
           </div>
         </div>
     
-        <!-- Remove All Tasks -->
+        <!-- Delete All Tasks -->
         <div class="row mb-2">
           <div class="col-8">
-              <p><strong>Remove all tasks:</strong> All tasks are deleted. This will not alter your data but remove the history of performed tasks.</p>
+              <p><strong>Delete all tasks:</strong> Deletes all tasks. This does not affect your data but removes the
+                  history of performed tasks.</p>
           </div>
           <div class="col-4 text-end">
             <button
               class="btn btn-secondary show-confirm-modal" 
-              data-message="Are you sure you want to remove all tasks?"
+              data-message="Are you sure you want to delete all tasks?"
               data-redirect-url="{% url 'twf:reset_remove_all_tasks' %}">
               Remove All Tasks
             </button>
@@ -58,7 +59,8 @@
         <!-- Remove All Dictionaries -->
         <div class="row mb-2">
           <div class="col-8">
-              <p><strong>Remove all dictionaries:</strong> Dictionaries are not deleted but removed from the project.</p>
+              <p><strong>Remove all dictionaries:</strong> Removes all dictionaries from the project (the dictionaries
+                  themselves are not deleted).</p>
           </div>
           <div class="col-4 text-end">
             <button
@@ -79,15 +81,15 @@
         <!-- Remove All Documents -->
         <div class="row mb-2">
           <div class="col-8">
-              <p><strong>Delete all documents:</strong> This deletes all document objects in your project and subsequently all page and tag objects.
-              Collections can no longer be edited.</p>
+              <p><strong>Delete all documents:</strong> Deletes all document objects in your project, including all
+                  associated pages and tags. Collections can no longer be edited.</p>
           </div>
           <div class="col-4 text-end">
             <button
               class="btn btn-danger show-danger-modal"
-              data-message="Are you sure you want to remove all documents?"
+              data-message="Are you sure you want to delete all documents?"
               data-redirect-url="{% url 'twf:reset_remove_all_documents' %}">
-              Remove Documents
+              Delete Documents
             </button>
           </div>
         </div>
@@ -95,7 +97,8 @@
         <!-- Remove All Tags -->
         <div class="row mb-2">
           <div class="col-8">
-              <p><strong>Delete all tags:</strong> This deletes all tags. They can be re-extracted from Transkribus document data. </p>
+              <p><strong>Delete all tags:</strong> Deletes all tags. Tags can be re-extracted from Transkribus
+                  document data. </p>
           </div>
           <div class="col-4 text-end">
             <button
@@ -110,7 +113,7 @@
         <!-- Remove All Collections -->
         <div class="row mb-2">
           <div class="col-8">
-              <p><strong>Delete all collections:</strong> This deletes all collections in the project.</p>
+              <p><strong>Delete all collections:</strong> Deletes all collections in this project.</p>
           </div>
           <div class="col-4 text-end">
             <button

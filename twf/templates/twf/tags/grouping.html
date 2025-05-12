@@ -78,7 +78,7 @@
                             </select>
                         </div>
                         <div class="col-5 small">
-                            [existing variations] + {{ tag.variation }}
+                            Select an entry an add: "<i>{{ tag.variation }}</i>"
                         </div>
                         <div class="col-3">
                             <input type="submit" name="add_to_existing" value="Add To Selected Entry" class="btn btn-dark" style="width: 100%;" />
@@ -111,9 +111,9 @@
  {% else %}
         <div class="alert alert-danger mt-3">
             There is no dictionary for the selected tag type <strong>"{{ selected_dict_type }}"</strong>.
-            Either <a href="{% url 'twf:dictionary_create' %}">create</a> or <a href="{% url 'twf:dictionaries_add' %}">add</a>
-            a dictionary with the same type to your project or assign you tag type
-            to an existing dictionary type in the <a href="{% url 'twf:project_settings_tasks' %}?tab=tag_types">Task Settings</a>
+            Please <a href="{% url 'twf:dictionary_create' %}">create</a> or <a href="{% url 'twf:dictionaries_add' %}">add</a>
+            a dictionary with the same type to your project, or assign your tag type
+            to an existing dictionary type in the <a href="{% url 'twf:project_settings_tasks' %}?tab=tag_types">Task Settings</a>.
         </div>
  {% endif %}
 {% endblock %}
