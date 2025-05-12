@@ -1,3 +1,5 @@
+{% load nav_tags %}
+{% load twf_permissions %}
 <nav id="sidebarMenu" class="sidebar">
     {% for group in context_nav.groups %}
         {% if group.options %}
@@ -12,14 +14,29 @@
                 </p>
                 <ul class="nav flex-column">
                     {% for option in group.options %}
-                        {% if option.url == request.path or option.url == navigation_anchor %}
-                            <li class="nav-item small border rounded mx-1 mb-1 bg-dark">
-                                <a class="nav-link px-2 py-1 text-light" href="{{ option.url }}">{{ option.value }}</a>
-                            </li>
+                        {% if option.permission %}
+                            {% has_permission request.user option.permission project as has_perm %}
+                            {% if has_perm %}
+                                {% if option.url == request.path or option.url == navigation_anchor %}
+                                    <li class="nav-item small border rounded mx-1 mb-1 bg-dark">
+                                        <a class="nav-link px-2 py-1 text-light" href="{{ option.url }}">{{ option.value }}</a>
+                                    </li>
+                                {% else %}
+                                    <li class="nav-item side-item small border rounded mx-1 mb-1">
+                                        <a class="nav-link px-2 py-1 text-dark" href="{{ option.url }}">{{ option.value }}</a>
+                                    </li>
+                                {% endif %}
+                            {% endif %}
                         {% else %}
-                            <li class="nav-item side-item small border rounded mx-1 mb-1">
-                                <a class="nav-link px-2 py-1 text-dark" href="{{ option.url }}">{{ option.value }}</a>
-                            </li>
+                            {% if option.url == request.path or option.url == navigation_anchor %}
+                                <li class="nav-item small border rounded mx-1 mb-1 bg-dark">
+                                    <a class="nav-link px-2 py-1 text-light" href="{{ option.url }}">{{ option.value }}</a>
+                                </li>
+                            {% else %}
+                                <li class="nav-item side-item small border rounded mx-1 mb-1">
+                                    <a class="nav-link px-2 py-1 text-dark" href="{{ option.url }}">{{ option.value }}</a>
+                                </li>
+                            {% endif %}
                         {% endif %}
                     {% endfor %}
                 </ul>

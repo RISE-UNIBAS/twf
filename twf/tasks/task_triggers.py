@@ -145,49 +145,33 @@ def start_dict_wikidata_batch(request):
 def start_dict_openai_batch(request):
     """Start the GND requests as a Celery task."""
     dictionary_id = request.POST.get('dictionary')
-    prompt = request.POST.get('prompt')
-    role_description = request.POST.get('role_description')
 
     return trigger_task(request, search_openai_entries,
-                        dictionary_id=dictionary_id,
-                        prompt=prompt,
-                        role_description=role_description)
+                        dictionary_id=dictionary_id)
 
 
 def start_dict_claude_batch(request):
     """Start the GND requests as a Celery task."""
     dictionary_id = request.POST.get('dictionary')
-    prompt = request.POST.get('prompt')
-    role_description = request.POST.get('role_description')
 
     return trigger_task(request, search_claude_entries,
-                        dictionary_id=dictionary_id,
-                        prompt=prompt,
-                        role_description=role_description)
+                        dictionary_id=dictionary_id)
 
 
 def start_dict_gemini_batch(request):
     """Start the Gemini requests as a Celery task."""
     dictionary_id = request.POST.get('dictionary')
-    prompt = request.POST.get('prompt')
-    role_description = request.POST.get('role_description')
 
     return trigger_task(request, search_gemini_entries,
-                        dictionary_id=dictionary_id,
-                        prompt=prompt,
-                        role_description=role_description)
+                        dictionary_id=dictionary_id)
 
 
 def start_dict_mistral_batch(request):
     """Start the Gemini requests as a Celery task."""
     dictionary_id = request.POST.get('dictionary')
-    prompt = request.POST.get('prompt')
-    role_description = request.POST.get('role_description')
 
     return trigger_task(request, search_mistral_entries,
-                        dictionary_id=dictionary_id,
-                        prompt=prompt,
-                        role_description=role_description)
+                        dictionary_id=dictionary_id)
 
 
 def start_dict_gnd_request(request):
@@ -231,45 +215,29 @@ def start_dict_wikidata_request(request):
 
 def start_dict_openai_request(request):
     dictionary_id = request.GET.get('dictionary_id')
-    prompt = request.POST.get('prompt')
-    role_description = request.POST.get('role_description')
     return trigger_task(request, search_openai_entry,
-                        dictionary_id=dictionary_id,
-                        prompt=prompt,
-                        role_description=role_description)
+                        dictionary_id=dictionary_id)
 
 
 def start_dict_claude_request(request):
     """Start the GND requests as a Celery task."""
     dictionary_id = request.GET.get('dictionary_id')
-    prompt = request.POST.get('prompt')
-    role_description = request.POST.get('role_description')
     return trigger_task(request, search_claude_entry,
-                        dictionary_id=dictionary_id,
-                        prompt=prompt,
-                        role_description=role_description)
+                        dictionary_id=dictionary_id)
 
 
 def start_dict_gemini_request(request):
     """Start the GND requests as a Celery task."""
     dictionary_id = request.GET.get('dictionary_id')
-    prompt = request.POST.get('prompt')
-    role_description = request.POST.get('role_description')
-    return trigger_task(request, search_gemini_entry,
-                        dictionary_id=dictionary_id,
-                        prompt=prompt,
-                        role_description=role_description)
+    return trigger_ai_task(request, search_gemini_entry,
+                           dictionary_id=dictionary_id)
 
 
 def start_dict_mistral_request(request):
     """Start the GND requests as a Celery task."""
     dictionary_id = request.GET.get('dictionary_id')
-    prompt = request.POST.get('prompt')
-    role_description = request.POST.get('role_description')
     return trigger_task(request, search_mistral_entry,
-                        dictionary_id=dictionary_id,
-                        prompt=prompt,
-                        role_description=role_description)
+                        dictionary_id=dictionary_id)
 
 
 ##############################
@@ -356,135 +324,78 @@ def start_sheet_metadata(request):
 ## COLLECTION TASKS
 def start_openai_collection_batch(request):
     collection_id = request.POST.get('collection')
-    prompt = request.POST.get('prompt')
-    role_description = request.POST.get('role_description')
-
-    return trigger_task(request, search_openai_for_collection,
-                        collection_id=collection_id,
-                        prompt=prompt,
-                        role_description=role_description)
+    return trigger_ai_task(request, search_openai_for_collection,
+                           collection_id=collection_id)
 
 def start_gemini_collection_batch(request):
     collection_id = request.POST.get('collection')
-    prompt = request.POST.get('prompt')
-    role_description = request.POST.get('role_description')
-
-    return trigger_task(request, search_gemini_for_collection,
-                        collection_id=collection_id,
-                        prompt=prompt,
-                        role_description=role_description)
+    return trigger_ai_task(request, search_gemini_for_collection,
+                           collection_id=collection_id)
 
 def start_claude_collection_batch(request):
     collection_id = request.POST.get('collection')
-    prompt = request.POST.get('prompt')
-    role_description = request.POST.get('role_description')
-
-    return trigger_task(request, search_claude_for_collection,
-                        collection_id=collection_id,
-                        prompt=prompt,
-                        role_description=role_description)
+    return trigger_ai_task(request, search_claude_for_collection,
+                           collection_id=collection_id)
 
 def start_openai_collection_request(request):
     collection_id = request.POST.get('collection_id')
-    prompt = request.POST.get('prompt')
-    role_description = request.POST.get('role_description')
-
-    return trigger_task(request, search_openai_for_collection_item,
-                        collection_id=collection_id,
-                        prompt=prompt,
-                        role_description=role_description)
+    return trigger_ai_task(request, search_openai_for_collection_item,
+                           collection_id=collection_id)
 
 def start_gemini_collection_request(request):
     collection_id = request.POST.get('collection_id')
-    prompt = request.POST.get('prompt')
-    role_description = request.POST.get('role_description')
-
-    return trigger_task(request, search_gemini_for_collection_item,
-                        collection_id=collection_id,
-                        prompt=prompt,
-                        role_description=role_description)
+    return trigger_ai_task(request, search_gemini_for_collection_item,
+                           collection_id=collection_id)
 
 def start_claude_collection_request(request):
     collection_id = request.POST.get('collection_id')
-    prompt = request.POST.get('prompt')
-    role_description = request.POST.get('role_description')
-
-    return trigger_task(request, search_claude_for_collection_item,
-                        collection_id=collection_id,
-                        prompt=prompt,
-                        role_description=role_description)
+    return trigger_ai_task(request, search_claude_for_collection_item,
+                           collection_id=collection_id)
 
 def start_mistral_collection_request(request):
     collection_id = request.POST.get('collection_id')
-    prompt = request.POST.get('prompt')
-    role_description = request.POST.get('role_description')
-
-    return trigger_task(request, search_mistral_for_collection_item,
-                        collection_id=collection_id,
-                        prompt=prompt,
-                        role_description=role_description)
+    return trigger_ai_task(request, search_mistral_for_collection_item,
+                           collection_id=collection_id)
 
 def start_copy_project(request):
     new_project_name = request.POST.get('new_project_name')
-
     return trigger_task(request, copy_project,
                         new_project_name=new_project_name)
 
 
 def start_query_project_openai(request):
-    """
-    Trigger an OpenAI query task for the project (text-only).
-    """
     documents = request.POST.getlist('documents')
-
     return trigger_ai_task(request, query_project_openai,
                            documents=documents)
 
 
 def start_query_project_gemini(request):
-    """
-    Trigger a Google Gemini query task for the project with multimodal support.
-    """
     documents = request.POST.getlist('documents')
-
     return trigger_ai_task(request, query_project_gemini,
                            documents=documents)
 
 
 def start_query_project_claude(request):
-    """
-    Trigger an Anthropic Claude query task for the project (text-only).
-    """
     documents = request.POST.getlist('documents')
-
     return trigger_ai_task(request, query_project_claude,
                            documents=documents)
 
 
 def start_query_project_mistral(request):
-    """
-    Trigger a Mistral query task for the project (text-only).
-    """
     documents = request.POST.getlist('documents')
-
     return trigger_ai_task(request, query_project_mistral,
                            documents=documents)
 
 
 def start_query_project_deepseek(request):
-    """
-    Trigger a DeepSeek query task for the project (text-only).
-    """
     documents = request.POST.getlist('documents')
-
     return trigger_ai_task(request, query_project_deepseek,
                            documents=documents)
 
 
 def start_query_project_qwen(request):
     documents = request.POST.getlist('documents')
-
-    return trigger_task(request, query_project_qwen,
+    return trigger_ai_task(request, query_project_qwen,
                         documents=documents)
 
 
@@ -493,12 +404,14 @@ def start_export(request):
     configuration_id = request.POST.get('export_conf')
     return trigger_task(request, export_task, export_configuration_id=configuration_id)
 
+
 def start_export_project(request):
     include_dictionaries = request.POST.get('include_dictionaries', False)
     include_media_files = request.POST.get('include_media_files', False)
     return trigger_task(request, export_project_task,
                         include_dictionaries=include_dictionaries,
                         include_media_files=include_media_files)
+
 
 def start_export_to_zenodo(request):
     return trigger_task(request, export_to_zenodo_task, export_id=request.POST.get('export_id'),)

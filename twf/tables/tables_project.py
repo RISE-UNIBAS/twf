@@ -1,6 +1,9 @@
 import django_tables2 as tables
-from twf.models import Task, Prompt, Note
+from django.utils.safestring import mark_safe
+
+from twf.models import Task, Prompt, Note, UserProfile
 from django.utils.html import format_html
+from django.template.loader import render_to_string
 
 class TaskTable(tables.Table):
     title = tables.Column(verbose_name="Task")
@@ -167,3 +170,150 @@ class NoteTable(tables.Table):
             edit_url,
             delete_url
         )
+
+
+class ProjectUserTable(tables.Table):
+    """Table for displaying users in a project with their permissions."""
+    project = None
+
+    user = tables.Column(accessor='user.username', verbose_name="Username", orderable=False)
+    user_type = tables.Column(empty_values=(), verbose_name="User Type", orderable=False)
+    role = tables.Column(empty_values=(), verbose_name="Permission Role", orderable=False)
+    function = tables.Column(empty_values=(), verbose_name="Function", orderable=False)
+    actions = tables.Column(empty_values=(), verbose_name="Actions", orderable=False)
+
+    def __init__(self, *args, **kwargs):
+        self.project = kwargs.pop('project')
+        super(ProjectUserTable, self).__init__(*args, **kwargs)
+
+    class Meta:
+        model = UserProfile
+        fields = ("user", "user_type", "role", "function")
+        attrs = {"class": "table table-striped table-hover user-table"}
+        row_attrs = {"data-user-id": lambda record: record.id}
+
+
+    def render_user_type(self, record):
+        """Render the user type (Owner, Member, Superuser) with appropriate styling."""
+        if not self.project:
+            return "-"
+
+        # Check if user is a superuser
+        if record.user.is_superuser:
+            return format_html('<span class="badge bg-dark">Superuser</span>')
+
+        # Check if user is the project owner
+        if self.project.owner == record:
+            return format_html('<span class="badge bg-primary">Owner</span>')
+
+        # Otherwise, user is a member
+        return format_html('<span class="badge bg-secondary">Member</span>')
+
+    def render_role(self, record):
+        """Render the role with appropriate styling."""
+        # Get the context - we need the current project
+        if not self.project:
+            return "-"
+
+        # Check if user is a special user (owner or superuser)
+        is_special_user = (self.project.owner == record) or record.user.is_superuser
+
+        if is_special_user:
+            # For owners and superusers, always show as managers
+            role_display = "Manager"
+            role_class = "danger"
+            override_badge = ""
+        else:
+            # For regular users, calculate role based on permission counts
+            project_id_str = str(self.project.id)
+            project_permissions = record.permissions.get(project_id_str, {})
+
+            # Check if the user has any actual permissions for this project
+            # (exclude 'function' which is not a permission)
+            perm_keys = [k for k in project_permissions.keys() if k != 'function' and '.' in k]
+            if not perm_keys:
+                role_display = "None"
+                role_class = "secondary"  # Match the 'none' role button color
+                override_badge = ""
+                return format_html('<span class="badge bg-{}">{}</span>{}',
+                                  role_class, role_display, override_badge)
+
+            # Count permissions by level and entity type
+            permission_counts = {'none': 0, 'view': 0, 'edit': 0, 'manage': 0}
+            entity_levels = {}  # To track the level for each entity type
+
+            # Process each permission
+            for perm_key in project_permissions:
+                if perm_key != 'function' and '.' in perm_key:
+                    entity_type, level = perm_key.split('.')
+
+                    # Track this entity type's permission level
+                    entity_levels[entity_type] = level
+
+                    # Count this permission level
+                    permission_counts[level] += 1
+
+            # Calculate the dominant role based on which level has the highest count
+            # Sort levels by priority (for ties, higher permission wins)
+            sorted_counts = sorted(
+                permission_counts.items(),
+                key=lambda x: (x[1], ['none', 'view', 'edit', 'manage'].index(x[0])),
+                reverse=True
+            )
+
+            # Get the most common permission level and convert to corresponding role name
+            perm_level = sorted_counts[0][0]
+
+            # Map permission level to role name
+            role_map = {
+                'none': 'none',
+                'view': 'viewer',
+                'edit': 'editor',
+                'manage': 'manager'
+            }
+            role = role_map[perm_level]
+
+            # Assign color based on role to match role assignment buttons
+            if role == 'manager':
+                role_class = "danger"
+            elif role == 'editor':
+                role_class = "warning"
+            elif role == 'viewer':
+                role_class = "info"
+            else:  # none
+                role_class = "secondary"
+
+            role_display = role.capitalize() if role != 'none' else "None"
+
+            # Show overrides if different permission levels exist
+            # (i.e., not all permissions are at the same level)
+            unique_levels = set(entity_levels.values())
+            has_overrides = len(unique_levels) > 1
+            override_badge = ""
+            if has_overrides:
+                override_badge = mark_safe('<span class="badge bg-secondary ms-1" title="Has custom permission overrides"><i class="fa fa-asterisk"></i></span>')
+
+        return format_html('<span class="badge bg-{}">{}</span>{}',
+                          role_class, role_display, override_badge)
+    
+    def render_function(self, record):
+        """Render the user's function in the project."""
+        if not self.project:
+            return "-"
+            
+        function = record.get_project_function(self.project)
+        if function:
+            return function
+        return "-"
+        
+    def render_actions(self, record):
+        """Render action buttons for the user."""
+        # Show edit button that triggers the permission form
+        edit_button = format_html(
+            '<button type="button" class="btn btn-sm btn-primary edit-permissions" '
+            'data-user-id="{}" data-username="{}">'
+            '<i class="fa fa-edit me-1"></i>Edit Permissions</button>',
+            record.id, record.user.username
+        )
+        
+        return edit_button

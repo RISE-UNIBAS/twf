@@ -18,11 +18,18 @@ from django.conf import settings
 from twf.models import Project
 
 
-def get_referrer_or_default(request, default='twf:home'):
+def get_referrer_or_default(request, default='twf:home', kwargs=None):
     """Get the referrer URL or a default URL."""
+    redirect_to_view = request.GET.get('redirect_to_view')
+    if redirect_to_view:
+        return redirect(redirect_to_view)
+
     referer = request.META.get('HTTP_REFERER')
     if referer:
         return HttpResponseRedirect(referer)
+
+    if kwargs:
+        return redirect(default, **kwargs)
     return redirect(default)
 
 

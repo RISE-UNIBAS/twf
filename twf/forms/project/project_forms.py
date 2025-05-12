@@ -5,7 +5,7 @@ import re
 
 from crispy_forms.bootstrap import TabHolder, Tab
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Submit, Layout, Row, Column, Div, HTML
+from crispy_forms.layout import Submit, Layout, Row, Column, Div, HTML, Field, ButtonHolder, Button
 from django import forms
 from django.forms import TextInput
 from django.urls import reverse
@@ -14,7 +14,8 @@ from django_select2.forms import Select2MultipleWidget, Select2Widget, Select2Ta
 from markdown import markdown
 
 from twf.clients import zenodo_client
-from twf.models import Project, Prompt, Note
+from twf.models import Project, Prompt, Note, UserProfile
+from twf.permissions import ENTITY_TYPES, ROLES
 
 
 class CreateProjectForm(forms.ModelForm):
@@ -129,16 +130,16 @@ class GeneralSettingsForm(forms.ModelForm):
         2. The current user is not removing themselves from members if they are a member
         """
         cleaned_data = super().clean()
-        
+
         if not self.current_user or not hasattr(self.current_user, 'profile'):
             return cleaned_data
-            
+
         # Check if owner is being changed by the current owner
         if self.instance and self.instance.owner == self.current_user.profile:
             # Ensure owner hasn't been changed
             if 'owner' in cleaned_data and cleaned_data['owner'] != self.current_user.profile:
                 self.add_error('owner', "As the current owner, you cannot transfer ownership to another user.")
-        
+
         # Check if the current user is removing themselves from members
         if self.instance and self.current_user.profile in self.instance.members.all():
             members_after = cleaned_data.get('members', [])
@@ -148,8 +149,63 @@ class GeneralSettingsForm(forms.ModelForm):
                 members_list.append(self.current_user.profile)
                 cleaned_data['members'] = members_list
                 self.add_error('members', "You cannot remove yourself from the project members.")
-        
+
         return cleaned_data
+
+    def save(self, commit=True):
+        """
+        Override the save method to handle permission changes when adding or removing users.
+        - When a user is added, they get 'viewer' permissions
+        - When a user is removed, their permissions for this project are completely removed
+        """
+        project = super().save(commit)
+
+        if self.instance and self.changed_data and 'members' in self.changed_data:
+            # Get previous and current members
+            previous_members = set(self.instance.members.all())
+            current_members = set(self.cleaned_data['members'])
+
+            # Find added and removed members
+            added_members = current_members - previous_members
+            removed_members = previous_members - current_members
+
+            # Handle added members - set viewer permissions
+            for member in added_members:
+                # Skip owners and superusers (they already have all permissions by default)
+                if member == self.instance.owner or member.user.is_superuser:
+                    continue
+
+                # Set viewer permissions for new members
+                from twf.permissions import get_role_permissions
+                project_id_str = str(self.instance.id)
+
+                # Initialize permissions dict for this project if it doesn't exist
+                if project_id_str not in member.permissions:
+                    member.permissions[project_id_str] = {}
+
+                # Set viewer permissions (all entity types with 'view' level)
+                for permission in get_role_permissions('viewer'):
+                    member.permissions[project_id_str][permission] = True
+
+                # Save the updated permissions
+                member.save()
+
+            # Handle removed members - completely remove all permissions for this project
+            for member in removed_members:
+                # Skip owners and superusers (they can't be removed)
+                if member == self.instance.owner or member.user.is_superuser:
+                    continue
+
+                # Clear permissions for this project
+                project_id_str = str(self.instance.id)
+                if project_id_str in member.permissions:
+                    # Remove the permissions dictionary for this project completely
+                    member.permissions.pop(project_id_str, None)
+
+                    # Save the updated permissions
+                    member.save()
+
+        return project
 
 
 class CredentialsForm(forms.ModelForm):
@@ -1225,3 +1281,304 @@ class PromptSettingsForm(forms.ModelForm):
             }
         }
         return cleaned_data
+
+
+class UserPermissionForm(forms.Form):
+    """
+    Form for managing user permissions within a project.
+
+    This form allows setting a user's role (viewer, editor, manager) and optionally
+    overriding specific permissions. It also provides a field for setting a function
+    description for the user in the project.
+    """
+    # Hidden field for user_id to identify which user we're editing
+    user_id = forms.IntegerField(widget=forms.HiddenInput())
+
+    # We use a hidden field for the role, will be set by the button clicks
+    role = forms.CharField(
+        required=False,  # Make it not required so special users don't need it
+        widget=forms.HiddenInput(),
+        initial='viewer'  # Default to viewer if no role is specified
+    )
+
+    # Function description for the user in this project
+    function = forms.CharField(
+        required=False,
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'E.g., "Lead Researcher", "Content Editor"'}),
+        help_text="Optional functional description for this user in the project"
+    )
+
+    # We'll dynamically add permission override fields in __init__
+
+    def __init__(self, *args, **kwargs):
+        """
+        Initialize the form with dynamic permission fields.
+
+        Args:
+            user_profile: The UserProfile object we're editing permissions for
+            project: The Project object these permissions apply to
+        """
+        # Extract user_profile and project from kwargs
+        self.user_profile = kwargs.pop('user_profile', None)
+        self.project = kwargs.pop('project', None)
+
+        super().__init__(*args, **kwargs)
+
+        # Set up form helper for crispy-forms
+        self.helper = FormHelper()
+        self.helper.form_method = 'post'
+        self.helper.form_class = 'form'
+
+        # Check if user is the project owner or a superuser
+        is_special_user = False
+        if self.user_profile and self.project:
+            is_special_user = (self.project.owner == self.user_profile) or self.user_profile.user.is_superuser
+
+        # For project owners and superusers, only show the function field
+        if is_special_user:
+            # Set initial function value
+            if self.user_profile:
+                self.fields['function'].initial = self.user_profile.get_project_function(self.project)
+
+            # Remove the role field completely for special users
+            if 'role' in self.fields:
+                self.fields.pop('role')
+
+            # Create a simpler layout for owners and superusers
+            self.helper.layout = Layout(
+                'user_id',  # Include hidden user_id field
+                Div(
+                    HTML('<div class="alert alert-info mb-4">'
+                         '<i class="fa fa-info-circle me-2"></i>'
+                         'This user has full access to the project as an owner or administrator.'
+                         '</div>'),
+                    css_class='mb-3'
+                ),
+                Row(
+                    Column('function', css_class='col-md-12'),
+                    css_class='mb-3'
+                ),
+                Div(
+                    Submit('submit', 'Save Function Description', css_class='btn btn-primary'),
+                    css_class='text-end mt-3'
+                )
+            )
+
+            return  # Exit early - we don't need to add permission fields
+
+        # For regular members, add permission override fields dynamically
+        for entity_type, permissions in ENTITY_TYPES.items():
+            for perm_name, perm_data in permissions.items():
+                field_name = f"permission_{entity_type}_{perm_name}"
+                self.fields[field_name] = forms.BooleanField(
+                    label=perm_data['label'],
+                    help_text=perm_data['description'],
+                    required=False,
+                )
+
+        # Set initial values if user_profile and project are provided
+        if self.user_profile and self.project:
+            # Set user_id
+            self.fields['user_id'].initial = self.user_profile.id
+
+            # Set initial role
+            project_permissions = self.user_profile.get_project_permissions(self.project)
+            role, _ = self.user_profile.get_role_and_overrides(self.project)
+            self.fields['role'].initial = role
+
+            # Set initial function
+            self.fields['function'].initial = self.user_profile.get_project_function(self.project)
+
+            # Set initial permission values
+            for entity_type, permissions in ENTITY_TYPES.items():
+                for perm_name in permissions:
+                    permission = f"{entity_type}.{perm_name}"
+                    field_name = f"permission_{entity_type}_{perm_name}"
+                    # Check if this permission exists directly in the user's permissions
+                    # without using the hierarchical permission logic
+                    project_permissions = self.user_profile.get_project_permissions(self.project)
+                    self.fields[field_name].initial = permission in project_permissions
+
+        # Create form layout with crispy-forms for regular members
+        permission_rows = []
+        for entity_type, permissions in ENTITY_TYPES.items():
+            # Create a card for each entity type
+            permission_fields = []
+            for perm_name in permissions:
+                permission_fields.append(
+                    Field(
+                        f"permission_{entity_type}_{perm_name}",
+                    )
+                )
+
+            # Add the entity type card to the layout
+            permission_rows.append(
+                Column(
+                    Div(
+                        HTML(f"<h6>{entity_type.title()}</h6>"),
+                        *permission_fields,
+                        css_class="card-body"
+                    ),
+                    css_class="col-md-6 mb-3"
+                )
+            )
+
+        # Function field
+        function_row = Row(
+            Column('function', css_class='col-md-12'),
+            css_class='mb-3'
+        )
+
+        # Role selection radio buttons
+        role_buttons = Div(
+            HTML('<h6>Role Assignment:</h6>'),
+            Div(
+                HTML('''
+                <div class="btn-group role-btn-group mb-3" role="group" aria-label="User Role">
+                    <input type="radio" class="btn-check" name="role_btn" id="role_none" autocomplete="off" data-role="none">
+                    <label class="btn btn-outline-secondary" for="role_none">None</label>
+
+                    <input type="radio" class="btn-check" name="role_btn" id="role_viewer" autocomplete="off" data-role="viewer">
+                    <label class="btn btn-outline-info" for="role_viewer">Viewer</label>
+
+                    <input type="radio" class="btn-check" name="role_btn" id="role_editor" autocomplete="off" data-role="editor">
+                    <label class="btn btn-outline-warning" for="role_editor">Editor</label>
+
+                    <input type="radio" class="btn-check" name="role_btn" id="role_manager" autocomplete="off" data-role="manager">
+                    <label class="btn btn-outline-danger" for="role_manager">Manager</label>
+                </div>
+                '''),
+                css_class='mb-3'
+            ),
+            'role',
+            css_class='mb-3'
+        )
+
+        # Build the complete layout for regular members
+        self.helper.layout = Layout(
+            'user_id',  # Include hidden user_id field
+            function_row,
+            role_buttons,
+            HTML('<h5 class="mt-4 mb-3">Permissions</h5>'),
+            Row(*permission_rows),
+            Div(
+                Submit('submit', 'Save Permissions', css_class='btn btn-primary'),
+                css_class='text-end mt-3'
+            )
+        )
+
+    def _determine_role(self, permissions):
+        """
+        Determine the user's role based on their current permissions.
+
+        Args:
+            permissions: The user's current permissions for the project
+
+        Returns:
+            str: The determined role ('none', 'viewer', 'editor', or 'manager')
+        """
+        # If there are no permissions, or only a function description, return 'none'
+        perm_keys = [k for k in permissions.keys() if k != 'function']
+        if not perm_keys:
+            return 'none'
+
+        # Check for Manager permissions
+        manager_perms = [f"{entity}.manage" for entity in ENTITY_TYPES.keys()]
+        if any(perm in permissions for perm in manager_perms):
+            return 'manager'
+
+        # Check for Editor permissions
+        editor_perms = [f"{entity}.edit" for entity in ENTITY_TYPES.keys()]
+        if any(perm in permissions for perm in editor_perms):
+            return 'editor'
+
+        # If there are any permissions, but no editor or manager permissions, it's a viewer
+        return 'viewer'
+
+    def save(self):
+        """
+        Save the form data to the user profile.
+
+        This method applies the selected role and any permission overrides
+        to the user's permissions for the specific project.
+        """
+        if not self.user_profile or not self.project:
+            return
+
+        # Check if this is a special user (owner or superuser)
+        is_special_user = (self.project.owner == self.user_profile) or self.user_profile.user.is_superuser
+
+        # Get function (always present)
+        function = self.cleaned_data.get('function')
+
+        # For special users, we only update the function description
+        if is_special_user:
+            # Set function description if provided
+            self.user_profile.set_project_function(self.project, function)
+            return
+
+        # For regular users, process role and permissions
+        role = self.cleaned_data.get('role', None)  # Default to None if not present
+
+        # For the 'none' role, we clear all permissions
+        if role == 'none':
+            # Clear all permissions but preserve the function description
+            if str(self.project.id) in self.user_profile.permissions:
+                # Keep only the function description if it exists
+                project_permissions = {}
+                if function:
+                    project_permissions['function'] = function
+                self.user_profile.permissions[str(self.project.id)] = project_permissions
+                self.user_profile.save()
+        else:
+            # For any other role, we need to clean up existing permissions first
+            # and then set the new role permissions
+            # The set_role_permissions method now handles this properly
+            self.user_profile.set_role_permissions(self.project, role)
+
+        # Set function description if provided
+        self.user_profile.set_project_function(self.project, function)
+
+        # First, group permissions by entity type to find the highest level for each
+        entity_permissions = {}
+
+        # Collect all permission states from form
+        for field_name, value in self.cleaned_data.items():
+            if field_name.startswith('permission_'):
+                # Extract entity_type and perm_name from field name
+                _, entity_type, perm_name = field_name.split('_', 2)
+
+                # Initialize the entity type if not present
+                if entity_type not in entity_permissions:
+                    entity_permissions[entity_type] = {'view': False, 'edit': False, 'manage': False}
+
+                # Set the permission state based on checkbox
+                entity_permissions[entity_type][perm_name] = value
+
+        # Now apply the permissions by entity type, only setting the highest level
+        project_id_str = str(self.project.id)
+        if project_id_str not in self.user_profile.permissions:
+            self.user_profile.permissions[project_id_str] = {}
+
+        # Preserve function if it exists
+        if function:
+            self.user_profile.permissions[project_id_str]['function'] = function
+
+        # Process each entity type separately
+        for entity_type, perms in entity_permissions.items():
+            # Remove any existing permissions for this entity type
+            for level in ['view', 'edit', 'manage']:
+                permission = f"{entity_type}.{level}"
+                if permission in self.user_profile.permissions[project_id_str]:
+                    self.user_profile.permissions[project_id_str].pop(permission)
+
+            # Add only the highest level permission that is checked
+            if perms['manage']:
+                self.user_profile.permissions[project_id_str][f"{entity_type}.manage"] = True
+            elif perms['edit']:
+                self.user_profile.permissions[project_id_str][f"{entity_type}.edit"] = True
+            elif perms['view']:
+                self.user_profile.permissions[project_id_str][f"{entity_type}.view"] = True
+
+        # Save the updated permissions
+        self.user_profile.save()

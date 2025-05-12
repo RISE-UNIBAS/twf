@@ -6,6 +6,8 @@ TWF_EXTERNAL_SERVICES = {
     "Anthropic": "https://api.anthropic.com/v1/models",
     "Google AI": "https://generativelanguage.googleapis.com/v1/models",
     "Mistral": "https://api.mistral.ai/v1/models",
+    "Deepseek": "https://api.deepseek.com/v1",
+    "Qwen": "https://dashscope-intl.aliyuncs.com/compatible-mode/v1/chat/completions",
     "Wikidata": "https://www.wikidata.org/w/api.php",
     "GND": "https://services.dnb.de/sru/authorities",
     "Geonames": "http://api.geonames.org",

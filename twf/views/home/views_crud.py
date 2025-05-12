@@ -79,7 +79,7 @@ def delete_user(request, pk):
             f"Cannot delete user '{user.username}' because they own projects. "
             "Transfer project ownership first or delete their projects."
         )
-        return get_referrer_or_default(request)
+        return get_referrer_or_default(request, default='twf:twf_user_management')
     
     # Store username for confirmation message
     username = user.username
@@ -91,7 +91,7 @@ def delete_user(request, pk):
     except Exception as e:
         messages.error(request, f"Error deleting user: {str(e)}")
     
-    return get_referrer_or_default(request)
+    return get_referrer_or_default(request, default='twf:twf_user_management')
 
 
 def reset_password(request, pk):

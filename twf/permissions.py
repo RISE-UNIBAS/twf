@@ -1,577 +1,269 @@
+"""
+This module implements a simplified permissions system for TWF, based on a view/edit/manage model
+for different entity types. This system allows for role-based permissions with the ability to
+override specific permissions on a per-user basis.
+"""
 from django.utils.safestring import mark_safe
 
 
+# Define user roles with default permissions
+ROLES = {
+    'viewer': 'Users who can view content but not modify it',
+    'editor': 'Users who can edit content but not change project settings',
+    'manager': 'Users who can manage all aspects of a project'
+}
+
+
+# Define entity types and their permissions
+ENTITY_TYPES = {
+    'project': {
+        'view': {
+            'label': 'View project',
+            'description': 'Access project information and settings',
+        },
+        'edit': {
+            'label': 'Edit project',
+            'description': 'Change project settings and information',
+        },
+        'manage': {
+            'label': 'Manage project',
+            'description': mark_safe('Advanced project operations including delete and export. '
+                                    '<span class="text-danger">Some actions cannot be undone.</span>'),
+        }
+    },
+    'document': {
+        'view': {
+            'label': 'View documents',
+            'description': 'View documents in the project',
+        },
+        'edit': {
+            'label': 'Edit documents',
+            'description': 'Edit document metadata and content',
+        },
+        'manage': {
+            'label': 'Manage documents',
+            'description': 'Create, delete, and batch process documents',
+        }
+    },
+    'tag': {
+        'view': {
+            'label': 'View tags',
+            'description': 'View tags in documents',
+        },
+        'edit': {
+            'label': 'Edit tags',
+            'description': 'Edit and assign tags',
+        },
+        'manage': {
+            'label': 'Manage tags',
+            'description': 'Extract tags, create tag types, and batch process tags',
+        }
+    },
+    'metadata': {
+        'view': {
+            'label': 'View metadata',
+            'description': 'View metadata for documents',
+        },
+        'edit': {
+            'label': 'Edit metadata',
+            'description': 'Edit document metadata',
+        },
+        'manage': {
+            'label': 'Manage metadata',
+            'description': 'Load metadata from external sources and configure metadata fields',
+        }
+    },
+    'dictionary': {
+        'view': {
+            'label': 'View dictionaries',
+            'description': 'View dictionaries and their entries',
+        },
+        'edit': {
+            'label': 'Edit dictionaries',
+            'description': 'Edit dictionary entries and manage variations',
+        },
+        'manage': {
+            'label': 'Manage dictionaries',
+            'description': 'Create, delete and batch process dictionaries',
+        }
+    },
+    'collection': {
+        'view': {
+            'label': 'View collections',
+            'description': 'View collections and their items',
+        },
+        'edit': {
+            'label': 'Edit collections',
+            'description': 'Edit collection items and their properties',
+        },
+        'manage': {
+            'label': 'Manage collections',
+            'description': 'Create, delete, and batch process collections',
+        }
+    },
+    'import-export': {
+        'view': {
+            'label': 'View exports',
+            'description': 'View and download available exports',
+        },
+        'edit': {
+            'label': 'Configure exports',
+            'description': 'Configure export settings and create exports',
+        },
+        'manage': {
+            'label': 'Manage imports/exports',
+            'description': 'Import data and manage export configurations',
+        }
+    },
+    'task': {
+        'view': {
+            'label': 'View tasks',
+            'description': 'View tasks and their status',
+        },
+        'edit': {
+            'label': 'Cancel tasks',
+            'description': 'Cancel running tasks',
+        },
+        'manage': {
+            'label': 'Manage tasks',
+            'description': 'Remove tasks and configure task settings',
+        }
+    },
+    'prompt': {
+        'view': {
+            'label': 'View prompts',
+            'description': 'View saved prompts',
+        },
+        'edit': {
+            'label': 'Edit prompts',
+            'description': 'Edit saved prompts',
+        },
+        'manage': {
+            'label': 'Manage prompts',
+            'description': 'Create and delete prompts',
+        }
+    },
+    'note': {
+        'view': {
+            'label': 'View notes',
+            'description': 'View project notes',
+        },
+        'edit': {
+            'label': 'Edit notes',
+            'description': 'Edit project notes',
+        },
+        'manage': {
+            'label': 'Manage notes',
+            'description': 'Create and delete project notes',
+        }
+    },
+    'ai': {
+        'view': {
+            'label': 'View AI settings',
+            'description': 'View AI configuration',
+        },
+        'edit': {
+            'label': 'Use AI features',
+            'description': 'Use AI features for individual operations',
+        },
+        'manage': {
+            'label': 'Manage AI features',
+            'description': 'Configure AI settings and run batch operations',
+        }
+    }
+}
+
+
 def check_permission(user, action, project, object_id=None):
+    """
+    Check if a user has permission to perform an action in a project.
+    This function maintains backward compatibility with the old permission system
+    while using the new simplified model.
 
-    # Check if action is valid
-    if action not in get_available_actions():
-        raise ValueError(f"Action '{action}' is not available.")
+    Args:
+        user: The user to check permissions for
+        action: The action to check (can be old granular permission or new entity_type.permission)
+        project: The project context
+        object_id: Optional object ID for more specific permission checks
 
+    Returns:
+        bool: Whether the user has permission
+    """
     # Check if user is authenticated
-    if not user.is_authenticated:
+    if not user.is_authenticated or not user.is_active:
         return False
 
-    if not user.is_active:
-        return False
-
-    # Check if user is superuser
-    if user.is_superuser:
-        return True
-
-    # Check if user is staff
-    if user.is_staff:
-        return True # TODO: Implement staff permissions
-
-    # Check if user is project owner
-    #
-    return user.profile.has_permission(action, project)
-
-def can_create_project(user):
-    """Check if a user can create a project."""
+    # Superusers and staff have all permissions
     if user.is_superuser or user.is_staff:
         return True
 
-def get_actions_grouped_by_category(project, profile=None):
-    """Return a dictionary of actions grouped by category.
-    If a profile is provided, only return actions that the profile has permission for."""
-    actions = get_available_actions(project, profile=profile)
-    grouped_actions = {}
+    # Check if the user is the project owner - owners have all permissions
+    if hasattr(user, 'profile') and project.owner == user.profile:
+        return True
 
-    for action_name, action_details in actions.items():
-        group = action_details.get("group", "default")
-        if group not in grouped_actions:
-            grouped_actions[group] = []
-        grouped_actions[group].append({"name": action_name, **action_details})
+    # Parse the action to check if it has the entity_type.permission format
+    if '.' in action:
+        entity_type, permission_level = action.split('.')
 
-    return grouped_actions
+        # Get current permissions for the project
+        project_permissions = user.profile.get_project_permissions(project)
+
+        # Direct check for the exact permission first
+        if action in project_permissions:
+            return True
+
+        # Check if user has a higher level permission for the same entity_type
+        if permission_level == 'view':
+            # Check if user has edit or manage permission for this entity_type
+            if f"{entity_type}.edit" in project_permissions or f"{entity_type}.manage" in project_permissions:
+                return True
+        elif permission_level == 'edit':
+            # Check if user has manage permission for this entity_type
+            if f"{entity_type}.manage" in project_permissions:
+                return True
+
+        # No higher permission level found
+        return False
+
+    # For non-standard permission format, check directly
+    return user.profile.has_permission(action, project, object_id)
 
 
-def get_available_actions(project=None, profile=None, for_group=None):
-    """Return a dictionary of available actions with their details.
-    If a profile is provided, only return actions that the profile has permission for."""
+def get_role_permissions(role):
+    """
+    Get all permissions for a specific role based on fixed view/edit/manage rules.
 
-    available_actions = {
-        # Project actions
-        "delete_project": {
-            "group": "project",
-            "label": "Delete project",
-            "description": mark_safe('Delete a project. <span class="text-danger">This cannot be undone and is '
-                                     'permanent.</span>'),
-            "default_for": []
-        },
-        "view_any_project": {
-            "group": "project",
-            "label": "View any project",
-            "description": "User is allowed to view any project.",
-            "default_for": ["manager"]
-        },
-        "close_project": {
-            "group": "project",
-            "label": "Close project",
-            "description": mark_safe('Close a project. <span class="text-danger">This will prevent any further '
-                                     'actions on the project.</span>'),
-            "default_for": ["manager"]
-        },
-        "reopen_project": {
-            "group": "project",
-            "label": "Reopen project",
-            "description": mark_safe('Reopen a project. <span class="text-danger">Not implemented yet.</span>'),
-            "default_for": ["manager"]
-        },
-        "copy_project": {
-            "group": "project",
-            "label": "Copy project",
-            "description": "Copy a project.",
-            "default_for": ["manager"]
-        },
-        "change_project_settings": {
-            "group": "project",
-            "label": "Change project settings",
-            "description": "Change the project settings.",
-            "default_for": ["manager"]
-        },
-        "change_credential_settings": {
-            "group": "project",
-            "label": "Change credentials",
-            "description": "Change the credential settings for the project.",
-            "default_for": ["manager"]
-        },
-        "change_task_settings": {
-            "group": "project",
-            "label": "Change task settings",
-            "description": "Change the task settings for the project.",
-            "default_for": ["manager"]
-        },
-        "change_export_settings": {
-            "group": "project",
-            "label": "Change export settings",
-            "description": "Change the export settings for the project.",
-            "default_for": ["manager"]
-        },
-        "setup_project_permissions": {
-            "group": "project",
-            "label": "Setup project permissions",
-            "description": "Setup the project permissions.",
-            "default_for": []
-        },
-        "request_transkribus_export": {
-            "group": "project",
-            "label": "Request Transkribus export",
-            "description": "Request a Transkribus export.",
-            "default_for": ["manager"]
-        },
-        "test_transkribus_export": {
-            "group": "project",
-            "label": "Test Transkribus export (NIY)",
-            "description": "Test a Transkribus export.",
-            "default_for": ["manager"]
-        },
-        "extract_transkribus_export": {
-            "group": "project",
-            "label": "Extract Transkribus export",
-            "description": "Extract a Transkribus export.",
-            "default_for": ["manager"]
-        },
-        "delete_all_documents": {
-            "group": "project",
-            "label": "Delete all documents",
-            "description": "Delete all documents in the project.",
-            "default_for": ["manager"]
-        },
-        "delete_all_tags": {
-            "group": "project",
-            "label": "Delete all tags",
-            "description": "Delete all tags in the project.",
-            "default_for": ["manager"]
-        },
-        "delete_all_collections": {
-            "group": "project",
-            "label": "Delete all collections",
-            "description": "Delete all collections in the project.",
-            "default_for": ["manager"]
-        },
-        ###############################
-        # Document actions
-        "document_batch_workflow_openai": {
-            "group": "document",
-            "label": "OpenAI Batch Workflow",
-            "description": "User is allowed to start an OpenAI batch workflow.",
-            "default_for": ["manager"]
-        },
-        "document_batch_workflow_gemini": {
-            "group": "document",
-            "label": "Gemini Batch Workflow",
-            "description": "User is allowed to start a Gemini batch workflow.",
-            "default_for": ["manager"]
-        },
-        "document_batch_workflow_claude": {
-            "group": "document",
-            "label": "Claude Batch Workflow",
-            "description": "User is allowed to start a Claude batch workflow.",
-            "default_for": ["manager"]
-        },
-        "document_batch_workflow_mistral": {
-            "group": "document",
-            "label": "Mistral Batch Workflow",
-            "description": "User is allowed to start a Mistral batch workflow.",
-            "default_for": ["manager"]
-        },
-        "document_batch_workflow_deepseek": {
-            "group": "document",
-            "label": "DeepSeek Batch Workflow",
-            "description": "User is allowed to start a DeepSeek batch workflow.",
-            "default_for": ["manager"]
-        },
-        "document_batch_workflow_qwen": {
-            "group": "document",
-            "label": "Qwen Batch Workflow",
-            "description": "User is allowed to start a Qwen batch workflow.",
-            "default_for": ["manager"]
-        },
-        "document_task_review": {
-            "group": "document",
-            "label": "Document task review",
-            "description": "User is allowed to review documents.",
-            "default_for": ["manager", "user"]
-        },
-        "document_create": {
-            "group": "document",
-            "label": "Create document",
-            "description": "User is allowed to manually create documents.",
-            "default_for": ["manager"]
-        },
-        ###############################
-        # Tag actions
-        "tags_extract": {
-            "group": "tag",
-            "label": "Extract tags",
-            "description": "User is allowed to extract tags.",
-            "default_for": ["manager"]
-        },
-        "tag_task_group": {
-            "group": "tag",
-            "label": "Group Tags",
-            "description": "User is allowed to group tags.",
-            "default_for": ["manager", "user"]
-        },
-        "tag_task_date_normalization": {
-            "group": "tag",
-            "label": "Date Normalization",
-            "description": "User is allowed to normalize dates.",
-            "default_for": ["manager", "user"]
-        },
-        ###############################
-        # Metadata actions
-        "metadata_load_json_data": {
-            "group": "metadata",
-            "label": "Load data",
-            "description": "User is allowed to load data.",
-            "default_for": ["manager"]
-        },
-        "metadata_load_google_sheet_data": {
-            "group": "metadata",
-            "label": "Load Google Sheet data",
-            "description": "User is allowed to load Google Sheet data.",
-            "default_for": ["manager"]
-        },
-        "metadata_extract_values": {
-            "group": "metadata",
-            "label": "Extract controlled values",
-            "description": "User is allowed to extract controlled values.",
-            "default_for": ["manager"]
-        },
-        "metadata_review_documents": {
-            "group": "metadata",
-            "label": "Review documents",
-            "description": "User is allowed to review documents.",
-            "default_for": ["manager"]
-        },
-        "metadata_review_pages": {
-            "group": "metadata",
-            "label": "Review pages",
-            "description": "User is allowed to review pages.",
-            "default_for": ["manager"]
-        },
-        ###############################
-        # Dictionary actions
-        "dictionary_add": {
-            "group": "dictionary",
-            "label": "Add dictionary",
-            "description": "User is allowed to add an existing dictionary to a project.",
-            "default_for": ["manager"]
-        },
-        "dictionary_create": {
-            "group": "dictionary",
-            "label": "Create dictionary",
-            "description": "User is allowed to create a dictionary.",
-            "default_for": ["manager"]
-        },
-        "dictionary_batch_workflow_gnd": {
-            "group": "dictionary",
-            "label": "GND Batch Workflow",
-            "description": "User is allowed to start a GND batch workflow.",
-            "default_for": ["manager"]
-        },
-        "dictionary_batch_workflow_wikidata": {
-            "group": "dictionary",
-            "label": "Wikidata Batch Workflow",
-            "description": "User is allowed to start a Wikidata batch workflow.",
-            "default_for": ["manager"]
-        },
-        "dictionary_batch_workflow_openai": {
-            "group": "dictionary",
-            "label": "OpenAI Batch Workflow",
-            "description": "User is allowed to start an OpenAI batch workflow.",
-            "default_for": ["manager"]
-        },
-        "dictionary_batch_workflow_gemini": {
-            "group": "dictionary",
-            "label": "Gemini Batch Workflow",
-            "description": "User is allowed to start a Gemini batch workflow.",
-            "default_for": ["manager"]
-        },
-        "dictionary_batch_workflow_claude": {
-            "group": "dictionary",
-            "label": "Claude Batch Workflow",
-            "description": "User is allowed to start a Claude batch workflow.",
-            "default_for": ["manager"]
-        },
-        "dictionary_batch_workflow_mistral": {
-            "group": "dictionary",
-            "label": "Mistral Batch Workflow",
-            "description": "User is allowed to start a Mistral batch workflow.",
-            "default_for": ["manager"]
-        },
-        "dictionary_batch_workflow_geonames": {
-            "group": "dictionary",
-            "label": "Geonames Batch Workflow",
-            "description": "User is allowed to start a Geonames batch workflow.",
-            "default_for": ["manager"]
-        },
-        "dictionary_manual_workflow_gnd": {
-            "group": "dictionary",
-            "label": "GND Manual Workflow",
-            "description": "User is allowed to start a GND manual workflow.",
-            "default_for": ["manager", "user"]
-        },
-        "dictionary_manual_workflow_wikidata": {
-            "group": "dictionary",
-            "label": "Wikidata Manual Workflow",
-            "description": "User is allowed to start a Wikidata manual workflow.",
-            "default_for": ["manager", "user"]
-        },
-        "dictionary_manual_workflow_openai": {
-            "group": "dictionary",
-            "label": "OpenAI Manual Workflow",
-            "description": "User is allowed to start an OpenAI manual workflow.",
-            "default_for": ["manager", "user"]
-        },
-        "dictionary_manual_workflow_gemini": {
-            "group": "dictionary",
-            "label": "Gemini Manual Workflow",
-            "description": "User is allowed to start a Gemini manual workflow.",
-            "default_for": ["manager", "user"]
-        },
-        "dictionary_manual_workflow_claude": {
-            "group": "dictionary",
-            "label": "Claude Manual Workflow",
-            "description": "User is allowed to start a Claude manual workflow.",
-            "default_for": ["manager", "user"]
-        },
-        "dictionary_manual_workflow_mistral": {
-            "group": "dictionary",
-            "label": "Mistral Manual Workflow",
-            "description": "User is allowed to start a Mistral manual workflow.",
-            "default_for": ["manager", "user"]
-        },
-        "dictionary_manual_workflow_geonames": {
-            "group": "dictionary",
-            "label": "Geonames Manual Workflow",
-            "description": "User is allowed to start a Geonames manual workflow.",
-            "default_for": ["manager", "user"]
-        },
-        "dictionary_merge_entries": {
-            "group": "dictionary",
-            "label": "Merge entries",
-            "description": "User is allowed to merge dictionary entries.",
-            "default_for": ["manager"]
-        },
-        ###############################
-        # Collection actions
-        "create_collection": {
-            "group": "collection",
-            "label": "Create collection",
-            "description": "User is allowed to create a collection.",
-            "default_for": ["manager"]
-        },
-        "delete_collection": {
-            "group": "collection",
-            "label": "Delete collection",
-            "description": "User is allowed to delete a collection.",
-            "default_for": ["manager"]
-        },
-        "change_collection_item_status": {
-            "group": "collection",
-            "label": "Change collection item status",
-            "description": "User is allowed to change the status of a collection item.",
-            "default_for": ["manager", "user"]
-        },
-        "collection_item_edit": {
-            "group": "collection",
-            "label": "Edit collection item",
-            "description": "User is allowed to edit a collection item.",
-            "default_for": ["manager", "user"]
-        },
-        "collection_item_delete": {
-            "group": "collection",
-            "label": "Delete collection item",
-            "description": "User is allowed to delete a collection item.",
-            "default_for": ["manager", "user"]
-        },
-        "collection_item_split": {
-            "group": "collection",
-            "label": "Split collection item",
-            "description": "User is allowed to split a collection item.",
-            "default_for": ["manager", "user"]
-        },
-        "collection_item_merge": {
-            "group": "collection",
-            "label": "Merge collection item",
-            "description": "User is allowed to merge a collection item.",
-            "default_for": ["manager", "user"]
-        },
-        "collection_item_copy": {
-            "group": "collection",
-            "label": "Copy collection item",
-            "description": "User is allowed to copy a collection item.",
-            "default_for": ["manager", "user"]
-        },
-        "collection_item_delete_annotation": {
-            "group": "collection",
-            "label": "Delete collection item annotation",
-            "description": "User is allowed to delete a collection item annotation.",
-            "default_for": ["manager", "user"]
-        },
-        "collection_openai_batch": {
-            "group": "collection",
-            "label": "OpenAI Batch",
-            "description": "User is allowed to start an OpenAI batch.",
-            "default_for": ["manager"]
-        },
-        "collection_gemini_batch": {
-            "group": "collection",
-            "label": "Gemini Batch",
-            "description": "User is allowed to start a Gemini batch.",
-            "default_for": ["manager"]
-        },
-        "collection_claude_batch": {
-            "group": "collection",
-            "label": "Claude Batch",
-            "description": "User is allowed to start a Claude batch.",
-            "default_for": ["manager"]
-        },
-        "collection_mistral_batch": {
-            "group": "collection",
-            "label": "Mistral Batch",
-            "description": "User is allowed to start a Mistral batch.",
-            "default_for": ["manager"]
-        },
-        "collection_openai_workflow":   {
-            "group": "collection",
-            "label": "OpenAI Workflow",
-            "description": "User is allowed to start an OpenAI workflow.",
-            "default_for": ["manager", "user"]
-        },
-        "collection_gemini_workflow":   {
-            "group": "collection",
-            "label": "Gemini Workflow",
-            "description": "User is allowed to start a Gemini workflow.",
-            "default_for": ["manager", "user"]
-        },
-        "collection_claude_workflow":   {
-            "group": "collection",
-            "label": "Claude Workflow",
-            "description": "User is allowed to start a Claude workflow.",
-            "default_for": ["manager", "user"]
-        },
-        "collection_mistral_workflow":   {
-            "group": "collection",
-            "label": "Mistral Workflow",
-            "description": "User is allowed to start a Mistral workflow.",
-            "default_for": ["manager", "user"]
-        },
-        "collection_item_naming_workflow": {
-            "group": "collection",
-            "label": "OpenAI Workflow",
-            "description": "User is allowed to start an OpenAI workflow.",
-            "default_for": ["manager", "user"]
-        },
-        ###############################
-        # Import Export actions
-        "import_dictionaries": {
-            "group": "import_export",
-            "label": "Import dictionary",
-            "description": "User is allowed to import a dictionary.",
-            "default_for": ["manager"]
-        },
-        "export_configure": {
-            "group": "import_export",
-            "label": "Export configurations",
-            "description": "User is allowed change export configurations.",
-            "default_for": ["manager"]
-        },
-        "export_documents": {
-            "group": "import_export",
-            "label": "Export documents",
-            "description": "User is allowed to export documents.",
-            "default_for": ["manager"]
-        },
-        "export_collections": {
-            "group": "import_export",
-            "label": "Export collections",
-            "description": "User is allowed to export collections.",
-            "default_for": ["manager"]
-        },
-        "export_dictionaries": {
-            "group": "import_export",
-            "label": "Export dictionaries",
-            "description": "User is allowed to export dictionaries.",
-            "default_for": ["manager"]
-        },
-        "export_tags": {
-            "group": "import_export",
-            "label": "Export tags",
-            "description": "User is allowed to export tags.",
-            "default_for": ["manager"]
-        },
-        "export_project": {
-            "group": "import_export",
-            "label": "Export project",
-            "description": "User is allowed to export a project.",
-            "default_for": ["manager"]
-        },
-        "export_to_zenodo": {
-            "group": "import_export",
-            "label": "Export to Zenodo",
-            "description": "User is allowed to export a project to Zenodo.",
-            "default_for": []
-        },
-        "exports_download": {
-            "group": "import_export",
-            "label": "Download exports",
-            "description": "User is allowed to download exports.",
-            "default_for": ["manager"]
-        },
-        "exports_delete": {
-            "group": "import_export",
-            "label": "Delete exports",
-            "description": "User is allowed to delete exports.",
-            "default_for": ["manager"]
-        },
-        ###############################
-        # Task actions
-        "cancel_task": {
-            "group": "task",
-            "label": "Cancel task",
-            "description": "User is allowed to cancel a task.",
-            "default_for": ["manager"]
-        },
-        "remove_task": {
-            "group": "task",
-            "label": "Remove task",
-            "description": "User is allowed to remove a task.",
-            "default_for": ["manager"]
-        },
-        ###############################
-        # Prompt actions
-        "delete_prompt": {
-            "group": "prompt",
-            "label": "Delete prompt",
-            "description": "User is allowed to delete a prompt.",
-            "default_for": ["manager"]
-        },
-        ###############################
-        # Prompt actions
-        "delete_note": {
-            "group": "notes",
-            "label": "Delete note",
-            "description": "User is allowed to delete a note.",
-            "default_for": ["manager"]
-        },
-    }
+    Args:
+        role: The role name (none, viewer, editor, manager)
 
-    if profile:
-        filtered_actions = {}
-        for action_name, action_details in available_actions.items():
-            if profile.has_permission(action_name, project):
-                filtered_actions[action_name] = action_details
-        return filtered_actions
+    Returns:
+        list: List of permissions for the given role
+    """
+    # The 'none' role has no permissions
+    if role == 'none':
+        return []
 
-    if for_group:
-        filtered_actions = {}
-        for action_name, action_details in available_actions.items():
-            if action_details["default_for"] and for_group in action_details["default_for"]:
-                filtered_actions[action_name] = action_details
-        return filtered_actions
+    if role not in ROLES and role != 'none':
+        return []
 
-    return available_actions
+    permissions = []
+
+    # Apply permissions based on role
+    for entity_type in ENTITY_TYPES:
+        if role == 'viewer':
+            # Viewers only get 'view' permissions
+            permissions.append(f"{entity_type}.view")
+        elif role == 'editor':
+            # Editors get 'view' and 'edit' permissions
+            permissions.append(f"{entity_type}.view")
+            permissions.append(f"{entity_type}.edit")
+        elif role == 'manager':
+            # Managers get all permissions (view, edit, manage)
+            permissions.append(f"{entity_type}.view")
+            permissions.append(f"{entity_type}.edit")
+            permissions.append(f"{entity_type}.manage")
+
+    return permissions
+
+
+

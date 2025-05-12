@@ -1,5 +1,6 @@
 {% extends 'twf/base/base.html' %}
 {% load static %}
+{% load twf_permissions %}
 
 {% block content %}
 <div class="container-fluid mt-4">
@@ -125,9 +126,8 @@
         </div>
     </div>
     
-    <!-- User Stats and Projects -->
-    <div class="row mb-4">
-        <!-- Activity Stats -->
+    
+        <!-- User Stats and Projects -->
         <div class="col-md-6 mb-4">
             <div class="card shadow-sm h-100">
                 <div class="card-header bg-dark text-white">
@@ -232,7 +232,7 @@
                             {% for project in owned_projects %}
                                 <a href="{% url 'twf:project_view' project.pk %}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
                                     <span>{{ project.title }}</span>
-                                    <span class="badge bg-success rounded-pill">Owner</span>
+                                    <span class="badge bg-success rounded-pill">Owner (Manager)</span>
                                 </a>
                             {% endfor %}
                         </div>
@@ -246,7 +246,7 @@
                             {% for project in member_projects %}
                                 <a href="{% url 'twf:project_view' project.pk %}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
                                     <span>{{ project.title }}</span>
-                                    <span class="badge bg-info rounded-pill">Member</span>
+                                    <span class="badge bg-info rounded-pill">{{ viewed_user.profile|get_user_role:project }}</span>
                                 </a>
                             {% endfor %}
                         </div>

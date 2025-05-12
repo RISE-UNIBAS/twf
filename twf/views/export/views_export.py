@@ -39,31 +39,30 @@ class TWFExportView(LoginRequiredMixin, TWFView):
                 'name': 'Overview',
                 'options': [
                     {'url': reverse_lazy('twf:export_overview'), 'value': 'Export Overview'},
-                    {'url': reverse_lazy('twf:export_view_export_confs'), 'value': 'Export Configurations'},
+                    {'url': reverse_lazy('twf:export_view_export_confs'),
+                     'value': 'Export Configurations', 'permission': 'import_export.view'},
                     {'url': reverse_lazy('twf:export_view_exports'),
-                     'value': 'Exports', 'permission': 'exports_download'},
+                     'value': 'Exports', 'permission': 'import_export.view'},
                 ]
             },
             {
                 'name': 'Import Data',
                 'options': [
                     {'url': reverse_lazy('twf:import_dictionaries'),
-                     'value': 'Import Dictionaries', 'permission': 'import_dictionaries'},
-                    {'url': reverse_lazy('twf:import_dictionaries'),
-                     'value': 'Import Project', 'permission': 'import_dictionaries'},
+                     'value': 'Import Dictionaries', 'permission': 'import_export.manage'},
                 ]
             },
             {
                 'name': 'Export Data',
                 'options': [
                     {'url': reverse_lazy('twf:export_configure'),
-                     'value': 'Configure Exports', 'permission': 'export_configure'},
+                     'value': 'Configure Exports', 'permission': 'import_export.edit'},
                     {'url': reverse_lazy('twf:export_run'),
-                     'value': 'Run Exports', 'permission': 'export_documents'},
+                     'value': 'Run Exports', 'permission': 'import_export.manage'},
                     {'url': reverse_lazy('twf:export_project'),
-                     'value': 'Export Project', 'permission': 'export_project'},
+                     'value': 'Export Project', 'permission': 'import_export.manage'},
                     {'url': reverse_lazy('twf:export_to_zenodo'),
-                     'value': 'Connect to Zenodo', 'permission': 'export_to_zenodo'},
+                     'value': 'Connect to Zenodo', 'permission': 'import_export.manage'},
                 ]
             },
 

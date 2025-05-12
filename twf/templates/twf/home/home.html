@@ -8,27 +8,51 @@
     {% if request.user.is_authenticated %}
 
         {% if project_set %}
-            <p class="lead">You're ready to start working on your project:&nbsp; <strong>{{ project }}</strong>.</p>
+            <div class="alert alert-info d-flex align-items-center gap-2 mt-3" role="alert">
+                <i class="bi bi-info-circle-fill"></i>
+                <div>
+                    You're ready to start working on your project:&nbsp; <strong>{{ project }}</strong>.
+                </div>
+            </div>
+
+            <div>
+                <p>
+                    TWF (Transkribus Work Flow) is a tool designed for managing and enriching document-based projects.
+                    It allows users to import large sets of documents, such as those from Transkribus or
+                    PAGE.XML formats, and enhance them with additional metadata, tags, and dictionary
+                    entries. You can browse, search, and organize documents, apply metadata, and
+                    create structured collections for export.
+                </p>
+                <p>
+                    The tool supports importing data from various formats, managing complex metadata,
+                    and grouping information into meaningful dictionaries. Once your data is organized,
+                    you can export it in customizable formats, such as JSON, for further use in other
+                    systems or analysis environments.
+                </p>
+            </div>
+        <!-- No project selected -->
         {% else %}
-            <p>Select a project from the menu to get started. If you have no projects assigned,
-                please contact your project manager.</p>
+
+            <div class="alert alert-info d-flex align-items-center gap-2 mt-3" role="alert">
+                <i class="bi bi-info-circle-fill"></i>
+                <div>
+                    Select a project from the menu to get started. If you have no projects assigned,
+                    please contact your project manager.
+                </div>
+            </div>
+
+            {% if projects %}
+                {% for project in projects %}
+                    <a href="{% url 'twf:project_select' project.id %}">Select {{ project.title }}</a>
+                {% endfor %}
+            {% else %}
+                <p class="lead">
+                    You are not a member of any projects.
+                </p>
+            {% endif %}
         {% endif %}
 
-        <div>
-            <p>
-                TWF (Transkribus Work Flow) is a tool designed for managing and enriching document-based projects.
-                It allows users to import large sets of documents, such as those from Transkribus or
-                PAGE.XML formats, and enhance them with additional metadata, tags, and dictionary
-                entries. You can browse, search, and organize documents, apply metadata, and
-                create structured collections for export.
-            </p>
-            <p>
-                The tool supports importing data from various formats, managing complex metadata,
-                and grouping information into meaningful dictionaries. Once your data is organized,
-                you can export it in customizable formats, such as JSON, for further use in other
-                systems or analysis environments.
-            </p>
-        </div>
+    <!-- User is not authenticated -->
     {% else %}
         <p class="lead">
             Transkribus Workflow @ <a href="https://rise.unibas.ch" target="_blank">RISE</a>,

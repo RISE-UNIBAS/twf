@@ -13,14 +13,13 @@ from django.views.decorators.csrf import csrf_exempt
 
 from twf.models import Collection, CollectionItem, Workflow
 from twf.permissions import check_permission
+from twf.views.views_base import get_referrer_or_default
 
 logger = logging.getLogger(__name__)
 
 def delete_collection_item_annotation(request, pk, index):
     """Delete an annotation from a collection item."""
-    is_allowed = check_permission(request.user,
-                                  "collection_item_delete_annotation",
-                                  pk)
+    is_allowed = check_permission(request.user, "collection.edit", pk)
     if not is_allowed:
         messages.error(request, "You do not have permission to delete annotations from this collection item.")
         return redirect('twf:collections')
@@ -37,9 +36,7 @@ def delete_collection_item_annotation(request, pk, index):
 
 def delete_collection_item(request, pk):
     """Delete a collection item."""
-    is_allowed = check_permission(request.user,
-                                  "collection_item_delete",
-                                  pk)
+    is_allowed = check_permission(request.user, "collection.edit", pk)
     if not is_allowed:
         messages.error(request, "You do not have permission to delete this collection item.")
         return redirect('twf:collections')
@@ -49,16 +46,17 @@ def delete_collection_item(request, pk):
     collection_item.delete()
     messages.success(request, "Collection item deleted.")
 
-    if request.GET.get('redirect_to_view'):
-        return redirect(request.GET.get('redirect_to_view'))
-
-    return redirect('twf:collections_view', pk=collection_id)
+    return get_referrer_or_default(
+        request,
+        default='twf:collections_view',
+        kwargs={'pk': collection_id}
+    )
 
 
 def copy_collection_item(request, pk):
     """Copy a collection item."""
     # Check user permission
-    if not check_permission(request.user, "collection_item_copy", pk):
+    if not check_permission(request.user, "collection.edit", pk):
         messages.error(request, "You do not have permission to copy this collection item.")
         return redirect('twf:collections')
 
@@ -80,16 +78,17 @@ def copy_collection_item(request, pk):
     except Exception as e:
         messages.error(request, "An unexpected error occurred while copying the collection item.")
 
-    if request.GET.get('redirect_to_view'):
-        return redirect(request.GET.get('redirect_to_view'))
-
-    return redirect('twf:collection_item_edit', pk=pk)
+    return get_referrer_or_default(
+        request,
+        default='twf:collection_item_edit',
+        kwargs={'pk': pk}
+    )
 
 
 def split_collection_item(request, pk, index):
     """Split a collection item."""
     # Check user permission
-    if not check_permission(request.user, "collection_item_split", pk):
+    if not check_permission(request.user, "collection.edit", pk):
         messages.error(request, "You do not have permission to split this collection item.")
         return redirect('twf:collections')
 
@@ -108,10 +107,11 @@ def split_collection_item(request, pk, index):
     except Exception as e:
         messages.error(request, "An unexpected error occurred while splitting the collection item.")
 
-    if request.GET.get('redirect_to_view'):
-        return redirect(request.GET.get('redirect_to_view'))
-
-    return redirect('twf:collection_item_edit', pk=pk)
+    return get_referrer_or_default(
+        request,
+        default='twf:collection_item_edit',
+        kwargs={'pk': pk}
+    )
 
 
 def download_collection_item_txt(request, pk):
@@ -165,9 +165,7 @@ def set_col_item_status_faulty(request, pk):
 
 def set_col_item_status(request, collection_item_id, status):
     """Set the status of a collection item to open."""
-    is_allowed = check_permission(request.user,
-                                  "change_collection_item_status",
-                                  collection_item_id)
+    is_allowed = check_permission(request.user, "collection.edit", collection_item_id)
     if not is_allowed:
         messages.error(request, "You do not have permission to change the status of this collection item.")
         return redirect('twf:collections')
@@ -176,14 +174,12 @@ def set_col_item_status(request, collection_item_id, status):
     collection_item.status = status
     collection_item.save()
     messages.success(request, f"Collection item status set to '{status}'.")
-    return redirect('twf:collection_item_edit', pk=collection_item_id)
+    return get_referrer_or_default(request, default='twf:collection_item_edit', kwargs={'pk': collection_item_id})
 
 
 def delete_collection(request, collection_id):
     """Delete a collection."""
-    is_allowed = check_permission(request.user,
-                                  "delete_collection",
-                                  collection_id)
+    is_allowed = check_permission(request.user, "collection.manage", collection_id)
     if not is_allowed:
         messages.error(request, "You do not have permission to delete this collection.")
         return redirect('twf:collections')
@@ -198,7 +194,7 @@ def delete_collection(request, collection_id):
     collection.delete()
     messages.success(request, "Collection deleted.")
 
-    return redirect('twf:collections')
+    return get_referrer_or_default(request, 'twf:collections')
 
 
 def fill_collection_item(item, page, skip_empty_types=False, structure_tag_filter_list=None):
@@ -221,6 +217,7 @@ def fill_collection_item(item, page, skip_empty_types=False, structure_tag_filte
             continue
 
         item.document_configuration['annotations'].append(cleaned_annotation)
+
 
 def clean_annotation(annotation):
     """Clean an annotation."""

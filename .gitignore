@@ -9,3 +9,4 @@ docs/_build/
 transkribusWorkflow/google_key.json
 screenshots/
 **/.claude/settings.local.json
+/.claude/

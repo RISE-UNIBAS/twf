@@ -15,9 +15,9 @@ from django.contrib.contenttypes.models import ContentType
 from django.db import models
 from django.contrib.auth import get_user_model
 from django.db.models import Q
-from django.db.models.functions import Random
 from django.utils import timezone
 from django.utils.timezone import now
+from twf.permissions import get_role_permissions, ENTITY_TYPES
 
 from twf.templatetags.tk_tags import tk_iiif_url, tk_bounding_box
 
@@ -100,7 +100,7 @@ class UserProfile(models.Model):
     permissions = models.JSONField(default=dict)
 
     def get_projects(self):
-        """Return the projects the user is a member of."""
+        """Return the projects the user is a member or owner of."""
 
         owned_projects = Project.objects.filter(owner=self, status='open')
         member_projects = Project.objects.filter(members=self, status='open')
@@ -108,34 +108,292 @@ class UserProfile(models.Model):
         all_projects = all_projects.distinct().order_by('id')
         return all_projects
 
+    def is_owner_of(self, project):
+        """Check if the user is the owner of a project."""
+        return self.user == project.owner.user
+
     def get_project_permissions(self, project):
         """Return the permissions of the user for a project."""
         return self.permissions.get(str(project.id), {})
 
-    def has_permission(self, action, project):
-        """Check if the user has a specific permission."""
+    def get_project_function(self, project):
+        """Return the role af the user for a project."""
+        permissions = self.get_project_permissions(project)
+        return permissions.get('function', None)
+
+    def set_role_permissions(self, project, role):
+        """ Set a user's role for a project with optional permission overrides. """
+        # First, get all current permissions
+        current_permissions = self.get_project_permissions(project)
+
+        # Remove all existing permissions except function
+        function_desc = current_permissions.get('function')
+        project_id_str = str(project.id)
+
+        if project_id_str in self.permissions:
+            # Create new empty permissions dict, but keep function if it exists
+            self.permissions[project_id_str] = {}
+            if function_desc:
+                self.permissions[project_id_str]['function'] = function_desc
+
+            # Save to ensure we're starting fresh
+            self.save()
+
+        # Get base permissions for the new role
+        permissions = get_role_permissions(role)
+
+        # Add all permissions for the new role
+        for permission in permissions:
+            self.add_permission(permission, project)
+
+    def set_role(self, project, role, overrides=None):
+        """
+        Set a user's role in a project with optional permission overrides.
+
+        This method:
+        1. Applies the base permissions for the given role
+        2. Applies any permission overrides specified
+
+        Args:
+            project: The project to set permissions for
+            role: The role to assign ('none', 'viewer', 'editor', or 'manager')
+            overrides: Optional dict of permission overrides {permission: bool}
+        """
+        # First, clear existing permissions for this project
+        if str(project.id) in self.permissions:
+            # Preserve the function description if it exists
+            function_desc = self.get_project_function(project)
+            # Create a new empty permissions dict for this project
+            self.permissions[str(project.id)] = {}
+            # Restore function description if it existed
+            if function_desc:
+                self.permissions[str(project.id)]['function'] = function_desc
+            self.save()
+
+        # If role is 'none', we just clear permissions and don't apply any new ones
+        if role == 'none':
+            return
+
+        # Apply base role permissions
+        self.set_role_permissions(project, role)
+
+        # Apply any permission overrides
+        if overrides:
+            for entity_type, entity_overrides in overrides.items():
+                for perm_type, value in entity_overrides.items():
+                    permission = f"{entity_type}.{perm_type}"
+                    if value:
+                        self.add_permission(permission, project)
+                    else:
+                        self.remove_permission(permission, project)
+
+    def has_permission(self, action, project, object_id=None):
+        """
+        Check if the user has a specific permission.
+
+        Supports hierarchical permissions where higher levels (manage > edit > view)
+        automatically grant lower level permissions for the same entity type.
+        """
+        # Superusers have all permissions
         if self.user.is_superuser:
             return True
 
+        # Project owners have all permissions
+        if project.owner == self:
+            return True
+
+        # Get permissions for this project
         project_permissions = self.permissions.get(str(project.id), {})
+
+        # Handle hierarchical permissions if this is a dotted action (entity_type.permission_level)
+        if '.' in action:
+            entity_type, permission_level = action.split('.')
+
+            # Direct check - does the user have this exact permission?
+            if action in project_permissions:
+                return True
+
+            # Hierarchical check - if requesting a lower permission, check if higher ones exist
+            if permission_level == 'view':
+                # 'manage' or 'edit' also grants 'view'
+                if f"{entity_type}.manage" in project_permissions or f"{entity_type}.edit" in project_permissions:
+                    return True
+            elif permission_level == 'edit':
+                # 'manage' also grants 'edit'
+                if f"{entity_type}.manage" in project_permissions:
+                    return True
+
+        # If not found via hierarchy, check if it exists directly
         return project_permissions.get(action, False)  # Default to False
 
     def add_permission(self, action, project):
-        """Grant a new permission to the user."""
-        project_permissions = self.permissions.get(str(project.id), None)
-        if project_permissions is None:
-            project_permissions = {}
-            self.permissions[str(project.id)] = project_permissions
+        """
+        Grant a new permission to the user.
+        Uses the best permission level system: If adding a higher level permission,
+        lower levels for the same object_type are redundant and can be removed.
+        """
+        # Parse the action to get object_type and permission_level
+        if '.' in action:
+            object_type, permission_level = action.split('.')
 
-        self.permissions.get(str(project.id), {})[action] = True
-        self.save()
+            # Get current permissions and ensure project permissions dict exists
+            project_permissions = self.get_project_permissions(project)
+
+            # Check if we're adding a higher-level permission
+            if permission_level == 'manage':
+                # Remove view and edit permissions for the same object type (they're redundant)
+                view_perm = f"{object_type}.view"
+                edit_perm = f"{object_type}.edit"
+                project_permissions.pop(view_perm, None)
+                project_permissions.pop(edit_perm, None)
+            elif permission_level == 'edit':
+                # Remove view permission for the same object type (it's redundant)
+                view_perm = f"{object_type}.view"
+                project_permissions.pop(view_perm, None)
+
+                # Check if manage permission already exists (don't downgrade)
+                manage_perm = f"{object_type}.manage"
+                if manage_perm in project_permissions:
+                    # If user already has manage permission, don't add edit
+                    self.permissions[str(project.id)] = project_permissions
+                    self.save()
+                    return
+            elif permission_level == 'view':
+                # Check if edit or manage permission already exists (don't downgrade)
+                edit_perm = f"{object_type}.edit"
+                manage_perm = f"{object_type}.manage"
+                if edit_perm in project_permissions or manage_perm in project_permissions:
+                    # If user already has higher permission, don't add view
+                    self.permissions[str(project.id)] = project_permissions
+                    self.save()
+                    return
+
+            # Add the new permission
+            project_permissions[action] = True
+            self.permissions[str(project.id)] = project_permissions
+            self.save()
+        else:
+            # For non-standard permission format, just add it directly
+            project_permissions = self.get_project_permissions(project)
+            project_permissions[action] = True
+            self.permissions[str(project.id)] = project_permissions
+            self.save()
 
     def remove_permission(self, action, project):
-        """Remove a permission from the user."""
-        project_permissions = self.permissions.get(str(project.id), {})
+        """
+        Remove a permission from the user.
+        When removing a higher level permission, we might need to add back lower levels.
+        """
+        project_permissions = self.get_project_permissions(project)
+
+        # If permission exists, remove it
         if action in project_permissions:
-            del self.permissions[str(project.id)][action]
+            # Parse the action to get object_type and permission_level
+            if '.' in action:
+                object_type, permission_level = action.split('.')
+
+                # If removing a higher-level permission, might need to add back lower ones
+                if permission_level == 'manage':
+                    # Check if edit permission should be added
+                    if f"{object_type}.edit" not in project_permissions:
+                        project_permissions[f"{object_type}.edit"] = True
+                elif permission_level == 'edit':
+                    # Check if view permission should be added
+                    if f"{object_type}.view" not in project_permissions:
+                        project_permissions[f"{object_type}.view"] = True
+
+            # Remove the permission
+            del project_permissions[action]
+            self.permissions[str(project.id)] = project_permissions
             self.save()
+
+    def set_project_function(self, project, function_desc):
+        """Set a functional description for the user in a project."""
+        project_permissions = self.get_project_permissions(project)
+        if function_desc:
+            project_permissions['function'] = function_desc
+        else:
+            # Remove the function if it's empty
+            project_permissions.pop('function', None)
+        self.permissions[str(project.id)] = project_permissions
+        self.save()
+
+    def get_role_and_overrides(self, project):
+        """
+        Determine a user's role in the project and identify any permission overrides.
+
+        This method analyzes the user's permissions for the project and returns:
+        1. The highest role that occurs most frequently in their permission set
+        2. Any permission overrides where an entity's permission level differs from the dominant role
+
+        Args:
+            project: The project to check permissions for
+
+        Returns:
+            tuple: (role, overrides) where:
+                role (str): 'manager', 'editor', 'viewer', or 'none'
+                overrides (dict): Dictionary of permission overrides
+        """
+        # Get the user's current permissions for this project
+        permissions = self.get_project_permissions(project)
+
+        # Filter out non-permission keys
+        perm_keys = [k for k in permissions.keys() if k != 'function' and '.' in k]
+
+        # Find overrides (permissions that differ from the standard set)
+        overrides = {}
+
+        # Check if the user has any permissions at all
+        if not perm_keys:
+            role = 'none'
+            return role, overrides
+
+        # Count permissions by level and track entity levels
+        permission_counts = {'none': 0, 'view': 0, 'edit': 0, 'manage': 0}
+        entity_levels = {}  # To track the level for each entity type
+
+        # Process each permission
+        for perm_key in perm_keys:
+            entity_type, level = perm_key.split('.')
+
+            # Track this entity type's permission level
+            entity_levels[entity_type] = level
+
+            # Count this permission level
+            permission_counts[level] += 1
+
+        # Calculate the dominant role based on which level has the highest count
+        # Sort levels by priority (for ties, higher permission wins)
+        sorted_counts = sorted(
+            permission_counts.items(),
+            key=lambda x: (x[1], ['none', 'view', 'edit', 'manage'].index(x[0])),
+            reverse=True
+        )
+
+        # Get the most common permission level and convert to corresponding role name
+        perm_level = sorted_counts[0][0]
+
+        # Map permission level to role name
+        role_map = {
+            'none': 'none',
+            'view': 'viewer',
+            'edit': 'editor',
+            'manage': 'manager'
+        }
+        role = role_map[perm_level]
+
+        # Check if we have multiple permission levels
+        unique_levels = set(entity_levels.values())
+        has_multiple_levels = len(unique_levels) > 1
+
+        # If multiple levels exist, identify all permissions that differ from the dominant role
+        if has_multiple_levels:
+            for entity_type, level in entity_levels.items():
+                if level != role:
+                    # This entity has a different permission level than the dominant role
+                    overrides[f"{entity_type}.{level}"] = True
+
+        return role, overrides
 
     def get_user_activity(self):
         """Get activity statistics for a specific user."""

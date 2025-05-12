@@ -9,8 +9,22 @@ from twf.models import PageTag
 class TagTable(tables.Table):
     variation = tables.Column(verbose_name="Variation", attrs={"td": {"class": "fw-bold"}})
     variation_type = tables.Column(verbose_name="Type")
+    is_parked = tables.Column(verbose_name="Parked", orderable=False,
+                            attrs={"th": {"class": "text-center"}, "td": {"class": "text-center"}})
     entry = tables.Column(accessor="dictionary_entry", verbose_name="Entry", empty_values=())
     options = tables.Column(empty_values=(), verbose_name="Options", orderable=False)
+    
+    def render_is_parked(self, value):
+        if value:
+            return format_html(
+                '<span class="badge bg-warning text-dark" data-bs-toggle="tooltip" title="This tag is parked">'
+                '<i class="fa fa-box-archive me-1"></i>Yes</span>'
+            )
+        else:
+            return format_html(
+                '<span class="badge bg-success" data-bs-toggle="tooltip" title="This tag is active">'
+                '<i class="fa fa-check-circle me-1"></i>No</span>'
+            )
 
     class Meta:
         model = PageTag

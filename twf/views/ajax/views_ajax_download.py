@@ -60,10 +60,10 @@ def ajax_transkribus_download_export(request):
             total_length_int = int(total_length)
             downloaded = 0
             fs = FileSystemStorage()
-            if not fs.exists('tmp'):
-                os.makedirs(fs.path('tmp'))
+            if not fs.exists('temp'):
+                os.makedirs(fs.path('temp'))
 
-            tmp_file_path = fs.path('tmp/transkribus_export.zip')
+            tmp_file_path = fs.path('temp/transkribus_export.zip')
             with open(tmp_file_path, 'wb') as f:
                 for chunk in response.iter_content(chunk_size=4096):
                     if chunk:  # filter out keep-alive chunks

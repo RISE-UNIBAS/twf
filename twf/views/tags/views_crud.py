@@ -1,9 +1,9 @@
 """Views for command actions."""
 from django.contrib import messages
-from django.http import HttpResponseRedirect
-from django.shortcuts import get_object_or_404, redirect
+from django.shortcuts import get_object_or_404
 
 from twf.models import PageTag
+from twf.views.views_base import get_referrer_or_default
 
 
 def park_tag(request, pk):
@@ -13,12 +13,7 @@ def park_tag(request, pk):
     tag.save(current_user=request.user)
     messages.success(request, f'Tag {pk} has been parked.')
 
-    # Get the HTTP referer URL
-    referer = request.META.get('HTTP_REFERER')
-    if referer:
-        return HttpResponseRedirect(referer)
-
-    return redirect('twf:project_group_tags', pk=tag.page.document.project.pk)
+    return get_referrer_or_default(request, default='twf:tags_overview')
 
 
 def unpark_tag(request, pk):
@@ -28,12 +23,8 @@ def unpark_tag(request, pk):
     tag.save(current_user=request.user)
     messages.success(request, f'Tag {pk} has been unparked.')
 
-    # Get the HTTP referer URL
-    referer = request.META.get('HTTP_REFERER')
-    if referer:
-        return HttpResponseRedirect(referer)
+    return get_referrer_or_default(request, default='twf:tags_overview')
 
-    return redirect('twf:project_group_tags', pk=tag.page.document.project.pk)
 
 
 def ungroup_tag(request, pk):
@@ -44,12 +35,7 @@ def ungroup_tag(request, pk):
     tag.save(current_user=request.user)
     messages.success(request, f'Tag {pk} has been ungrouped.')
 
-    # Get the HTTP referer URL
-    referer = request.META.get('HTTP_REFERER')
-    if referer:
-        return HttpResponseRedirect(referer)
-
-    return redirect('twf:project_group_tags', pk=tag.page.document.project.pk)
+    return get_referrer_or_default(request, default='twf:tags_overview')
 
 
 def delete_tag(request, pk):
@@ -58,9 +44,4 @@ def delete_tag(request, pk):
     tag.delete()
     messages.success(request, f'Tag {pk} has been deleted.')
 
-    # Get the HTTP referer URL
-    referer = request.META.get('HTTP_REFERER')
-    if referer:
-        return HttpResponseRedirect(referer)
-
-    return redirect('twf:project_group_tags', pk=tag.page.document.project.pk)
+    return get_referrer_or_default(request, default='twf:tags_overview')

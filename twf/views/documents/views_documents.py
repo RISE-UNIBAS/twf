@@ -32,32 +32,34 @@ class TWFDocumentView(LoginRequiredMixin, TWFView):
                 'name': 'Your Documents',
                 'options': [
                     {'url': reverse('twf:documents_overview'), 'value': 'Overview'},
-                    {'url': reverse('twf:documents_browse'), 'value': 'Browse Documents'},
-                    {'url': reverse('twf:documents_search'), 'value': 'Search Documents'},
+                    {'url': reverse('twf:documents_browse'),
+                     'value': 'Browse Documents', 'permission': 'document.view'},
+                    {'url': reverse('twf:documents_search'),
+                     'value': 'Search Documents', 'permission': 'document.view'},
                 ]
             },
             {
                 'name': 'Document Batch',
                 'options': [
                     {'url': reverse('twf:documents_batch_openai'),
-                     'value': 'ChatGPT', 'permission': 'document_batch_workflow_openai'},
+                     'value': 'ChatGPT', 'permission': 'ai.manage'},
                     {'url': reverse('twf:documents_batch_gemini'),
-                     'value': 'Gemini', 'permission': 'document_batch_workflow_gemini'},
+                     'value': 'Gemini', 'permission': 'ai.manage'},
                     {'url': reverse('twf:documents_batch_claude'),
-                     'value': 'Claude', 'permission': 'document_batch_workflow_claude'},
+                     'value': 'Claude', 'permission': 'ai.manage'},
                     {'url': reverse('twf:documents_batch_mistral'),
-                     'value': 'Mistral', 'permission': 'document_batch_workflow_mistral'},
+                     'value': 'Mistral', 'permission': 'ai.manage'},
                     {'url': reverse('twf:documents_batch_deepseek'),
-                     'value': 'DeepSeek', 'permission': 'document_batch_workflow_deepseek'},
+                     'value': 'DeepSeek', 'permission': 'ai.manage'},
                     {'url': reverse('twf:documents_batch_qwen'),
-                     'value': 'Qwen', 'permission': 'document_batch_workflow_qwen'},
+                     'value': 'Qwen', 'permission': 'ai.manage'},
                 ]
             },
             {
                 'name': 'Manual Workflows',
                 'options': [
                     {'url': reverse('twf:documents_review'),
-                     'value': 'Review Documents', 'permission': 'document_task_review'},
+                     'value': 'Review Documents', 'permission': 'document.edit'},
                 ]
             },
 

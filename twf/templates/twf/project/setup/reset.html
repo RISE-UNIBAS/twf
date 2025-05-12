@@ -3,8 +3,7 @@
 {% block content %}
     <p class="lead">This is dangerous!</p>
         
-    <form action="{% url 'twf:project_reset' %}" method="post">
-      {% csrf_token %}
+    <div class="container"
       
       <!-- A Bit Dangerous Section -->
       <div class="border p-3 mb-3">
@@ -17,12 +16,10 @@
               <p><strong>Unpark all tags:</strong> All parked tags in the project are un-parked.</p>
           </div>
           <div class="col-4 text-end">
-            <button 
-              type="submit" 
-              name="action" 
-              value="unpark_all_tags" 
+            <button
               class="btn btn-secondary show-confirm-modal" 
-              data-message="Are you sure you want to un-park all tags?">
+              data-message="Are you sure you want to un-park all tags?"
+              data-redirect-url="{% url 'twf:reset_unpark_all_tags' %}">
               Unpark All Tags
             </button>
           </div>
@@ -34,12 +31,10 @@
               <p><strong>Remove all saved prompts:</strong> Removes all saved prompts from the project</p>
           </div>
           <div class="col-4 text-end">
-            <button 
-              type="submit" 
-              name="action" 
-              value="remove_all_prompts" 
+            <button
               class="btn btn-secondary show-confirm-modal" 
-              data-message="Are you sure you want to remove all saved prompts?">
+              data-message="Are you sure you want to remove all saved prompts?"
+              data-redirect-url="{% url 'twf:reset_remove_all_prompts' %}">
               Remove All Prompts
             </button>
           </div>
@@ -51,12 +46,10 @@
               <p><strong>Remove all tasks:</strong> All tasks are deleted. This will not alter your data but remove the history of performed tasks.</p>
           </div>
           <div class="col-4 text-end">
-            <button 
-              type="submit" 
-              name="action" 
-              value="remove_all_tasks" 
+            <button
               class="btn btn-secondary show-confirm-modal" 
-              data-message="Are you sure you want to remove all tasks?">
+              data-message="Are you sure you want to remove all tasks?"
+              data-redirect-url="{% url 'twf:reset_remove_all_tasks' %}">
               Remove All Tasks
             </button>
           </div>
@@ -68,12 +61,10 @@
               <p><strong>Remove all dictionaries:</strong> Dictionaries are not deleted but removed from the project.</p>
           </div>
           <div class="col-4 text-end">
-            <button 
-              type="submit" 
-              name="action" 
-              value="remove_all_dictionaries" 
+            <button
               class="btn btn-secondary show-confirm-modal" 
-              data-message="Are you sure you want to remove all dictionaries?">
+              data-message="Are you sure you want to remove all dictionaries?"
+              data-redirect-url="{% url 'twf:reset_remove_all_dictionaries' %}">
               Remove All Dictionaries
             </button>
           </div>
@@ -131,6 +122,6 @@
           </div>
         </div>
       </div>
-    </form>
+    </div>
 
 {% endblock %}

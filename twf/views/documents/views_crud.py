@@ -9,6 +9,7 @@ from django.views.decorators.csrf import csrf_exempt
 
 from twf.models import Document
 from twf.utils.metadata_utils import delete_nested_key, set_nested_value
+from twf.views.views_base import get_referrer_or_default
 
 
 @login_required
@@ -21,12 +22,7 @@ def delete_document(request, pk, doc_pk):
     document.delete()
     messages.success(request, f'Document {doc_pk} has been deleted.')
 
-    # Get the HTTP referer URL
-    referer = request.META.get('HTTP_REFERER')
-    if referer:
-        return HttpResponseRedirect(referer)
-
-    return redirect('twf:document', pk=pk)
+    return get_referrer_or_default(request, default='twf:document')
 
 
 def update_document_metadata(request, pk, base_key):

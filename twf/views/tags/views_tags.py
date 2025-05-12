@@ -40,32 +40,37 @@ class TWFTagsView(LoginRequiredMixin, TWFView):
                 'name': 'Data',
                 'options': [
                     {'url': reverse('twf:tags_overview'), 'value': 'Overview'},
-                    {'url': reverse('twf:tags_all'), 'value': 'All Tags'},
+                    {'url': reverse('twf:tags_all'),
+                     'value': 'All Tags', 'permission': 'tag.view'},
                 ]
             },
             {
                 'name': 'Tag Extraction',
                 'options': [
                     {'url': reverse('twf:tags_extract'),
-                     'value': 'Extract Tags', 'permission': 'tags_extract'},
+                     'value': 'Extract Tags', 'permission': 'tag.manage'},
                 ]
             },
             {
                 'name': 'Tag Workflows',
                 'options': [
                     {'url': reverse('twf:tags_group'),
-                     'value': 'Grouping Wizard', 'permission': 'tag_task_group'},
+                     'value': 'Grouping Wizard', 'permission': 'tag.edit'},
                     {'url': reverse('twf:tags_dates'),
-                     'value': 'Date Normalization', 'permission': 'tag_task_date_normalization'},
+                     'value': 'Date Normalization', 'permission': 'tag.edit'},
                 ]
             },
             {
                 'name': 'Tag Views',
                 'options': [
-                    {'url': reverse('twf:tags_view_open'), 'value': 'Open Tags'},
-                    {'url': reverse('twf:tags_view_parked'), 'value': 'Parked Tags'},
-                    {'url': reverse('twf:tags_view_resolved'), 'value': 'Resolved Tags'},
-                    {'url': reverse('twf:tags_view_ignored'), 'value': 'Ignored Tags'},
+                    {'url': reverse('twf:tags_view_open'),
+                     'value': 'Open Tags', 'permission': 'tag.view'},
+                    {'url': reverse('twf:tags_view_parked'),
+                     'value': 'Parked Tags', 'permission': 'tag.view'},
+                    {'url': reverse('twf:tags_view_resolved'),
+                     'value': 'Resolved Tags', 'permission': 'tag.view'},
+                    {'url': reverse('twf:tags_view_ignored'),
+                     'value': 'Ignored Tags', 'permission': 'tag.view'},
                 ]
             },
         ]

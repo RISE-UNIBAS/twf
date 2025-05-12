@@ -1,6 +1,7 @@
 {% extends 'twf/base/base.html' %}
 {% load static %}
 {% load twf_filters %}
+{% load twf_permissions %}
 
 {% block page_title %}
      <h1>{{ project.title }}</h1>
@@ -221,24 +222,27 @@
                                 <a href="{% url 'twf:project_do_select' project.id %}" class="btn btn-dark">
                                     <i class="fas fa-sign-in-alt me-1"></i> Select Project
                                 </a>
-                                {% if project.status == 'open' %}
-                                    <a href="#" class="btn btn-warning show-confirm-modal" 
-                                       data-message="Are you sure you want to close this project? Closed projects can still be reopened later."
-                                       data-redirect-url="{% url 'twf:project_do_close' project.id %}">
-                                        <i class="fas fa-times-circle me-1"></i> Close Project
-                                    </a>
-                                {% else %}
-                                    <a href="#" class="btn btn-dark show-confirm-modal"
-                                       data-message="Are you sure you want to reopen this project?"
-                                       data-redirect-url="{% url 'twf:project_do_reopen' project.id %}">
-                                        <i class="fas fa-door-open me-1"></i> Reopen Project
+                                {% has_permission request.user 'project.manage' project as can_manage %}
+                                {% if can_manage %}
+                                    {% if project.status == 'open' %}
+                                        <a href="#" class="btn btn-warning show-confirm-modal" 
+                                           data-message="Are you sure you want to close this project? Closed projects can still be reopened later."
+                                           data-redirect-url="{% url 'twf:project_do_close' project.id %}">
+                                            <i class="fas fa-times-circle me-1"></i> Close Project
+                                        </a>
+                                    {% else %}
+                                        <a href="#" class="btn btn-dark show-confirm-modal"
+                                           data-message="Are you sure you want to reopen this project?"
+                                           data-redirect-url="{% url 'twf:project_do_reopen' project.id %}">
+                                            <i class="fas fa-door-open me-1"></i> Reopen Project
+                                        </a>
+                                    {% endif %}
+                                    <a href="#" class="btn btn-danger show-danger-modal"
+                                       data-message="Are you sure you want to delete the project <strong>{{ project.title }}</strong>? This action cannot be undone!"
+                                       data-redirect-url="{% url 'twf:project_do_delete' project.id %}">
+                                        <i class="fas fa-trash-alt me-1"></i> Delete Project
                                     </a>
                                 {% endif %}
-                                <a href="#" class="btn btn-danger show-danger-modal"
-                                   data-message="Are you sure you want to delete the project <strong>{{ project.title }}</strong>? This action cannot be undone!"
-                                   data-redirect-url="{% url 'twf:project_do_delete' project.id %}">
-                                    <i class="fas fa-trash-alt me-1"></i> Delete Project
-                                </a>
                             </div>
                         </div>
                         <div class="col-md-6 mt-3 mt-md-0">

@@ -17,10 +17,10 @@ from twf.forms.dynamic_forms import DynamicForm
 from twf.forms.filters.filters import TaskFilter, PromptFilter, NoteFilter
 from twf.forms.project.project_forms_batches import ProjectCopyBatchForm, DocumentExtractionBatchForm
 from twf.forms.project.project_forms import QueryDatabaseForm, GeneralSettingsForm, CredentialsForm, \
-    TaskSettingsForm, RepositorySettingsForm, PromptForm, NoteForm, PromptSettingsForm
-from twf.models import Page, PageTag, Prompt, Task, Note
-from twf.permissions import get_actions_grouped_by_category, get_available_actions
-from twf.tables.tables_project import TaskTable, PromptTable, NoteTable
+    TaskSettingsForm, RepositorySettingsForm, PromptForm, NoteForm, PromptSettingsForm, UserPermissionForm
+from twf.models import Page, PageTag, Prompt, Task, Note, UserProfile
+from twf.permissions import check_permission, ENTITY_TYPES
+from twf.tables.tables_project import TaskTable, PromptTable, NoteTable, ProjectUserTable
 from twf.utils.project_statistics import get_document_statistics, get_tag_statistics, get_dictionary_statistics
 from twf.views.views_base import TWFView
 
@@ -38,50 +38,61 @@ class TWFProjectView(LoginRequiredMixin, TWFView):
                 'name': 'Project',
                 'options': [
                     {'url': reverse('twf:project_overview'), 'value': 'Overview'},
-                    {'url': reverse('twf:project_task_monitor'), 'value': 'Task Monitor'},
-                    {'url': reverse('twf:project_prompts'), 'value': 'Saved Prompts'},
-                    {'url': reverse('twf:project_notes'), 'value': 'Project Notes'},
+                    {'url': reverse('twf:project_task_monitor'),
+                     'value': 'Task Monitor', 'permission': 'task.view'},
+                    {'url': reverse('twf:project_prompts'),
+                     'value': 'Saved Prompts', 'permission': 'prompt.view'},
+                    {'url': reverse('twf:project_notes'),
+                     'value': 'Project Notes', 'permission': 'note.view'},
                 ]
             },
             {
                 'name': 'Ask Questions',
                 'options': [
-                    {'url': reverse('twf:project_query'), 'value': 'Query Database'},
-                    {'url': reverse('twf:project_ai_query'), 'value': 'Ask ChatGPT'},
-                    {'url': reverse('twf:project_gemini_query'), 'value': 'Ask Gemini'},
-                    {'url': reverse('twf:project_claude_query'), 'value': 'Ask Claude'},
-                    {'url': reverse('twf:project_mistral_query'), 'value': 'Ask Mistral'},
-                    {'url': reverse('twf:project_deepseek_query'), 'value': 'Ask DeepSeek'},
-                    {'url': reverse('twf:project_qwen_query'), 'value': 'Ask Qwen'},
+                    {'url': reverse('twf:project_query'),
+                     'value': 'Query Database', 'permission': 'ai.edit'},
+                    {'url': reverse('twf:project_ai_query'),
+                     'value': 'Ask ChatGPT', 'permission': 'ai.edit'},
+                    {'url': reverse('twf:project_gemini_query'),
+                     'value': 'Ask Gemini', 'permission': 'ai.edit'},
+                    {'url': reverse('twf:project_claude_query'),
+                     'value': 'Ask Claude', 'permission': 'ai.edit'},
+                    {'url': reverse('twf:project_mistral_query'),
+                     'value': 'Ask Mistral', 'permission': 'ai.edit'},
+                    {'url': reverse('twf:project_deepseek_query'),
+                     'value': 'Ask DeepSeek', 'permission': 'ai.edit'},
+                    {'url': reverse('twf:project_qwen_query'),
+                     'value': 'Ask Qwen', 'permission': 'ai.edit'},
                 ]
             },
             {
                 'name': 'Settings',
                 'options': [
                     {'url': reverse('twf:project_settings_general'),
-                     'value': 'General Settings', 'permission': 'change_project_settings'},
+                     'value': 'General Settings', 'permission': 'project.manage'},
                     {'url': reverse('twf:project_settings_credentials'),
-                     'value': 'Credential Settings', 'permission': 'change_credential_settings'},
+                     'value': 'Credential Settings', 'permission': 'project.manage'},
                     {'url': reverse('twf:project_settings_tasks'),
-                     'value': 'Task Settings', 'permission': 'change_task_settings'},
+                     'value': 'Task Settings', 'permission': 'task.manage'},
                     {'url': reverse('twf:project_settings_prompt'),
-                     'value': 'AI Prompt Settings', 'permission': 'change_task_settings'},
+                     'value': 'AI Prompt Settings', 'permission': 'ai.manage'},
                     {'url': reverse('twf:project_settings_repository'),
-                     'value': 'Repository Settings', 'permission': 'export_to_zenodo'},
+                     'value': 'Repository Settings', 'permission': 'import_export.manage'},
                     {'url': reverse('twf:user_management'),
-                     'value': 'User Management', 'permission': 'setup_project_permissions'},
+                     'value': 'User Management', 'permission': 'project.manage'},
                 ]
             },
             {
                 'name': 'Setup Project',
                 'options': [
                     {'url': reverse('twf:project_tk_export'),
-                     'value': 'Request Transkribus Export', 'permission': 'request_transkribus_export'},
+                     'value': 'Request Transkribus Export', 'permission': 'project.manage'},
                     {'url': reverse('twf:project_tk_structure'),
-                     'value': 'Extract Transkribus Export', 'permission': 'extract_transkribus_export'},
+                     'value': 'Extract Transkribus Export', 'permission': 'project.manage'},
                     {'url': reverse('twf:project_copy'),
-                     'value': 'Create Copy of Project', 'permission': 'copy_project'},
-                    {'url': reverse('twf:project_reset'), 'value': 'Reset Functions'},
+                     'value': 'Create Copy of Project', 'permission': 'project.manage'},
+                    {'url': reverse('twf:project_reset'),
+                     'value': 'Reset Functions', 'permission': 'project.manage'},
                 ]
             },
         ]
@@ -675,37 +686,114 @@ class TWFProjectOverviewView(TWFProjectView):
 
 
 class TWFProjectUserManagementView(TWFProjectView):
-    """View to manage the users."""
+    """View to manage the users and their permissions."""
     template_name = 'twf/project/user_management.html'
     page_title = 'User Management'
 
     def get_context_data(self, **kwargs):
-        """Add the user profiles to the context."""
+        """Add the user profiles and permission groups to the context."""
         context = super().get_context_data(**kwargs)
 
         project = self.get_project()
         users = [project.owner] + list(project.members.all())
+
+        # Get role information for each user
+        user_roles = []
+        for profile in users:
+            role, overrides = profile.get_role_and_overrides(project)
+            user_roles.append({
+                'profile': profile,
+                'role': role.capitalize(),
+                'has_overrides': bool(overrides)
+            })
+
+        from twf.forms.project.project_forms import UserPermissionForm
+        from twf.permissions import ENTITY_TYPES
+
+        # Create a form for the selected user if provided
+        selected_user_id = self.request.GET.get('user_id')
+        selected_profile = None
+        permission_form = None
+
+        if selected_user_id:
+            try:
+                selected_profile = next((p for p in users if str(p.id) == selected_user_id), None)
+                if selected_profile:
+                    permission_form = UserPermissionForm(
+                        initial={'user_id': selected_profile.id},
+                        user_profile=selected_profile,
+                        project=project
+                    )
+            except (ValueError, TypeError):
+                pass
+
         context['users'] = users
-        context['permissions'] = get_actions_grouped_by_category(project, profile=self.request.user.profile)
+        context['user_roles'] = user_roles
+        context['permission_groups'] = ENTITY_TYPES
+        context['selected_profile'] = selected_profile
+        context['permission_form'] = permission_form
+        context['table'] = ProjectUserTable(users, project=project)
 
         return context
 
     def post(self, request, *args, **kwargs):
         """Handle the post request."""
         project = self.get_project()
+
+        # Process the form using the user_id from the form
+        from twf.forms.project.project_forms import UserPermissionForm
+        form = UserPermissionForm(request.POST)
+
+        if form.is_valid():
+            # Get the user ID from the form
+            user_id = form.cleaned_data.get('user_id')
+
+            # Get the user profile
+            users = [project.owner] + list(project.members.all())
+            try:
+                profile = next((p for p in users if p.id == user_id), None)
+            except (ValueError, TypeError):
+                profile = None
+
+            if not profile:
+                messages.error(request, 'User not found.')
+                return redirect(reverse('twf:user_management'))
+
+            # Check if user is a special user (owner or superuser)
+            is_special_user = (project.owner == profile) or profile.user.is_superuser
+
+            # Re-initialize the form with the correct profile and project
+            form = UserPermissionForm(request.POST, user_profile=profile, project=project)
+
+            if form.is_valid():
+                form.save()
+
+                # Show different message based on user type
+                if is_special_user:
+                    messages.success(request, f'Function description for {profile.user.username} has been updated successfully.')
+                else:
+                    messages.success(request, f'Permissions for {profile.user.username} have been updated successfully.')
+
+                return redirect(reverse('twf:user_management'))
+
+        # If form is invalid or user not found, redisplay with errors
         context = self.get_context_data()
 
-        for profile in context['users']:
-            for action in get_available_actions(project).keys():
-                form_field_name = f"{profile.user.username}__{action}"
-                if form_field_name in request.POST:
-                    profile.add_permission(action, project)
-                else:
-                    profile.remove_permission(action, project)
-            profile.save()
+        # If we have a valid user_id in the form, try to display that user
+        if 'user_id' in form.cleaned_data:
+            user_id = form.cleaned_data.get('user_id')
+            users = [project.owner] + list(project.members.all())
+            profile = next((p for p in users if p.id == user_id), None)
+            if profile:
+                context['selected_profile'] = profile
+                context['permission_form'] = form
 
-        messages.success(request, 'Permissions have been updated successfully.')
-        return redirect(reverse('twf:user_management'))
+        # Show error messages
+        for field, errors in form.errors.items():
+            for error in errors:
+                messages.error(request, f"Error in {field}: {error}")
+
+        return self.render_to_response(context)
 
 
 class TWFProjectCopyView(FormView, TWFProjectView):

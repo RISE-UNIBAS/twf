@@ -9,13 +9,13 @@ from django_filters.views import FilterView
 from django_tables2 import SingleTableView
 
 from twf.forms.filters.filters import CollectionItemFilter, CollectionFilter
+from twf.permissions import check_permission
 from twf.tables.tables_collection import CollectionTable
 
 logger = logging.getLogger(__name__)
 from twf.forms.collections.collections_forms import CollectionCreateForm, CollectionAddDocumentForm, CollectionUpdateForm, \
     CollectionItemReviewForm, CollectionItemUpdateForm
 from twf.models import CollectionItem, Collection, Workflow
-from twf.permissions import check_permission
 from twf.tables.tables_collection import CollectionItemTable
 from twf.views.collections.views_crud import fill_collection_item, clean_annotation
 from twf.views.views_base import TWFView
@@ -40,36 +40,38 @@ class TWFCollectionsView(LoginRequiredMixin, TWFView):
                 'name': 'Overview',
                 'options': [
                     {"url": reverse('twf:collections'), "value": "Overview"},
-                    {"url": reverse('twf:collections_view'), "value": "Your Collections"},
+                    {"url": reverse('twf:collections_view'),
+                     "value": "Your Collections", "permission": "collection.view"},
                     {"url": reverse('twf:project_collections_create'),
-                     "value": "Create New Collection", "permission": "create_collection"}
+                     "value": "Create New Collection", "permission": "collection.manage"}
                 ]
             },
             {
                 'name': 'Automated Workflows',
                 'options': [
                     {"url": reverse('twf:collections_openai_batch'),
-                     "value": "OpenAI", "permission": "collection_openai_batch"},
+                     "value": "OpenAI", "permission": "ai.manage"},
                     {"url": reverse('twf:collections_gemini_batch'),
-                     "value": "Gemini", "permission": "collection_gemini_batch"},
+                     "value": "Gemini", "permission": "ai.manage"},
                     {"url": reverse('twf:collections_claude_batch'),
-                     "value": "Claude", "permission": "collection_claude_batch"},
+                     "value": "Claude", "permission": "ai.manage"},
                     {"url": reverse('twf:collections_mistral_batch'),
-                     "value": "Mistral", "permission": "collection_mistral_batch"},
+                     "value": "Mistral", "permission": "ai.manage"},
                 ]
             },
             {
                 'name': 'Supervised Workflows',
                 'options': [
-                    {"url": reverse('twf:collections_review'), "value": "Review Collections"},
+                    {"url": reverse('twf:collections_review'),
+                     "value": "Review Collections", "permission": "collection.edit"},
                     {"url": reverse('twf:collections_openai_request'),
-                     "value": "OpenAI", "permission": "collection_openai_workflow"},
+                     "value": "OpenAI", "permission": "collection.edit"},
                     {"url": reverse('twf:collections_gemini_request'),
-                     "value": "Gemini", "permission": "collection_gemini_workflow"},
+                     "value": "Gemini", "permission": "collection.edit"},
                     {"url": reverse('twf:collections_claude_request'),
-                     "value": "Claude", "permission": "collection_claude_workflow"},
+                     "value": "Claude", "permission": "collection.edit"},
                     {"url": reverse('twf:collections_mistral_request'),
-                     "value": "Mistral", "permission": "collection_mistral_workflow"},
+                     "value": "Mistral", "permission": "collection.edit"},
                 ]
             }
         ]
@@ -427,7 +429,7 @@ class TWFCollectionsReviewView(FormView, TWFCollectionsView):
 
         if action_d:
             logger.info("Deleting collection item %s", self.next_item)
-            if check_permission(self.request.user, 'collection_item_delete', self.next_item.id):
+            if check_permission(self.request.user, 'collection.manage', self.next_item.id):
                 self.next_item.delete()
                 messages.success(self.request, 'Collection item has been deleted successfully.')
             else:

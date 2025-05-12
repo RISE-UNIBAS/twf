@@ -38,20 +38,20 @@ class TWFMetadataView(LoginRequiredMixin, TWFView):
                 'name': 'Load Metadata',
                 'options': [
                     {'url': reverse('twf:metadata_load_metadata'),
-                     'value': 'Load JSON Metadata', 'permission': 'metadata_load_json_data'},
+                     'value': 'Load JSON Metadata', 'permission': 'metadata.manage'},
                     {'url': reverse('twf:metadata_load_sheets_metadata'),
-                     'value': 'Load Google Sheets Metadata', 'permission': 'metadata_load_google_sheet_data'},
+                     'value': 'Load Google Sheets Metadata', 'permission': 'metadata.manage'},
                 ]
             },
             {
                 'name': 'Metadata Workflows',
                 'options': [
                     {'url': reverse('twf:metadata_extract'),
-                     'value': 'Extract Controlled Values', 'permission': 'metadata_extract_values'},
+                     'value': 'Extract Controlled Values', 'permission': 'metadata.manage'},
                     {'url': reverse('twf:metadata_review_documents'),
-                     'value': 'Review Document Metadata', 'permission': 'metadata_review_documents'},
+                     'value': 'Review Document Metadata', 'permission': 'metadata.edit'},
                     {'url': reverse('twf:metadata_review_pages'),
-                     'value': 'Review Page Metadata', 'permission': 'metadata_review_pages'},
+                     'value': 'Review Page Metadata', 'permission': 'metadata.edit'},
                 ]
             }
         ]

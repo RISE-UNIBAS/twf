@@ -1,11 +1,23 @@
 {% extends 'twf/base/base.html' %}
+{% load twf_permissions %}
 
 {% block page_title %}
     <h1>Work on "{{ project_to_select.title }}"</h1>
 {% endblock %}
 
 {% block content %}
-    <p class="lead">Your role in this project: <strong>{{ user_role }}</strong></p>
+    <p class="lead">Your role in this project: <strong>{{ user_role|title }}</strong></p>
+    
+    {% if user_role != 'owner' and user_role != 'admin' and user_role != 'no access' %}
+        <div class="card mb-4">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0">Your Permissions</h5>
+            </div>
+            <div class="card-body">
+                {% show_user_permissions request.user.profile project_to_select %}
+            </div>
+        </div>
+    {% endif %}
 
      <form method="post" action="{% url 'twf:project_do_select' project_to_select.pk %}">
         {% csrf_token %}

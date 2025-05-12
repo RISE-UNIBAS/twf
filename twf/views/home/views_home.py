@@ -21,7 +21,7 @@ from twf.forms.project.project_forms import CreateProjectForm
 from twf.forms.user_forms import LoginForm, ChangePasswordForm, UserProfileForm, CreateUserForm
 from twf.models import Project, Document, Page, Dictionary, DictionaryEntry, PageTag, Variation, DateVariation, \
     UserProfile, User, Task, CollectionItem
-from twf.permissions import get_available_actions, check_permission
+from twf.permissions import check_permission
 from twf.tables.tables_home import ProjectManagementTable, UserManagementTable
 from twf.tasks.instant_tasks import save_instant_task_create_project
 from twf.utils.mail_utils import send_welcome_email
@@ -45,28 +45,16 @@ class TWFHomeView(TWFView):
                     {'url': reverse('twf:home'), 'value': 'Home'},
                     {'url': reverse('twf:about'), 'value': 'About'},
                 ]
+            },
+            {
+                'name': 'User Options',
+                'options': self.get_user_options()
+            },
+            {
+                'name': 'Administrator Options',
+                'options': self.get_admin_options()
             }
         ]
-        if self.request.user.is_authenticated:
-            user_projects = self.request.user.profile.get_projects().order_by('title')
-            proj_nav = []
-            for proj in user_projects:
-                proj_nav.append({'url': reverse('twf:project_select', args=[proj.id]),
-                                 'value': proj.title})
-
-            sub_nav.append({'name': 'Select Project',
-                            'options': proj_nav})
-
-        sub_nav.append({
-            'name': 'User Options',
-            'options': self.get_user_options()
-        })
-
-        sub_nav.append({
-            'name': 'Administrator Options',
-            'options': self.get_admin_options()
-        })
-
         return sub_nav
 
     def get_user_options(self):
@@ -121,6 +109,15 @@ class TWFHomeIndexView(TWFHomeView):
     page_title = 'Home'
     show_context_help = False  # Disable context help for the home page
 
+    def get_context_data(self, **kwargs):
+        """Add the active item to the navigation."""
+        context = super().get_context_data(**kwargs)
+        if self.request.user.is_authenticated:
+            # Get the projects the user is a member of
+            context['projects'] = self.request.user.profile.get_projects()
+
+        return context
+
     def get_breadcrumbs(self):
         """Get the breadcrumbs."""
         breadcrumbs = [
@@ -165,6 +162,27 @@ class TWFHomeUserProfileView(LoginRequiredMixin, FormView, TWFHomeView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        
+        # Add user projects with roles
+        user = self.request.user
+        owned_projects = user.profile.owned_projects.all()
+        member_projects = user.profile.get_projects().exclude(owner=user.profile)
+        
+        # Get user roles for each project
+        roles = {}
+        for project in member_projects:
+            role, overrides = user.profile.get_role_and_overrides(project)
+            roles[project.id] = {
+                'role': role.capitalize(),
+                'has_overrides': bool(overrides)
+            }
+        
+        context.update({
+            'owned_projects': owned_projects,
+            'member_projects': member_projects,
+            'project_roles': roles,
+        })
+        
         return context
 
     def get_form_kwargs(self):
@@ -229,8 +247,21 @@ class TWFUserDetailView(LoginRequiredMixin, TWFHomeView):
         context['activity'] = activity_stats
         
         # Get projects the user owns or is a member of
-        context['owned_projects'] = user.profile.owned_projects.all()
-        context['member_projects'] = Project.objects.filter(members=user.profile)
+        owned_projects = user.profile.owned_projects.all()
+        member_projects = Project.objects.filter(members=user.profile)
+        
+        context['owned_projects'] = owned_projects
+        context['member_projects'] = member_projects
+        
+        # Get user roles for each project
+        roles = {}
+        for project in member_projects:
+            role, overrides = user.profile.get_role_and_overrides(project)
+            roles[project.id] = {
+                'role': role,
+                'has_overrides': bool(overrides)
+            }
+        context['project_roles'] = roles
         
         # Get recent actions performed by this user
         recent_actions = []
@@ -330,13 +361,18 @@ class TWFSelectProjectView(LoginRequiredMixin, TWFHomeView):
         user = self.request.user
 
         project = Project.objects.get(pk=self.kwargs.get('pk'))
-        user_role = 'member'
+        
+        # Determine user role based on their relationship to the project
         if user.is_superuser:
             user_role = 'admin'
-        if project.owner == user:
+        elif project.owner.user == user:
             user_role = 'owner'
-        if project.members.filter(user_id=user.pk).exists():
-            user_role = 'member'
+        elif project.members.filter(user=user).exists():
+            # Use the new permission system to get the role
+            role, _ = user.profile.get_role_and_overrides(project)
+            user_role = role
+        else:
+            user_role = 'no access'
 
         context.update(
             {
@@ -364,17 +400,18 @@ class TWFCreateProjectView(LoginRequiredMixin, FormView, TWFHomeView):
         project.save(current_user=self.request.user)
         members = form.cleaned_data['members']
 
-        member_permissions = get_available_actions(for_group='user')
+        # Add members to the project
         for member in members:
             project.members.add(member)
-            for perm in member_permissions.keys():
-                member.add_permission(perm, project)
-            member.save()
 
-        all_permissions = get_available_actions()
-        for perm in all_permissions.keys():
-            project.owner.add_permission(perm, project)
-        project.owner.save()
+        # Apply the manager role to the project owner
+        project.owner.set_role_permissions(project, 'manager')
+        
+        # For members, apply the viewer role by default
+        for member in members:
+            if member != project.owner:
+                # Apply the viewer role to all members except the owner
+                member.set_role_permissions(project, 'viewer')
 
         save_instant_task_create_project(project, self.request.user)
 
@@ -501,7 +538,7 @@ class TWFProjectViewDetailView(LoginRequiredMixin, TWFHomeView):
         project = get_object_or_404(Project, pk=kwargs.get('pk'))
         
         # Check if the user has permission to view this project
-        if not check_permission(request.user, "view_any_project", project):
+        if not check_permission(request.user, "project.view", project):
             messages.error(request, "You do not have permission to view this project.")
             return redirect('twf:project_management')
         

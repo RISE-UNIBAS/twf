@@ -78,6 +78,34 @@ def save_instant_task_delete_all_collections(project, user):
     save_instant_task(project, user, title, description, "All collections were deleted.")
 
 
+def save_instant_task_unpark_all_tags(project, user):
+    """Save an instant task to the database."""
+    title = "Unpark All Tags"
+    description = "Unpark all tags in the project."
+    save_instant_task(project, user, title, description, "All tags were unparked.")
+
+
+def save_instant_task_remove_all_prompts(project, user):
+    """Save an instant task to the database."""
+    title = "Remove All Prompts"
+    description = "Remove all prompts in the project."
+    save_instant_task(project, user, title, description, "All prompts were removed.")
+
+
+def save_instant_task_remove_all_tasks(project, user):
+    """Save an instant task to the database."""
+    title = "Remove All Tasks"
+    description = "Remove all tasks in the project."
+    save_instant_task(project, user, title, description, "All tasks were removed.")
+
+
+def save_instant_task_remove_all_dictionaries(project, user):
+    """Save an instant task to the database."""
+    title = "Remove All Dictionaries"
+    description = "Remove all dictionaries from the project."
+    save_instant_task(project, user, title, description, "All dictionaries were removed from the project.")
+
+
 def start_related_task(project, user, title, description, text):
     """Start an instant task."""
     task = Task(project=project,

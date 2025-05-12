@@ -9,19 +9,12 @@
     {% if user.profile.get_projects %}
      {% for proj in user.profile.get_projects %}
         <div class="border rounded bg-white mt-3 p-3">
-            <p><strong>{{ proj.title }}</strong></p>
-            {% project_permissions user.profile proj as perms %}
-            {% if perms %}
-                {% for perm in perms %}
-                    <span class="badge bg-info">{{ perm }}</span>
-                {% endfor %}
-            {% else %}
-                <span class="badge bg-danger">No permissions</span>
-            {% endif %}
+            <h5 class="mb-3">{{ proj.title }}</h5>
+            {% show_user_permissions user.profile proj %}
         </div>
      {% endfor %}
     {% else %}
-        <p class="lead">You have no projects.</p>
+        <p class="lead">You are not a member of any projects.</p>
     {% endif %}
 
 {% endblock %}

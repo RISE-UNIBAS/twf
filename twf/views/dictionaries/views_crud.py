@@ -4,7 +4,7 @@ from django.shortcuts import get_object_or_404, redirect
 
 from twf.models import Dictionary, DictionaryEntry, PageTag, Variation
 from twf.tasks.instant_tasks import save_instant_task_add_dictionary
-from twf.views.views_base import TWFView
+from twf.views.views_base import TWFView, get_referrer_or_default
 
 
 def remove_dictionary_from_project(request, pk):
@@ -16,12 +16,7 @@ def remove_dictionary_from_project(request, pk):
 
     messages.success(request, f'Dictionary {dictionary.label} has been removed from your project.')
 
-    # Get the HTTP referer URL
-    referer = request.META.get('HTTP_REFERER')
-    if referer:
-        return HttpResponseRedirect(referer)
-
-    return redirect('twf:dictionaries')
+    return get_referrer_or_default(request, default='twf:dictionaries')
 
 
 def delete_variation(request, pk):
@@ -34,15 +29,9 @@ def delete_variation(request, pk):
         page_tag.save()
 
     variation.delete()
-
     messages.success(request, f'Variation {pk} has been deleted.')
 
-    # Get the HTTP referer URL
-    referer = request.META.get('HTTP_REFERER')
-    if referer:
-        return HttpResponseRedirect(referer)
-
-    return redirect('twf:dictionaries_view', pk=variation.entry.dictionary.pk)
+    return get_referrer_or_default(request, default='twf:dictionaries')
 
 
 def delete_entry(request, pk):
@@ -51,12 +40,7 @@ def delete_entry(request, pk):
     entry.delete()
     messages.success(request, f'Dictionary entry {pk} has been deleted.')
 
-    # Get the HTTP referer URL
-    referer = request.META.get('HTTP_REFERER')
-    if referer:
-        return HttpResponseRedirect(referer)
-
-    return redirect('twf:dictionary', pk=entry.dictionary.pk)
+    return get_referrer_or_default(request, default='twf:dictionaries')
 
 
 def skip_entry(request, pk):
@@ -65,12 +49,8 @@ def skip_entry(request, pk):
     entry.save(current_user=request.user)
     messages.success(request, f'Dictionary entry {pk} has been skipped.')
 
-    # Get the HTTP referer URL
-    referer = request.META.get('HTTP_REFERER')
-    if referer:
-        return HttpResponseRedirect(referer)
+    return get_referrer_or_default(request, default='twf:dictionaries')
 
-    return redirect('twf:dictionaries_normalization')
 
 def add_dictionary_to_project(request, pk):
     """Add a dictionary to the project."""
@@ -85,12 +65,8 @@ def add_dictionary_to_project(request, pk):
 
     messages.success(request, f'Dictionary {dictionary.label} has been added to your project.')
 
-    # Get the HTTP referer URL
-    referer = request.META.get('HTTP_REFERER')
-    if referer:
-        return HttpResponseRedirect(referer)
+    return get_referrer_or_default(request, default='twf:dictionaries')
 
-    return redirect('twf:dictionaries_add')
 
 def delete_dictionary_entry(request, pk):
     """Delete a dictionary entry."""
@@ -98,9 +74,4 @@ def delete_dictionary_entry(request, pk):
     entry.delete()
     messages.success(request, f'Dictionary entry {pk} has been deleted.')
 
-    # Get the HTTP referer URL
-    referer = request.META.get('HTTP_REFERER')
-    if referer:
-        return HttpResponseRedirect(referer)
-
-    return redirect('twf:dictionaries')  # Redirect to the dictionaries page
+    return get_referrer_or_default(request, default='twf:dictionaries')

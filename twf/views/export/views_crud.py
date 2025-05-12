@@ -4,7 +4,7 @@ from django.shortcuts import redirect
 from twf.clients.zenodo_client import create_new_deposition
 from twf.models import Export, ExportConfiguration
 from twf.permissions import check_permission
-from twf.views.views_base import TWFView
+from twf.views.views_base import TWFView, get_referrer_or_default
 
 
 def delete_export(request, pk):
@@ -12,7 +12,7 @@ def delete_export(request, pk):
 
     project = TWFView.s_get_project(request)
 
-    if not check_permission(request.user, "exports_delete", project):
+    if not check_permission(request.user, "import-export.manage", project):
         messages.error(request, "You do not have permission to delete exports.")
         return redirect('twf:project_reset')
 
@@ -23,7 +23,7 @@ def delete_export(request, pk):
     except Export.DoesNotExist:
         messages.error(request, 'Export does not exist.')
 
-    return redirect('twf:export_view_exports')
+    return get_referrer_or_default(request, default='twf:export_view_exports')
 
 
 def delete_export_configuration(request, pk):
@@ -31,7 +31,7 @@ def delete_export_configuration(request, pk):
 
     project = TWFView.s_get_project(request)
 
-    if not check_permission(request.user, "exports_delete", project):
+    if not check_permission(request.user, "import-export.manage", project):
         messages.error(request, "You do not have permission to delete export configurations.")
         return redirect('twf:project_reset')
 
@@ -42,7 +42,7 @@ def delete_export_configuration(request, pk):
     except Export.DoesNotExist:
         messages.error(request, 'Export configuration does not exist.')
 
-    return redirect('twf:export_view_export_confs')
+    return get_referrer_or_default(request, default='twf:export_view_export_confs')
 
 
 def disconnect_zenodo(request):
@@ -50,7 +50,7 @@ def disconnect_zenodo(request):
 
     project = TWFView.s_get_project(request)
 
-    if not check_permission(request.user, "exports_delete", project):
+    if not check_permission(request.user, "import-export.manage", project):
         messages.error(request, "You do not have permission to disconnect Zenodo.")
         return redirect('twf:export_to_zenodo')
 
@@ -61,7 +61,7 @@ def disconnect_zenodo(request):
     except Exception as e:
         messages.error(request, f'Error disconnecting Zenodo: {str(e)}')
 
-    return redirect('twf:export_to_zenodo')
+    return get_referrer_or_default(request, default='twf:export_to_zenodo')
 
 
 def connect_zenodo(request, deposition_id):
@@ -69,7 +69,7 @@ def connect_zenodo(request, deposition_id):
 
     project = TWFView.s_get_project(request)
 
-    if not check_permission(request.user, "exports_delete", project):
+    if not check_permission(request.user, "import-export.manage", project):
         messages.error(request, "You do not have permission to connect Zenodo.")
         return redirect('twf:export_to_zenodo')
 
@@ -77,7 +77,7 @@ def connect_zenodo(request, deposition_id):
     project.save(current_user=request.user)
 
     messages.success(request, 'Zenodo connected successfully.')
-    return redirect('twf:export_to_zenodo')
+    return get_referrer_or_default(request, default='twf:export_to_zenodo')
 
 
 def create_zenodo_connection(request):
@@ -85,7 +85,7 @@ def create_zenodo_connection(request):
 
     project = TWFView.s_get_project(request)
 
-    if not check_permission(request.user, "exports_delete", project):
+    if not check_permission(request.user, "import-export.manage", project):
         messages.error(request, "You do not have permission to connect Zenodo.")
         return redirect('twf:export_to_zenodo')
 
@@ -98,4 +98,4 @@ def create_zenodo_connection(request):
     except Exception as e:
         messages.error(request, f'Error connecting Zenodo: {str(e)}')
 
-    return redirect('twf:export_to_zenodo')
+    return get_referrer_or_default(request, default='twf:export_to_zenodo')

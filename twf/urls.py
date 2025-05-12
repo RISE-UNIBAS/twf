@@ -39,7 +39,8 @@ from twf.views.home.views_home import TWFHomeView, TWFHomeLoginView, TWFHomePass
 from twf.views.home.views_crud import activate_user, deactivate_user, delete_user, reset_password
 from twf.views.metadata.views_metadata_ai import TWFMetadataLoadDataView, TWFMetadataLoadSheetsDataView
 from twf.views.project.views_crud import delete_all_documents, delete_all_tags, delete_all_collections, select_project, \
-    delete_project, close_project, reopen_project, delete_prompt, task_cancel_view, task_remove_view, delete_note
+    delete_project, close_project, reopen_project, delete_prompt, task_cancel_view, task_remove_view, delete_note, \
+    unpark_all_tags, remove_all_prompts, remove_all_tasks, remove_all_dictionaries, update_user_permissions
 from twf.views.ajax.views_ajax_download import ajax_transkribus_download_export, download_progress_view
 from twf.views.collections.views_collections import TWFCollectionsReviewView, TWFCollectionOverviewView, \
     TWFCollectionsCreateView, TWFCollectionsDetailView, TWFCollectionsEditView, TWFCollectionsAddDocumentView, \
@@ -118,6 +119,10 @@ urlpatterns = [
     path('project/setup/reset/delete/documents/', delete_all_documents, name='reset_remove_all_documents'),
     path('project/setup/reset/delete/tags/', delete_all_tags, name='reset_remove_all_tags'),
     path('project/setup/reset/delete/collections/', delete_all_collections, name='reset_remove_all_collections'),
+    path('project/setup/reset/unpark/tags/', unpark_all_tags, name='reset_unpark_all_tags'),
+    path('project/setup/reset/remove/prompts/', remove_all_prompts, name='reset_remove_all_prompts'),
+    path('project/setup/reset/remove/tasks/', remove_all_tasks, name='reset_remove_all_tasks'),
+    path('project/setup/reset/remove/dictionaries/', remove_all_dictionaries, name='reset_remove_all_dictionaries'),
 
     path('project/task/monitor/', TWFProjectTaskMonitorView.as_view(), name='project_task_monitor'),
     path('project/task/<int:pk>/view/', TWFProjectTaskDetailView.as_view(), name='task_detail'),
@@ -140,6 +145,9 @@ urlpatterns = [
     path('project/settings/repositories/', TWFProjectRepositorySettingsView.as_view(),
          name='project_settings_repository'),
     path('project/user/management/', TWFProjectUserManagementView.as_view(), name='user_management'),
+    # Redirect permissions URL to the user management view
+    path('project/permissions/', TWFProjectUserManagementView.as_view(), name='user_roles'),
+    path('project/<int:project_id>/permissions/update/<int:user_id>/', update_user_permissions, name='update_user_permissions'),
 
     # Project options
     path('project/query/', TWFProjectQueryView.as_view(), name='project_query'),
