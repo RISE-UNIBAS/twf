@@ -92,7 +92,7 @@ class TWFProjectView(LoginRequiredMixin, TWFView):
                     {'url': reverse('twf:project_copy'),
                      'value': 'Create Copy of Project', 'permission': 'project.manage'},
                     {'url': reverse('twf:project_reset'),
-                     'value': 'Reset Functions', 'permission': 'project.manage'},
+                     'value': 'Reset Project', 'permission': 'project.manage'},
                 ]
             },
         ]
