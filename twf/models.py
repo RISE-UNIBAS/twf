@@ -538,6 +538,12 @@ class Project(TimeStampedModel):
     """A dictionary of AI settings for different providers. Includes temperature, max tokens, and other parameters
     that control the behavior of AI providers like OpenAI, Google Gemini, Anthropic Claude, and Mistral."""
 
+    conf_display = models.JSONField(default=dict, blank=True,
+                                    verbose_name='Display Configurations',
+                                    help_text='A dictionary of display configurations.')
+    """A dictionary of display configurations. In order to keep these settings as dynamic as possible, they are
+    stored as JSONField. The keys in the dictionary are the services, and the values are the display configurations."""
+
     keywords = models.JSONField(default=list, blank=True,
                                 verbose_name='Keywords',
                                 help_text='Keywords for the project. These can be used for data exports.')

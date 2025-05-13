@@ -18,6 +18,264 @@ from twf.models import Project, Prompt, Note, UserProfile
 from twf.permissions import ENTITY_TYPES, ROLES
 
 
+class DisplaySettingsForm(forms.ModelForm):
+    """Form for creating and updating display settings.
+
+    This form provides controls for configuring various display-related settings
+    for the project, such as pagination, table views, and UI preferences.
+    """
+
+    active_tab = forms.CharField(widget=forms.HiddenInput(), required=False)
+
+    # Table display settings
+    table_items_per_page = forms.IntegerField(
+        label="Items Per Page",
+        required=False,
+        min_value=5,
+        max_value=100,
+        initial=10,
+        help_text="Number of items to display per page in tables (min: 5, max: 100, default: 10)"
+    )
+
+    table_compact_view = forms.BooleanField(
+        label="Use Compact Table View",
+        required=False,
+        initial=False,
+        help_text="Display tables in a more compact format with less padding"
+    )
+
+    # Document display settings
+    document_show_metadata = forms.BooleanField(
+        label="Show Metadata in Document View",
+        required=False,
+        initial=True,
+        help_text="Always display document metadata in document views"
+    )
+
+    document_show_images = forms.BooleanField(
+        label="Show Images in Document View",
+        required=False,
+        initial=True,
+        help_text="Display page images when viewing documents"
+    )
+
+    # Collection display settings
+    collection_show_annotations = forms.BooleanField(
+        label="Show Annotations in Collection View",
+        required=False,
+        initial=True,
+        help_text="Display annotations when viewing collections"
+    )
+
+    # Dashboard display settings
+    dashboard_show_statistics = forms.BooleanField(
+        label="Show Statistics on Dashboard",
+        required=False,
+        initial=True,
+        help_text="Display project statistics on the dashboard"
+    )
+
+    dashboard_show_recent_activity = forms.BooleanField(
+        label="Show Recent Activity on Dashboard",
+        required=False,
+        initial=True,
+        help_text="Display recent project activity on the dashboard"
+    )
+
+    # AI provider settings
+    ai_enable_openai = forms.BooleanField(
+        label="Enable OpenAI",
+        required=False,
+        initial=True,
+        help_text="Enable OpenAI features throughout the application"
+    )
+
+    ai_enable_claude = forms.BooleanField(
+        label="Enable Claude",
+        required=False,
+        initial=True,
+        help_text="Enable Anthropic Claude features throughout the application"
+    )
+
+    ai_enable_gemini = forms.BooleanField(
+        label="Enable Gemini",
+        required=False,
+        initial=True,
+        help_text="Enable Google Gemini features throughout the application"
+    )
+
+    ai_enable_mistral = forms.BooleanField(
+        label="Enable Mistral",
+        required=False,
+        initial=True,
+        help_text="Enable Mistral AI features throughout the application"
+    )
+
+    ai_enable_deepseek = forms.BooleanField(
+        label="Enable DeepSeek",
+        required=False,
+        initial=True,
+        help_text="Enable DeepSeek features throughout the application"
+    )
+
+    ai_enable_qwen = forms.BooleanField(
+        label="Enable Qwen",
+        required=False,
+        initial=True,
+        help_text="Enable Qwen features throughout the application"
+    )
+
+    # Advanced display settings
+    enable_dark_mode = forms.BooleanField(
+        label="Enable Dark Mode",
+        required=False,
+        initial=False,
+        help_text="Use dark color scheme for the UI"
+    )
+
+    class Meta:
+        model = Project
+        fields = ['conf_display']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        # Populate fields from conf_display JSON if data exists
+        conf_display = self.instance.conf_display or {}
+
+        # Table settings
+        table_settings = conf_display.get('table', {})
+        self.fields['table_items_per_page'].initial = table_settings.get('items_per_page', 10)
+        self.fields['table_compact_view'].initial = table_settings.get('compact_view', False)
+
+        # Document settings
+        document_settings = conf_display.get('document', {})
+        self.fields['document_show_metadata'].initial = document_settings.get('show_metadata', True)
+        self.fields['document_show_images'].initial = document_settings.get('show_images', True)
+
+        # Collection settings
+        collection_settings = conf_display.get('collection', {})
+        self.fields['collection_show_annotations'].initial = collection_settings.get('show_annotations', True)
+
+        # Dashboard settings
+        dashboard_settings = conf_display.get('dashboard', {})
+        self.fields['dashboard_show_statistics'].initial = dashboard_settings.get('show_statistics', True)
+        self.fields['dashboard_show_recent_activity'].initial = dashboard_settings.get('show_recent_activity', True)
+
+        # AI provider settings
+        ai_settings = conf_display.get('ai_providers', {})
+        self.fields['ai_enable_openai'].initial = ai_settings.get('enable_openai', True)
+        self.fields['ai_enable_claude'].initial = ai_settings.get('enable_claude', True)
+        self.fields['ai_enable_gemini'].initial = ai_settings.get('enable_gemini', True)
+        self.fields['ai_enable_mistral'].initial = ai_settings.get('enable_mistral', True)
+        self.fields['ai_enable_deepseek'].initial = ai_settings.get('enable_deepseek', True)
+        self.fields['ai_enable_qwen'].initial = ai_settings.get('enable_qwen', True)
+
+        # Advanced settings
+        advanced_settings = conf_display.get('advanced', {})
+        self.fields['enable_dark_mode'].initial = advanced_settings.get('dark_mode', False)
+
+        self.helper = FormHelper()
+        self.helper.form_method = 'post'
+        self.helper.form_class = 'form form-control'
+        self.helper.layout = Layout(
+            TabHolder(
+                Tab(
+                    'Table Display',
+                    Row(
+                        Column('table_items_per_page', css_class='col-6'),
+                        Column('table_compact_view', css_class='col-6'),
+                    ),
+                    css_id='table'
+                ),
+                Tab(
+                    'Document Display',
+                    Row(
+                        Column('document_show_metadata', css_class='col-6'),
+                        Column('document_show_images', css_class='col-6'),
+                    ),
+                    css_id='document'
+                ),
+                Tab(
+                    'Collection Display',
+                    Row(
+                        Column('collection_show_annotations', css_class='col-12'),
+                    ),
+                    css_id='collection'
+                ),
+                Tab(
+                    'Dashboard Display',
+                    Row(
+                        Column('dashboard_show_statistics', css_class='col-6'),
+                        Column('dashboard_show_recent_activity', css_class='col-6'),
+                    ),
+                    css_id='dashboard'
+                ),
+                Tab(
+                    'AI Providers',
+                    Row(
+                        Column('ai_enable_openai', css_class='col-6'),
+                        Column('ai_enable_claude', css_class='col-6'),
+                    ),
+                    Row(
+                        Column('ai_enable_gemini', css_class='col-6'),
+                        Column('ai_enable_mistral', css_class='col-6'),
+                    ),
+                    Row(
+                        Column('ai_enable_deepseek', css_class='col-6'),
+                        Column('ai_enable_qwen', css_class='col-6'),
+                    ),
+                    css_id='ai_providers'
+                ),
+                Tab(
+                    'Advanced',
+                    Row(
+                        Column('enable_dark_mode', css_class='col-12'),
+                    ),
+                    css_id='advanced'
+                ),
+            ),
+            Div(
+                Submit('submit', 'Save Settings', css_class='btn btn-dark'),
+                css_class='text-end pt-3'
+            ),
+            'active_tab'
+        )
+
+    def clean(self):
+        """Clean and save display settings data back into the JSONField `conf_display`."""
+        cleaned_data = super().clean()
+        self.instance.conf_display = {
+            'table': {
+                'items_per_page': cleaned_data.get('table_items_per_page'),
+                'compact_view': cleaned_data.get('table_compact_view'),
+            },
+            'document': {
+                'show_metadata': cleaned_data.get('document_show_metadata'),
+                'show_images': cleaned_data.get('document_show_images'),
+            },
+            'collection': {
+                'show_annotations': cleaned_data.get('collection_show_annotations'),
+            },
+            'dashboard': {
+                'show_statistics': cleaned_data.get('dashboard_show_statistics'),
+                'show_recent_activity': cleaned_data.get('dashboard_show_recent_activity'),
+            },
+            'ai_providers': {
+                'enable_openai': cleaned_data.get('ai_enable_openai'),
+                'enable_claude': cleaned_data.get('ai_enable_claude'),
+                'enable_gemini': cleaned_data.get('ai_enable_gemini'),
+                'enable_mistral': cleaned_data.get('ai_enable_mistral'),
+                'enable_deepseek': cleaned_data.get('ai_enable_deepseek'),
+                'enable_qwen': cleaned_data.get('ai_enable_qwen'),
+            },
+            'advanced': {
+                'dark_mode': cleaned_data.get('enable_dark_mode'),
+            }
+        }
+        return cleaned_data
+
+
 class CreateProjectForm(forms.ModelForm):
 
     class Meta:
@@ -283,62 +541,95 @@ class CredentialsForm(forms.ModelForm):
         self.helper = FormHelper()
         self.helper.form_method = 'post'
         self.helper.form_class = 'form form-control'
-        self.helper.layout = Layout(
-            TabHolder(
-                Tab(
-                    'Transkribus',
-                    Row(
-                        Column('transkribus_username', css_class='col-6'),
-                        Column('transkribus_password', css_class='col-6')
-                    ), css_id='transkribus'
-                ),
+
+        # Get AI provider settings from display settings to filter tabs
+        conf_display = getattr(self.instance, 'conf_display', {}) or {}
+        ai_settings = conf_display.get('ai_providers', {})
+
+        # Create tabs list, starting with non-AI tabs
+        tabs = [
+            Tab(
+                'Transkribus',
+                Row(
+                    Column('transkribus_username', css_class='col-6'),
+                    Column('transkribus_password', css_class='col-6')
+                ), css_id='transkribus'
+            ),
+            Tab(
+                'Geonames',
+                Row(Column('geonames_username', css_class='col-12')),
+                css_id='geonames'
+            ),
+            Tab(
+                'Zenodo',
+                Row(Column('zenodo_token', css_class='col-12')),
+                css_id='zenodo'
+            )
+        ]
+
+        # Add AI provider tabs based on display settings
+        if ai_settings.get('enable_openai', True):
+            tabs.append(
                 Tab(
                     'OpenAI',
                     Row(Column('openai_api_key', css_class='col-12')),
                     Row(Column('openai_default_model', css_class='col-12')),
                     css_id='openai'
-                ),
+                )
+            )
+
+        if ai_settings.get('enable_gemini', True):
+            tabs.append(
                 Tab(
                     'Google',
                     Row(Column('genai_api_key', css_class='col-12')),
                     Row(Column('genai_default_model', css_class='col-12')),
                     css_id='genai'
-                ),
+                )
+            )
+
+        if ai_settings.get('enable_claude', True):
+            tabs.append(
                 Tab(
                     'Anthropic',
                     Row(Column('anthropic_api_key', css_class='col-12')),
                     Row(Column('anthropic_default_model', css_class='col-12')),
                     css_id='anthropic'
-                ),
+                )
+            )
+
+        if ai_settings.get('enable_mistral', True):
+            tabs.append(
                 Tab(
                     'Mistral',
                     Row(Column('mistral_api_key', css_class='col-12')),
                     Row(Column('mistral_default_model', css_class='col-12')),
                     css_id='mistral'
-                ),
+                )
+            )
+
+        if ai_settings.get('enable_deepseek', True):
+            tabs.append(
                 Tab(
                     'DeepSeek',
                     Row(Column('deepseek_api_key', css_class='col-12')),
                     Row(Column('deepseek_default_model', css_class='col-12')),
                     css_id='deepseek'
-                ),
+                )
+            )
+
+        if ai_settings.get('enable_qwen', True):
+            tabs.append(
                 Tab(
                     'Qwen',
                     Row(Column('qwen_api_key', css_class='col-12')),
                     Row(Column('qwen_default_model', css_class='col-12')),
                     css_id='qwen'
-                ),
-                Tab(
-                    'Geonames',
-                    Row(Column('geonames_username', css_class='col-12')),
-                    css_id='geonames'
-                ),
-                Tab(
-                    'Zenodo',
-                    Row(Column('zenodo_token', css_class='col-12')),
-                    css_id='zenodo'
                 )
-            ),
+            )
+
+        self.helper.layout = Layout(
+            TabHolder(*tabs),
             Div(
                 Submit('submit', 'Save Settings', css_class='btn btn-dark'),
                 css_class='text-end pt-3'
@@ -1147,8 +1438,17 @@ class PromptSettingsForm(forms.ModelForm):
         self.helper = FormHelper()
         self.helper.form_method = 'post'
         self.helper.form_class = 'form form-control'
-        self.helper.layout = Layout(
-            TabHolder(
+
+        # Get AI provider settings from display settings to filter tabs
+        conf_display = getattr(self.instance, 'conf_display', {}) or {}
+        ai_settings = conf_display.get('ai_providers', {})
+
+        # Create tabs list based on enabled AI providers
+        tabs = []
+
+        # Add AI provider tabs based on display settings
+        if ai_settings.get('enable_openai', True):
+            tabs.append(
                 Tab(
                     'OpenAI',
                     Row(
@@ -1164,7 +1464,11 @@ class PromptSettingsForm(forms.ModelForm):
                         Column('openai_image_resize', css_class='col-6'),
                     ),
                     css_id='openai'
-                ),
+                )
+            )
+
+        if ai_settings.get('enable_gemini', True):
+            tabs.append(
                 Tab(
                     'Google Gemini',
                     Row(
@@ -1180,7 +1484,11 @@ class PromptSettingsForm(forms.ModelForm):
                         Column('gemini_image_resize', css_class='col-6'),
                     ),
                     css_id='gemini'
-                ),
+                )
+            )
+
+        if ai_settings.get('enable_claude', True):
+            tabs.append(
                 Tab(
                     'Anthropic Claude',
                     Row(
@@ -1195,7 +1503,11 @@ class PromptSettingsForm(forms.ModelForm):
                         Column('claude_image_resize', css_class='col-12'),
                     ),
                     css_id='claude'
-                ),
+                )
+            )
+
+        if ai_settings.get('enable_mistral', True):
+            tabs.append(
                 Tab(
                     'Mistral',
                     Row(
@@ -1207,7 +1519,11 @@ class PromptSettingsForm(forms.ModelForm):
                         Column('mistral_presence_penalty', css_class='col-6'),
                     ),
                     css_id='mistral'
-                ),
+                )
+            )
+
+        if ai_settings.get('enable_deepseek', True):
+            tabs.append(
                 Tab(
                     'DeepSeek',
                     Row(
@@ -1222,7 +1538,11 @@ class PromptSettingsForm(forms.ModelForm):
                         Column('deepseek_image_resize', css_class='col-12'),
                     ),
                     css_id='deepseek'
-                ),
+                )
+            )
+
+        if ai_settings.get('enable_qwen', True):
+            tabs.append(
                 Tab(
                     'Qwen',
                     Row(
@@ -1238,7 +1558,10 @@ class PromptSettingsForm(forms.ModelForm):
                     ),
                     css_id='qwen'
                 )
-            ),
+            )
+
+        self.helper.layout = Layout(
+            TabHolder(*tabs),
             Div(
                 Submit('submit', 'Save Settings', css_class='btn btn-dark'),
                 css_class='text-end pt-3'
@@ -1278,6 +1601,22 @@ class PromptSettingsForm(forms.ModelForm):
                 'max_tokens': cleaned_data.get('mistral_max_tokens'),
                 'random_seed': cleaned_data.get('mistral_random_seed'),
                 'presence_penalty': cleaned_data.get('mistral_presence_penalty')
+            },
+            'deepseek': {
+                'temperature': cleaned_data.get('deepseek_temperature'),
+                'max_tokens': cleaned_data.get('deepseek_max_tokens'),
+                'image_resize': cleaned_data.get('deepseek_image_resize'),
+                'frequency_penalty': cleaned_data.get('deepseek_frequency_penalty'),
+                'seed': cleaned_data.get('deepseek_seed'),
+                'top_p': cleaned_data.get('deepseek_top_p')
+            },
+            'qwen': {
+                'temperature': cleaned_data.get('qwen_temperature'),
+                'max_tokens': cleaned_data.get('qwen_max_tokens'),
+                'image_resize': cleaned_data.get('qwen_image_resize'),
+                'frequency_penalty': cleaned_data.get('qwen_frequency_penalty'),
+                'seed': cleaned_data.get('qwen_seed'),
+                'top_p': cleaned_data.get('qwen_top_p')
             }
         }
         return cleaned_data

@@ -63,7 +63,7 @@ from twf.views.project.views_project import TWFProjectQueryView, TWFProjectOverv
     TWFProjectPromptsView, TWFProjectTaskSettingsView, TWFProjectCopyView, \
     TWFProjectResetView, TWFProjectUserManagementView, TWFProjectRepositorySettingsView, TWFProjectPromptEditView, \
     TWFProjectSetupView, TWFProjectTranskribusExtractView, TWFProjectNotesView, TWFProjectPromptDetailView, \
-    TWFProjectNoteEditView, TWFProjectNoteDetailView, TWFProjectPromptSettingsView
+    TWFProjectNoteEditView, TWFProjectNoteDetailView, TWFProjectPromptSettingsView, TWFProjectDisplaySettingsView
 from twf.views.project.views_project_ai import TWFProjectAIQueryView, TWFProjectGeminiQueryView, \
     TWFProjectClaudeQueryView, TWFProjectMistralQueryView, TWFProjectDeepSeekQueryView, TWFProjectQwenQueryView
 from twf.views.tags.views_tags import TWFProjectTagsView, TWFProjectTagsOpenView, \
@@ -144,6 +144,7 @@ urlpatterns = [
     path('project/settings/prompt/', TWFProjectPromptSettingsView.as_view(), name='project_settings_prompt'),
     path('project/settings/repositories/', TWFProjectRepositorySettingsView.as_view(),
          name='project_settings_repository'),
+    path('project/settings/display/', TWFProjectDisplaySettingsView.as_view(), name='project_settings_display'),
     path('project/user/management/', TWFProjectUserManagementView.as_view(), name='user_management'),
     # Redirect permissions URL to the user management view
     path('project/permissions/', TWFProjectUserManagementView.as_view(), name='user_roles'),

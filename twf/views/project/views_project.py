@@ -17,7 +17,7 @@ from twf.forms.dynamic_forms import DynamicForm
 from twf.forms.filters.filters import TaskFilter, PromptFilter, NoteFilter
 from twf.forms.project.project_forms_batches import ProjectCopyBatchForm, DocumentExtractionBatchForm
 from twf.forms.project.project_forms import QueryDatabaseForm, GeneralSettingsForm, CredentialsForm, \
-    TaskSettingsForm, RepositorySettingsForm, PromptForm, NoteForm, PromptSettingsForm, UserPermissionForm
+    TaskSettingsForm, RepositorySettingsForm, PromptForm, NoteForm, PromptSettingsForm, UserPermissionForm, DisplaySettingsForm
 from twf.models import Page, PageTag, Prompt, Task, Note, UserProfile
 from twf.permissions import check_permission, ENTITY_TYPES
 from twf.tables.tables_project import TaskTable, PromptTable, NoteTable, ProjectUserTable
@@ -48,22 +48,7 @@ class TWFProjectView(LoginRequiredMixin, TWFView):
             },
             {
                 'name': 'Ask Questions',
-                'options': [
-                    {'url': reverse('twf:project_query'),
-                     'value': 'Query Database', 'permission': 'ai.edit'},
-                    {'url': reverse('twf:project_ai_query'),
-                     'value': 'Ask ChatGPT', 'permission': 'ai.edit'},
-                    {'url': reverse('twf:project_gemini_query'),
-                     'value': 'Ask Gemini', 'permission': 'ai.edit'},
-                    {'url': reverse('twf:project_claude_query'),
-                     'value': 'Ask Claude', 'permission': 'ai.edit'},
-                    {'url': reverse('twf:project_mistral_query'),
-                     'value': 'Ask Mistral', 'permission': 'ai.edit'},
-                    {'url': reverse('twf:project_deepseek_query'),
-                     'value': 'Ask DeepSeek', 'permission': 'ai.edit'},
-                    {'url': reverse('twf:project_qwen_query'),
-                     'value': 'Ask Qwen', 'permission': 'ai.edit'},
-                ]
+                'options': self.get_ai_navigation_options()
             },
             {
                 'name': 'Settings',
@@ -78,6 +63,8 @@ class TWFProjectView(LoginRequiredMixin, TWFView):
                      'value': 'AI Prompt Settings', 'permission': 'ai.manage'},
                     {'url': reverse('twf:project_settings_repository'),
                      'value': 'Repository Settings', 'permission': 'import_export.manage'},
+                    {'url': reverse('twf:project_settings_display'),
+                     'value': 'Display Settings', 'permission': 'project.manage'},
                     {'url': reverse('twf:user_management'),
                      'value': 'User Management', 'permission': 'project.manage'},
                 ]
@@ -102,6 +89,75 @@ class TWFProjectView(LoginRequiredMixin, TWFView):
     def get_navigation_index(self):
         """Get the index of the navigation."""
         return 1
+
+    def get_ai_navigation_options(self):
+        """
+        Get the AI navigation options based on the display settings.
+        Only include enabled AI providers in the navigation.
+        """
+        # Always include the database query option
+        options = [
+            {'url': reverse('twf:project_query'),
+             'value': 'Query Database', 'permission': 'ai.edit'}
+        ]
+
+        try:
+            # Get the project's display settings
+            project = self.get_project()
+            if not project:
+                return options
+
+            # Get AI provider settings from conf_display
+            conf_display = getattr(project, 'conf_display', {}) or {}
+            ai_settings = conf_display.get('ai_providers', {})
+        except Exception:
+            # If there's any issue, return default options (just the query database option)
+            return options
+
+        # Add options for enabled AI providers
+        if ai_settings.get('enable_openai', True):
+            options.append({
+                'url': reverse('twf:project_ai_query'),
+                'value': 'Ask ChatGPT',
+                'permission': 'ai.edit'
+            })
+
+        if ai_settings.get('enable_gemini', True):
+            options.append({
+                'url': reverse('twf:project_gemini_query'),
+                'value': 'Ask Gemini',
+                'permission': 'ai.edit'
+            })
+
+        if ai_settings.get('enable_claude', True):
+            options.append({
+                'url': reverse('twf:project_claude_query'),
+                'value': 'Ask Claude',
+                'permission': 'ai.edit'
+            })
+
+        if ai_settings.get('enable_mistral', True):
+            options.append({
+                'url': reverse('twf:project_mistral_query'),
+                'value': 'Ask Mistral',
+                'permission': 'ai.edit'
+            })
+
+        if ai_settings.get('enable_deepseek', True):
+            options.append({
+                'url': reverse('twf:project_deepseek_query'),
+                'value': 'Ask DeepSeek',
+                'permission': 'ai.edit'
+            })
+
+        if ai_settings.get('enable_qwen', True):
+            options.append({
+                'url': reverse('twf:project_qwen_query'),
+                'value': 'Ask Qwen',
+                'permission': 'ai.edit'
+            })
+
+        return options
 
     def get_context_data(self, **kwargs):
         """Get the context data."""
@@ -559,9 +615,39 @@ class TWFProjectPromptSettingsView(FormView, TWFProjectView):
 
         # Add a success message
         messages.success(self.request, 'AI Prompt settings have been updated successfully.')
-        
+
         # Retrieve the active tab from form data and include it in the success URL
         active_tab = form.cleaned_data.get('active_tab', 'openai')
+        success_url = f"{self.success_url}?tab={active_tab}"
+
+        return HttpResponseRedirect(success_url)
+
+
+class TWFProjectDisplaySettingsView(FormView, TWFProjectView):
+    """View for the project display settings."""
+
+    template_name = 'twf/project/settings/settings_display.html'
+    page_title = 'Display Settings'
+    form_class = DisplaySettingsForm
+    success_url = reverse_lazy('twf:project_settings_display')
+
+    def get_form_kwargs(self):
+        """Get the form kwargs."""
+        kwargs = super().get_form_kwargs()
+        kwargs['instance'] = self.get_project()
+        return kwargs
+
+    def form_valid(self, form):
+        """Handle the form submission."""
+        # Save the form
+        self.object = form.save(commit=False)
+        self.object.save(current_user=self.request.user)
+
+        # Add a success message
+        messages.success(self.request, 'Display settings have been updated successfully.')
+
+        # Retrieve the active tab from form data and include it in the success URL
+        active_tab = form.cleaned_data.get('active_tab', 'table')
         success_url = f"{self.success_url}?tab={active_tab}"
 
         return HttpResponseRedirect(success_url)

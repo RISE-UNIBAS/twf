@@ -40,20 +40,7 @@ class TWFDocumentView(LoginRequiredMixin, TWFView):
             },
             {
                 'name': 'Document Batch',
-                'options': [
-                    {'url': reverse('twf:documents_batch_openai'),
-                     'value': 'ChatGPT', 'permission': 'ai.manage'},
-                    {'url': reverse('twf:documents_batch_gemini'),
-                     'value': 'Gemini', 'permission': 'ai.manage'},
-                    {'url': reverse('twf:documents_batch_claude'),
-                     'value': 'Claude', 'permission': 'ai.manage'},
-                    {'url': reverse('twf:documents_batch_mistral'),
-                     'value': 'Mistral', 'permission': 'ai.manage'},
-                    {'url': reverse('twf:documents_batch_deepseek'),
-                     'value': 'DeepSeek', 'permission': 'ai.manage'},
-                    {'url': reverse('twf:documents_batch_qwen'),
-                     'value': 'Qwen', 'permission': 'ai.manage'},
-                ]
+                'options': self.get_ai_batch_options()
             },
             {
                 'name': 'Manual Workflows',
@@ -69,6 +56,71 @@ class TWFDocumentView(LoginRequiredMixin, TWFView):
     def get_navigation_index(self):
         """Get the navigation index."""
         return 2
+
+    def get_ai_batch_options(self):
+        """
+        Get the AI batch options based on the display settings.
+        Only include enabled AI providers in the navigation.
+        """
+        options = []
+
+        try:
+            # Get the project's display settings
+            project = self.get_project()
+            if not project:
+                return options
+
+            # Get AI provider settings from conf_display
+            conf_display = getattr(project, 'conf_display', {}) or {}
+            ai_settings = conf_display.get('ai_providers', {})
+        except Exception:
+            # If there's any issue, return an empty list
+            return []
+
+        # Add options for enabled AI providers
+        if ai_settings.get('enable_openai', True):
+            options.append({
+                'url': reverse('twf:documents_batch_openai'),
+                'value': 'ChatGPT',
+                'permission': 'ai.manage'
+            })
+
+        if ai_settings.get('enable_gemini', True):
+            options.append({
+                'url': reverse('twf:documents_batch_gemini'),
+                'value': 'Gemini',
+                'permission': 'ai.manage'
+            })
+
+        if ai_settings.get('enable_claude', True):
+            options.append({
+                'url': reverse('twf:documents_batch_claude'),
+                'value': 'Claude',
+                'permission': 'ai.manage'
+            })
+
+        if ai_settings.get('enable_mistral', True):
+            options.append({
+                'url': reverse('twf:documents_batch_mistral'),
+                'value': 'Mistral',
+                'permission': 'ai.manage'
+            })
+
+        if ai_settings.get('enable_deepseek', True):
+            options.append({
+                'url': reverse('twf:documents_batch_deepseek'),
+                'value': 'DeepSeek',
+                'permission': 'ai.manage'
+            })
+
+        if ai_settings.get('enable_qwen', True):
+            options.append({
+                'url': reverse('twf:documents_batch_qwen'),
+                'value': 'Qwen',
+                'permission': 'ai.manage'
+            })
+
+        return options
 
     def get_context_data(self, **kwargs):
         """Get the context data for the view."""

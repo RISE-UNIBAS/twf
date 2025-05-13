@@ -41,40 +41,24 @@ class TWFDictionaryView(LoginRequiredMixin, TWFView):
             },
             {
                 'name': 'Automated Workflows',
-                'options': [
+                'options': self.get_ai_batch_options() + [
                     {'url': reverse('twf:dictionaries_batch_gnd'),
                      'value': 'GND', 'permission': 'dictionary.manage'},
                     {'url': reverse('twf:dictionaries_batch_wikidata'),
                      'value': 'Wikidata', 'permission': 'dictionary.manage'},
                     {'url': reverse('twf:dictionaries_batch_geonames'),
                      'value': 'Geonames', 'permission': 'dictionary.manage'},
-                    {'url': reverse('twf:dictionaries_batch_openai'),
-                     'value': 'Open AI', 'permission': 'dictionary.manage'},
-                    {'url': reverse('twf:dictionaries_batch_claude'),
-                     'value': 'Claude', 'permission': 'dictionary.manage'},
-                    {'url': reverse('twf:dictionaries_batch_gemini'),
-                     'value': 'Gemini', 'permission': 'dictionary.manage'},
-                    {'url': reverse('twf:dictionaries_batch_mistral'),
-                     'value': 'Mistral', 'permission': 'dictionary.manage'},
                 ]
             },
             {
                 'name': 'Supervised Workflows',
-                'options': [
+                'options': self.get_ai_request_options() + [
                     {'url': reverse('twf:dictionaries_request_gnd'),
                      'value': 'GND', 'permission': 'dictionary.edit'},
                     {'url': reverse('twf:dictionaries_request_wikidata'),
                      'value': 'Wikidata', 'permission': 'dictionary.edit'},
                     {'url': reverse('twf:dictionaries_request_geonames'),
                      'value': 'Geonames', 'permission': 'dictionary.edit'},
-                    {'url': reverse('twf:dictionaries_request_openai'),
-                     'value': 'Open AI', 'permission': 'dictionary.edit'},
-                    {'url': reverse('twf:dictionaries_request_claude'),
-                     'value': 'Claude', 'permission': 'dictionary.edit'},
-                    {'url': reverse('twf:dictionaries_request_gemini'),
-                     'value': 'Gemini', 'permission': 'dictionary.edit'},
-                    {'url': reverse('twf:dictionaries_request_mistral'),
-                     'value': 'Mistral', 'permission': 'dictionary.edit'},
                 ]
             },
             {
@@ -92,6 +76,108 @@ class TWFDictionaryView(LoginRequiredMixin, TWFView):
     def get_navigation_index(self):
         """Get the navigation index."""
         return 5
+
+    def get_ai_batch_options(self):
+        """
+        Get the AI batch options based on the display settings.
+        Only include enabled AI providers in the navigation.
+        """
+        options = []
+
+        try:
+            # Get the project's display settings
+            project = self.get_project()
+            if not project:
+                return options
+
+            # Get AI provider settings from conf_display
+            conf_display = getattr(project, 'conf_display', {}) or {}
+            ai_settings = conf_display.get('ai_providers', {})
+        except Exception:
+            # If there's any issue, return an empty list
+            return []
+
+        # Add options for enabled AI providers
+        if ai_settings.get('enable_openai', True):
+            options.append({
+                'url': reverse('twf:dictionaries_batch_openai'),
+                'value': 'Open AI',
+                'permission': 'dictionary.manage'
+            })
+
+        if ai_settings.get('enable_claude', True):
+            options.append({
+                'url': reverse('twf:dictionaries_batch_claude'),
+                'value': 'Claude',
+                'permission': 'dictionary.manage'
+            })
+
+        if ai_settings.get('enable_gemini', True):
+            options.append({
+                'url': reverse('twf:dictionaries_batch_gemini'),
+                'value': 'Gemini',
+                'permission': 'dictionary.manage'
+            })
+
+        if ai_settings.get('enable_mistral', True):
+            options.append({
+                'url': reverse('twf:dictionaries_batch_mistral'),
+                'value': 'Mistral',
+                'permission': 'dictionary.manage'
+            })
+
+        return options
+
+    def get_ai_request_options(self):
+        """
+        Get the AI request options based on the display settings.
+        Only include enabled AI providers in the navigation.
+        """
+        options = []
+
+        try:
+            # Get the project's display settings
+            project = self.get_project()
+            if not project:
+                return options
+
+            # Get AI provider settings from conf_display
+            conf_display = getattr(project, 'conf_display', {}) or {}
+            ai_settings = conf_display.get('ai_providers', {})
+        except Exception:
+            # If there's any issue, return an empty list
+            return []
+
+        # Add options for enabled AI providers
+        if ai_settings.get('enable_openai', True):
+            options.append({
+                'url': reverse('twf:dictionaries_request_openai'),
+                'value': 'Open AI',
+                'permission': 'dictionary.edit'
+            })
+
+        if ai_settings.get('enable_claude', True):
+            options.append({
+                'url': reverse('twf:dictionaries_request_claude'),
+                'value': 'Claude',
+                'permission': 'dictionary.edit'
+            })
+
+        if ai_settings.get('enable_gemini', True):
+            options.append({
+                'url': reverse('twf:dictionaries_request_gemini'),
+                'value': 'Gemini',
+                'permission': 'dictionary.edit'
+            })
+
+        if ai_settings.get('enable_mistral', True):
+            options.append({
+                'url': reverse('twf:dictionaries_request_mistral'),
+                'value': 'Mistral',
+                'permission': 'dictionary.edit'
+            })
+
+        return options
 
     def get_dictionaries(self):
         """Get the dictionaries."""
