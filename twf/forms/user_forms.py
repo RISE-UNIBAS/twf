@@ -97,12 +97,21 @@ class UserProfileForm(forms.ModelForm):
         self.helper = FormHelper()
         self.helper.form_method = 'post'
         self.helper.layout = Layout(
-            'username',
-            'first_name',
-            'last_name',
-            'email',
-            'orcid',
-            'affiliation',
+            Row(
+                Column('username', css_class='form-group col-6 mb-0'),
+                Column('email', css_class='form-group col-6 mb-0'),
+                css_class='row form-row'
+            ),
+            Row(
+                Column('first_name', css_class='form-group col-6 mb-0'),
+                Column('last_name', css_class='form-group col-6 mb-0'),
+                css_class='row form-row'
+            ),
+            Row(
+                Column('orcid', css_class='form-group col-6 mb-0'),
+                Column('affiliation', css_class='form-group col-6 mb-0'),
+                css_class='row form-row'
+            ),
             Div(
                 Submit('submit', 'Save Changes', css_class='btn btn-dark'),
                 css_class='text-end pt-3'
