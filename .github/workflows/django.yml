@@ -50,19 +50,19 @@ jobs:
         echo "DB_HOST=postgres" >> .env
         echo "DB_PORT=5432" >> .env
 
-        - name: Install PostgreSQL client
-          run: sudo apt-get update && sudo apt-get install -y postgresql-client
+    - name: Install PostgreSQL client
+      run: sudo apt-get update && sudo apt-get install -y postgresql-client
 
-        - name: Wait for PostgreSQL to be ready
-          run: |
-            echo "Waiting for PostgreSQL to be ready..."
-            for i in {1..30}; do
-              pg_isready -h postgres -U postgres -d twf && echo "PostgreSQL is ready!" && exit 0
-              echo "Postgres not ready yet..."
-              sleep 2
-            done
-            echo "PostgreSQL failed to start in time"
-            exit 1
+    - name: Wait for PostgreSQL to be ready
+      run: |
+        echo "Waiting for PostgreSQL to be ready..."
+        for i in {1..30}; do
+          pg_isready -h postgres -U postgres -d twf && echo "PostgreSQL is ready!" && exit 0
+          echo "Postgres not ready yet..."
+          sleep 2
+        done
+        echo "PostgreSQL failed to start in time"
+        exit 1
 
     - name: Migrate database
       run: |
