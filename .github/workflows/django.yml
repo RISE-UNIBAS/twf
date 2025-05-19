@@ -29,14 +29,12 @@ jobs:
         sudo systemctl enable postgresql
         psql --version
 
-    # Create user and database
     - name: Set up PostgreSQL user and database
       run: |
-        sudo -u postgres psql -c "CREATE USER postgres WITH PASSWORD 'postgres';"
-        sudo -u postgres psql -c "ALTER USER postgres WITH SUPERUSER;"
-        sudo -u postgres createdb -O postgres twf
+        sudo -u postgres psql -c "ALTER USER postgres WITH PASSWORD 'postgres';"
+        sudo -u postgres createdb -O postgres twf  
 
-    # Set up environment variables
+      # Set up environment variables
     - name: Create .env file
       run: |
         echo "DB_NAME=twf" >> .env
