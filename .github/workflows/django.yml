@@ -8,13 +8,15 @@ on:
 
 jobs:
   build:
-
+    # Use the latest Ubuntu runner
     runs-on: ubuntu-latest
+
+    # Matrix strategy (allows easy expansion to multiple Python versions if needed)
     strategy:
-      max-parallel: 4
       matrix:
         python-version: [3.12]
 
+    # Service containers for PostgreSQL and Redis
     services:
       postgres:
         image: postgres:13
@@ -22,55 +24,98 @@ jobs:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
           POSTGRES_DB: twf
+        # Health check to ensure PostgreSQL is ready before running tests
         options: >-
-          --health-cmd="pg_isready -U postgres -d twf"
-          --health-interval=10s
-          --health-timeout=10s
-          --health-retries=10
-          --health-start-period=30s
+          --health-cmd "pg_isready -U postgres -d twf"
+          --health-interval 10s
+          --health-timeout 10s
+          --health-retries 10
+          --health-start-period 10s
+      redis:
+        image: redis:latest
+        # Health check to ensure Redis is ready before running tests
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+          --health-start-period 5s
+
+    # Set environment variables (Celery broker URL for Redis)
+    env:
+      CELERY_BROKER_URL: "redis://redis:6379/0"
 
     steps:
-    - uses: actions/checkout@v3
+      # Checkout the repository code
+      - uses: actions/checkout@v3
 
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v3
-      with:
-        python-version: ${{ matrix.python-version }}
+      # Set up Python 3.12
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v3
+        with:
+          python-version: ${{ matrix.python-version }}
 
-    - name: Install Dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
+      # Install Python dependencies
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
 
-    - name: Create .env file
-      run: |
-        echo "DB_NAME=twf" >> .env
-        echo "DB_USER=postgres" >> .env
-        echo "DB_PASSWORD=postgres" >> .env
-        echo "DB_HOST=postgres" >> .env
-        echo "DB_PORT=5432" >> .env
+      # Create .env file with database connection settings for Django
+      - name: Create .env file
+        run: |
+          echo "DB_NAME=twf" >> .env
+          echo "DB_USER=postgres" >> .env
+          echo "DB_PASSWORD=postgres" >> .env
+          echo "DB_HOST=postgres" >> .env
+          echo "DB_PORT=5432" >> .env
 
-    - name: Install PostgreSQL client
-      run: sudo apt-get update && sudo apt-get install -y postgresql-client
+      # (Optional) Display .env contents for debugging
+      - name: Check .env content
+        run: cat .env
 
-    - name: Wait for PostgreSQL to be ready
-      run: |
-        echo "Waiting for PostgreSQL to be ready..."
-        for i in {1..45}; do
-          pg_isready -h postgres -U postgres -d twf && echo "PostgreSQL is ready!" && exit 0
-          echo "Postgres not ready yet..."
-          sleep 2
-        done
-        echo "PostgreSQL failed to start in time"
-        exit 1
+      # Install PostgreSQL and Redis client tools for health checks (pg_isready, redis-cli)
+      - name: Install Postgres & Redis clients
+        run: sudo apt-get update && sudo apt-get install -y postgresql-client redis-tools
 
-    - name: Migrate database
-      run: |
-        python manage.py migrate
+      # Wait for PostgreSQL service to be ready (using pg_isready with retries)
+      - name: Wait for PostgreSQL to be ready
+        run: |
+          echo "Waiting for PostgreSQL to be ready..."
+          for i in {1..30}; do
+            pg_isready -h postgres -U postgres -d twf && echo "PostgreSQL is ready! ✅" && exit 0
+            echo "PostgreSQL not ready yet, waiting..."
+            sleep 2
+          done
+          echo "PostgreSQL failed to start in time ❌"
+          exit 1
 
-    - name: Run Tests
-      run: |
-        python manage.py test
+      # Wait for Redis service to be ready (using redis-cli ping with retries)
+      - name: Wait for Redis to be ready
+        run: |
+          echo "Waiting for Redis to be ready..."
+          for i in {1..30}; do
+            redis-cli -h redis ping && echo "Redis is ready! ✅" && exit 0
+            echo "Redis not ready yet, waiting..."
+            sleep 2
+          done
+          echo "Redis failed to start in time ❌"
+          exit 1
 
-    - name: Clean up .env file
-      run: rm .env
+      # (Optional) Start a Celery worker in the background to simulate task processing
+      - name: Start Celery worker (background)
+        run: |
+          echo "Starting Celery worker in background..."
+          celery -A twf worker --loglevel=info &
+
+      # Run Django database migrations
+      - name: Migrate database
+        run: python manage.py migrate
+
+      # Run Django tests
+      - name: Run tests
+        run: python manage.py test
+
+      # Clean up the .env file (remove sensitive data after tests)
+      - name: Clean up .env file
+        run: rm .env
