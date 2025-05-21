@@ -1,0 +1,34 @@
+{% extends 'twf/base/base.html' %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+    <p class="lead">Configure display settings for tables, documents, collections, and the dashboard.</p>
+    {% crispy form %}
+{% endblock %}
+
+{% block script %}
+<script>
+   $(document).ready(function() {
+        // Check if there's an active tab in the URL and show it
+        const urlParams = new URLSearchParams(window.location.search);
+        const activeTab = urlParams.get('tab');
+
+        if (activeTab) {
+            $(`.nav-tabs a[href="#${activeTab}"]`).tab('show');
+            $('#id_active_tab').val(activeTab); // Set hidden input if available
+        }
+
+        // Update the URL and hidden input when a new tab is clicked
+        $('.nav-tabs a').on('shown.bs.tab', function(e) {
+            const tabName = $(e.target).attr('href').substring(1); // Get tab name without #
+
+            const newUrl = new URL(window.location.href);
+            newUrl.searchParams.set('tab', tabName);
+
+            // Update URL without reloading and set hidden input value
+            window.history.replaceState(null, null, newUrl);
+            $('#id_active_tab').val(tabName);
+        });
+    });
+</script>
+{% endblock %}
