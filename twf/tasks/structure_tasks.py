@@ -1,17 +1,19 @@
 """Celery tasks for extracting Transkribus export files."""
+import copy
 import logging
 import os
 import uuid
 import zipfile
 import xml.etree.ElementTree as ET
 from pathlib import Path
+from collections import defaultdict
 
 from celery import shared_task
 from django.core.files.storage import FileSystemStorage
 from django.utils import timezone
 from simple_alto_parser import PageFileParser
 
-from twf.models import Document, Page
+from twf.models import Document, Page, DocumentSyncHistory, PageTag
 from twf.utils.page_file_meta_data_reader import extract_transkribus_file_metadata
 from twf.tasks.task_base import BaseTWFTask
 from twf.utils.file_utils import delete_all_in_folder
@@ -20,64 +22,200 @@ logger = logging.getLogger(__name__)
 
 
 @shared_task(bind=True, base=BaseTWFTask)
-def extract_zip_export_task(self, project_id, user_id, **kwargs):
-    """Extract the Transkribus export zip file and create Document and Page instances."""
-    extracted_files = 0
-    created_documents = 0
-    created_pages = 0
-    
-    try:
-        # Step 1: Validate and prepare the zip file
-        zip_file, extract_to_path = prepare_zip_file(self.project, self)
-        if self.twf_task:
-            self.twf_task.text += f"Prepared zip file: {zip_file.name}\n" 
-            self.twf_task.text += f"Extraction path: {extract_to_path}\n"
-            self.twf_task.save(update_fields=["text"])
+def extract_zip_export_task(self, project_id, user_id, force_recreate_tags=False, delete_removed_documents=True, **kwargs):
+    """
+    Unified smart synchronization from Transkribus export.
 
-        # Step 2: Extract files from the zip archive
+    This task extracts the Transkribus export and intelligently syncs:
+    1. Documents and pages (add/update/delete)
+    2. Tags while preserving user assignments and parked status
+
+    Args:
+        project_id: Project ID
+        user_id: User performing sync
+        force_recreate_tags: If True, delete all tags and recreate (default: False)
+        delete_removed_documents: If True, delete documents not in export (default: True)
+        **kwargs: Additional options
+
+    Returns:
+        dict: Comprehensive statistics about the sync operation
+    """
+    extracted_files = 0
+    doc_changes = {}
+    tag_changes = {}
+
+    try:
+        # ========================================
+        # PHASE 1: DOWNLOAD & EXTRACT (30%)
+        # ========================================
+        self.twf_task.text += "=" * 60 + "\n"
+        self.twf_task.text += "PHASE 1: EXTRACT TRANSKRIBUS EXPORT\n"
+        self.twf_task.text += "=" * 60 + "\n\n"
+        self.twf_task.save(update_fields=["text"])
+
+        # Validate and prepare zip file
+        zip_file, extract_to_path = prepare_zip_file(self.project, self)
+        self.twf_task.text += f"✓ Prepared zip file: {zip_file.name}\n"
+        self.twf_task.text += f"✓ Extraction path: {extract_to_path}\n\n"
+        self.twf_task.save(update_fields=["text"])
+
+        # Extract files from zip
         copied_files = extract_files_from_zip(zip_file, extract_to_path, self.project, self)
         extracted_files = len(copied_files)
-        if self.twf_task:
-            self.twf_task.text += f"Extracted {extracted_files} files from the zip archive.\n"
+        self.twf_task.text += f"✓ Extracted {extracted_files} files from the zip archive.\n\n"
+        self.twf_task.save(update_fields=["text"])
+
+        # ========================================
+        # PHASE 2: SYNC DOCUMENTS & PAGES (40%)
+        # ========================================
+        self.twf_task.text += "=" * 60 + "\n"
+        self.twf_task.text += "PHASE 2: SYNC DOCUMENTS & PAGES\n"
+        self.twf_task.text += "=" * 60 + "\n\n"
+        self.twf_task.save(update_fields=["text"])
+
+        doc_changes = sync_documents_and_pages(
+            copied_files,
+            self.project,
+            self.user,
+            self,
+            delete_removed=delete_removed_documents
+        )
+
+        self.twf_task.text += f"\nDocument Sync Summary:\n"
+        self.twf_task.text += f"  • Documents added: {doc_changes['added']}\n"
+        self.twf_task.text += f"  • Documents updated: {doc_changes['updated']}\n"
+        self.twf_task.text += f"  • Documents deleted: {doc_changes['deleted']}\n"
+        self.twf_task.text += f"  • Pages added: {doc_changes['pages_added']}\n"
+        self.twf_task.text += f"  • Pages updated: {doc_changes['pages_updated']}\n"
+        self.twf_task.text += f"  • Pages deleted: {doc_changes['pages_deleted']}\n\n"
+        self.twf_task.save(update_fields=["text"])
+
+        # ========================================
+        # PHASE 3: SMART TAG SYNC (30%)
+        # ========================================
+        if force_recreate_tags:
+            self.twf_task.text += "=" * 60 + "\n"
+            self.twf_task.text += "PHASE 3: RECREATE ALL TAGS (FORCE MODE)\n"
+            self.twf_task.text += "=" * 60 + "\n\n"
+            self.twf_task.text += "⚠️  WARNING: Force recreate mode enabled.\n"
+            self.twf_task.text += "⚠️  All existing tags will be deleted and recreated.\n"
+            self.twf_task.text += "⚠️  Manual assignments and parked status will be lost.\n\n"
             self.twf_task.save(update_fields=["text"])
 
-        # Step 3: Process extracted files and create/update Document and Page instances
-        doc_count, page_count = process_extracted_files(copied_files, self.project, self.user, self)
-        created_documents = doc_count
-        created_pages = page_count
-        if self.twf_task:
-            self.twf_task.text += f"Created/updated {doc_count} documents and {page_count} pages.\n"
+            # Use the old recreate approach
+            from twf.tasks.tags_tasks import create_page_tags
+            pages = Page.objects.filter(document__project=self.project)
+            self.set_total_items(pages.count())
+
+            assigned_tags = 0
+            total_tags = 0
+
+            for page in pages:
+                PageTag.objects.filter(page=page).delete()
+                parsed_data = page.parsed_data
+
+                for element in parsed_data.get("elements", []):
+                    for tag in element.get("element_data", {}).get("custom_list_structure", []):
+                        if "text" in tag:
+                            text = tag["text"].strip()
+                            copy_of_tag = copy.deepcopy(tag)
+                            copy_of_tag.pop("text")
+                            from twf.utils.tags_utils import assign_tag
+                            page_tag = PageTag(page=page, variation=text, variation_type=tag["type"],
+                                             additional_information=copy_of_tag)
+                            is_assigned = assign_tag(page_tag, self.user)
+                            if is_assigned:
+                                assigned_tags += 1
+                            total_tags += 1
+                            page_tag.save(current_user=self.user)
+
+                page.num_tags = len(element.get("element_data", {}).get("custom_list_structure", []))
+                page.save()
+                self.advance_task()
+
+            tag_changes = {
+                'added': total_tags,
+                'updated': 0,
+                'deleted': 0,
+                'preserved_assignments': 0,
+                'preserved_parked': 0,
+                'auto_assigned': assigned_tags,
+                'warnings': []
+            }
+        else:
+            self.twf_task.text += "=" * 60 + "\n"
+            self.twf_task.text += "PHASE 3: SMART TAG SYNC\n"
+            self.twf_task.text += "=" * 60 + "\n\n"
+            self.twf_task.text += "Smart sync mode: Preserving user assignments and parked status.\n\n"
             self.twf_task.save(update_fields=["text"])
 
-        # Step 4: Parse page data
-        parse_pages(self.project, self.user, self)
+            # Import here to avoid circular import
+            from twf.tasks.tags_tasks import smart_sync_tags
 
-        # Finalize the task with detailed information
+            tag_changes = smart_sync_tags(self.project, self.user, self)
+
+        self.twf_task.text += f"\nTag Sync Summary:\n"
+        self.twf_task.text += f"  • Tags added: {tag_changes['added']}\n"
+        self.twf_task.text += f"  • Tags updated: {tag_changes['updated']}\n"
+        self.twf_task.text += f"  • Tags deleted: {tag_changes['deleted']}\n"
+        self.twf_task.text += f"  • Assignments preserved: {tag_changes['preserved_assignments']}\n"
+        self.twf_task.text += f"  • Parked status preserved: {tag_changes['preserved_parked']}\n"
+        self.twf_task.text += f"  • Auto-assigned: {tag_changes['auto_assigned']}\n"
+
+        if tag_changes.get('warnings'):
+            self.twf_task.text += f"\n⚠️  Warnings: {len(tag_changes['warnings'])}\n"
+            for warning in tag_changes['warnings'][:5]:  # Show first 5 warnings
+                self.twf_task.text += f"  - {warning}\n"
+            if len(tag_changes['warnings']) > 5:
+                self.twf_task.text += f"  ... and {len(tag_changes['warnings']) - 5} more warnings\n"
+
+        self.twf_task.text += "\n"
+        self.twf_task.save(update_fields=["text"])
+
+        # ========================================
+        # FINALIZE
+        # ========================================
+        self.twf_task.text += "=" * 60 + "\n"
+        self.twf_task.text += "SYNC COMPLETED SUCCESSFULLY\n"
+        self.twf_task.text += "=" * 60 + "\n"
+        self.twf_task.save(update_fields=["text"])
+
         self.end_task(
             status="SUCCESS",
             extracted_files=extracted_files,
-            created_documents=created_documents,
-            created_pages=created_pages
+            documents_added=doc_changes.get('added', 0),
+            documents_updated=doc_changes.get('updated', 0),
+            documents_deleted=doc_changes.get('deleted', 0),
+            pages_added=doc_changes.get('pages_added', 0),
+            pages_updated=doc_changes.get('pages_updated', 0),
+            pages_deleted=doc_changes.get('pages_deleted', 0),
+            tags_added=tag_changes.get('added', 0),
+            tags_updated=tag_changes.get('updated', 0),
+            tags_deleted=tag_changes.get('deleted', 0),
+            tags_preserved=tag_changes.get('preserved_assignments', 0),
+            tags_auto_assigned=tag_changes.get('auto_assigned', 0),
+            warnings_count=len(tag_changes.get('warnings', []))
         )
 
         return {
             'status': 'completed',
             'extracted_files': extracted_files,
-            'created_documents': created_documents,
-            'created_pages': created_pages
+            'doc_changes': doc_changes,
+            'tag_changes': tag_changes
         }
 
     except Exception as e:
-        # Log the error and end the task with failure status
         error_msg = str(e)
         logger.error(f"Error in extract_zip_export_task: {error_msg}")
-        self.end_task(
-            status="FAILURE", 
-            error_msg=error_msg,
-            extracted_files=extracted_files,
-            created_documents=created_documents,
-            created_pages=created_pages
-        )
+
+        if self.twf_task:
+            self.twf_task.text += "\n" + "=" * 60 + "\n"
+            self.twf_task.text += "❌ SYNC FAILED\n"
+            self.twf_task.text += "=" * 60 + "\n"
+            self.twf_task.text += f"Error: {error_msg}\n"
+            self.twf_task.save(update_fields=["text"])
+
+        self.end_task(status="FAILURE", error_msg=error_msg)
         raise
 
 
@@ -394,5 +532,206 @@ def parse_pages(project, extracting_user, celery_task):
         if failed_parsing > 0:
             celery_task.twf_task.text += f"- Failed to parse: {failed_parsing} pages\n"
         celery_task.twf_task.save(update_fields=["text"])
+
+
+def sync_documents_and_pages(copied_files, project, user, celery_task, delete_removed=True):
+    """
+    Synchronize documents and pages with Transkribus export.
+
+    This function handles the smart synchronization of documents and pages:
+    - Adds new documents and pages
+    - Updates existing documents and pages
+    - Optionally deletes documents removed from Transkribus
+
+    Args:
+        copied_files: List of extracted file paths
+        project: Project object
+        user: User performing the sync
+        celery_task: BaseTWFTask instance for progress tracking
+        delete_removed: If True, delete documents not in the export
+
+    Returns:
+        dict: Statistics about the sync operation:
+        {
+            'added': int,           # New documents created
+            'updated': int,         # Existing documents updated
+            'deleted': int,         # Documents removed
+            'pages_added': int,     # New pages created
+            'pages_updated': int,   # Existing pages updated
+            'pages_deleted': int    # Pages removed
+        }
+    """
+    # Track all documents in the export
+    documents_in_export = set()
+
+    # Separate page XML files from metadata files
+    page_xml_files = []
+    metadata_files = []
+
+    for file in copied_files:
+        file_str = str(file)
+        if file_str.endswith(('metadata.xml', 'mets.xml')):
+            metadata_files.append(file)
+        else:
+            page_xml_files.append(file)
+
+    if celery_task.twf_task:
+        celery_task.twf_task.text += f"Found {len(metadata_files)} metadata files and {len(page_xml_files)} page files.\n"
+        celery_task.twf_task.save(update_fields=["text"])
+
+    stats = {
+        'added': 0,
+        'updated': 0,
+        'deleted': 0,
+        'pages_added': 0,
+        'pages_updated': 0,
+        'pages_deleted': 0
+    }
+
+    # Track document changes for sync history
+    doc_changes = defaultdict(lambda: {
+        'pages': {'added': [], 'updated': [], 'deleted': []},
+        'metadata_updated': False
+    })
+
+    # Process page XML files
+    total_files = len(page_xml_files)
+    for i, file in enumerate(page_xml_files, start=1):
+        try:
+            data = extract_transkribus_file_metadata(file)
+            doc_id = data['docId']
+            page_id = data['pageId']
+            page_nr = data['pageNr']
+
+            # Track this document
+            documents_in_export.add(doc_id)
+
+            # Get or create document
+            doc_instance, doc_created = Document.objects.get_or_create(
+                project=project,
+                document_id=doc_id,
+                defaults={'created_by': user, 'modified_by': user}
+            )
+
+            if doc_created:
+                stats['added'] += 1
+                if celery_task.twf_task:
+                    celery_task.twf_task.text += f"  + Created new document {doc_id}\n"
+            else:
+                stats['updated'] += 1
+
+            # Extract and update document metadata if available
+            if metadata_files:
+                document_metadata = parse_metadata_files(metadata_files, doc_id)
+                if document_metadata:
+                    # Set document title if available and not already set
+                    if 'title' in document_metadata and not doc_instance.title:
+                        doc_instance.title = document_metadata['title']
+
+                    # Update metadata field
+                    if hasattr(doc_instance, 'metadata'):
+                        existing_metadata = doc_instance.metadata or {}
+                        if 'transkribus' not in existing_metadata:
+                            existing_metadata['transkribus'] = {}
+                        existing_metadata['transkribus'].update(document_metadata)
+                        doc_instance.metadata = existing_metadata
+                        doc_changes[doc_instance.id]['metadata_updated'] = True
+
+                    doc_instance.save(current_user=user)
+
+            # Get or create page
+            page_instance, page_created = Page.objects.get_or_create(
+                document=doc_instance,
+                tk_page_id=page_id,
+                tk_page_number=page_nr,
+                defaults={'created_by': user, 'modified_by': user}
+            )
+
+            # Update the page XML file
+            with open(file, 'rb') as f:
+                file_name = os.path.basename(str(file))
+                page_instance.xml_file.save(file_name, f, save=False)
+
+            page_instance.save(current_user=user)
+
+            if page_created:
+                stats['pages_added'] += 1
+                doc_changes[doc_instance.id]['pages']['added'].append(page_instance.id)
+            else:
+                stats['pages_updated'] += 1
+                doc_changes[doc_instance.id]['pages']['updated'].append(page_instance.id)
+
+            # Advance progress
+            progress = (i / total_files) * 30  # Allocate 30% for document/page sync
+            celery_task.update_progress(
+                32 + progress,
+                text=f"Processing file {i}/{total_files}: document {doc_id}"
+            )
+
+        except Exception as e:
+            error_msg = f"Failed to process file {file}: {e}"
+            logger.warning(error_msg)
+            if celery_task.twf_task:
+                celery_task.twf_task.text += f"  ✗ Error: {error_msg}\n"
+
+    # Parse all pages
+    parse_pages(project, user, celery_task)
+
+    # Handle deleted documents (if enabled)
+    if delete_removed:
+        all_project_docs = Document.objects.filter(project=project)
+        for doc in all_project_docs:
+            if doc.document_id not in documents_in_export:
+                # Document was removed from Transkribus
+                stats['deleted'] += 1
+
+                # Count deleted pages
+                deleted_page_count = doc.pages.count()
+                stats['pages_deleted'] += deleted_page_count
+
+                # Create sync history before deletion
+                DocumentSyncHistory.objects.create(
+                    document=doc,
+                    task=celery_task.twf_task,
+                    project=project,
+                    user=user,
+                    sync_type='deleted',
+                    changes={
+                        'pages': {'deleted': list(doc.pages.values_list('id', flat=True))},
+                        'reason': 'Document not present in Transkribus export'
+                    },
+                    created_by=user,
+                    modified_by=user
+                )
+
+                if celery_task.twf_task:
+                    celery_task.twf_task.text += f"  - Deleted document {doc.document_id} (not in export)\n"
+
+                doc.delete()
+
+    # Create sync history for processed documents
+    for doc_id, changes in doc_changes.items():
+        try:
+            document = Document.objects.get(id=doc_id)
+
+            # Determine if this is a new document or updated
+            sync_type = 'created' if document.id not in [d.id for d in Document.objects.filter(project=project)] else 'updated'
+
+            # Only create history if there were actual changes
+            if changes['pages']['added'] or changes['pages']['updated'] or changes['metadata_updated']:
+                DocumentSyncHistory.objects.create(
+                    document=document,
+                    task=celery_task.twf_task,
+                    project=project,
+                    user=user,
+                    sync_type=sync_type,
+                    changes=changes,
+                    created_by=user,
+                    modified_by=user
+                )
+        except Document.DoesNotExist:
+            logger.warning(f"Document {doc_id} not found when creating sync history")
+
+    return stats
 
 

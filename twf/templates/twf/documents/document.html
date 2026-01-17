@@ -56,6 +56,9 @@
         <li class="nav-item" role="presentation">
             <button class="nav-link" id="metadata-tab" data-bs-toggle="tab" data-bs-target="#metadata" type="button" role="tab" aria-controls="metadata" aria-selected="false">Metadata</button>
         </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="sync-history-tab" data-bs-toggle="tab" data-bs-target="#sync-history" type="button" role="tab" aria-controls="sync-history" aria-selected="false">Sync History</button>
+        </li>
     </ul>
     <div class="tab-content mt-2" id="documentTabsContent">
         <div class="tab-pane fade show active" id="pages" role="tabpanel" aria-labelledby="pages-tab">
@@ -107,6 +110,119 @@
         </div>
         <div class="tab-pane fade" id="metadata" role="tabpanel" aria-labelledby="metadata-tab">
             {% render_metadata document %}
+        </div>
+        <div class="tab-pane fade" id="sync-history" role="tabpanel" aria-labelledby="sync-history-tab">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Document Synchronization History</h5>
+                    <p class="text-muted small mb-0">Records of all Transkribus export synchronizations for this document</p>
+                </div>
+                <div class="card-body">
+                    {% if document.sync_history.all %}
+                        {% for sync in document.sync_history.all %}
+                            <div class="card mb-3">
+                                <div class="card-header d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <strong>{{ sync.synced_at|date:"Y-m-d H:i:s" }}</strong>
+                                        <span class="badge
+                                            {% if sync.sync_type == 'created' %}bg-success
+                                            {% elif sync.sync_type == 'updated' %}bg-primary
+                                            {% elif sync.sync_type == 'unchanged' %}bg-secondary
+                                            {% elif sync.sync_type == 'deleted' %}bg-danger
+                                            {% endif %}
+                                        ">{{ sync.get_sync_type_display }}</span>
+                                    </div>
+                                    <small class="text-muted">by {{ sync.user.username }}</small>
+                                </div>
+                                <div class="card-body">
+                                    {% if sync.changes %}
+                                        {% if sync.changes.tags %}
+                                            <h6>Tag Changes:</h6>
+                                            <ul>
+                                                {% if sync.changes.tags.added > 0 %}
+                                                    <li><span class="badge bg-success">+{{ sync.changes.tags.added }}</span> tags added</li>
+                                                {% endif %}
+                                                {% if sync.changes.tags.updated > 0 %}
+                                                    <li><span class="badge bg-primary">~{{ sync.changes.tags.updated }}</span> tags updated</li>
+                                                {% endif %}
+                                                {% if sync.changes.tags.deleted > 0 %}
+                                                    <li><span class="badge bg-danger">-{{ sync.changes.tags.deleted }}</span> tags deleted</li>
+                                                {% endif %}
+                                                {% if sync.changes.tags.preserved_assignments > 0 %}
+                                                    <li><span class="badge bg-info">{{ sync.changes.tags.preserved_assignments }}</span> dictionary assignments preserved</li>
+                                                {% endif %}
+                                                {% if sync.changes.tags.preserved_parked > 0 %}
+                                                    <li><span class="badge bg-warning">{{ sync.changes.tags.preserved_parked }}</span> parked statuses preserved</li>
+                                                {% endif %}
+                                                {% if sync.changes.tags.auto_assigned > 0 %}
+                                                    <li><span class="badge bg-success">{{ sync.changes.tags.auto_assigned }}</span> new tags auto-assigned</li>
+                                                {% endif %}
+                                            </ul>
+
+                                            {% if sync.changes.transcription_changes %}
+                                                <div class="alert alert-info" role="alert">
+                                                    <strong>Note:</strong> Transcription changes detected (tag offsets shifted)
+                                                </div>
+                                            {% endif %}
+
+                                            {% if sync.changes.tags.offset_shifts %}
+                                                <details class="mt-2">
+                                                    <summary class="text-muted small">View offset shifts ({{ sync.changes.tags.offset_shifts|length }})</summary>
+                                                    <ul class="small mt-2">
+                                                        {% for shift in sync.changes.tags.offset_shifts %}
+                                                            <li>Line {{ shift.line }}: "{{ shift.tag }}" ({{ shift.old_offset }} → {{ shift.new_offset }})</li>
+                                                        {% endfor %}
+                                                    </ul>
+                                                </details>
+                                            {% endif %}
+                                        {% endif %}
+
+                                        {% if sync.changes.pages_added or sync.changes.pages_updated or sync.changes.pages_deleted %}
+                                            <h6>Page Changes:</h6>
+                                            <ul>
+                                                {% if sync.changes.pages_added > 0 %}
+                                                    <li><span class="badge bg-success">+{{ sync.changes.pages_added }}</span> pages added</li>
+                                                {% endif %}
+                                                {% if sync.changes.pages_updated > 0 %}
+                                                    <li><span class="badge bg-primary">~{{ sync.changes.pages_updated }}</span> pages updated</li>
+                                                {% endif %}
+                                                {% if sync.changes.pages_deleted > 0 %}
+                                                    <li><span class="badge bg-danger">-{{ sync.changes.pages_deleted }}</span> pages deleted</li>
+                                                {% endif %}
+                                            </ul>
+                                        {% endif %}
+
+                                        {% if sync.changes.warnings %}
+                                            <div class="alert alert-warning mt-2" role="alert">
+                                                <strong>Warnings:</strong>
+                                                <ul class="mb-0 mt-1">
+                                                    {% for warning in sync.changes.warnings %}
+                                                        <li class="small">{{ warning }}</li>
+                                                    {% endfor %}
+                                                </ul>
+                                            </div>
+                                        {% endif %}
+                                    {% else %}
+                                        <p class="text-muted">No detailed changes recorded</p>
+                                    {% endif %}
+
+                                    {% if sync.task %}
+                                        <div class="mt-2">
+                                            <small class="text-muted">
+                                                Related task: <a href="{% url 'twf:task_detail' sync.task.pk %}">{{ sync.task.title }}</a>
+                                            </small>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="alert alert-info" role="alert">
+                            No synchronization history available for this document yet.
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
         </div>
     </div>
 {% endblock %}

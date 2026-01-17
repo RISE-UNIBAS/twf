@@ -19,7 +19,6 @@ from django_filters.views import FilterView
 from django_tables2 import SingleTableMixin
 
 from twf.forms.filters.filters import TagFilter
-from twf.forms.tags.tags_forms_batches import TagsExtractionBatchForm
 from twf.forms.tags.tags_forms import DateNormalizationForm
 from twf.models import PageTag, DateVariation, Dictionary, DictionaryEntry, Variation
 from twf.tables.tables_tags import TagTable
@@ -42,13 +41,6 @@ class TWFTagsView(LoginRequiredMixin, TWFView):
                     {'url': reverse('twf:tags_overview'), 'value': 'Overview'},
                     {'url': reverse('twf:tags_all'),
                      'value': 'All Tags', 'permission': 'tag.view'},
-                ]
-            },
-            {
-                'name': 'Tag Extraction',
-                'options': [
-                    {'url': reverse('twf:tags_extract'),
-                     'value': 'Extract Tags', 'permission': 'tag.manage'},
                 ]
             },
             {
@@ -99,24 +91,6 @@ class TWFTagsView(LoginRequiredMixin, TWFView):
 
         if self.page_title is None:
             self.page_title = kwargs.get('page_title', 'Tags View')
-
-
-class TWFTagsExtractView(FormView, TWFTagsView):
-    """View for the tags overview."""
-    template_name = 'twf/tags/extract.html'
-    page_title = 'Extract Tags'
-    form_class = TagsExtractionBatchForm
-    success_url = reverse_lazy('twf:tags_extract')
-
-    def get_form_kwargs(self):
-        """Get the form kwargs."""
-        kwargs = super().get_form_kwargs()
-        kwargs['project'] = self.get_project()
-
-        kwargs['data-start-url'] = reverse_lazy('twf:task_transkribus_extract_tags')
-        kwargs['data-message'] = "Are you sure you want to extract tags from your Transkribus export?"
-
-        return kwargs
 
 
 class TWFTagsOverviewView(TWFTagsView):

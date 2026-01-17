@@ -35,7 +35,7 @@ from twf.views.export.views_crud import delete_export, delete_export_configurati
 from twf.views.home.views_home import TWFHomeView, TWFHomeLoginView, TWFHomePasswordChangeView, TWFHomeUserOverView, \
     TWFSelectProjectView, TWFHomeUserProfileView, TWFCreateProjectView, TWFManageProjectsView, TWFManageUsersView, \
     TWFSystemHealthView, check_system_health, TWFHomeIndexView, TWFHomeAboutView, TWFProjectViewDetailView, \
-    TWFUserDetailView
+    TWFUserDetailView, TWFProjectListView
 from twf.views.home.views_crud import activate_user, deactivate_user, delete_user, reset_password
 from twf.views.metadata.views_metadata_ai import TWFMetadataLoadDataView, TWFMetadataLoadSheetsDataView
 from twf.views.project.views_crud import delete_all_documents, delete_all_tags, delete_all_collections, select_project, \
@@ -68,7 +68,7 @@ from twf.views.project.views_project_ai import TWFProjectAIQueryView, TWFProject
     TWFProjectClaudeQueryView, TWFProjectMistralQueryView, TWFProjectDeepSeekQueryView, TWFProjectQwenQueryView
 from twf.views.tags.views_tags import TWFProjectTagsView, TWFProjectTagsOpenView, \
     TWFProjectTagsParkedView, TWFProjectTagsResolvedView, TWFProjectTagsIgnoredView, TWFTagsDatesGroupView, \
-    TWFTagsGroupView, TWFTagsOverviewView, TWFTagsExtractView, TWFTagsAssignTagView
+    TWFTagsGroupView, TWFTagsOverviewView, TWFTagsAssignTagView
 from twf.workflows.collection_workflows import start_review_collection_workflow
 from twf.workflows.document_workflows import start_review_document_workflow
 
@@ -95,6 +95,7 @@ urlpatterns = [
     path('twf/system/health/', TWFSystemHealthView.as_view(), name='twf_system_health'),
 
     # Select Project
+    path('projects/', TWFProjectListView.as_view(), name='project_list'),
     path('project/select/<int:pk>/confirm/', TWFSelectProjectView.as_view(), name='project_select'),
     path('project/select/<int:pk>', select_project, name='project_do_select'),
     path('project/create/', TWFCreateProjectView.as_view(), name='project_create'),
@@ -179,7 +180,6 @@ urlpatterns = [
     #############################
     # TAGS
     path('tags/overview/', TWFTagsOverviewView.as_view(), name='tags_overview'),
-    path('tags/extract/', TWFTagsExtractView.as_view(), name='tags_extract'),
     path('tags/all/', TWFProjectTagsView.as_view(template_name='twf/tags/all_tags.html',
                                                  page_title='All Tags'),
          name='tags_all'),
@@ -321,8 +321,6 @@ urlpatterns = [
     path('celery/project/query/mistral/', start_query_project_mistral, name='task_project_query_mistral'),
     path('celery/project/query/deepseek/', start_query_project_deepseek, name='task_project_query_deepseek'),
     path('celery/project/query/qwen/', start_query_project_qwen, name='task_project_query_qwen'),
-
-    path('celery/transkribus/tags/extract/', start_tags_creation, name='task_transkribus_extract_tags'),
 
     path('celery/metadata/sheets/load/', start_sheet_metadata, name='task_metadata_load_sheets'),
     path('celery/metadata/json/load/', start_json_metadata, name='task_metadata_load_json'),

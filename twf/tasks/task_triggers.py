@@ -77,22 +77,27 @@ def trigger_ai_task(request, task_function, **kwargs):
 ##############################
 ## PROJECT TASKS
 def start_extraction(request):
-    """Start Transkribus export zip extraction and page parsing process.
-    No additional parameters are required."""
-    return trigger_task(request, extract_zip_export_task)
+    """Start Transkribus export zip extraction and unified smart sync process.
+
+    Optional parameters:
+    - force_recreate_tags: Boolean to force recreation of all tags (default: False)
+    - delete_removed_documents: Boolean to delete documents not in export (default: True)
+    """
+    # Extract optional parameters from form
+    force_recreate_tags = request.POST.get('force_recreate_tags', 'false').lower() == 'true'
+    delete_removed_documents = request.POST.get('delete_removed_documents', 'true').lower() == 'true'
+
+    kwargs = {
+        'force_recreate_tags': force_recreate_tags,
+        'delete_removed_documents': delete_removed_documents
+    }
+
+    return trigger_task(request, extract_zip_export_task, **kwargs)
 
 
 def start_test_export_task(request):
     """Start the test export task."""
     return JsonResponse({'status': 'error', 'message': 'Not implemented'}, status=400)
-
-
-##############################
-## TAGS TASKS
-def start_tags_creation(request):
-    """Start the page tags creation process.
-    No additional parameters are required."""
-    return trigger_task(request, create_page_tags)
 
 
 ##############################

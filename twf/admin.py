@@ -3,7 +3,7 @@ from django.contrib import admin
 from .models import (
     UserProfile, Project, Document, Page, Dictionary, DictionaryEntry,
     Variation, PageTag, Collection, CollectionItem, DateVariation, Workflow,
-    Task, Prompt, ExportConfiguration, Export, Note
+    Task, Prompt, ExportConfiguration, Export, Note, DocumentSyncHistory
 )
 
 
@@ -27,6 +27,24 @@ class DocumentAdmin(admin.ModelAdmin):
     list_display = ['project', 'title', 'document_id', 'metadata', 'status', 'is_parked', 'is_reserved']
     list_filter = ['project', 'created_at']
     search_fields = ['title', 'document_id']
+
+
+@admin.register(DocumentSyncHistory)
+class DocumentSyncHistoryAdmin(admin.ModelAdmin):
+    """Admin View for DocumentSyncHistory."""
+    list_display = ['document', 'sync_type', 'synced_at', 'user', 'project']
+    list_filter = ['sync_type', 'project', 'synced_at']
+    search_fields = ['document__document_id', 'document__title', 'user__username']
+    readonly_fields = ['document', 'task', 'project', 'user', 'sync_type', 'changes', 'synced_at',
+                       'created_at', 'modified_at', 'created_by', 'modified_by']
+
+    def has_add_permission(self, request):
+        """Prevent manual creation of sync history records."""
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        """Allow deletion for cleanup purposes."""
+        return request.user.is_superuser
 
 
 @admin.register(Page)

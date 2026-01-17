@@ -1,8 +1,12 @@
 """Utility functions for tags."""
 import json
+import re
+import logging
 from django.db.models import Count
-from fuzzywuzzy import process
+from fuzzywuzzy import process, fuzz
 from twf.models import PageTag, Variation
+
+logger = logging.getLogger(__name__)
 
 
 def get_translated_tag_type(project, tag_type):
@@ -112,3 +116,297 @@ def assign_tag(page_tag, user):
         return True
     except Variation.DoesNotExist:
         return False
+
+
+def extract_tags_from_parsed_data(parsed_data):
+    """
+    Extract tags from PAGE XML parsed data.
+
+    Parses the 'custom' attribute from PAGE XML elements to extract tag information
+    including person names, places, organizations, works, etc.
+
+    Args:
+        parsed_data: Dict containing parsed PAGE XML data with 'elements' key
+
+    Returns:
+        List of tag dicts with structure:
+        {
+            'variation': 'Richard Wagner',
+            'type': 'person',
+            'offset': 15,
+            'length': 14,
+            'continued': False,
+            'line_id': 'r_tl_1',
+            'line_text': 'Qu\'importe que Richard Wagner...'
+        }
+    """
+    tags = []
+
+    if not parsed_data or 'elements' not in parsed_data:
+        return tags
+
+    for element in parsed_data.get('elements', []):
+        # Get line identifier and text
+        element_id = element.get('id', '')
+        element_data = element.get('element_data', {})
+
+        # Get the full line text
+        text_lines = element_data.get('text_lines', [])
+        line_text = ' '.join(text_lines) if text_lines else ''
+
+        # Parse custom attribute to extract tags
+        custom_data = element_data.get('custom_structure', {})
+        custom_str = ''
+
+        # Handle different possible structures
+        if isinstance(custom_data, dict):
+            structure = custom_data.get('structure', {})
+            if isinstance(structure, dict):
+                custom_str = structure.get('custom', '')
+            elif isinstance(structure, str):
+                custom_str = structure
+        elif isinstance(custom_data, str):
+            custom_str = custom_data
+
+        # Also check custom_list_structure which is used in the current code
+        custom_list = element_data.get('custom_list_structure', [])
+
+        # If we have custom_list_structure, use that (current format)
+        if custom_list:
+            for tag_data in custom_list:
+                if not isinstance(tag_data, dict):
+                    continue
+
+                tag_type = tag_data.get('type', '')
+                if not tag_type or tag_type == 'readingOrder':
+                    continue
+
+                # Extract tag text
+                variation_text = tag_data.get('text', '').strip()
+                if not variation_text:
+                    continue
+
+                # Get offset and length if available
+                offset = tag_data.get('offset', 0)
+                length = tag_data.get('length', len(variation_text))
+                continued = tag_data.get('continued', False)
+
+                tags.append({
+                    'variation': variation_text,
+                    'type': tag_type,
+                    'offset': offset,
+                    'length': length,
+                    'continued': continued,
+                    'line_id': element_id,
+                    'line_text': line_text
+                })
+
+        # Otherwise parse from custom string (for raw PAGE XML)
+        elif custom_str:
+            # Extract tags using regex: tagType {key:value; key:value;}
+            tag_pattern = re.compile(r'(\w+)\s+\{([^}]+)\}')
+
+            for match in tag_pattern.finditer(custom_str):
+                tag_type = match.group(1)
+
+                # Skip metadata entries
+                if tag_type == 'readingOrder' or tag_type == 'structure':
+                    continue
+
+                # Parse attributes
+                attrs_str = match.group(2)
+                attrs = {}
+                for attr in attrs_str.split(';'):
+                    attr = attr.strip()
+                    if ':' in attr:
+                        key, val = attr.split(':', 1)
+                        attrs[key.strip()] = val.strip()
+
+                # Get offset, length, and continued flag
+                try:
+                    offset = int(attrs.get('offset', 0))
+                    length = int(attrs.get('length', 0))
+                except (ValueError, TypeError):
+                    logger.warning(f"Invalid offset/length in tag: {attrs}")
+                    continue
+
+                continued = attrs.get('continued', '').lower() == 'true'
+
+                # Extract tagged text from line using offset and length
+                if length > 0 and offset >= 0 and offset + length <= len(line_text):
+                    variation_text = line_text[offset:offset + length].strip()
+                else:
+                    # Fallback if extraction fails
+                    logger.warning(f"Could not extract tag text at offset {offset}, length {length} "
+                                 f"from line: {line_text[:50]}...")
+                    continue
+
+                if variation_text:
+                    tags.append({
+                        'variation': variation_text,
+                        'type': tag_type,
+                        'offset': offset,
+                        'length': length,
+                        'continued': continued,
+                        'line_id': element_id,
+                        'line_text': line_text
+                    })
+
+    return tags
+
+
+class SmartTagMatcher:
+    """
+    Smart matching algorithm for tags that handles transcription changes.
+
+    Uses multi-signal scoring to match old tags to new tags even when:
+    - Transcription text changes (offsets shift)
+    - Tag text has typos that get fixed
+    - Line content is edited
+
+    Matching is based on:
+    - Same line ID (required)
+    - Same tag type (required)
+    - Text similarity (exact or fuzzy)
+    - Offset proximity
+    - Length similarity
+    """
+
+    # Matching thresholds and weights
+    MATCH_THRESHOLD = 60  # Minimum score to consider a match
+    EXACT_TEXT_SCORE = 40
+    MAX_FUZZY_TEXT_SCORE = 30
+    FUZZY_TEXT_THRESHOLD = 80  # Minimum similarity for fuzzy match
+    MAX_OFFSET_SCORE = 30
+    MAX_LENGTH_SCORE = 10
+
+    def __init__(self):
+        """Initialize the matcher."""
+        self.ambiguous_matches = []
+
+    def match_tags(self, old_tags, new_tags_data, page):
+        """
+        Match old PageTag objects to new tag data from XML.
+
+        Args:
+            old_tags: List of existing PageTag objects
+            new_tags_data: List of tag dicts from extract_tags_from_parsed_data()
+            page: Page object (for logging)
+
+        Returns:
+            Tuple of (matches, unmatched_old, unmatched_new) where:
+            - matches: List[(old_tag, new_tag_data)] of matched pairs
+            - unmatched_old: List[old_tag] to delete
+            - unmatched_new: List[new_tag_data] to create
+        """
+        potential_matches = []
+
+        # Phase 1: Calculate scores for all combinations
+        for new_tag_data in new_tags_data:
+            for old_tag in old_tags:
+                score = self.calculate_match_score(old_tag, new_tag_data)
+                if score >= self.MATCH_THRESHOLD:
+                    potential_matches.append((old_tag, new_tag_data, score))
+                elif score >= self.MATCH_THRESHOLD * 0.85:  # 85% of threshold
+                    # Log ambiguous cases
+                    self.ambiguous_matches.append({
+                        'page': page.tk_page_number,
+                        'line': new_tag_data['line_id'],
+                        'old_text': old_tag.variation,
+                        'new_text': new_tag_data['variation'],
+                        'score': score
+                    })
+
+        # Phase 2: Greedy best-match (highest scores first)
+        potential_matches.sort(key=lambda x: x[2], reverse=True)
+
+        used_old = set()
+        used_new = set()
+        final_matches = []
+
+        for old_tag, new_tag_data, score in potential_matches:
+            old_id = old_tag.id
+            # Use a tuple of identifying features for new tags
+            new_id = (new_tag_data['line_id'], new_tag_data['type'],
+                     new_tag_data['offset'], new_tag_data['variation'])
+
+            if old_id not in used_old and new_id not in used_new:
+                final_matches.append((old_tag, new_tag_data, score))
+                used_old.add(old_id)
+                used_new.add(new_id)
+
+        # Phase 3: Identify unmatched
+        unmatched_old = [t for t in old_tags if t.id not in used_old]
+        unmatched_new = [t for t in new_tags_data if
+                        (t['line_id'], t['type'], t['offset'], t['variation']) not in used_new]
+
+        return final_matches, unmatched_old, unmatched_new
+
+    def calculate_match_score(self, old_tag, new_tag_data):
+        """
+        Calculate similarity score between old PageTag and new tag data from XML.
+
+        Args:
+            old_tag: Existing PageTag object
+            new_tag_data: Dict from extract_tags_from_parsed_data()
+
+        Returns:
+            int: Match score (0-100)
+        """
+        score = 0
+
+        # REQUIRED: Same line ID
+        old_line_id = old_tag.additional_information.get('line_id', '')
+        new_line_id = new_tag_data['line_id']
+
+        if old_line_id != new_line_id:
+            return 0  # Different lines = not the same tag
+
+        # REQUIRED: Same variation_type
+        if old_tag.variation_type != new_tag_data['type']:
+            return 0
+
+        # Signal 1: Text similarity (max 40 points for exact, 30 for fuzzy)
+        if old_tag.variation == new_tag_data['variation']:
+            score += self.EXACT_TEXT_SCORE
+        else:
+            # Fuzzy match for typo corrections
+            similarity = fuzz.ratio(old_tag.variation, new_tag_data['variation'])
+            if similarity >= self.FUZZY_TEXT_THRESHOLD:
+                # Scale fuzzy match score
+                score += (similarity / 100) * self.MAX_FUZZY_TEXT_SCORE
+
+        # Signal 2: Offset proximity (max 30 points)
+        old_offset = old_tag.additional_information.get('offset', 0)
+        new_offset = new_tag_data['offset']
+        offset_diff = abs(old_offset - new_offset)
+
+        if offset_diff == 0:
+            score += 30  # Exact same position
+        elif offset_diff <= 3:
+            score += 25  # Very close (minor transcription edits)
+        elif offset_diff <= 10:
+            score += 15  # Close (moderate edits)
+        elif offset_diff <= 20:
+            score += 5   # Somewhat close
+        # else: 0 points
+
+        # Signal 3: Length similarity (bonus up to 10 points)
+        old_length = old_tag.additional_information.get('length', len(old_tag.variation))
+        new_length = new_tag_data['length']
+        length_diff = abs(old_length - new_length)
+
+        if length_diff == 0:
+            score += self.MAX_LENGTH_SCORE
+        elif length_diff <= 2:
+            score += 5
+
+        return score
+
+    def get_ambiguous_matches(self):
+        """Return list of ambiguous matches that were close but didn't make threshold."""
+        return self.ambiguous_matches
+
+    def clear_ambiguous_matches(self):
+        """Clear the ambiguous matches list."""
+        self.ambiguous_matches = []

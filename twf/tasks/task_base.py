@@ -45,7 +45,7 @@ class BaseTWFTask(CeleryTask):
     # Standard descriptions for common task types
     TASK_DESCRIPTIONS = {
         # Document and structure tasks
-        "extract_zip_export_task": "Extraction of Transkribus export files to create document and page structures.",
+        "extract_zip_export_task": "Unified synchronization of documents, pages, and tags from Transkribus export. Intelligently preserves user assignments and parked status.",
         "create_collection": "Creation of a new collection in the project.",
         
         # AI collection processing tasks
@@ -473,10 +473,11 @@ class BaseTWFTask(CeleryTask):
             
             if kwargs:
                 meta.update(kwargs)
-            
-            # Update task state
-            self.update_state(state=status, meta=meta)
-            
+
+            # Update task state (skip for FAILURE as Celery will handle it when exception is raised)
+            if status != "FAILURE":
+                self.update_state(state=status, meta=meta)
+
             # Update database record
             self.twf_task.end_time = end_time
             self.twf_task.status = status

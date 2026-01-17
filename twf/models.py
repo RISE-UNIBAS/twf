@@ -790,6 +790,142 @@ class Document(TimeStampedModel):
         return f"Document {self.document_id}"
 
 
+class DocumentSyncHistory(TimeStampedModel):
+    """
+    DocumentSyncHistory Model
+    -------------------------
+
+    Tracks synchronization history for individual documents from Transkribus exports.
+    Each sync operation creates DocumentSyncHistory records for affected documents,
+    providing a detailed audit trail of what changed during each sync.
+
+    This model enables users to:
+    - View when a document was last synced
+    - See exactly what changed (pages added/removed, tags updated, etc.)
+    - Track which user performed the sync
+    - Link to the full task details for more information
+
+    Attributes
+    ~~~~~~~~~~
+    document : ForeignKey
+        The document this sync history entry relates to.
+    task : ForeignKey
+        The Task that performed this sync operation.
+    project : ForeignKey
+        The project this document belongs to (denormalized for faster queries).
+    user : ForeignKey
+        The user who triggered the sync.
+    sync_type : CharField
+        Type of change: 'created', 'updated', 'unchanged', or 'deleted'.
+    changes : JSONField
+        Detailed JSON structure documenting all changes during sync.
+        Structure:
+        {
+            "pages": {
+                "added": [page_ids],
+                "updated": [page_ids],
+                "deleted": [page_ids]
+            },
+            "tags": {
+                "added": int,
+                "updated": int,
+                "deleted": int,
+                "preserved_assignments": int,
+                "preserved_parked": int,
+                "auto_assigned": int,
+                "offset_shifts": [
+                    {"line": "r_tl_1", "tag": "Wagner", "old_offset": 15, "new_offset": 16}
+                ]
+            },
+            "metadata_updated": bool,
+            "transcription_changes": bool,
+            "warnings": [str]
+        }
+    synced_at : DateTimeField
+        Timestamp when this sync occurred.
+    """
+
+    SYNC_TYPE_CHOICES = [
+        ('created', 'Created'),
+        ('updated', 'Updated'),
+        ('unchanged', 'Unchanged'),
+        ('deleted', 'Deleted'),
+    ]
+
+    document = models.ForeignKey(Document, on_delete=models.CASCADE, related_name='sync_history')
+    """The document this sync history entry relates to."""
+
+    task = models.ForeignKey('Task', on_delete=models.CASCADE, related_name='document_syncs')
+    """The Task that performed this sync operation."""
+
+    project = models.ForeignKey('Project', on_delete=models.CASCADE, related_name='document_sync_history')
+    """The project this document belongs to."""
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='document_syncs')
+    """The user who triggered the sync."""
+
+    sync_type = models.CharField(max_length=20, choices=SYNC_TYPE_CHOICES, default='updated')
+    """Type of change that occurred during sync."""
+
+    changes = models.JSONField(default=dict, blank=True)
+    """Detailed JSON structure documenting all changes during sync."""
+
+    synced_at = models.DateTimeField(auto_now_add=True)
+    """Timestamp when this sync occurred."""
+
+    class Meta:
+        """Meta options for the DocumentSyncHistory model."""
+        ordering = ['-synced_at']
+        indexes = [
+            models.Index(fields=['document', '-synced_at']),
+            models.Index(fields=['task']),
+            models.Index(fields=['project', '-synced_at']),
+        ]
+        verbose_name = 'Document Sync History'
+        verbose_name_plural = 'Document Sync Histories'
+
+    def get_summary(self):
+        """
+        Return a human-readable summary of changes.
+
+        Returns:
+            str: Summary like "+5 tags, -2 tags, ~3 tags" or "No changes"
+        """
+        if self.sync_type == 'unchanged':
+            return "No changes"
+
+        if self.sync_type == 'created':
+            return "Document created"
+
+        if self.sync_type == 'deleted':
+            return "Document deleted"
+
+        parts = []
+        tags = self.changes.get('tags', {})
+
+        if tags.get('added', 0) > 0:
+            parts.append(f"+{tags['added']} tags")
+        if tags.get('deleted', 0) > 0:
+            parts.append(f"-{tags['deleted']} tags")
+        if tags.get('updated', 0) > 0:
+            parts.append(f"~{tags['updated']} tags")
+
+        pages = self.changes.get('pages', {})
+        if pages.get('added'):
+            parts.append(f"+{len(pages['added'])} pages")
+        if pages.get('deleted'):
+            parts.append(f"-{len(pages['deleted'])} pages")
+
+        if self.changes.get('transcription_changes'):
+            parts.append("text changed")
+
+        return ", ".join(parts) if parts else "Updated"
+
+    def __str__(self):
+        """Return the string representation of the DocumentSyncHistory."""
+        return f"Sync: {self.document.document_id} at {self.synced_at} ({self.sync_type})"
+
+
 def page_directory_path(instance, filename):
     """Gets the project name, processes it into a slug (a URL-friendly format without spaces or special characters)"""
     collection_id = instance.document.project.collection_id
