@@ -62,7 +62,13 @@ class TWFHomeView(TWFView):
         user = self.request.user
 
         if user.is_authenticated:
-            nav = [
+            nav = []
+            if self.is_project_set():
+                nav = [
+                    {'url': reverse('twf:project_list'), 'value': 'Change Project'},
+                ]
+
+            nav += [
                 {'url': reverse('twf:user_overview'), 'value': 'Your Profile'},
                 {'url': reverse('twf:user_profile'), 'value': 'Change User Info'},
                 {'url': reverse('twf:user_change_password'), 'value': 'Change Password'},
@@ -124,6 +130,21 @@ class TWFHomeIndexView(TWFHomeView):
             {'url': reverse('twf:home'), 'value': '<i class="fas fa-home"></i>'},
         ]
         return breadcrumbs
+
+
+class TWFProjectListView(LoginRequiredMixin, TWFHomeView):
+    """View to list all available projects for the user to select."""
+    template_name = 'twf/home/project_list.html'
+    page_title = 'Select Project'
+    show_context_help = False
+
+    def get_context_data(self, **kwargs):
+        """Add projects to context."""
+        context = super().get_context_data(**kwargs)
+        if self.request.user.is_authenticated:
+            context['projects'] = self.request.user.profile.get_projects()
+            context['current_project'] = self.get_project()
+        return context
 
 
 class TWFHomeAboutView(TWFHomeView):

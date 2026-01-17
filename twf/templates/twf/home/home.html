@@ -42,13 +42,59 @@
             </div>
 
             {% if projects %}
-                {% for project in projects %}
-                    <a href="{% url 'twf:project_select' project.id %}">Select {{ project.title }}</a>
-                {% endfor %}
+                <div class="row mt-4">
+                    {% for project in projects %}
+                    <div class="col-md-6 col-lg-4 mb-4">
+                        <div class="card h-100 shadow-sm">
+                            <div class="card-header bg-dark text-white">
+                                <h5 class="card-title mb-0">{{ project.title }}</h5>
+                            </div>
+                            <div class="card-body">
+                                {% if project.description %}
+                                <p class="card-text text-muted mb-3">{{ project.description|truncatechars:100 }}</p>
+                                {% else %}
+                                <p class="card-text text-muted mb-3 fst-italic">No description available</p>
+                                {% endif %}
+
+                                <hr class="my-3">
+
+                                <div class="mb-2">
+                                    <i class="fas fa-user me-2 text-muted"></i>
+                                    <small class="text-muted">Owner: {{ project.owner.user.username }}</small>
+                                </div>
+                                <div class="mb-2">
+                                    <i class="fas fa-users me-2 text-muted"></i>
+                                    <small class="text-muted">Members: {{ project.members.count }}</small>
+                                </div>
+                                <div class="mb-2">
+                                    <i class="fas fa-calendar-alt me-2 text-muted"></i>
+                                    <small class="text-muted">Created: {{ project.created_at|date:"M d, Y" }}</small>
+                                </div>
+                                <div class="mb-2">
+                                    <i class="fas fa-circle me-2 {% if project.status == 'open' %}text-success{% else %}text-danger{% endif %}"></i>
+                                    <small class="text-muted">Status:
+                                        <span class="badge {% if project.status == 'open' %}bg-success{% else %}bg-danger{% endif %}">
+                                            {{ project.status|title }}
+                                        </span>
+                                    </small>
+                                </div>
+                            </div>
+                            <div class="card-footer text-center">
+                                <a href="{% url 'twf:project_select' project.id %}" class="btn btn-dark">
+                                    <i class="fas fa-sign-in-alt me-1"></i> Select Project
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
             {% else %}
-                <p class="lead">
-                    You are not a member of any projects.
-                </p>
+                <div class="alert alert-warning d-flex align-items-center gap-2 mt-3" role="alert">
+                    <i class="bi bi-exclamation-triangle-fill"></i>
+                    <div>
+                        You are not a member of any projects. Please contact your project manager or administrator.
+                    </div>
+                </div>
             {% endif %}
         {% endif %}
 
