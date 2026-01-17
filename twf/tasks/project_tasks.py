@@ -657,3 +657,48 @@ def query_project_qwen(self, project_id, user_id, **kwargs):
         'qwen',
         prompt_mode=prompt_mode
     )
+
+
+@shared_task(bind=True, base=BaseTWFTask)
+def query_project_unified(self, project_id, user_id, **kwargs):
+    """
+    Unified task for AI query processing with project documents.
+
+    Supports any AI provider through the generic AI client.
+
+    Args:
+        project_id: Project ID
+        user_id: User ID
+        **kwargs: Must include:
+            - ai_provider: Provider key ('openai', 'genai', 'anthropic', 'mistral', etc.)
+            - model: Model name to use
+            - prompt: The prompt text
+            - role_description: System role description
+            - documents: List of document IDs
+            - prompt_mode (optional): One of "text_only", "images_only", or "text_and_images"
+    """
+    self.validate_task_parameters(kwargs, ['ai_provider', 'model', 'prompt', 'role_description', 'documents'])
+
+    provider = kwargs.get('ai_provider')
+    model = kwargs.get('model')
+    doc_ids = kwargs.pop('documents')
+    documents = self.project.documents.filter(pk__in=doc_ids)
+
+    # Get the prompt mode (defaults to text_only if not provided)
+    prompt_mode = kwargs.pop('prompt_mode', 'text_only')
+
+    # Note about image support for non-supporting providers
+    if prompt_mode in ['images_only', 'text_and_images']:
+        if provider in ['anthropic', 'mistral', 'deepseek', 'qwen']:
+            self.twf_task.text += f"Note: {provider} does not currently support image inputs. Using text-only mode.\n"
+            prompt_mode = 'text_only'
+
+    return self.process_single_ai_request(
+        documents,
+        provider,
+        kwargs['prompt'],
+        kwargs['role_description'],
+        provider,
+        prompt_mode=prompt_mode,
+        model=model
+    )

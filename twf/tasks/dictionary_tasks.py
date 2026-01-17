@@ -270,3 +270,71 @@ def search_mistral_entry(self, project_id, user_id, **kwargs):
     dictionary_entry = DictionaryEntry.objects.get(id=kwargs.get('entry_id'))
     self.process_ai_request([dictionary_entry], 'mistral',
                             kwargs['prompt'], kwargs['role_description'], 'mistral')
+
+
+@shared_task(bind=True, base=BaseTWFTask)
+def search_ai_entries(self, project_id, user_id, **kwargs):
+    """
+    Unified task for AI batch processing of dictionary entries.
+
+    Supports any AI provider through the generic AI client.
+
+    Args:
+        project_id: Project ID
+        user_id: User ID
+        **kwargs: Must include:
+            - dictionary_id: ID of the dictionary to process
+            - ai_provider: Provider key ('openai', 'genai', 'anthropic', 'mistral', etc.)
+            - model: Model name to use
+            - prompt: The prompt template
+            - role_description: System role description
+    """
+    self.validate_task_parameters(kwargs,
+                                  ['dictionary_id', 'ai_provider', 'model', 'prompt', 'role_description'])
+
+    dictionary = Dictionary.objects.get(id=kwargs.get('dictionary_id'))
+    provider = kwargs.get('ai_provider')
+
+    # Map provider keys to the keys expected by process_ai_request
+    # (genai->genai, anthropic->anthropic, etc. - they happen to match)
+    self.process_ai_request(
+        dictionary.entries.all(),
+        provider,
+        kwargs['prompt'],
+        kwargs['role_description'],
+        provider,
+        model=kwargs.get('model')
+    )
+
+
+@shared_task(bind=True, base=BaseTWFTask)
+def search_ai_entry(self, project_id, user_id, **kwargs):
+    """
+    Unified task for AI request (supervised) processing of a single dictionary entry.
+
+    Supports any AI provider through the generic AI client.
+
+    Args:
+        project_id: Project ID
+        user_id: User ID
+        **kwargs: Must include:
+            - entry_id: ID of the dictionary entry to process
+            - ai_provider: Provider key ('openai', 'genai', 'anthropic', 'mistral', etc.)
+            - model: Model name to use
+            - prompt: The prompt template
+            - role_description: System role description
+    """
+    self.validate_task_parameters(kwargs,
+                                  ['entry_id', 'ai_provider', 'model', 'prompt', 'role_description'])
+
+    dictionary_entry = DictionaryEntry.objects.get(id=kwargs.get('entry_id'))
+    provider = kwargs.get('ai_provider')
+
+    self.process_ai_request(
+        [dictionary_entry],
+        provider,
+        kwargs['prompt'],
+        kwargs['role_description'],
+        provider,
+        model=kwargs.get('model')
+    )

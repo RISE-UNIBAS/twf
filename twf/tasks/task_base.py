@@ -235,25 +235,30 @@ class BaseTWFTask(CeleryTask):
             self.twf_task.save(update_fields=["progress", "title"])
 
     def process_ai_request(self, items, client_name, prompt, role_description,
-                           metadata_field, prompt_mode="text_only"):
+                           metadata_field, prompt_mode="text_only", model=None):
         """
         Generalized function to process AI requests for multiple items.
-        
+
         This method handles sending requests to AI providers for a batch of items.
         It tracks progress, manages the AI client, and stores results in each item's metadata.
-        
+
         Args:
             items (QuerySet): Collection of items to process (documents, collection items, etc.)
-            client_name (str): The name of the AI provider to use ('openai', 'genai', etc.) 
+            client_name (str): The name of the AI provider to use ('openai', 'genai', etc.)
             prompt (str): The text prompt to send to the model
             role_description (str): System role description for the AI model
             metadata_field (str): Field name for storing results in each item's metadata
             prompt_mode (str): One of "text_only", "images_only", or "text_and_images".
+            model (str): Optional model name to use. If not provided, uses default_model from credentials.
         """
         # Set up the task with detailed tracking information
         total_items = len(items)
         self.set_total_items(total_items)
         self.create_configured_client(client_name, role_description)
+
+        # Use provided model or fall back to default from credentials
+        self.model = model if model else self.credentials.get('default_model', '')
+
         self._generate_task_init_description(prompt, role_description, prompt_mode)
         is_image_prompt_mode = self._clean_prompt_mode(prompt_mode)
 
@@ -318,7 +323,7 @@ class BaseTWFTask(CeleryTask):
                 successful_items=successful_items,
                 failed_items=failed_items,
                 client_name=client_name,
-                model=self.credentials['default_model'],
+                model=self.model,
                 total_time=total_time,
                 average_time=avg_time)
 
@@ -327,25 +332,25 @@ class BaseTWFTask(CeleryTask):
             # We raise a standard Exception that Celery can serialize properly
             raise Exception(f"{failed_items} items failed to process")
 
-    def process_single_ai_request(self, items, client_name, prompt, role_description, metadata_field, prompt_mode="text_only"):
+    def process_single_ai_request(self, items, client_name, prompt, role_description, metadata_field, prompt_mode="text_only", model=None):
         """
         Process an AI request with possible multimodal content (text + images).
-        
+
         This method handles sending requests to various AI providers (OpenAI, Google Gemini,
         Anthropic Claude, Mistral) with optional multimodal content. It supports three modes:
-        
+
         1. Text Only: Only sends the text prompt and context
         2. Images Only: Sends only images with a minimal text prompt
         3. Text + Images: Sends both text and images
-        
-        For image-based modes, the method automatically selects up to 5 images per document 
+
+        For image-based modes, the method automatically selects up to 5 images per document
         from the provided items. Images are retrieved directly from the Transkribus server
         using their URLs rather than downloading them locally first. The images are scaled
         to 50% of their original size to reduce bandwidth usage and improve processing time.
-        
+
         The method handles provider capability detection and automatic fallback to text-only
         mode when needed, ensuring graceful degradation when an unsupported feature is requested.
-        
+
         Args:
             items (QuerySet): The document items to process. These should have a get_text() method
                              and, for documents, should have associated pages with images.
@@ -356,7 +361,8 @@ class BaseTWFTask(CeleryTask):
             metadata_field (str): Field name for storing results in metadata
             prompt_mode (str): One of "text_only", "images_only", or "text_and_images".
                               Defaults to "text_only".
-        
+            model (str): Optional model name to use. If not provided, uses default_model from credentials.
+
         Technical Details:
             - Image resources are added to the AI client via the add_image_resource() method
             - For OpenAI and Gemini, images are sent as URLs in the prompt content
@@ -364,7 +370,7 @@ class BaseTWFTask(CeleryTask):
             - Images are retrieved via the Page model's get_image_url() method with scale_percent=50
             - For images-only mode with no text, a default prompt is used if none is provided
             - Images are cleared from the client after use with clear_image_resources()
-            
+
         Note:
             If a client doesn't support images but an image mode is requested, the method
             will automatically fall back to text-only mode with an appropriate warning in
@@ -373,6 +379,10 @@ class BaseTWFTask(CeleryTask):
         """
         self.set_total_items(1)
         self.create_configured_client(client_name, role_description)
+
+        # Use provided model or fall back to default from credentials
+        self.model = model if model else self.credentials.get('default_model', '')
+
         self._generate_task_init_description(prompt, role_description, prompt_mode)
 
         is_image_prompt_mode = self._clean_prompt_mode(prompt_mode)
@@ -420,11 +430,13 @@ class BaseTWFTask(CeleryTask):
         
         # Call the API with proper error handling
         try:
-            response, elapsed_time = self.client.prompt(model=self.credentials['default_model'],
+            # Use self.model if available, otherwise fall back to default_model from credentials
+            model_to_use = getattr(self, 'model', None) or self.credentials.get('default_model', '')
+            response, elapsed_time = self.client.prompt(model=model_to_use,
                                                        prompt=full_prompt)
             self.client.clear_image_resources()
             self._handle_task_success(ai_result=response)
-            
+
             # Return the result for display on the page
             return {"ai_result": response}
             
@@ -665,7 +677,9 @@ class BaseTWFTask(CeleryTask):
         try:
             context = item.get_text()
             prompt = prompt + "\n\n" + "Context:\n" + context
-            response, elapsed_time = self.client.prompt(model=self.credentials['default_model'],
+            # Use self.model if available, otherwise fall back to default_model from credentials
+            model_to_use = getattr(self, 'model', None) or self.credentials.get('default_model', '')
+            response, elapsed_time = self.client.prompt(model=model_to_use,
                                                         prompt=prompt)
             return response, elapsed_time
         except Exception as e:
