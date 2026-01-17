@@ -9,15 +9,42 @@
         <table class="table table-borderless align-middle">
             <thead class="table-light">
                 <tr>
-                    <th>Variation Type</th>
-                    <th class="text-end">Total Count</th>
-                    <th>Percentage</th>
-                    <th class="text-end">Grouped</th>
-                    <th>Grouped %</th>
-                    <th class="text-end">Parked</th>
-                    <th>Parked %</th>
-                    <th class="text-end">Unresolved</th>
-                    <th>Unresolved %</th>
+                    <th data-bs-toggle="tooltip" data-bs-placement="top"
+                        title="The type of tag extracted from your documents (e.g., person names, place names, dates)">
+                        Variation Type <i class="fas fa-info-circle text-muted"></i>
+                    </th>
+                    <th class="text-end" data-bs-toggle="tooltip" data-bs-placement="top"
+                        title="Total number of tags of this type across all documents">
+                        Total Count <i class="fas fa-info-circle text-muted"></i>
+                    </th>
+                    <th data-bs-toggle="tooltip" data-bs-placement="top"
+                        title="Percentage of this tag type relative to all tags in the project">
+                        Percentage <i class="fas fa-info-circle text-muted"></i>
+                    </th>
+                    <th class="text-end" data-bs-toggle="tooltip" data-bs-placement="top"
+                        title="Number of tags assigned to dictionary entries or normalized as dates">
+                        Grouped <i class="fas fa-info-circle text-muted"></i>
+                    </th>
+                    <th data-bs-toggle="tooltip" data-bs-placement="top"
+                        title="Percentage of tags that have been successfully grouped">
+                        Grouped % <i class="fas fa-info-circle text-muted"></i>
+                    </th>
+                    <th class="text-end" data-bs-toggle="tooltip" data-bs-placement="top"
+                        title="Number of tags temporarily set aside for later processing">
+                        Parked <i class="fas fa-info-circle text-muted"></i>
+                    </th>
+                    <th data-bs-toggle="tooltip" data-bs-placement="top"
+                        title="Percentage of tags that have been parked">
+                        Parked % <i class="fas fa-info-circle text-muted"></i>
+                    </th>
+                    <th class="text-end" data-bs-toggle="tooltip" data-bs-placement="top"
+                        title="Number of tags not yet grouped or parked, requiring attention">
+                        Unresolved <i class="fas fa-info-circle text-muted"></i>
+                    </th>
+                    <th data-bs-toggle="tooltip" data-bs-placement="top"
+                        title="Percentage of tags that remain unresolved">
+                        Unresolved % <i class="fas fa-info-circle text-muted"></i>
+                    </th>
                 </tr>
             </thead>
             <tbody>
