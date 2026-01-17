@@ -15,7 +15,7 @@ import logging
 from django.utils import timezone
 from celery import Task as CeleryTask
 
-from twf.clients.ai_client import create_ai_client
+from twf.clients.ai_client_adapter import create_ai_client
 from twf.models import Task, Project, User, Document, Page, CollectionItem
 
 logger = logging.getLogger(__name__)
