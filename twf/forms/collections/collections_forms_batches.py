@@ -34,38 +34,6 @@ class CollectionBatchForm(BaseAIBatchForm):
         return 'Start Batch'
 
 
-class CollectionOpenaiBatchForm(CollectionBatchForm):
-    """Form for batch processing Geonames data."""
-
-    def get_button_label(self):
-        """Get the label for the submit button."""
-        return 'Start OpenAI Batch'
-
-
-class CollectionGeminiBatchForm(CollectionBatchForm):
-    """Form for batch processing Geonames data."""
-
-    def get_button_label(self):
-        """Get the label for the submit button."""
-        return 'Start Gemini Batch'
-
-
-class CollectionClaudeBatchForm(CollectionBatchForm):
-    """Form for batch processing Geonames data."""
-
-    def get_button_label(self):
-        """Get the label for the submit button."""
-        return 'Start Claude Batch'
-
-
-class CollectionMistralBatchForm(CollectionBatchForm):
-    """Form for batch processing Geonames data."""
-
-    def get_button_label(self):
-        """Get the label for the submit button."""
-        return 'Start Mistral Batch'
-
-
 class UnifiedCollectionAIBatchForm(CollectionBatchForm):
     """
     Unified form for AI batch processing of collections.

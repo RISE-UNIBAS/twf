@@ -18,23 +18,15 @@ from django.conf import settings
 from django.core.files.storage import default_storage
 from django.http import JsonResponse
 
-from twf.tasks.collection_tasks import search_openai_for_collection, search_gemini_for_collection, \
-    search_claude_for_collection, search_openai_for_collection_item, search_gemini_for_collection_item, \
-    search_claude_for_collection_item, search_mistral_for_collection_item
-from twf.tasks.document_tasks import search_openai_for_docs, search_gemini_for_docs, search_claude_for_docs, \
-    search_mistral_for_docs, search_deepseek_for_docs, search_qwen_for_docs
 from twf.tasks.structure_tasks import extract_zip_export_task
 from twf.tasks.dictionary_tasks import search_gnd_entries, search_geonames_entries, search_wikidata_entries, \
-    search_openai_entries, search_gnd_entry, search_geonames_entry, search_wikidata_entry, search_openai_entry, \
-    search_claude_entries, search_gemini_entries, search_claude_entry, search_gemini_entry, search_mistral_entries, \
-    search_mistral_entry
+    search_gnd_entry, search_geonames_entry, search_wikidata_entry
 from twf.tasks.metadata_tasks import load_sheets_metadata, load_json_metadata
 from twf.tasks.tags_tasks import create_page_tags
-from twf.tasks.project_tasks import copy_project, query_project_openai, query_project_gemini, query_project_claude, \
-    query_project_mistral, query_project_deepseek, query_project_qwen
+from twf.tasks.project_tasks import copy_project
 from twf.tasks.export_tasks import export_project_task, export_to_zenodo_task, export_task
 
-# Note: Unified tasks are imported dynamically in their respective trigger functions to avoid circular imports
+# Note: Unified AI tasks are imported dynamically in their respective trigger functions to avoid circular imports
 from twf.views.views_base import TWFView
 
 def trigger_task(request, task_function, *args, **kwargs):
@@ -148,38 +140,6 @@ def start_dict_wikidata_batch(request):
                         language=language)
 
 
-def start_dict_openai_batch(request):
-    """Start the GND requests as a Celery task."""
-    dictionary_id = request.POST.get('dictionary')
-
-    return trigger_task(request, search_openai_entries,
-                        dictionary_id=dictionary_id)
-
-
-def start_dict_claude_batch(request):
-    """Start the GND requests as a Celery task."""
-    dictionary_id = request.POST.get('dictionary')
-
-    return trigger_task(request, search_claude_entries,
-                        dictionary_id=dictionary_id)
-
-
-def start_dict_gemini_batch(request):
-    """Start the Gemini requests as a Celery task."""
-    dictionary_id = request.POST.get('dictionary')
-
-    return trigger_task(request, search_gemini_entries,
-                        dictionary_id=dictionary_id)
-
-
-def start_dict_mistral_batch(request):
-    """Start the Gemini requests as a Celery task."""
-    dictionary_id = request.POST.get('dictionary')
-
-    return trigger_task(request, search_mistral_entries,
-                        dictionary_id=dictionary_id)
-
-
 def start_dictionaries_batch_unified(request):
     """
     Unified task trigger for dictionary AI batch processing.
@@ -236,33 +196,6 @@ def start_dict_wikidata_request(request):
                         language=language)
 
 
-def start_dict_openai_request(request):
-    dictionary_id = request.GET.get('dictionary_id')
-    return trigger_task(request, search_openai_entry,
-                        dictionary_id=dictionary_id)
-
-
-def start_dict_claude_request(request):
-    """Start the GND requests as a Celery task."""
-    dictionary_id = request.GET.get('dictionary_id')
-    return trigger_task(request, search_claude_entry,
-                        dictionary_id=dictionary_id)
-
-
-def start_dict_gemini_request(request):
-    """Start the GND requests as a Celery task."""
-    dictionary_id = request.GET.get('dictionary_id')
-    return trigger_ai_task(request, search_gemini_entry,
-                           dictionary_id=dictionary_id)
-
-
-def start_dict_mistral_request(request):
-    """Start the GND requests as a Celery task."""
-    dictionary_id = request.GET.get('dictionary_id')
-    return trigger_task(request, search_mistral_entry,
-                        dictionary_id=dictionary_id)
-
-
 def start_dictionaries_request_unified(request):
     """
     Unified task trigger for dictionary AI request (supervised) processing.
@@ -282,46 +215,6 @@ def start_dictionaries_request_unified(request):
 
 ##############################
 ## DOCUMENT TASKS
-def start_openai_doc_batch(request):
-    """ Start the OpenAI requests as a Celery task."""
-    return trigger_ai_task(request,
-                           search_openai_for_docs,
-                           request_level=request.POST.get('request_level'))
-
-
-def start_gemini_doc_batch(request):
-    """ Start the Gemini requests as a Celery task."""
-    return trigger_ai_task(request,
-                           search_gemini_for_docs,
-                           request_level=request.POST.get('request_level'))
-
-
-def start_claude_doc_batch(request):
-    """ Start the Claude requests as a Celery task."""
-    return trigger_ai_task(request,
-                           search_claude_for_docs,
-                           request_level=request.POST.get('request_level'))
-
-
-def start_mistral_doc_batch(request):
-    """ Start the Mistral requests as a Celery task."""
-    return trigger_ai_task(request,
-                           search_mistral_for_docs,
-                           request_level=request.POST.get('request_level'))
-
-def start_deepseek_doc_batch(request):
-    """ Start the DeepSeek requests as a Celery task."""
-    return trigger_ai_task(request,
-                           search_deepseek_for_docs,
-                           request_level=request.POST.get('request_level'))
-
-def start_qwen_doc_batch(request):
-    """ Start the Qwen requests as a Celery task."""
-    return trigger_ai_task(request,
-                           search_qwen_for_docs,
-                           request_level=request.POST.get('request_level'))
-
-
 def start_documents_batch_unified(request):
     """
     Unified task trigger for document AI batch processing.
@@ -380,42 +273,6 @@ def start_sheet_metadata(request):
 
 ##############################
 ## COLLECTION TASKS
-def start_openai_collection_batch(request):
-    collection_id = request.POST.get('collection')
-    return trigger_ai_task(request, search_openai_for_collection,
-                           collection_id=collection_id)
-
-def start_gemini_collection_batch(request):
-    collection_id = request.POST.get('collection')
-    return trigger_ai_task(request, search_gemini_for_collection,
-                           collection_id=collection_id)
-
-def start_claude_collection_batch(request):
-    collection_id = request.POST.get('collection')
-    return trigger_ai_task(request, search_claude_for_collection,
-                           collection_id=collection_id)
-
-def start_openai_collection_request(request):
-    collection_id = request.POST.get('collection_id')
-    return trigger_ai_task(request, search_openai_for_collection_item,
-                           collection_id=collection_id)
-
-def start_gemini_collection_request(request):
-    collection_id = request.POST.get('collection_id')
-    return trigger_ai_task(request, search_gemini_for_collection_item,
-                           collection_id=collection_id)
-
-def start_claude_collection_request(request):
-    collection_id = request.POST.get('collection_id')
-    return trigger_ai_task(request, search_claude_for_collection_item,
-                           collection_id=collection_id)
-
-def start_mistral_collection_request(request):
-    collection_id = request.POST.get('collection_id')
-    return trigger_ai_task(request, search_mistral_for_collection_item,
-                           collection_id=collection_id)
-
-
 def start_collections_batch_unified(request):
     """
     Unified task trigger for collection AI batch processing.
@@ -454,42 +311,6 @@ def start_copy_project(request):
     new_project_name = request.POST.get('new_project_name')
     return trigger_task(request, copy_project,
                         new_project_name=new_project_name)
-
-
-def start_query_project_openai(request):
-    documents = request.POST.getlist('documents')
-    return trigger_ai_task(request, query_project_openai,
-                           documents=documents)
-
-
-def start_query_project_gemini(request):
-    documents = request.POST.getlist('documents')
-    return trigger_ai_task(request, query_project_gemini,
-                           documents=documents)
-
-
-def start_query_project_claude(request):
-    documents = request.POST.getlist('documents')
-    return trigger_ai_task(request, query_project_claude,
-                           documents=documents)
-
-
-def start_query_project_mistral(request):
-    documents = request.POST.getlist('documents')
-    return trigger_ai_task(request, query_project_mistral,
-                           documents=documents)
-
-
-def start_query_project_deepseek(request):
-    documents = request.POST.getlist('documents')
-    return trigger_ai_task(request, query_project_deepseek,
-                           documents=documents)
-
-
-def start_query_project_qwen(request):
-    documents = request.POST.getlist('documents')
-    return trigger_ai_task(request, query_project_qwen,
-                        documents=documents)
 
 
 def start_query_project_unified(request):

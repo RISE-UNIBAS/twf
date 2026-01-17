@@ -80,7 +80,7 @@ class DocumentExtractionBatchForm(BaseBatchForm):
 class ProjectCopyBatchForm(BaseBatchForm):
     """
     Form for copying a project.
-    
+
     This form provides the interface for creating a copy of an existing project.
     """
     new_project_name = forms.CharField(label='New Project Name', required=True,
@@ -90,7 +90,7 @@ class ProjectCopyBatchForm(BaseBatchForm):
     def __init__(self, *args, **kwargs):
         """
         Initialize the project copy form.
-        
+
         Args:
             *args: Variable length argument list.
             **kwargs: Arbitrary keyword arguments.
@@ -102,7 +102,7 @@ class ProjectCopyBatchForm(BaseBatchForm):
     def get_button_label(self):
         """
         Get the label for the submit button.
-        
+
         Returns:
             str: The button label.
         """
@@ -111,7 +111,7 @@ class ProjectCopyBatchForm(BaseBatchForm):
     def get_dynamic_fields(self):
         """
         Get the dynamic fields for the form.
-        
+
         Returns:
             list: A list of form field layouts.
         """
@@ -126,7 +126,7 @@ class ProjectCopyBatchForm(BaseBatchForm):
 class ProjectAIBaseForm(BaseMultiModalAIBatchForm):
     """
     Base form for querying AI models with project documents and optional images.
-    
+
     This form extends the multimodal AI batch form with project-specific functionality
     for selecting documents to include in AI queries.
     """
@@ -139,7 +139,7 @@ class ProjectAIBaseForm(BaseMultiModalAIBatchForm):
     def __init__(self, *args, **kwargs):
         """
         Initialize the project AI base form.
-        
+
         Args:
             *args: Variable length argument list.
             **kwargs: Arbitrary keyword arguments.
@@ -154,7 +154,7 @@ class ProjectAIBaseForm(BaseMultiModalAIBatchForm):
     def get_dynamic_fields(self):
         """
         Get the dynamic fields for the form.
-        
+
         Returns:
             list: A list of form field layouts including document selection.
         """
@@ -168,192 +168,11 @@ class ProjectAIBaseForm(BaseMultiModalAIBatchForm):
     def get_cancel_button_label(self):
         """
         Get the label for the cancel button.
-        
+
         Returns:
             str: The cancel button label.
         """
         return 'Cancel'
-
-
-class OpenAIQueryDatabaseForm(ProjectAIBaseForm):
-    """
-    Form for querying OpenAI models with multimodal support.
-    
-    This form configures the project AI form for OpenAI models,
-    enabling multimodal capabilities for GPT-4 Vision models.
-    """
-
-    def __init__(self, *args, **kwargs):
-        """
-        Initialize the OpenAI query form.
-        
-        Args:
-            *args: Variable length argument list.
-            **kwargs: Arbitrary keyword arguments.
-        """
-        # OpenAI supports multimodal 
-        kwargs['multimodal_support'] = True
-        super().__init__(*args, **kwargs)
-
-    def get_button_label(self):
-        """
-        Get the label for the submit button.
-        
-        Returns:
-            str: The button label.
-        """
-        return 'Ask ChatGPT'
-
-
-class GeminiQueryDatabaseForm(ProjectAIBaseForm):
-    """
-    Form for querying Google Gemini models with multimodal support.
-    
-    This form configures the project AI form for Google Gemini models,
-    which have native multimodal capabilities.
-    """
-
-    def __init__(self, *args, **kwargs):
-        """
-        Initialize the Gemini query form.
-        
-        Args:
-            *args: Variable length argument list.
-            **kwargs: Arbitrary keyword arguments.
-        """
-        # Gemini supports multimodal
-        kwargs['multimodal_support'] = True
-        super().__init__(*args, **kwargs)
-
-    def get_button_label(self):
-        """
-        Get the label for the submit button.
-        
-        Returns:
-            str: The button label.
-        """
-        return 'Ask Gemini'
-
-
-class ClaudeQueryDatabaseForm(ProjectAIBaseForm):
-    """
-    Form for querying Anthropic Claude models.
-    
-    This form configures the project AI form for Claude models.
-    Multimodal support is currently disabled but will be enabled
-    for Claude 3 models in a future update.
-    """
-
-    def __init__(self, *args, **kwargs):
-        """
-        Initialize the Claude query form.
-        
-        Args:
-            *args: Variable length argument list.
-            **kwargs: Arbitrary keyword arguments.
-        """
-        # Temporarily disable multimodal for Claude
-        kwargs['multimodal_support'] = True
-        super().__init__(*args, **kwargs)
-
-    def get_button_label(self):
-        """
-        Get the label for the submit button.
-        
-        Returns:
-            str: The button label.
-        """
-        return 'Ask Claude'
-
-
-class MistralQueryDatabaseForm(ProjectAIBaseForm):
-    """
-    Form for querying Mistral models.
-    
-    This form configures the project AI form for Mistral models,
-    which currently do not support multimodal inputs.
-    """
-
-    def __init__(self, *args, **kwargs):
-        """
-        Initialize the Mistral query form.
-        
-        Args:
-            *args: Variable length argument list.
-            **kwargs: Arbitrary keyword arguments.
-        """
-        # Mistral doesn't support multimodal
-        kwargs['multimodal_support'] = False
-        super().__init__(*args, **kwargs)
-
-    def get_button_label(self):
-        """
-        Get the label for the submit button.
-        
-        Returns:
-            str: The button label.
-        """
-        return 'Ask Mistral'
-
-
-class DeepSeekQueryDatabaseForm(ProjectAIBaseForm):
-    """
-    Form for querying DeepSeek models.
-
-    This form configures the project AI form for DeepSeek models,
-    which currently do not support multimodal inputs.
-    """
-
-    def __init__(self, *args, **kwargs):
-        """
-        Initialize the DeepSeek query form.
-
-        Args:
-            *args: Variable length argument list.
-            **kwargs: Arbitrary keyword arguments.
-        """
-        # DeepSeek doesn't support multimodal
-        kwargs['multimodal_support'] = True
-        super().__init__(*args, **kwargs)
-
-    def get_button_label(self):
-        """
-        Get the label for the submit button.
-
-        Returns:
-            str: The button label.
-        """
-        return 'Ask DeepSeek'
-
-
-class QwenQueryDatabaseForm(ProjectAIBaseForm):
-    """
-    Form for querying Qwen models.
-
-    This form configures the project AI form for Qwen models,
-    which currently do not support multimodal inputs.
-    """
-
-    def __init__(self, *args, **kwargs):
-        """
-        Initialize the Qwen query form.
-
-        Args:
-            *args: Variable length argument list.
-            **kwargs: Arbitrary keyword arguments.
-        """
-        # Qwen doesn't support multimodal
-        kwargs['multimodal_support'] = True
-        super().__init__(*args, **kwargs)
-
-    def get_button_label(self):
-        """
-        Get the label for the submit button.
-
-        Returns:
-            str: The button label.
-        """
-        return 'Ask Qwen'
 
 
 class UnifiedAIQueryForm(ProjectAIBaseForm):

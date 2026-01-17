@@ -34,54 +34,6 @@ class DocumentBatchAIForm(BaseMultiModalAIBatchForm):
         return fields
 
 
-class DocumentBatchOpenAIForm(DocumentBatchAIForm):
-    """Form for running a batch of documents through OpenAI."""
-
-    def get_button_label(self):
-        """Get the label for the submit button."""
-        return 'Run ChatGPT Batch'
-
-
-class DocumentBatchGeminiForm(DocumentBatchAIForm):
-    """Form for running a batch of documents through OpenAI."""
-
-    def get_button_label(self):
-        """Get the label for the submit button."""
-        return 'Run Gemini Project Batch'
-
-
-class DocumentBatchClaudeForm(DocumentBatchAIForm):
-    """Form for running a batch of documents through OpenAI."""
-
-    def get_button_label(self):
-        """Get the label for the submit button."""
-        return 'Run Claude Project Batch'
-
-
-class DocumentBatchMistralForm(DocumentBatchAIForm):
-    """Form for running a batch of documents through OpenAI."""
-
-    def get_button_label(self):
-        """Get the label for the submit button."""
-        return 'Run Mistral Project Batch'
-
-
-class DocumentBatchDeepSeekForm(DocumentBatchAIForm):
-    """Form for running a batch of documents through DeepSeek."""
-
-    def get_button_label(self):
-        """Get the label for the submit button."""
-        return 'Run DeepSeek Project Batch'
-
-
-class DocumentBatchQwenForm(DocumentBatchAIForm):
-    """Form for running a batch of documents through Qwen."""
-
-    def get_button_label(self):
-        """Get the label for the submit button."""
-        return 'Run Qwen Project Batch'
-
-
 class UnifiedDocumentBatchAIForm(DocumentBatchAIForm):
     """
     Unified form for batch processing documents with any AI provider.

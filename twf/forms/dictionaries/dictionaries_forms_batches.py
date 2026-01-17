@@ -54,38 +54,6 @@ class DictionaryAIBatchForm(BaseAIBatchForm):
         )]
 
 
-class DictionariesOpenAIBatchForm(DictionaryAIBatchForm):
-    """Form for batch processing Geonames data."""
-
-    def get_button_label(self):
-        """Get the label for the submit button."""
-        return 'Start OpenAI Batch'
-
-class DictionariesGeminiBatchForm(DictionaryAIBatchForm):
-    """Form for batch processing Geonames data."""
-
-
-    def get_button_label(self):
-        """Get the label for the submit button."""
-        return 'Start Gemini Batch'
-
-
-class DictionariesClaudeBatchForm(DictionaryAIBatchForm):
-    """Form for batch processing Geonames data."""
-
-    def get_button_label(self):
-        """Get the label for the submit button."""
-        return 'Start Claude Batch'
-
-
-class DictionariesMistralBatchForm(DictionaryAIBatchForm):
-    """Form for batch processing Geonames data."""
-
-    def get_button_label(self):
-        """Get the label for the submit button."""
-        return 'Start Mistral Batch'
-
-
 class UnifiedDictionaryAIBatchForm(DictionaryAIBatchForm):
     """
     Unified form for AI batch processing of dictionary entries.
@@ -365,4 +333,3 @@ class WikidataBatchForm(DictionaryBatchForm):
             css_class='row form-row'
         ))
         return fields
-
