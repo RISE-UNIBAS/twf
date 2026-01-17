@@ -40,7 +40,7 @@ class TWFHomeView(TWFView):
         """Get the sub navigation for the home pages."""
         sub_nav = [
             {
-                'name': 'TWF',
+                'name': 'MOSAIC',
                 'options': [
                     {'url': reverse('twf:home'), 'value': 'Home'},
                     {'url': reverse('twf:about'), 'value': 'About'},

@@ -1,0 +1,122 @@
+:root {
+  --bs-dark-rgb: 70, 80, 90;
+}
+
+/* Don't touch text globally inside .bg-dark */
+.bg-dark {
+  background-color: rgb(var(--bs-dark-rgb)) !important;
+}
+
+/* Target only intended header/nav areas */
+.header-dark,
+.navbar-dark,
+.sidebar-dark {
+  background-color: rgb(var(--bs-dark-rgb)) !important;
+  color: #fff !important;
+}
+
+.header-dark h1,
+.header-dark h2,
+.navbar-dark a,
+.sidebar-dark li,
+.sidebar-dark a {
+  color: #fff !important;
+}
+
+/* Buttons */
+.btn-dark {
+  background-color: rgb(var(--bs-dark-rgb)) !important;
+  border-color: rgb(var(--bs-dark-rgb)) !important;
+  color: #fff !important;
+}
+
+.btn-dark:hover,
+.btn-dark:focus {
+  background-color: #5c4033 !important;
+  border-color: #5c4033 !important;
+  color: #fff !important;
+}
+
+/* Soft feedback tones */
+.bg-success,
+.btn-success {
+  background-color: #6c9b7d !important;
+  border-color: #6c9b7d !important;
+  color: #fff !important;
+}
+
+.bg-danger,
+.btn-danger {
+  background-color: #b0645c !important;
+  border-color: #b0645c !important;
+  color: #fff !important;
+}
+
+.bg-warning,
+.btn-warning {
+  background-color: #c9a860 !important;
+  border-color: #c9a860 !important;
+  color: #212529 !important; /* darker text for contrast */
+}
+
+/* Optional: softer text */
+.text-success {
+  color: #6c9b7d !important;
+}
+
+.text-danger {
+  color: #b0645c !important;
+}
+
+.text-warning {
+  color: #c9a860 !important;
+}
+
+.bg-info,
+.alert-info {
+  background-color: #d6e4e0 !important;
+  border-color: #b5cfc8 !important;
+  color: #2c4844 !important;
+}
+
+/* Base sidebar nav item */
+.nav-link.text-dark {
+  color: #5a4734 !important; /* soft warm brown */
+  font-weight: 500;
+}
+
+/* Hover + focus */
+.nav-link.text-dark:hover,
+.nav-link.text-dark:focus {
+  background-color: #a18d7b !important;
+  color: #fff !important;
+}
+
+/* Active/selected nav item */
+.nav-link.active,
+.nav-link[aria-current="page"] {
+  background-color: #8e755d !important;
+  color: #fff !important;
+  font-weight: 600;
+}
+
+/* Disabled sidebar nav items (optional) */
+.nav-link.disabled {
+  color: #b3a99c !important;
+  background-color: transparent !important;
+  pointer-events: none;
+}
+
+.bg-parchment-dark {
+  background-color: #8e755d !important; /* warm darker brown */
+  color: #fff;
+}
+
+.bg-parchment-dark .nav-link {
+  color: #eee !important;
+}
+
+.bg-parchment-dark .nav-link:hover {
+  color: #fff !important;
+  text-decoration: underline;
+}

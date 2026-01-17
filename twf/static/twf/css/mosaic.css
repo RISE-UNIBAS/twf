@@ -36,7 +36,7 @@ body {
 
 .btn-ext:hover::before {
   content: "\f35d"; /* Unicode for FontAwesome icon (here: fa-search) */
-  font-family: "Font Awesome 6 Free";  /* or "Font Awesome 5 Free", depending on your setup */
+  font-family: "Font Awesome 6 Free";
   font-weight: 900; /* 400 for regular, 900 for solid icons */
   margin-right: 0.5em;
   color: #aaa;
@@ -95,7 +95,11 @@ h2::after {
 }
 
 .side-item:hover {
-    background-color: #848484; !important;
+    background-color: #a18d7b !important;
+}
+
+.side-item a:hover {
+    color: #fff !important;
 }
 
 .top-item:hover .nav-link {
