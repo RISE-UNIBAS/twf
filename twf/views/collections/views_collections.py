@@ -67,112 +67,26 @@ class TWFCollectionsView(LoginRequiredMixin, TWFView):
 
     def get_ai_batch_options(self):
         """
-        Get the AI batch options based on the display settings.
-        Only include enabled AI providers in the navigation.
+        Get the AI batch options.
+        Returns simplified navigation with unified AI Batch processing.
         """
-        options = []
-
-        try:
-            # Get the project's display settings
-            project = self.get_project()
-            if not project:
-                return options
-
-            # Get AI provider settings from conf_display
-            conf_display = getattr(project, 'conf_display', {}) or {}
-            ai_settings = conf_display.get('ai_providers', {})
-
-            # Add options for enabled AI providers
-            if ai_settings.get('enable_openai', True):
-                options.append({
-                    'url': reverse('twf:collections_openai_batch'),
-                    'value': 'OpenAI',
-                    'permission': 'ai.manage'
-                })
-
-            if ai_settings.get('enable_gemini', True):
-                options.append({
-                    'url': reverse('twf:collections_gemini_batch'),
-                    'value': 'Gemini',
-                    'permission': 'ai.manage'
-                })
-
-            if ai_settings.get('enable_claude', True):
-                options.append({
-                    'url': reverse('twf:collections_claude_batch'),
-                    'value': 'Claude',
-                    'permission': 'ai.manage'
-                })
-
-            if ai_settings.get('enable_mistral', True):
-                options.append({
-                    'url': reverse('twf:collections_mistral_batch'),
-                    'value': 'Mistral',
-                    'permission': 'ai.manage'
-                })
-
-            # Note: DeepSeek and Qwen are not currently implemented for Collections
-            # but we'll prepare the code for when they are added
-
-        except Exception:
-            # If there's any issue, return an empty list
-            return []
-
+        options = [
+            {'url': reverse('twf:collections_batch_ai_unified'),
+             'value': 'AI Batch Processing',
+             'permission': 'ai.manage'}
+        ]
         return options
 
     def get_ai_request_options(self):
         """
-        Get the AI request options based on the display settings.
-        Only include enabled AI providers in the navigation.
+        Get the AI request options.
+        Returns simplified navigation with unified AI Request processing.
         """
-        options = []
-
-        try:
-            # Get the project's display settings
-            project = self.get_project()
-            if not project:
-                return options
-
-            # Get AI provider settings from conf_display
-            conf_display = getattr(project, 'conf_display', {}) or {}
-            ai_settings = conf_display.get('ai_providers', {})
-
-            # Add options for enabled AI providers
-            if ai_settings.get('enable_openai', True):
-                options.append({
-                    'url': reverse('twf:collections_openai_request'),
-                    'value': 'OpenAI',
-                    'permission': 'collection.edit'
-                })
-
-            if ai_settings.get('enable_gemini', True):
-                options.append({
-                    'url': reverse('twf:collections_gemini_request'),
-                    'value': 'Gemini',
-                    'permission': 'collection.edit'
-                })
-
-            if ai_settings.get('enable_claude', True):
-                options.append({
-                    'url': reverse('twf:collections_claude_request'),
-                    'value': 'Claude',
-                    'permission': 'collection.edit'
-                })
-
-            if ai_settings.get('enable_mistral', True):
-                options.append({
-                    'url': reverse('twf:collections_mistral_request'),
-                    'value': 'Mistral',
-                    'permission': 'collection.edit'
-                })
-
-            # Note: DeepSeek and Qwen are not currently implemented for Collections
-            # but we'll prepare the code for when they are added
-
-        except Exception:
-            # If there's any issue, return an empty list
-            return []
-
+        options = [
+            {'url': reverse('twf:collections_request_ai_unified'),
+             'value': 'AI Request',
+             'permission': 'collection.edit'}
+        ]
         return options
 
 

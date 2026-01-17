@@ -179,6 +179,25 @@ def start_dict_mistral_batch(request):
                         dictionary_id=dictionary_id)
 
 
+def start_dictionaries_batch_unified(request):
+    """
+    Unified task trigger for dictionary AI batch processing.
+    Dispatches to the appropriate provider-specific task based on 'ai_provider'.
+    """
+    PROVIDER_TASKS = {
+        'openai': search_openai_entries,
+        'genai': search_gemini_entries,
+        'anthropic': search_claude_entries,
+        'mistral': search_mistral_entries,
+    }
+
+    provider = request.POST.get('ai_provider', 'openai')
+    task_function = PROVIDER_TASKS.get(provider, search_openai_entries)
+    dictionary_id = request.POST.get('dictionary')
+
+    return trigger_ai_task(request, task_function, dictionary_id=dictionary_id)
+
+
 def start_dict_gnd_request(request):
     dictionary_id = request.GET.get('dictionary_id')
     earliest_birth_year = request.POST.get('earliest_birth_year', None)
@@ -245,6 +264,25 @@ def start_dict_mistral_request(request):
                         dictionary_id=dictionary_id)
 
 
+def start_dictionaries_request_unified(request):
+    """
+    Unified task trigger for dictionary AI request (supervised) processing.
+    Dispatches to the appropriate provider-specific task based on 'ai_provider'.
+    """
+    PROVIDER_TASKS = {
+        'openai': search_openai_entry,
+        'genai': search_gemini_entry,
+        'anthropic': search_claude_entry,
+        'mistral': search_mistral_entry,
+    }
+
+    provider = request.POST.get('ai_provider', 'openai')
+    task_function = PROVIDER_TASKS.get(provider, search_openai_entry)
+    dictionary_id = request.GET.get('dictionary_id')
+
+    return trigger_ai_task(request, task_function, dictionary_id=dictionary_id)
+
+
 ##############################
 ## DOCUMENT TASKS
 def start_openai_doc_batch(request):
@@ -285,6 +323,41 @@ def start_qwen_doc_batch(request):
     return trigger_ai_task(request,
                            search_qwen_for_docs,
                            request_level=request.POST.get('request_level'))
+
+
+def start_documents_batch_unified(request):
+    """
+    Unified task trigger for document AI batch processing.
+
+    Dispatches to the appropriate provider-specific task based on the
+    'ai_provider' parameter from the form.
+    """
+    from twf.tasks.document_tasks import (search_openai_for_docs, search_gemini_for_docs,
+                                          search_claude_for_docs, search_mistral_for_docs,
+                                          search_deepseek_for_docs, search_qwen_for_docs)
+
+    # Map provider keys to task functions
+    PROVIDER_TASKS = {
+        'openai': search_openai_for_docs,
+        'genai': search_gemini_for_docs,
+        'anthropic': search_claude_for_docs,
+        'mistral': search_mistral_for_docs,
+        'deepseek': search_deepseek_for_docs,
+        'qwen': search_qwen_for_docs,
+    }
+
+    # Get the selected provider from the form
+    provider = request.POST.get('ai_provider', 'openai')
+
+    # Get the task function for the provider
+    task_function = PROVIDER_TASKS.get(provider, search_openai_for_docs)
+
+    # Get request level
+    request_level = request.POST.get('request_level')
+
+    # Trigger the appropriate task
+    return trigger_ai_task(request, task_function, request_level=request_level)
+
 
 ##############################
 ## METADATA TASKS
@@ -362,6 +435,45 @@ def start_mistral_collection_request(request):
     return trigger_ai_task(request, search_mistral_for_collection_item,
                            collection_id=collection_id)
 
+
+def start_collections_batch_unified(request):
+    """
+    Unified task trigger for collection AI batch processing.
+    Dispatches to the appropriate provider-specific task based on 'ai_provider'.
+    """
+    PROVIDER_TASKS = {
+        'openai': search_openai_for_collection,
+        'genai': search_gemini_for_collection,
+        'anthropic': search_claude_for_collection,
+        # Note: Mistral batch task not implemented for collections
+    }
+
+    provider = request.POST.get('ai_provider', 'openai')
+    task_function = PROVIDER_TASKS.get(provider, search_openai_for_collection)
+    collection_id = request.POST.get('collection')
+
+    return trigger_ai_task(request, task_function, collection_id=collection_id)
+
+
+def start_collections_request_unified(request):
+    """
+    Unified task trigger for collection AI request (supervised) processing.
+    Dispatches to the appropriate provider-specific task based on 'ai_provider'.
+    """
+    PROVIDER_TASKS = {
+        'openai': search_openai_for_collection_item,
+        'genai': search_gemini_for_collection_item,
+        'anthropic': search_claude_for_collection_item,
+        'mistral': search_mistral_for_collection_item,
+    }
+
+    provider = request.POST.get('ai_provider', 'openai')
+    task_function = PROVIDER_TASKS.get(provider, search_openai_for_collection_item)
+    collection_id = request.POST.get('collection_id')
+
+    return trigger_ai_task(request, task_function, collection_id=collection_id)
+
+
 def start_copy_project(request):
     new_project_name = request.POST.get('new_project_name')
     return trigger_task(request, copy_project,
@@ -402,6 +514,40 @@ def start_query_project_qwen(request):
     documents = request.POST.getlist('documents')
     return trigger_ai_task(request, query_project_qwen,
                         documents=documents)
+
+
+def start_query_project_unified(request):
+    """
+    Unified task trigger for AI queries.
+
+    Dispatches to the appropriate provider-specific task based on the
+    'ai_provider' parameter from the form.
+    """
+    from twf.tasks.project_tasks import (query_project_openai, query_project_gemini,
+                                         query_project_claude, query_project_mistral,
+                                         query_project_deepseek, query_project_qwen)
+
+    # Map provider keys to task functions
+    PROVIDER_TASKS = {
+        'openai': query_project_openai,
+        'genai': query_project_gemini,
+        'anthropic': query_project_claude,
+        'mistral': query_project_mistral,
+        'deepseek': query_project_deepseek,
+        'qwen': query_project_qwen,
+    }
+
+    # Get the selected provider from the form
+    provider = request.POST.get('ai_provider', 'openai')
+
+    # Get the task function for the provider
+    task_function = PROVIDER_TASKS.get(provider, query_project_openai)
+
+    # Get documents list
+    documents = request.POST.getlist('documents')
+
+    # Trigger the appropriate task
+    return trigger_ai_task(request, task_function, documents=documents)
 
 
 def start_export(request):

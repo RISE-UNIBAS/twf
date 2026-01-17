@@ -59,66 +59,16 @@ class TWFDocumentView(LoginRequiredMixin, TWFView):
 
     def get_ai_batch_options(self):
         """
-        Get the AI batch options based on the display settings.
-        Only include enabled AI providers in the navigation.
+        Get the AI batch options.
+
+        Returns simplified navigation with unified AI Batch processing.
+        The AI Batch view provides a dropdown to select from available providers.
         """
-        options = []
-
-        try:
-            # Get the project's display settings
-            project = self.get_project()
-            if not project:
-                return options
-
-            # Get AI provider settings from conf_display
-            conf_display = getattr(project, 'conf_display', {}) or {}
-            ai_settings = conf_display.get('ai_providers', {})
-        except Exception:
-            # If there's any issue, return an empty list
-            return []
-
-        # Add options for enabled AI providers
-        if ai_settings.get('enable_openai', True):
-            options.append({
-                'url': reverse('twf:documents_batch_openai'),
-                'value': 'ChatGPT',
-                'permission': 'ai.manage'
-            })
-
-        if ai_settings.get('enable_gemini', True):
-            options.append({
-                'url': reverse('twf:documents_batch_gemini'),
-                'value': 'Gemini',
-                'permission': 'ai.manage'
-            })
-
-        if ai_settings.get('enable_claude', True):
-            options.append({
-                'url': reverse('twf:documents_batch_claude'),
-                'value': 'Claude',
-                'permission': 'ai.manage'
-            })
-
-        if ai_settings.get('enable_mistral', True):
-            options.append({
-                'url': reverse('twf:documents_batch_mistral'),
-                'value': 'Mistral',
-                'permission': 'ai.manage'
-            })
-
-        if ai_settings.get('enable_deepseek', True):
-            options.append({
-                'url': reverse('twf:documents_batch_deepseek'),
-                'value': 'DeepSeek',
-                'permission': 'ai.manage'
-            })
-
-        if ai_settings.get('enable_qwen', True):
-            options.append({
-                'url': reverse('twf:documents_batch_qwen'),
-                'value': 'Qwen',
-                'permission': 'ai.manage'
-            })
+        options = [
+            {'url': reverse('twf:documents_batch_ai_unified'),
+             'value': 'AI Batch Processing',
+             'permission': 'ai.manage'}
+        ]
 
         return options
 

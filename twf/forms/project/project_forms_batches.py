@@ -15,16 +15,34 @@ from twf.models import Document
 
 class DocumentExtractionBatchForm(BaseBatchForm):
     """
-    Form for extracting documents from a Transkribus export.
-    
-    This form provides the interface for the batch extraction of documents
-    from Transkribus exports.
+    Form for extracting documents from a Transkribus export with smart sync.
+
+    This form provides the interface for the unified synchronization of documents,
+    pages, and tags from Transkribus exports. It includes options to control the
+    sync behavior.
     """
+
+    force_recreate_tags = forms.BooleanField(
+        label='Force Recreate All Tags',
+        required=False,
+        initial=False,
+        help_text='If checked, all tags will be deleted and recreated from scratch. '
+                  'This will lose all dictionary assignments and parked statuses. '
+                  'Leave unchecked to use smart sync that preserves user work.'
+    )
+
+    delete_removed_documents = forms.BooleanField(
+        label='Delete Documents Not in Export',
+        required=False,
+        initial=True,
+        help_text='If checked, documents that exist in the database but are not found '
+                  'in the Transkribus export will be deleted. Uncheck to keep all existing documents.'
+    )
 
     def __init__(self, *args, **kwargs):
         """
         Initialize the document extraction form.
-        
+
         Args:
             *args: Variable length argument list.
             **kwargs: Arbitrary keyword arguments.
@@ -34,20 +52,29 @@ class DocumentExtractionBatchForm(BaseBatchForm):
     def get_button_label(self):
         """
         Get the label for the submit button.
-        
+
         Returns:
             str: The button label.
         """
-        return 'Extract Documents From Transkribus Export'
+        return 'Synchronize Transkribus Export'
 
     def get_dynamic_fields(self):
         """
         Get the dynamic fields for the form.
-        
+
         Returns:
             list: A list of form field layouts.
         """
-        return []
+        return [
+            Row(
+                Column('force_recreate_tags', css_class='form-group col-12 mb-3'),
+                css_class='row form-row'
+            ),
+            Row(
+                Column('delete_removed_documents', css_class='form-group col-12 mb-3'),
+                css_class='row form-row'
+            )
+        ]
 
 
 class ProjectCopyBatchForm(BaseBatchForm):
@@ -327,3 +354,121 @@ class QwenQueryDatabaseForm(ProjectAIBaseForm):
             str: The button label.
         """
         return 'Ask Qwen'
+
+
+class UnifiedAIQueryForm(ProjectAIBaseForm):
+    """
+    Unified form for querying any AI provider with dynamic provider selection.
+
+    This form provides a dropdown to select from available AI providers
+    and dynamically adjusts multimodal support based on the selected provider.
+    """
+
+    # Provider configuration with multimodal support flags
+    PROVIDER_CONFIG = {
+        'openai': {'label': 'OpenAI (ChatGPT)', 'multimodal': True},
+        'genai': {'label': 'Google Gemini', 'multimodal': True},
+        'anthropic': {'label': 'Anthropic Claude', 'multimodal': True},
+        'mistral': {'label': 'Mistral', 'multimodal': False},
+        'deepseek': {'label': 'DeepSeek', 'multimodal': True},
+        'qwen': {'label': 'Qwen', 'multimodal': True},
+    }
+
+    ai_provider = forms.ChoiceField(
+        label='AI Provider',
+        required=True,
+        help_text='Select the AI provider to use for this query.',
+        widget=forms.Select(attrs={
+            'class': 'form-select',
+            'style': 'width: 100%;'
+        })
+    )
+
+    model = forms.CharField(
+        label='Model',
+        required=True,
+        help_text='The AI model to use (e.g., gpt-4o, claude-3-5-sonnet-20241022, gemini-2.0-flash-exp).',
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'style': 'width: 100%;',
+            'placeholder': 'Model name'
+        })
+    )
+
+    def __init__(self, *args, **kwargs):
+        """
+        Initialize the unified AI query form.
+
+        Args:
+            *args: Variable length argument list.
+            **kwargs: Arbitrary keyword arguments.
+        """
+        # Extract project to check enabled providers
+        project = kwargs.get('project')
+
+        # Determine multimodal support based on provider (if specified in data)
+        provider = None
+        if args and isinstance(args[0], dict):
+            provider = args[0].get('ai_provider')
+        elif 'data' in kwargs and kwargs['data']:
+            provider = kwargs['data'].get('ai_provider')
+
+        # Set multimodal support based on provider
+        if provider and provider in self.PROVIDER_CONFIG:
+            kwargs['multimodal_support'] = self.PROVIDER_CONFIG[provider]['multimodal']
+        else:
+            # Default to True for initial form display
+            kwargs['multimodal_support'] = True
+
+        super().__init__(*args, **kwargs)
+
+        # Build provider choices based on project configuration
+        if project:
+            display_conf = project.conf_display.get('ai_providers', {})
+            enabled_providers = []
+
+            for provider_key, provider_info in self.PROVIDER_CONFIG.items():
+                # Check if provider is enabled (default to True if not specified)
+                provider_enabled_key = f"enable_{provider_key.replace('genai', 'gemini').replace('anthropic', 'claude')}"
+                if display_conf.get(provider_enabled_key, True):
+                    enabled_providers.append((provider_key, provider_info['label']))
+
+            self.fields['ai_provider'].choices = enabled_providers
+        else:
+            # Fallback to all providers if no project
+            self.fields['ai_provider'].choices = [
+                (key, info['label']) for key, info in self.PROVIDER_CONFIG.items()
+            ]
+
+        # Set default model from credentials if available
+        if project and provider:
+            creds = project.get_credentials(provider)
+            if creds and 'default_model' in creds and creds['default_model']:
+                self.fields['model'].initial = creds['default_model']
+
+    def get_button_label(self):
+        """
+        Get the label for the submit button.
+
+        Returns:
+            str: The button label.
+        """
+        return 'Ask AI'
+
+    def get_dynamic_fields(self):
+        """
+        Get the dynamic fields for the form.
+
+        Returns:
+            list: A list of form field layouts including provider selection.
+        """
+        # Add provider and model selection at the top
+        provider_fields = [
+            Row(
+                Column('ai_provider', css_class='form-group col-6 mb-3'),
+                Column('model', css_class='form-group col-6 mb-3'),
+                css_class='row form-row'
+            ),
+        ]
+        # Then add parent fields (prompt, role, etc.) and documents
+        return provider_fields + super().get_dynamic_fields()

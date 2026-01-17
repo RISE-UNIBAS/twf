@@ -15,12 +15,13 @@
 {% block content %}
 
     <p class="lead">{{ ai_lead }}</p>
-    {% if not has_ai_credentials %}
+    {% if not has_api_key %}
             <div class="alert alert-warning" role="alert">
-                <strong>Warning!</strong> You have not set up AI credentials yet.
-                Please <a href="{{ ai_credentials_url }}">set up AI credentials</a> before using this feature.
+                <strong>Warning!</strong> You have not set up an API key yet.
+                Please <a href="{{ ai_credentials_url }}">set up API credentials</a> before using this feature.
             </div>
-    {% else %}
+    {% endif %}
+    {% if has_api_key %}
         {% if multimodal_info %}
         <div class="alert alert-info mb-3">
             <i class="fas fa-image me-2"></i> <strong>Input capability:</strong> {{ multimodal_info }}
@@ -48,6 +49,86 @@
 
 {% block script %}
     <script>
+        // Provider configuration for dynamic UI updates
+        const providerConfig = {{ provider_config_json|safe }};
+
+        // Update UI based on selected provider
+        function updateProviderInfo(provider) {
+            if (!providerConfig || !providerConfig[provider]) {
+                return;
+            }
+
+            const config = providerConfig[provider];
+
+            // Update lead text
+            if (config.description) {
+                $('.lead').first().text(config.description);
+            }
+
+            // Update model field with default model (or clear if no default)
+            const modelField = $('#id_model, [name="model"]');
+            if (modelField.length) {
+                if (config.default_model) {
+                    modelField.val(config.default_model);
+                } else {
+                    // Clear the field if no default model is configured
+                    modelField.val('');
+                }
+            }
+
+            // Update multimodal info if present
+            if (config.multimodal_info) {
+                const multimodalAlert = $('.alert-info:has(.fa-image)');
+                if (multimodalAlert.length) {
+                    multimodalAlert.html('<i class="fas fa-image me-2"></i> <strong>Input capability:</strong> ' + config.multimodal_info);
+                    multimodalAlert.show();
+                } else if (config.multimodal) {
+                    // Create multimodal alert if it doesn't exist
+                    const alertHtml = '<div class="alert alert-info mb-3"><i class="fas fa-image me-2"></i> <strong>Input capability:</strong> ' + config.multimodal_info + '</div>';
+                    $('.lead').first().after(alertHtml);
+                }
+            } else {
+                // Hide multimodal alert if provider doesn't support it
+                $('.alert-info:has(.fa-image)').hide();
+            }
+
+            // Update credentials URL
+            if (config.credentials_url) {
+                $('a[href*="project_settings_credentials"]').attr('href', config.credentials_url);
+            }
+
+            // Update credentials warning - only show if NO API KEY is present
+            const warningAlert = $('.alert-warning');
+            if (!config.has_api_key) {
+                if (warningAlert.length === 0) {
+                    const warningHtml = '<div class="alert alert-warning" role="alert"><strong>Warning!</strong> You have not set up an API key yet. Please <a href="' + config.credentials_url + '">set up API credentials</a> before using this feature.</div>';
+                    $('.lead').first().after(warningHtml);
+                } else {
+                    // Update existing warning
+                    warningAlert.html('<strong>Warning!</strong> You have not set up an API key yet. Please <a href="' + config.credentials_url + '">set up API credentials</a> before using this feature.');
+                }
+            } else {
+                warningAlert.remove();
+            }
+        }
+
+        // Listen for provider dropdown changes
+        $(document).ready(function() {
+            const providerSelect = $('#id_ai_provider, [name="ai_provider"]');
+            if (providerSelect.length) {
+                providerSelect.on('change', function() {
+                    const selectedProvider = $(this).val();
+                    updateProviderInfo(selectedProvider);
+                });
+
+                // Initialize on page load
+                const initialProvider = providerSelect.val();
+                if (initialProvider) {
+                    updateProviderInfo(initialProvider);
+                }
+            }
+        });
+
         function format_ai_result(data) {
             let text = (data.text) || "No response text.";
 

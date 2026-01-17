@@ -92,70 +92,17 @@ class TWFProjectView(LoginRequiredMixin, TWFView):
 
     def get_ai_navigation_options(self):
         """
-        Get the AI navigation options based on the display settings.
-        Only include enabled AI providers in the navigation.
+        Get the AI navigation options.
+
+        Returns simplified navigation with Query Database and unified AI Query.
+        The AI Query view provides a dropdown to select from available providers.
         """
-        # Always include the database query option
         options = [
             {'url': reverse('twf:project_query'),
-             'value': 'Query Database', 'permission': 'ai.edit'}
+             'value': 'Query Database', 'permission': 'ai.edit'},
+            {'url': reverse('twf:project_ai_query_unified'),
+             'value': 'AI Query', 'permission': 'ai.edit'}
         ]
-
-        try:
-            # Get the project's display settings
-            project = self.get_project()
-            if not project:
-                return options
-
-            # Get AI provider settings from conf_display
-            conf_display = getattr(project, 'conf_display', {}) or {}
-            ai_settings = conf_display.get('ai_providers', {})
-        except Exception:
-            # If there's any issue, return default options (just the query database option)
-            return options
-
-        # Add options for enabled AI providers
-        if ai_settings.get('enable_openai', True):
-            options.append({
-                'url': reverse('twf:project_ai_query'),
-                'value': 'Ask ChatGPT',
-                'permission': 'ai.edit'
-            })
-
-        if ai_settings.get('enable_gemini', True):
-            options.append({
-                'url': reverse('twf:project_gemini_query'),
-                'value': 'Ask Gemini',
-                'permission': 'ai.edit'
-            })
-
-        if ai_settings.get('enable_claude', True):
-            options.append({
-                'url': reverse('twf:project_claude_query'),
-                'value': 'Ask Claude',
-                'permission': 'ai.edit'
-            })
-
-        if ai_settings.get('enable_mistral', True):
-            options.append({
-                'url': reverse('twf:project_mistral_query'),
-                'value': 'Ask Mistral',
-                'permission': 'ai.edit'
-            })
-
-        if ai_settings.get('enable_deepseek', True):
-            options.append({
-                'url': reverse('twf:project_deepseek_query'),
-                'value': 'Ask DeepSeek',
-                'permission': 'ai.edit'
-            })
-
-        if ai_settings.get('enable_qwen', True):
-            options.append({
-                'url': reverse('twf:project_qwen_query'),
-                'value': 'Ask Qwen',
-                'permission': 'ai.edit'
-            })
 
         return options
 
