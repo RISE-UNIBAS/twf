@@ -17,6 +17,7 @@ from twf.models import Document, Page, DocumentSyncHistory, PageTag
 from twf.utils.page_file_meta_data_reader import extract_transkribus_file_metadata
 from twf.tasks.task_base import BaseTWFTask
 from twf.utils.file_utils import delete_all_in_folder
+from twf.clients.transkribus_api_client import TranskribusAPIClient
 
 logger = logging.getLogger(__name__)
 
@@ -534,6 +535,121 @@ def parse_pages(project, extracting_user, celery_task):
         celery_task.twf_task.save(update_fields=["text"])
 
 
+def enrich_documents_with_api_metadata(project, documents_to_enrich, user, celery_task):
+    """
+    Enrich documents with metadata from Transkribus API.
+
+    Fetches additional metadata (labels, tags, excluded status) from the Transkribus API
+    that is not available in the PageXML export.
+
+    Args:
+        project: Project object
+        documents_to_enrich: Set of document IDs to enrich
+        user: User performing the sync
+        celery_task: BaseTWFTask instance for progress tracking
+
+    Returns:
+        int: Number of documents successfully enriched
+    """
+    if not documents_to_enrich:
+        return 0
+
+    # Get Transkribus credentials
+    try:
+        transkribus_credentials = project.get_credentials('transkribus')
+        username = transkribus_credentials.get('username')
+        password = transkribus_credentials.get('password')
+        collection_id = project.collection_id
+
+        if not username or not password or not collection_id:
+            logger.warning("Missing Transkribus credentials or collection ID, skipping API enrichment")
+            return 0
+
+    except Exception as e:
+        logger.warning(f"Could not retrieve Transkribus credentials: {e}")
+        return 0
+
+    # Initialize API client
+    api_client = TranskribusAPIClient(username, password)
+
+    if not api_client.authenticate():
+        logger.error("Failed to authenticate with Transkribus API, skipping enrichment")
+        if celery_task.twf_task:
+            celery_task.twf_task.text += "  ⚠ Failed to authenticate with Transkribus API, skipping metadata enrichment\n"
+        return 0
+
+    if celery_task.twf_task:
+        celery_task.twf_task.text += f"\n📡 Enriching {len(documents_to_enrich)} documents with Transkribus API metadata...\n"
+        celery_task.twf_task.save(update_fields=["text"])
+
+    enriched_count = 0
+    total_docs = len(documents_to_enrich)
+
+    for idx, doc_id in enumerate(documents_to_enrich, start=1):
+        try:
+            # Get the document instance
+            doc_instance = Document.objects.get(project=project, document_id=doc_id)
+
+            # Fetch enriched metadata from API
+            enriched_data = api_client.enrich_document_metadata(collection_id, int(doc_id))
+
+            if enriched_data:
+                # Update document metadata
+                existing_metadata = doc_instance.metadata or {}
+                if 'transkribus_api' not in existing_metadata:
+                    existing_metadata['transkribus_api'] = {}
+
+                existing_metadata['transkribus_api']['labels'] = enriched_data.get('labels', [])
+                existing_metadata['transkribus_api']['page_labels_available'] = enriched_data.get('page_labels_available', [])
+                doc_instance.metadata = existing_metadata
+                doc_instance.save(current_user=user)
+
+                # Update page metadata with labels and exclusion status
+                page_data = enriched_data.get('pages', {})
+                for page_id, page_info in page_data.items():
+                    try:
+                        page_instance = Page.objects.get(document=doc_instance, tk_page_id=page_id)
+                        page_metadata = page_instance.metadata or {}
+
+                        if 'transkribus_api' not in page_metadata:
+                            page_metadata['transkribus_api'] = {}
+
+                        page_metadata['transkribus_api']['labels'] = page_info.get('labels', [])
+                        page_metadata['transkribus_api']['is_excluded'] = page_info.get('is_excluded', False)
+
+                        page_instance.metadata = page_metadata
+
+                        # Update is_ignored field based on "Exclude" label
+                        if page_info.get('is_excluded', False):
+                            page_instance.is_ignored = True
+
+                        page_instance.save(current_user=user)
+
+                    except Page.DoesNotExist:
+                        logger.warning(f"Page {page_id} not found for document {doc_id}")
+                    except Exception as e:
+                        logger.error(f"Failed to update page {page_id} metadata: {e}")
+
+                enriched_count += 1
+
+                if celery_task.twf_task and idx % 10 == 0:
+                    celery_task.twf_task.text += f"  ✓ Enriched {idx}/{total_docs} documents\n"
+                    celery_task.twf_task.save(update_fields=["text"])
+
+        except Document.DoesNotExist:
+            logger.warning(f"Document {doc_id} not found during enrichment")
+        except Exception as e:
+            logger.error(f"Failed to enrich document {doc_id}: {e}")
+            if celery_task.twf_task:
+                celery_task.twf_task.text += f"  ✗ Failed to enrich document {doc_id}: {e}\n"
+
+    if celery_task.twf_task:
+        celery_task.twf_task.text += f"✓ Successfully enriched {enriched_count}/{total_docs} documents with API metadata\n\n"
+        celery_task.twf_task.save(update_fields=["text"])
+
+    return enriched_count
+
+
 def sync_documents_and_pages(copied_files, project, user, celery_task, delete_removed=True):
     """
     Synchronize documents and pages with Transkribus export.
@@ -542,6 +658,7 @@ def sync_documents_and_pages(copied_files, project, user, celery_task, delete_re
     - Adds new documents and pages
     - Updates existing documents and pages
     - Optionally deletes documents removed from Transkribus
+    - Enriches documents with metadata from Transkribus API
 
     Args:
         copied_files: List of extracted file paths
@@ -673,6 +790,9 @@ def sync_documents_and_pages(copied_files, project, user, celery_task, delete_re
             logger.warning(error_msg)
             if celery_task.twf_task:
                 celery_task.twf_task.text += f"  ✗ Error: {error_msg}\n"
+
+    # Enrich documents with API metadata (labels, tags, excluded status)
+    enrich_documents_with_api_metadata(project, documents_in_export, user, celery_task)
 
     # Parse all pages
     parse_pages(project, user, celery_task)

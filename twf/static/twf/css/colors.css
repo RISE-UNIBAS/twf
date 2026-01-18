@@ -120,3 +120,38 @@
   color: #fff !important;
   text-decoration: underline;
 }
+
+/* Inline tag markers */
+.inline-tag {
+  padding: 2px 4px;
+  border-radius: 3px;
+  cursor: help;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.inline-tag:hover {
+  filter: brightness(0.95);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+}
+
+/* Tag resolved - has dictionary entry */
+.inline-tag.tag-resolved {
+  background-color: #c8e6c9 !important; /* soft green background */
+  color: #2e7d32 !important; /* dark green text */
+  border-bottom: 2px solid #6c9b7d;
+}
+
+/* Tag unresolved - no dictionary entry */
+.inline-tag.tag-unresolved {
+  background-color: #ffccbc !important; /* soft red/orange background */
+  color: #bf360c !important; /* dark red text */
+  border-bottom: 2px solid #b0645c;
+}
+
+/* Tag parked - user has parked it */
+.inline-tag.tag-parked {
+  background-color: #fff9c4 !important; /* soft yellow background */
+  color: #f57f17 !important; /* dark yellow/amber text */
+  border-bottom: 2px solid #c9a860;
+}

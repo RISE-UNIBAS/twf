@@ -13,6 +13,57 @@ from twf.forms.base_batch_forms import BaseBatchForm, BaseMultiModalAIBatchForm
 from twf.models import Document
 
 
+class TranskribusEnrichmentBatchForm(BaseBatchForm):
+    """
+    Form for enriching documents with Transkribus API metadata.
+
+    This form provides the interface for fetching additional document and page metadata
+    (labels, tags, excluded status) from the Transkribus API that is not available in
+    the PageXML export.
+    """
+
+    force = forms.BooleanField(
+        label='Force Re-Enrichment',
+        required=False,
+        initial=False,
+        help_text='If checked, re-fetch API metadata even for documents that already have it. '
+                  'Leave unchecked to only enrich documents without existing API metadata.'
+    )
+
+    def __init__(self, *args, **kwargs):
+        """
+        Initialize the enrichment form.
+
+        Args:
+            *args: Variable length argument list.
+            **kwargs: Arbitrary keyword arguments.
+        """
+        super().__init__(*args, **kwargs)
+
+    def get_button_label(self):
+        """
+        Get the label for the submit button.
+
+        Returns:
+            str: The button label.
+        """
+        return 'Enrich with API Metadata'
+
+    def get_dynamic_fields(self):
+        """
+        Get the dynamic fields for the form.
+
+        Returns:
+            list: A list of form field layouts.
+        """
+        return [
+            Row(
+                Column('force', css_class='form-group col-12 mb-3'),
+                css_class='row form-row'
+            )
+        ]
+
+
 class DocumentExtractionBatchForm(BaseBatchForm):
     """
     Form for extracting documents from a Transkribus export with smart sync.

@@ -37,17 +37,20 @@ class TaskTable(tables.Table):
         elif record.status == "SUCCESS":
             return format_html(
                 '<div class="progress" style="height: 20px;"><div class="progress-bar bg-success" '
-                'role="progressbar" style="width: 100%">Completed</div></div>'
+                'role="progressbar" style="width: 100%">{}</div></div>',
+                'Completed'
             )
         elif record.status == "FAILURE":
             return format_html(
                 '<div class="progress" style="height: 20px;"><div class="progress-bar bg-danger" '
-                'role="progressbar" style="width: 100%">Failed</div></div>'
+                'role="progressbar" style="width: 100%">{}</div></div>',
+                'Failed'
             )
         elif record.status == "CANCELED":
             return format_html(
                 '<div class="progress" style="height: 20px;"><div class="progress-bar bg-dark" '
-                'role="progressbar" style="width: 100%">Cancelled</div></div>'
+                'role="progressbar" style="width: 100%">{}</div></div>',
+                'Cancelled'
             )
         return "-"
 
@@ -86,7 +89,8 @@ class TaskTable(tables.Table):
         )
         
         return format_html(
-            '{}{}{}'.format(view_button, cancel_button, delete_button)
+            '{}{}{}',
+            view_button, cancel_button, delete_button
         )
 
     class Meta:

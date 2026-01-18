@@ -19,6 +19,7 @@ from django.core.files.storage import default_storage
 from django.http import JsonResponse
 
 from twf.tasks.structure_tasks import extract_zip_export_task
+from twf.tasks.transkribus_enrich_tasks import enrich_transkribus_metadata_task
 from twf.tasks.dictionary_tasks import search_gnd_entries, search_geonames_entries, search_wikidata_entries, \
     search_gnd_entry, search_geonames_entry, search_wikidata_entry
 from twf.tasks.metadata_tasks import load_sheets_metadata, load_json_metadata
@@ -86,6 +87,58 @@ def start_extraction(request):
     }
 
     return trigger_task(request, extract_zip_export_task, **kwargs)
+
+
+def start_enrich_metadata(request):
+    """Start Transkribus API metadata enrichment for all documents.
+
+    Optional parameters:
+    - force: Boolean to force re-enrichment even for documents with existing metadata (default: False)
+    """
+    # Extract optional parameters from form
+    force = request.POST.get('force', 'false').lower() == 'true'
+
+    kwargs = {
+        'force': force
+    }
+
+    return trigger_task(request, enrich_transkribus_metadata_task, **kwargs)
+
+
+def start_enrich_document_metadata(request, document_pk):
+    """Start Transkribus API metadata enrichment for a specific document.
+
+    Args:
+        document_pk: The primary key of the document to enrich
+
+    Optional parameters:
+    - force: Boolean to force re-enrichment even if metadata exists (default: True)
+    """
+    import json
+    from twf.models import Document
+
+    # Get the document to find its Transkribus document_id
+    try:
+        document = Document.objects.get(pk=document_pk)
+    except Document.DoesNotExist:
+        return JsonResponse({'status': 'error', 'message': 'Document not found'}, status=404)
+
+    # Parse JSON body if present
+    if request.body:
+        try:
+            data = json.loads(request.body)
+            force = data.get('force', True)
+        except json.JSONDecodeError:
+            force = True
+    else:
+        force = request.POST.get('force', 'true').lower() == 'true'
+
+    kwargs = {
+        'force': force,
+        'document_ids': [document.document_id]  # Pass the Transkribus document ID
+    }
+
+    return trigger_task(request, enrich_transkribus_metadata_task, **kwargs)
 
 
 def start_test_export_task(request):

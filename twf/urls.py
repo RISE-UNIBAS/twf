@@ -58,8 +58,9 @@ from twf.views.project.views_project import TWFProjectQueryView, TWFProjectOverv
     TWFProjectCredentialsSettingsView, \
     TWFProjectPromptsView, TWFProjectTaskSettingsView, TWFProjectCopyView, \
     TWFProjectResetView, TWFProjectUserManagementView, TWFProjectRepositorySettingsView, TWFProjectPromptEditView, \
-    TWFProjectSetupView, TWFProjectTranskribusExtractView, TWFProjectNotesView, TWFProjectPromptDetailView, \
-    TWFProjectNoteEditView, TWFProjectNoteDetailView, TWFProjectPromptSettingsView, TWFProjectDisplaySettingsView
+    TWFProjectSetupView, TWFProjectTranskribusExtractView, TWFProjectTranskribusEnrichView, TWFProjectNotesView, \
+    TWFProjectPromptDetailView, TWFProjectNoteEditView, TWFProjectNoteDetailView, TWFProjectPromptSettingsView, \
+    TWFProjectDisplaySettingsView
 from twf.views.project.views_project_ai import TWFUnifiedAIQueryView
 from twf.views.tags.views_tags import TWFProjectTagsView, TWFProjectTagsOpenView, \
     TWFProjectTagsParkedView, TWFProjectTagsResolvedView, TWFProjectTagsIgnoredView, TWFTagsDatesGroupView, \
@@ -107,6 +108,7 @@ urlpatterns = [
          TWFProjectSetupView.as_view(template_name='twf/project/setup/setup_export.html',
                                      page_title='Request Transkribus Export'), name='project_tk_export'),
     path('project/setup/tk/structure/', TWFProjectTranskribusExtractView.as_view(), name='project_tk_structure'),
+    path('project/setup/tk/enrich/', TWFProjectTranskribusEnrichView.as_view(), name='project_tk_enrich'),
     path('project/setup/tk/test/', TWFProjectSetupView.as_view(template_name='twf/project/setup/test_export.html',
                                                                page_title='Test Transkribus Export'),
          name='project_test_export'),
@@ -286,6 +288,8 @@ urlpatterns = [
     path('celery/remove/<str:task_id>/', task_remove_view, name='celery_task_remove'),
 
     path('celery/transkribus/extract/', start_extraction, name='task_transkribus_extract_export'),
+    path('celery/transkribus/enrich/', start_enrich_metadata, name='task_transkribus_enrich_metadata'),
+    path('celery/transkribus/enrich/document/<int:document_pk>/', start_enrich_document_metadata, name='task_enrich_document_metadata'),
     path('celery/project/copy/', start_copy_project, name='task_project_copy'),
 
     # Unified AI query task trigger

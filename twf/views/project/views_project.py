@@ -15,7 +15,8 @@ from django_tables2 import SingleTableView
 
 from twf.forms.dynamic_forms import DynamicForm
 from twf.forms.filters.filters import TaskFilter, PromptFilter, NoteFilter
-from twf.forms.project.project_forms_batches import ProjectCopyBatchForm, DocumentExtractionBatchForm
+from twf.forms.project.project_forms_batches import ProjectCopyBatchForm, DocumentExtractionBatchForm, \
+    TranskribusEnrichmentBatchForm
 from twf.forms.project.project_forms import QueryDatabaseForm, GeneralSettingsForm, CredentialsForm, \
     TaskSettingsForm, RepositorySettingsForm, PromptForm, NoteForm, PromptSettingsForm, UserPermissionForm, DisplaySettingsForm
 from twf.models import Page, PageTag, Prompt, Task, Note, UserProfile
@@ -76,6 +77,8 @@ class TWFProjectView(LoginRequiredMixin, TWFView):
                      'value': 'Request Transkribus Export', 'permission': 'project.manage'},
                     {'url': reverse('twf:project_tk_structure'),
                      'value': 'Extract Transkribus Export', 'permission': 'project.manage'},
+                    {'url': reverse('twf:project_tk_enrich'),
+                     'value': 'Enrich with API Metadata', 'permission': 'project.manage'},
                     {'url': reverse('twf:project_copy'),
                      'value': 'Create Copy of Project', 'permission': 'project.manage'},
                     {'url': reverse('twf:project_reset'),
@@ -941,6 +944,23 @@ class TWFProjectTranskribusExtractView(FormView, TWFProjectView):
 
         kwargs['data-start-url'] = reverse_lazy('twf:task_transkribus_extract_export')
         kwargs['data-message'] = "Are you sure you want to extract your Transkribus export?"
+
+        return kwargs
+
+
+class TWFProjectTranskribusEnrichView(FormView, TWFProjectView):
+    """View for enriching documents with Transkribus API metadata."""
+    template_name = 'twf/project/setup/setup_enrich.html'
+    page_title = 'Enrich with API Metadata'
+    form_class = TranskribusEnrichmentBatchForm
+    success_url = reverse_lazy('twf:project_tk_enrich')
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['project'] = self.get_project()
+
+        kwargs['data-start-url'] = reverse_lazy('twf:task_transkribus_enrich_metadata')
+        kwargs['data-message'] = "Are you sure you want to enrich documents with Transkribus API metadata?"
 
         return kwargs
 

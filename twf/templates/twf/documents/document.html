@@ -8,7 +8,14 @@
         <div class="col-12">
             <div class="card">
                 <div class="card-body">
-                    <h5 class="card-title">Document Details</h5>
+                    <h5 class="card-title">
+                        Document Details
+                        <button type="button" class="btn btn-sm btn-outline-primary float-end"
+                                onclick="updatePageMetadata({{ document.document_id }})"
+                                title="Refresh metadata from Transkribus API">
+                            <i class="fa fa-refresh me-1"></i>Update API Metadata
+                        </button>
+                    </h5>
                     <table class="table">
                         <tr>
                             <td>Database ID / Transkribus ID</td>
@@ -75,25 +82,16 @@
                                         Tags: <span class="badge bg-secondary">{{ page.num_tags }}</span>
                                     </p>
                                     <div class="card-text px-2 bg-light">
-                                        {% for block in page.parsed_data.elements %}
-                                            <span class="badge bg-info">{{ block.element_data.custom_structure.structure.type }}</span>
+                                        {% load twf_filters %}
+                                        {% for block in page|mark_tags_inline %}
+                                            <span class="badge bg-info">{{ block.structure_type }}</span>
                                             <p class="small">
-                                                {% for line in block.element_data.text_lines %}
+                                                {% for line in block.text_lines %}
                                                     {{ line }}<br/>
                                                 {% endfor %}
                                             </p>
                                             {% if not forloop.last %}
                                                 <hr/>
-                                            {% endif %}
-                                        {% endfor %}
-                                    </div>
-                                    <div class="card-text px-2 bg-light">
-                                        Tags:
-                                        {% for tag in page.tags.all %}
-                                            {% if tag.dictionary_entry %}
-                                                <span class="badge bg-success">{{ tag.variation }}: {{ tag.dictionary_entry }}</span>
-                                            {% else %}
-                                                <span class="badge bg-danger">{{ tag.variation }}</span>
                                             {% endif %}
                                         {% endfor %}
                                     </div>
@@ -229,4 +227,38 @@
 
 {% block script %}
     <script type="text/javascript" src="{% static 'twf/js/handle_metadata.js' %}"></script>
+    <script type="text/javascript">
+        function updatePageMetadata(documentId) {
+            if (!confirm('This will fetch the latest metadata from Transkribus API for this document. Continue?')) {
+                return;
+            }
+
+            const url = "/celery/transkribus/enrich/document/{{ document.pk }}/";
+
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    force: true
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    alert('Metadata update started! Task ID: ' + data.task_id);
+                    // Redirect to task monitor
+                    window.location.href = "/project/task/monitor/";
+                } else {
+                    alert('Error starting task: ' + (data.message || 'Unknown error'));
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Failed to start metadata update task');
+            });
+        }
+    </script>
 {% endblock %}
