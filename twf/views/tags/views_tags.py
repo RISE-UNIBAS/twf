@@ -105,6 +105,7 @@ class TWFTagsOverviewView(TWFTagsView):
 
         project = self.get_project()
         total_pagetags = PageTag.objects.filter(page__document__project=project).count()
+        excluded_types = get_excluded_types(project)
 
         # Organize by dictionary type to find the most used entry per type
         entry_counts = PageTag.objects.filter(
@@ -126,19 +127,23 @@ class TWFTagsOverviewView(TWFTagsView):
                 top_entries_per_type[dtype].append(entry)
 
         # Counting each variation_type in PageTags within a specific project
-        variation_type_edit_counts = PageTag.objects.filter(
+        # Split into main (non-ignored) and ignored
+        variation_type_edit_counts_all = PageTag.objects.filter(
             page__document__project=project
         ).values('variation_type').annotate(
             count=Count('variation_type')
         ).order_by('-count')
 
-        total_tag_types = variation_type_edit_counts.count()  # Total number of tag types
-        total_tags = total_pagetags  # Total number of tags
+        # Separate main and ignored tags
+        main_variation_types = []
+        ignored_variation_types = []
 
-        # Calculate percentages and other stats for each variation type
-        grouped_percentages = []  # List to store grouped percentages for calculating average
+        for variation in variation_type_edit_counts_all:
+            # Add tag type translation
+            tag_type = variation['variation_type']
+            translated_type = get_translated_tag_type(project, tag_type)
+            variation['dict_type'] = translated_type if translated_type != tag_type else None
 
-        for variation in variation_type_edit_counts:
             variation['percentage'] = (variation['count'] / total_pagetags * 100) if total_pagetags > 0 else 0
 
             if variation['variation_type'] in get_date_types(project):
@@ -170,7 +175,6 @@ class TWFTagsOverviewView(TWFTagsView):
 
             variation['grouped_percentage'] = (variation['grouped'] / variation['count'] * 100) \
                 if variation['count'] > 0 else 0
-            grouped_percentages.append(variation['grouped_percentage'])  # Collect grouped percentage for averaging
             variation['parked'] = PageTag.objects.filter(
                 page__document__project=project,
                 variation_type=variation['variation_type'],
@@ -181,15 +185,26 @@ class TWFTagsOverviewView(TWFTagsView):
             variation['unresolved_percentage'] = (variation['unresolved'] / variation['count'] * 100) \
                 if variation['count'] > 0 else 0
 
-        # Calculate average grouped percentage
+            # Categorize as main or ignored
+            if tag_type in excluded_types:
+                ignored_variation_types.append(variation)
+            else:
+                main_variation_types.append(variation)
+
+        # Calculate average grouped percentage for main tags
+        grouped_percentages = [v['grouped_percentage'] for v in main_variation_types]
         average_grouped_percentage = sum(grouped_percentages) / len(grouped_percentages) if grouped_percentages else 0
+
+        total_tag_types = len(main_variation_types)
 
         context['stats'] = {
             'most_used_entries_per_type': dict(top_entries_per_type),
-            'variation_type_edit_counts': variation_type_edit_counts,
+            'variation_type_edit_counts': main_variation_types,
+            'ignored_variation_type_counts': ignored_variation_types,
             'total_tag_types': total_tag_types,
-            'total_tags': total_tags,
-            'average_grouped_percentage': average_grouped_percentage
+            'total_tags': total_pagetags,
+            'average_grouped_percentage': average_grouped_percentage,
+            'has_ignored_tags': len(ignored_variation_types) > 0
         }
 
         return context
@@ -297,6 +312,13 @@ class TWFTagsGroupView(TWFTagsView):
         context['tag'] = unassigned_tag
         if unassigned_tag:
             context['closest'] = get_closest_variations(unassigned_tag)
+            # Count identical unparked tags with same variation
+            identical_count = PageTag.objects.filter(
+                page__document__project=project,
+                variation=unassigned_tag.variation,
+                is_parked=False
+            ).count()
+            context['identical_tag_count'] = identical_count
         try:
             dictionary = self.get_project().selected_dictionaries.get(type=dict_type)
             context['dictionary'] = dictionary
@@ -408,16 +430,16 @@ class TWFProjectTagsView(SingleTableMixin, FilterView, TWFTagsView):
     def get_context_data(self, **kwargs):
         """Get the context data."""
         context = super().get_context_data(**kwargs)
-        
+
         # Basic context
         context['page_title'] = self.page_title
         context['filter'] = self.filterset
-        
+
         # Tag statistics
         project = self.get_project()
         all_tags = PageTag.objects.filter(page__document__project=project)
         excluded_types = get_excluded_types(project)
-        
+
         # Tag statistics for the header
         stats = {
             'total': all_tags.exclude(variation_type__in=excluded_types).count(),
@@ -425,7 +447,7 @@ class TWFProjectTagsView(SingleTableMixin, FilterView, TWFTagsView):
                 Q(dictionary_entry__isnull=False) | Q(date_variation_entry__isnull=False)
             ).count(),
             'open': all_tags.exclude(variation_type__in=excluded_types).filter(
-                dictionary_entry__isnull=True, 
+                dictionary_entry__isnull=True,
                 date_variation_entry__isnull=True,
                 is_parked=False
             ).count(),
@@ -433,7 +455,7 @@ class TWFProjectTagsView(SingleTableMixin, FilterView, TWFTagsView):
             'ignored': all_tags.filter(variation_type__in=excluded_types).count()
         }
         context['tag_stats'] = stats
-        
+
         return context
 
 

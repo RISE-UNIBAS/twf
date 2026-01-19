@@ -7,7 +7,15 @@
         {% if tag %}
             <div class="my-3 p-3 border rounded" style="background-color: khaki">
                 <p class="text-center" style="color: #7c7c7c">Try to group:
-                    <a href="{% url 'twf:tags_park' tag.id %}" class="btn btn-secondary float-end">Park</a></p>
+                    <span class="float-end">
+                        <a href="{% url 'twf:tags_park' tag.id %}" class="btn btn-secondary">Park</a>
+                        <a href="{% url 'twf:tags_park_all' tag.id %}" class="btn btn-warning ms-2"
+                           data-bs-toggle="tooltip" title="Park all {{ identical_tag_count }} tag(s) with variation '{{ tag.variation }}'">
+                            Park All Identical
+                            <span class="badge bg-dark">{{ identical_tag_count }}</span>
+                        </a>
+                    </span>
+                </p>
                 <p class="display-6 text-center">{{ tag.variation }}</p>
 
                 {% if tag.additional_information.line_text %}
@@ -39,6 +47,12 @@
                             <div class="row border">
                                 <div class="col-1">
                                     <span class="badge" style="background-color: {% value_to_color close.1 %}">{{ close.1 }}</span>
+                                    {% if close.2 > 1 %}
+                                        <span class="badge bg-success mt-1" data-bs-toggle="tooltip"
+                                              title="{{ close.2 }} variations match strongly">
+                                            <i class="fa fa-star"></i> {{ close.2 }}
+                                        </span>
+                                    {% endif %}
                                 </div>
                                 <div class="col-3">
                                    {{ close.0.entry }}

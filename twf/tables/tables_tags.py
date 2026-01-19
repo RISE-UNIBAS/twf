@@ -44,33 +44,36 @@ class TagTable(tables.Table):
         return ["date", "date_type_2"]  # Replace with actual variation types for dates
 
     def render_options(self, record):
+        from django.utils.safestring import mark_safe
 
-        return format_html(
-            '{} {} {} {}',
-            format_html(
-                '<a href="{}" class="btn btn-sm btn-dark me-1"'
-                '  data-bs-toggle="tooltip" data-bs-placement="bottom" title="Park tag (put aside for later)">'
-                '<i class="fa fa-box-archive"></i></a>',
-                reverse_lazy("twf:tags_park", kwargs={"pk": record.pk})
-            ),
-            format_html(
-                '<a href="{}" class="btn btn-sm btn-ext me-1" target="_blank"'
-                '  data-bs-toggle="tooltip" data-bs-placement="bottom" title="View on Transkribus">'
-                '<i class="fa fa-scroll"></i></a>',
-                record.get_transkribus_url()
-            ),
-            format_html(
-                '<a href="{}" class="btn btn-sm btn-dark me-1"'
-                '  data-bs-toggle="tooltip" data-bs-placement="bottom" title="Assign to dictionary entry">'
-                '<i class="fa fa-hand-point-right"></i></a>',
-                reverse_lazy("twf:tags_assign", kwargs={"pk": record.pk})
-            ),
-            format_html(
-                '<a href="#" class="btn btn-sm btn-danger show-danger-modal"'
-                '  data-message="Are you sure you want to delete this tag?" '
-                '  data-redirect-url="{}" '
-                '  data-bs-toggle="tooltip" data-bs-placement="bottom" title="Delete tag">'
-                '<i class="fa fa-trash"></i></a>',
-                reverse_lazy("twf:tags_delete", kwargs={"pk": record.pk})
-            )
+        park_button = format_html(
+            '<a href="{}" class="btn btn-sm btn-dark me-1"'
+            '  data-bs-toggle="tooltip" data-bs-placement="bottom" title="Park tag (put aside for later)">'
+            '<i class="fa fa-box-archive"></i></a>',
+            reverse_lazy("twf:tags_park", kwargs={"pk": record.pk})
         )
+
+        transkribus_button = format_html(
+            '<a href="{}" class="btn btn-sm btn-ext me-1" target="_blank"'
+            '  data-bs-toggle="tooltip" data-bs-placement="bottom" title="View on Transkribus">'
+            '<i class="fa fa-scroll"></i></a>',
+            record.get_transkribus_url()
+        )
+
+        assign_button = format_html(
+            '<a href="{}" class="btn btn-sm btn-dark me-1"'
+            '  data-bs-toggle="tooltip" data-bs-placement="bottom" title="Assign to dictionary entry">'
+            '<i class="fa fa-hand-point-right"></i></a>',
+            reverse_lazy("twf:tags_assign", kwargs={"pk": record.pk})
+        )
+
+        delete_button = format_html(
+            '<a href="#" class="btn btn-sm btn-danger show-danger-modal"'
+            '  data-message="Are you sure you want to delete this tag?" '
+            '  data-redirect-url="{}" '
+            '  data-bs-toggle="tooltip" data-bs-placement="bottom" title="Delete tag">'
+            '<i class="fa fa-trash"></i></a>',
+            reverse_lazy("twf:tags_delete", kwargs={"pk": record.pk})
+        )
+
+        return mark_safe(f'{park_button}{transkribus_button}{assign_button}{delete_button}')

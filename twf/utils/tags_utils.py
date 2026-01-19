@@ -69,7 +69,18 @@ def get_date_types(project):
 
 
 def get_closest_variations(page_tag):
-    """Return the 5 closest variations to the tag."""
+    """
+    Return the 5 closest dictionary entries to the tag.
+
+    Groups variations by entry and returns unique entries.
+    Entries with multiple strong matches are marked as such.
+
+    Returns:
+        List of tuples: (variation, score, match_count)
+        - variation: The best matching Variation object for this entry
+        - score: The highest similarity score for this entry
+        - match_count: Number of variations with score >= 80 for this entry
+    """
 
     dict_type = page_tag.variation_type
     dict_type = get_translated_tag_type(page_tag.page.document.project, dict_type)
@@ -79,18 +90,38 @@ def get_closest_variations(page_tag):
         entry__dictionary__type=dict_type)
     variations_list = [variation.variation for variation in variations]
 
-    # Using fuzzywuzzy to find the top 5 closest matches
-    top_matches = process.extract(page_tag.variation, variations_list, limit=5)
+    # Get many more matches to ensure we capture all good matches per entry
+    # Use limit=None to get all matches, or a high number like 50
+    all_matches = process.extract(page_tag.variation, variations_list, limit=50)
 
-    # Retrieve the matched Variation objects
-    closest_variations = []
-    for match in top_matches:
+    # Group matches by dictionary entry
+    entry_matches = {}  # {entry_id: [(variation, score), ...]}
+
+    for match in all_matches:
         variation_text, score = match
         matched_variation = variations.filter(variation=variation_text).first()
         if matched_variation:
-            closest_variations.append((matched_variation, score))
+            entry_id = matched_variation.entry.id
+            if entry_id not in entry_matches:
+                entry_matches[entry_id] = []
+            entry_matches[entry_id].append((matched_variation, score))
 
-    return closest_variations
+    # For each entry, determine the best variation and count strong matches
+    entry_results = []
+    for entry_id, matches in entry_matches.items():
+        # Sort matches by score (highest first)
+        matches.sort(key=lambda x: x[1], reverse=True)
+        best_variation, best_score = matches[0]
+
+        # Count how many variations have a strong match (score >= 80)
+        strong_match_count = sum(1 for _, score in matches if score >= 80)
+
+        entry_results.append((best_variation, best_score, strong_match_count))
+
+    # Sort entries by best score and return top 5
+    entry_results.sort(key=lambda x: x[1], reverse=True)
+
+    return entry_results[:5]
 
 
 def assign_tag(page_tag, user):

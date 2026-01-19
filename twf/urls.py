@@ -42,7 +42,7 @@ from twf.views.collections.views_collections import TWFCollectionsReviewView, TW
     TWFCollectionsCreateView, TWFCollectionsDetailView, TWFCollectionsEditView, TWFCollectionsAddDocumentView, \
     TWFCollectionItemEditView, TWFCollectionItemView, TWFCollectionListView
 from twf.views.views_base import help_content
-from twf.views.tags.views_crud import park_tag, unpark_tag, ungroup_tag, delete_tag
+from twf.views.tags.views_crud import park_tag, park_all_identical_tags, unpark_tag, ungroup_tag, delete_tag
 from twf.views.dictionaries.views_dictionaries import TWFDictionaryOverviewView, TWFDictionaryDictionaryView, \
     TWFDictionaryDictionaryEditView, TWFDictionaryDictionaryEntryEditView, TWFDictionaryDictionaryEntryView, \
     TWFDictionaryNormDataView, TWFDictionaryCreateView, TWFDictionaryDictionariesView, \
@@ -182,6 +182,7 @@ urlpatterns = [
     path('tags/view/ignored/', TWFProjectTagsIgnoredView.as_view(), name='tags_view_ignored'),
     # Park and unpark tags
     path('tags/park/<int:pk>/', park_tag, name='tags_park'),
+    path('tags/park-all/<int:pk>/', park_all_identical_tags, name='tags_park_all'),
     path('tags/unpark/<int:pk>/', unpark_tag, name='tags_unpark'),
     path('tags/ungroup/<int:pk>/', ungroup_tag, name='tags_ungroup'),
     path('tags/delete/<int:pk>/', delete_tag, name='tags_delete'),
