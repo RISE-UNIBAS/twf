@@ -95,7 +95,7 @@ class DictionaryEntryTable(tables.Table):
         """Renders the variations column with badges for each variation."""
         variations = record.variations.all()
         if not variations:
-            return format_html('<span class="text-muted">No variations</span>')
+            return format_html('<span class="text-muted">{}</span>', 'No variations')
         
         html = ""
         for var in variations[:5]:  # Limit to first 5 variations to avoid overflow
@@ -110,10 +110,10 @@ class DictionaryEntryTable(tables.Table):
     def render_metadata(self, record):
         """Renders the metadata column with truncated content and status badge."""
         if not record.metadata:
-            return format_html('<span class="badge bg-warning">No data</span>')
-        
+            return format_html('<span class="badge bg-warning">{}</span>', 'No data')
+
         # Show a success badge for entries with metadata
-        status_badge = format_html('<span class="badge bg-success mb-1">Normalized</span>')
+        status_badge = '<span class="badge bg-success mb-1">Normalized</span>'
         
         # Extract key information from metadata
         metadata_info = ""

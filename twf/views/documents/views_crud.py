@@ -61,3 +61,31 @@ def delete_document_metadata(request, pk, base_key):
             return JsonResponse({"error": "Key does not exist."}, status=404)
 
         return JsonResponse({"success": True})
+
+
+@login_required
+def update_document_options(request, pk):
+    """Update document status and workflow remarks."""
+    if request.method == "POST":
+        document = get_object_or_404(Document, pk=pk)
+
+        # Update status if provided
+        status = request.POST.get('status')
+        if status and status in dict(Document.STATUS_CHOICES):
+            document.status = status
+
+        # Update is_parked if provided
+        is_parked = request.POST.get('is_parked')
+        if is_parked is not None:
+            document.is_parked = is_parked == 'true'
+
+        # Update workflow_remarks
+        workflow_remarks = request.POST.get('workflow_remarks', '')
+        document.workflow_remarks = workflow_remarks
+
+        document.save(current_user=request.user)
+        messages.success(request, 'Document options updated successfully.')
+
+        return redirect('twf:view_document', pk=pk)
+
+    return redirect('twf:view_document', pk=pk)

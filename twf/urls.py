@@ -22,7 +22,8 @@ from twf.views.dictionaries.views_dictionaries_ai import TWFDictionaryGNDBatchVi
     TWFUnifiedDictionaryAIBatchView, TWFUnifiedDictionaryAIRequestView
 from twf.views.dictionaries.views_crud import remove_dictionary_from_project, add_dictionary_to_project, skip_entry, \
     delete_variation, delete_dictionary_entry
-from twf.views.documents.views_crud import update_document_metadata, delete_document_metadata
+from twf.views.documents.views_crud import update_document_metadata, delete_document_metadata, \
+    update_document_options
 from twf.views.documents.views_documents import TWFDocumentsOverviewView, TWFDocumentsBrowseView, \
     TWFDocumentNameView, TWFDocumentDetailView, TWFDocumentReviewView, TWFDocumentsSearchView
 from twf.views.documents.views_documents_ai import TWFUnifiedDocumentBatchView
@@ -60,7 +61,7 @@ from twf.views.project.views_project import TWFProjectQueryView, TWFProjectOverv
     TWFProjectResetView, TWFProjectUserManagementView, TWFProjectRepositorySettingsView, TWFProjectPromptEditView, \
     TWFProjectSetupView, TWFProjectTranskribusExtractView, TWFProjectTranskribusEnrichView, TWFProjectNotesView, \
     TWFProjectPromptDetailView, TWFProjectNoteEditView, TWFProjectNoteDetailView, TWFProjectPromptSettingsView, \
-    TWFProjectDisplaySettingsView
+    TWFProjectDisplaySettingsView, TWFProjectWorkflowSettingsView
 from twf.views.project.views_project_ai import TWFUnifiedAIQueryView
 from twf.views.tags.views_tags import TWFProjectTagsView, TWFProjectTagsOpenView, \
     TWFProjectTagsParkedView, TWFProjectTagsResolvedView, TWFProjectTagsIgnoredView, TWFTagsDatesGroupView, \
@@ -143,6 +144,7 @@ urlpatterns = [
     path('project/settings/repositories/', TWFProjectRepositorySettingsView.as_view(),
          name='project_settings_repository'),
     path('project/settings/display/', TWFProjectDisplaySettingsView.as_view(), name='project_settings_display'),
+    path('project/settings/workflows/', TWFProjectWorkflowSettingsView.as_view(), name='project_settings_workflows'),
     path('project/user/management/', TWFProjectUserManagementView.as_view(), name='user_management'),
     # Redirect permissions URL to the user management view
     path('project/permissions/', TWFProjectUserManagementView.as_view(), name='user_roles'),
@@ -162,6 +164,7 @@ urlpatterns = [
     path('documents/review/', TWFDocumentReviewView.as_view(), name='documents_review'),
     path('documents/name/', TWFDocumentNameView.as_view(), name='name_documents'),
     path('document/<int:pk>/', TWFDocumentDetailView.as_view(), name='view_document'),
+    path('document/<int:pk>/update-options/', update_document_options, name='update_document_options'),
 
     # Unified AI batch view
     path('documents/batch/ai/', TWFUnifiedDocumentBatchView.as_view(), name='documents_batch_ai_unified'),

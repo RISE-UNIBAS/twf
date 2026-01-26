@@ -96,7 +96,9 @@ def start_enrich_metadata(request):
     - force: Boolean to force re-enrichment even for documents with existing metadata (default: False)
     """
     # Extract optional parameters from form
-    force = request.POST.get('force', 'false').lower() == 'true'
+    # Django checkboxes send 'on' when checked, or nothing when unchecked
+    force_value = request.POST.get('force', '')
+    force = force_value.lower() in ('true', 'on', '1')
 
     kwargs = {
         'force': force
