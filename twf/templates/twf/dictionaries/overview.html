@@ -2,6 +2,8 @@
 {% load nav_tags %}
 
 {% block content %}
+    <p class="lead">Overview of dictionary entries organized by type, showing the most frequently used entries.</p>
+
      {% include 'twf/dictionaries/info_card_dictionaries.html' %}
 
      {% for dtype, entries in dict_stats.top_entries_per_type.items %}
