@@ -1,6 +1,5 @@
 from django.contrib import messages
-from django.http import HttpResponseRedirect
-from django.shortcuts import get_object_or_404, redirect
+from django.shortcuts import get_object_or_404
 
 from twf.models import Dictionary, DictionaryEntry, PageTag, Variation
 from twf.tasks.instant_tasks import save_instant_task_add_dictionary
@@ -14,9 +13,11 @@ def remove_dictionary_from_project(request, pk):
     project.selected_dictionaries.remove(dictionary)
     project.save(current_user=request.user)
 
-    messages.success(request, f'Dictionary {dictionary.label} has been removed from your project.')
+    messages.success(
+        request, f"Dictionary {dictionary.label} has been removed from your project."
+    )
 
-    return get_referrer_or_default(request, default='twf:dictionaries')
+    return get_referrer_or_default(request, default="twf:dictionaries")
 
 
 def delete_variation(request, pk):
@@ -29,27 +30,27 @@ def delete_variation(request, pk):
         page_tag.save()
 
     variation.delete()
-    messages.success(request, f'Variation {pk} has been deleted.')
+    messages.success(request, f"Variation {pk} has been deleted.")
 
-    return get_referrer_or_default(request, default='twf:dictionaries')
+    return get_referrer_or_default(request, default="twf:dictionaries")
 
 
 def delete_entry(request, pk):
     """Delete a dictionary entry."""
     entry = get_object_or_404(DictionaryEntry, pk=pk)
     entry.delete()
-    messages.success(request, f'Dictionary entry {pk} has been deleted.')
+    messages.success(request, f"Dictionary entry {pk} has been deleted.")
 
-    return get_referrer_or_default(request, default='twf:dictionaries')
+    return get_referrer_or_default(request, default="twf:dictionaries")
 
 
 def skip_entry(request, pk):
     """Skip a dictionary entry."""
     entry = get_object_or_404(DictionaryEntry, pk=pk)
     entry.save(current_user=request.user)
-    messages.success(request, f'Dictionary entry {pk} has been skipped.')
+    messages.success(request, f"Dictionary entry {pk} has been skipped.")
 
-    return get_referrer_or_default(request, default='twf:dictionaries')
+    return get_referrer_or_default(request, default="twf:dictionaries")
 
 
 def add_dictionary_to_project(request, pk):
@@ -59,19 +60,21 @@ def add_dictionary_to_project(request, pk):
     project.selected_dictionaries.add(dictionary)
     project.save(current_user=request.user)
 
-    save_instant_task_add_dictionary(project,
-                                     request.user,
-                                     f"Added dictionary {dictionary.label} to project")
+    save_instant_task_add_dictionary(
+        project, request.user, f"Added dictionary {dictionary.label} to project"
+    )
 
-    messages.success(request, f'Dictionary {dictionary.label} has been added to your project.')
+    messages.success(
+        request, f"Dictionary {dictionary.label} has been added to your project."
+    )
 
-    return get_referrer_or_default(request, default='twf:dictionaries')
+    return get_referrer_or_default(request, default="twf:dictionaries")
 
 
 def delete_dictionary_entry(request, pk):
     """Delete a dictionary entry."""
     entry = get_object_or_404(DictionaryEntry, pk=pk)
     entry.delete()
-    messages.success(request, f'Dictionary entry {pk} has been deleted.')
+    messages.success(request, f"Dictionary entry {pk} has been deleted.")
 
-    return get_referrer_or_default(request, default='twf:dictionaries')
+    return get_referrer_or_default(request, default="twf:dictionaries")

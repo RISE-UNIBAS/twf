@@ -18,14 +18,16 @@ def generated_task_id():
 
 def save_instant_task(project, user, title, description, text):
     """Save an instant task to the database."""
-    task = Task(project=project,
-                user=user,
-                status='SUCCESS',
-                title=title,
-                text=text,
-                description=description,
-                end_time=timezone.now(),
-                celery_task_id=generated_task_id())
+    task = Task(
+        project=project,
+        user=user,
+        status="SUCCESS",
+        title=title,
+        text=text,
+        description=description,
+        end_time=timezone.now(),
+        celery_task_id=generated_task_id(),
+    )
     task.save()
 
 
@@ -75,7 +77,9 @@ def save_instant_task_delete_all_collections(project, user):
     """Save an instant task to the database."""
     title = "Delete All Collections"
     description = "Delete all collections in the project."
-    save_instant_task(project, user, title, description, "All collections were deleted.")
+    save_instant_task(
+        project, user, title, description, "All collections were deleted."
+    )
 
 
 def save_instant_task_unpark_all_tags(project, user):
@@ -103,17 +107,25 @@ def save_instant_task_remove_all_dictionaries(project, user):
     """Save an instant task to the database."""
     title = "Remove All Dictionaries"
     description = "Remove all dictionaries from the project."
-    save_instant_task(project, user, title, description, "All dictionaries were removed from the project.")
+    save_instant_task(
+        project,
+        user,
+        title,
+        description,
+        "All dictionaries were removed from the project.",
+    )
 
 
 def start_related_task(project, user, title, description, text):
     """Start an instant task."""
-    task = Task(project=project,
-                user=user,
-                status='STARTED',
-                title=title,
-                text=text,
-                description=description,
-                celery_task_id=generated_task_id())
+    task = Task(
+        project=project,
+        user=user,
+        status="STARTED",
+        title=title,
+        text=text,
+        description=description,
+        celery_task_id=generated_task_id(),
+    )
     task.save()
     return task

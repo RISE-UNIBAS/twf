@@ -29,10 +29,7 @@ def save_prompt(request):
                 return JsonResponse({"error": "Prompt not found"}, status=404)
         else:
             # Create a new prompt
-            new_prompt = Prompt(
-                project=project,
-                prompt=prompt_text,
-                system_role=role)
+            new_prompt = Prompt(project=project, prompt=prompt_text, system_role=role)
             new_prompt.save(current_user=request.user)
             return JsonResponse({"id": new_prompt.id}, status=200)
 
@@ -47,12 +44,14 @@ def load_prompt(request):
         prompt_id = data.get("prompt_id")
         try:
             prompt = Prompt.objects.get(id=prompt_id)
-            return JsonResponse({"id": prompt.id,
-                                 "prompt": prompt.prompt,
-                                 "role": prompt.system_role}, status=200)
+            return JsonResponse(
+                {"id": prompt.id, "prompt": prompt.prompt, "role": prompt.system_role},
+                status=200,
+            )
         except Prompt.DoesNotExist:
             return JsonResponse({"error": "Prompt not found"}, status=404)
     return JsonResponse({"error": "Invalid request"}, status=400)
+
 
 @csrf_exempt
 def get_prompts(request):
@@ -62,10 +61,8 @@ def get_prompts(request):
         prompts = Prompt.objects.filter(project=project)
         prompt_list = []
         for prompt in prompts:
-            prompt_list.append({
-                "id": prompt.id,
-                "prompt": prompt.prompt,
-                "role": prompt.system_role
-            })
+            prompt_list.append(
+                {"id": prompt.id, "prompt": prompt.prompt, "role": prompt.system_role}
+            )
         return JsonResponse({"prompts": prompt_list}, status=200, safe=False)
     return JsonResponse({"error": "Invalid request"}, status=400)

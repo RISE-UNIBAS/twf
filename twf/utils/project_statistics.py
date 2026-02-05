@@ -1,4 +1,5 @@
 """This module contains functions to gather statistics for a project."""
+
 from collections import defaultdict
 
 from django.db.models import Avg, Count
@@ -10,22 +11,38 @@ def get_document_statistics(project):
 
     total_documents = project.documents.count()
     total_pages = Page.objects.filter(document__project=project).count()
-    average_pages_per_document = (Page.objects.filter(document__project=project).values('document').
-                                  annotate(count=Count('id')).aggregate(Avg('count')))
-    ignored_pages = Page.objects.filter(document__project=project, is_ignored=True).count()
-    largest_document = (Document.objects.annotate(num_pages=Count('pages'))
-                        .filter(project=project).order_by('-num_pages').first())
-    smallest_document = (Document.objects.annotate(num_pages=Count('pages'))
-                         .filter(project=project).order_by('num_pages').first())
+    average_pages_per_document = (
+        Page.objects.filter(document__project=project)
+        .values("document")
+        .annotate(count=Count("id"))
+        .aggregate(Avg("count"))
+    )
+    ignored_pages = Page.objects.filter(
+        document__project=project, is_ignored=True
+    ).count()
+    largest_document = (
+        Document.objects.annotate(num_pages=Count("pages"))
+        .filter(project=project)
+        .order_by("-num_pages")
+        .first()
+    )
+    smallest_document = (
+        Document.objects.annotate(num_pages=Count("pages"))
+        .filter(project=project)
+        .order_by("num_pages")
+        .first()
+    )
 
     return {
-        'total_documents': total_documents,
-        'total_pages': total_pages,
-        'ignored_pages': ignored_pages,
-        'ignored_percentage': (ignored_pages / total_pages * 100) if total_pages > 0 else 0,
-        'average_pages_per_document': average_pages_per_document,
-        'largest_document': largest_document,
-        'smallest_document': smallest_document
+        "total_documents": total_documents,
+        "total_pages": total_pages,
+        "ignored_pages": ignored_pages,
+        "ignored_percentage": (
+            (ignored_pages / total_pages * 100) if total_pages > 0 else 0
+        ),
+        "average_pages_per_document": average_pages_per_document,
+        "largest_document": largest_document,
+        "smallest_document": smallest_document,
     }
 
 
@@ -34,23 +51,32 @@ def get_tag_statistics(project):
 
     total_tags = PageTag.objects.filter(page__document__project=project).count()
     total_pages = Page.objects.filter(document__project=project).count()
-    
+
     # Calculate tags per page
     tags_per_page = round(total_tags / total_pages, 1) if total_pages > 0 else 0
-    
+
     # Calculate open and resolved tags
-    open_tags = PageTag.objects.filter(page__document__project=project, is_parked=False).count()
-    resolved_tags = PageTag.objects.filter(page__document__project=project, is_parked=True).count()
-    
+    open_tags = PageTag.objects.filter(
+        page__document__project=project, is_parked=False
+    ).count()
+    resolved_tags = PageTag.objects.filter(
+        page__document__project=project, is_parked=True
+    ).count()
+
     # Get tag types distribution
-    tag_types = PageTag.objects.filter(page__document__project=project).values('variation_type').annotate(count=Count('id')).order_by('-count')[:5]
-    
+    tag_types = (
+        PageTag.objects.filter(page__document__project=project)
+        .values("variation_type")
+        .annotate(count=Count("id"))
+        .order_by("-count")[:5]
+    )
+
     return {
-        'total_tags': total_tags,
-        'tags_per_page': tags_per_page,
-        'open_tags': open_tags,
-        'resolved_tags': resolved_tags,
-        'tag_types': tag_types
+        "total_tags": total_tags,
+        "tags_per_page": tags_per_page,
+        "open_tags": open_tags,
+        "resolved_tags": resolved_tags,
+        "tag_types": tag_types,
     }
 
 
@@ -62,15 +88,16 @@ def get_dictionary_statistics(project):
 
     # Top entries per dictionary type
     top_entries_per_type = defaultdict(list)
-    entry_counts = PageTag.objects.filter(
-        page__document__project=project
-    ).values(
-        'dictionary_entry__id',
-        'dictionary_entry__label',
-        'dictionary_entry__dictionary__type'
-    ).annotate(
-        count=Count('id')
-    ).order_by('dictionary_entry__dictionary__type', '-count')
+    entry_counts = (
+        PageTag.objects.filter(page__document__project=project)
+        .values(
+            "dictionary_entry__id",
+            "dictionary_entry__label",
+            "dictionary_entry__dictionary__type",
+        )
+        .annotate(count=Count("id"))
+        .order_by("dictionary_entry__dictionary__type", "-count")
+    )
 
     # Find the mostly referenced dictionary entry and category
     mostly_referenced_entry = None
@@ -80,28 +107,28 @@ def get_dictionary_statistics(project):
     category_counts = defaultdict(int)
 
     for entry in entry_counts:
-        dtype = entry['dictionary_entry__dictionary__type']
+        dtype = entry["dictionary_entry__dictionary__type"]
 
         # Add entry to top entries per type (up to 20 per type)
         if len(top_entries_per_type[dtype]) < 20:
             top_entries_per_type[dtype].append(entry)
 
         # Track the mostly referenced dictionary entry
-        if entry['count'] > highest_entry_count:
-            highest_entry_count = entry['count']
+        if entry["count"] > highest_entry_count:
+            highest_entry_count = entry["count"]
             mostly_referenced_entry = entry
 
         # Track the mostly referenced category
-        category_counts[dtype] += entry['count']
+        category_counts[dtype] += entry["count"]
         if category_counts[dtype] > highest_category_count:
             highest_category_count = category_counts[dtype]
             mostly_referenced_category = dtype
 
     return {
-        'total_dictionaries': total_dictionaries,
-        'top_entries_per_type': dict(top_entries_per_type),
-        'mostly_referenced_entry': mostly_referenced_entry,
-        'mostly_referenced_category': mostly_referenced_category
+        "total_dictionaries": total_dictionaries,
+        "top_entries_per_type": dict(top_entries_per_type),
+        "mostly_referenced_entry": mostly_referenced_entry,
+        "mostly_referenced_category": mostly_referenced_category,
     }
 
 
@@ -109,15 +136,12 @@ def get_collection_statistics():
     """Get statistics for collections in a project."""
     # Example: total number of collections
     total_collections = Collection.objects.count()
-    return {
-        'total_collections': total_collections
-    }
+    return {"total_collections": total_collections}
 
 
 def get_import_export_statistics():
     """Get statistics for import/export operations."""
     # Here you can add stats for import/export operations if tracked
-    pass
 
 
 def get_transkribus_statistics(project):
@@ -158,15 +182,15 @@ def get_transkribus_statistics(project):
         if not isinstance(document.metadata, dict):
             continue
 
-        transkribus_api_data = document.metadata.get('transkribus_api', {})
-        doc_labels = transkribus_api_data.get('labels', [])
+        transkribus_api_data = document.metadata.get("transkribus_api", {})
+        doc_labels = transkribus_api_data.get("labels", [])
 
         if doc_labels:
             documents_with_labels += 1
             # Count each label
             for label in doc_labels:
                 if isinstance(label, dict):
-                    label_name = label.get('name', 'Unknown')
+                    label_name = label.get("name", "Unknown")
                     document_label_counter[label_name] += 1
                 elif isinstance(label, str):
                     document_label_counter[label] += 1
@@ -179,22 +203,22 @@ def get_transkribus_statistics(project):
             continue
 
         # Process labels from transkribus_api
-        transkribus_api_data = page.metadata.get('transkribus_api', {})
-        page_labels = transkribus_api_data.get('labels', [])
+        transkribus_api_data = page.metadata.get("transkribus_api", {})
+        page_labels = transkribus_api_data.get("labels", [])
 
         if page_labels:
             pages_with_labels += 1
             # Count each label
             for label in page_labels:
                 if isinstance(label, dict):
-                    label_name = label.get('name', 'Unknown')
+                    label_name = label.get("name", "Unknown")
                     page_label_counter[label_name] += 1
                 elif isinstance(label, str):
                     page_label_counter[label] += 1
 
         # Process status from transkribus metadata
-        transkribus_data = page.metadata.get('transkribus', {})
-        page_status = transkribus_data.get('status')
+        transkribus_data = page.metadata.get("transkribus", {})
+        page_status = transkribus_data.get("status")
 
         if page_status:
             pages_with_status += 1
@@ -202,30 +226,34 @@ def get_transkribus_statistics(project):
 
     # Prepare result dictionary
     result = {
-        'page_label_counts': dict(page_label_counter.most_common()),
-        'page_status_counts': dict(page_status_counter.most_common()),
-        'document_label_counts': dict(document_label_counter.most_common()),
-        'total_pages_with_labels': pages_with_labels,
-        'total_pages_with_status': pages_with_status,
-        'total_documents_with_labels': documents_with_labels,
-        'total_pages': pages.count(),
-        'total_documents': documents.count(),
+        "page_label_counts": dict(page_label_counter.most_common()),
+        "page_status_counts": dict(page_status_counter.most_common()),
+        "document_label_counts": dict(document_label_counter.most_common()),
+        "total_pages_with_labels": pages_with_labels,
+        "total_pages_with_status": pages_with_status,
+        "total_documents_with_labels": documents_with_labels,
+        "total_pages": pages.count(),
+        "total_documents": documents.count(),
     }
 
     # Calculate percentages
-    if result['total_pages'] > 0:
-        result['pages_with_labels_percentage'] = (pages_with_labels / result['total_pages']) * 100
-        result['pages_with_status_percentage'] = (pages_with_status / result['total_pages']) * 100
-    else:
-        result['pages_with_labels_percentage'] = 0
-        result['pages_with_status_percentage'] = 0
-
-    if result['total_documents'] > 0:
-        result['documents_with_labels_percentage'] = (
-            documents_with_labels / result['total_documents']
+    if result["total_pages"] > 0:
+        result["pages_with_labels_percentage"] = (
+            pages_with_labels / result["total_pages"]
+        ) * 100
+        result["pages_with_status_percentage"] = (
+            pages_with_status / result["total_pages"]
         ) * 100
     else:
-        result['documents_with_labels_percentage'] = 0
+        result["pages_with_labels_percentage"] = 0
+        result["pages_with_status_percentage"] = 0
+
+    if result["total_documents"] > 0:
+        result["documents_with_labels_percentage"] = (
+            documents_with_labels / result["total_documents"]
+        ) * 100
+    else:
+        result["documents_with_labels_percentage"] = 0
 
     return result
 
@@ -233,9 +261,9 @@ def get_transkribus_statistics(project):
 def gather_statistics():
     """Gather statistics for a project."""
     return {
-        'documents': get_document_statistics(),
-        'tags': get_tag_statistics(),
-        'dictionaries': get_dictionary_statistics(),
-        'collections': get_collection_statistics(),
+        "documents": get_document_statistics(),
+        "tags": get_tag_statistics(),
+        "dictionaries": get_dictionary_statistics(),
+        "collections": get_collection_statistics(),
         # Add more sections as needed
     }

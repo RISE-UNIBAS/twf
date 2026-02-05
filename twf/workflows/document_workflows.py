@@ -21,13 +21,14 @@ def create_document_workflow(project, user, item_count=None):
     """
     # Use configured batch size if item_count not provided
     if item_count is None:
-        workflow_def = project.get_workflow_definition('review_documents')
-        item_count = workflow_def.get('batch_size', 5)
+        workflow_def = project.get_workflow_definition("review_documents")
+        item_count = workflow_def.get("batch_size", 5)
 
     # Get available document IDs that are not reserved and not reviewed
     available_document_ids = list(
-        Document.objects.filter(project=project, is_reserved=False, status='open')
-        .values_list('id', flat=True)[:item_count]
+        Document.objects.filter(
+            project=project, is_reserved=False, status="open"
+        ).values_list("id", flat=True)[:item_count]
     )
 
     if len(available_document_ids) == 0:
@@ -39,25 +40,29 @@ def create_document_workflow(project, user, item_count=None):
     # Mark the documents as reserved
     Document.objects.filter(id__in=available_document_ids).update(is_reserved=True)
 
-    task = start_related_task(project, user,
-                              "Review Documents",
-                              "Review documents in the project.",
-                              "The user has started a workflow to review documents.")
+    task = start_related_task(
+        project,
+        user,
+        "Review Documents",
+        "Review documents in the project.",
+        "The user has started a workflow to review documents.",
+    )
 
     # Create the workflow
     workflow = Workflow.objects.create(
         project=project,
         user=user,
-        workflow_type='review_documents',
+        workflow_type="review_documents",
         item_count=item_count,
-        related_task=task
+        related_task=task,
     )
 
     # Assign documents to the workflow
-    workflow.assigned_document_items.set(Document.objects.filter(id__in=available_document_ids))
+    workflow.assigned_document_items.set(
+        Document.objects.filter(id__in=available_document_ids)
+    )
 
     return True
-
 
 
 def start_review_document_workflow(request):
@@ -69,6 +74,6 @@ def start_review_document_workflow(request):
     started_workflow = create_document_workflow(project, user, item_count=None)
     if not started_workflow:
         messages.error(request, "No documents available for review.")
-        return redirect('twf:documents_review')
+        return redirect("twf:documents_review")
 
-    return redirect('twf:documents_review')
+    return redirect("twf:documents_review")

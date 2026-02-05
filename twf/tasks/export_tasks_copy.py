@@ -16,13 +16,6 @@ from django.core.files.storage import default_storage
 from django.core.serializers import serialize
 from django.utils.text import slugify
 
-from twf.clients.zenodo_client import (
-    get_deposition,
-    update_deposition_metadata,
-    upload_file_to_deposition,
-    publish_deposition,
-    create_temp_readme_from_project,
-)
 from twf.models import (
     Export,
     Page,
@@ -31,73 +24,110 @@ from twf.models import (
     DictionaryEntry,
     Variation,
     DateVariation,
-    ExportConfiguration,
 )
 from twf.tasks.task_base import BaseTWFTask
-from twf.utils.export_utils import ExportCreator
+from twf.utils.create_export_utils import create_data
 
 
 @shared_task(bind=True, base=BaseTWFTask)
-def export_task(self, project_id, user_id, **kwargs):
+def export_documents_task(self, project_id, user_id, **kwargs):
     """
-    Export project data using a specific export configuration.
+    Export documents or pages from a project to JSON files.
 
     Args:
         self: Celery task instance
         project_id: ID of the project to export
         user_id: ID of the user performing the export
         **kwargs: Additional parameters including:
-            - export_configuration_id: ID of the ExportConfiguration to use
+            - export_type: "documents" or "pages"
+            - export_single_file: bool, whether to create one file per item or combine all
 
     Returns:
-        None (creates Export object with downloadable ZIP file)
+        None (creates Export object with downloadable file)
     """
-    self.validate_task_parameters(kwargs, ["export_configuration_id"])
-    export_configuration_id = kwargs.get("export_configuration_id")
-    export_configuration = ExportConfiguration.objects.get(id=export_configuration_id)
-    download_url = None
+    print(kwargs)
+    self.validate_task_parameters(kwargs, ["export_type", "export_single_file"])
+
+    docs_to_export = self.project.documents.all()
+    self.set_total_items(docs_to_export.count())
+
+    export_type = kwargs.get("export_type")
+    export_single_file = kwargs.get("export_single_file")
+
+    # 1st step: Create a temporary directory
+    temp_dir = tempfile.mkdtemp()
 
     try:
-        export_creator = ExportCreator(self.project, export_configuration)
-        number_of_items = export_creator.get_number_of_items()
-        self.set_total_items(number_of_items)
+        # 2nd step: Export documents
+        processed_entries = 0
+        export_data_list = []
 
-        # For every export, the "project" part is always the same
-        export_data = export_creator.create_item_data(self.project)
+        for doc in docs_to_export:
+            if export_type == "documents":
+                export_doc_data = create_data(doc)
 
-        # The export creator provides a list of items to handle
-        export_data["items"] = []
-        for item in export_creator.get_items():
-            item_data = export_creator.create_item_data(item)
-            export_data["items"].append(item_data)
-            self.advance_task(f"Exporting {item}")
+                if export_single_file:
+                    export_filename = f"document_{doc.document_id}.json"
+                    export_filepath = Path(temp_dir) / export_filename
+                    with open(export_filepath, "w", encoding="utf8") as sf:
+                        json.dump(export_doc_data, sf, indent=4)
+                else:
+                    export_data_list.append(export_doc_data)
 
-        # Create ZIP
-        temp_dir = tempfile.mkdtemp()
-        with open(os.path.join(temp_dir, "data.json"), "w", encoding="utf8") as sf:
-            json.dump(export_data, sf, indent=4)
+            elif export_type == "pages":
+                for page in doc.pages.all():
+                    export_page_data = create_data(page)
 
-        zip_filename = f"export_{self.project.id}"
-        zip_filepath = shutil.make_archive(zip_filename, "zip", temp_dir)
-        result_filename = Path(zip_filepath).name
+                    if export_single_file:
+                        export_filename = f"page_{page.tk_page_id}.json"
+                        export_filepath = os.path.join(temp_dir, export_filename)
+                        with open(export_filepath, "w", encoding="utf8") as sf:
+                            json.dump(export_page_data, sf, indent=4)
+                    else:
+                        export_data_list.append(export_page_data)
+
+            self.advance_task()
+
+        # 3rd step: Store the final result
+        if export_single_file:
+            zip_filename = f"export_{self.project.id}.zip"
+            zip_filepath = shutil.make_archive(
+                zip_filename.replace(".zip", ""), "zip", temp_dir
+            )
+            result_filepath = zip_filepath
+        else:
+            export_filename = f"export_{self.project.id}.json"
+            export_filepath = Path(temp_dir) / export_filename
+            with open(export_filepath, "w", encoding="utf8") as sf:
+                json.dump(export_data_list, sf, indent=4)
+            result_filepath = export_filepath
+
+        # Move to a persistent storage location for download
+        result_filename = Path(result_filepath).name
         relative_export_path = f"exports/{result_filename}"
-
         final_result_path = Path(settings.MEDIA_ROOT) / relative_export_path
+
+        # Ensure the directory exists
         final_result_path.parent.mkdir(parents=True, exist_ok=True)
 
-        with open(zip_filepath, "rb") as f:
+        with open(result_filepath, "rb") as f:
             saved_filename = default_storage.save(relative_export_path, File(f))
 
-        export = Export(
-            export_file=saved_filename, export_configuration=export_configuration
-        )
-        export.save(current_user=self.user)
-        download_url = export.export_file.url
-        self.end_task(download_url=download_url)
+    finally:
+        # Cleanup temporary files AFTER successful storage
+        if os.path.exists(temp_dir):
+            shutil.rmtree(temp_dir)
 
-    except Exception as e:
-        self.end_task(text="Export failed", status="ERROR")
-        raise e
+    export_instance = Export(
+        project=self.project,
+        export_file=saved_filename,  # Save the path to the file
+        export_type=export_type,
+    )
+    export_instance.save(current_user=self.user)
+
+    # 4th step: End task and return the download URL
+    download_url = export_instance.export_file.url
+    self.end_task(download_url=download_url)
 
 
 @shared_task(bind=True, base=BaseTWFTask)
@@ -203,60 +233,16 @@ def export_project_task(self, project_id, user_id, **kwargs):
 @shared_task(bind=True, base=BaseTWFTask)
 def export_to_zenodo_task(self, project_id, user_id, **kwargs):
     """
-    Upload an existing export to Zenodo repository.
+    Export project data to Zenodo repository.
 
     Args:
         self: Celery task instance
-        project_id: ID of the project
-        user_id: ID of the user performing the upload
-        **kwargs: Additional parameters including:
-            - export_id: ID of the Export object to upload to Zenodo
+        project_id: ID of the project to export
+        user_id: ID of the user performing the export
+        **kwargs: Additional keyword arguments
 
     Returns:
-        None (uploads export file to Zenodo deposition)
+        None (ends task immediately - placeholder implementation)
     """
-    self.validate_task_parameters(kwargs, ["export_id"])
-
-    export_id = kwargs.get("export_id")
-    export = Export.objects.get(id=export_id)
-
-    try:
-        self.update_progress(0, "Starting Zenodo export...")
-        depo = get_deposition(self.project)
-        self.update_progress(5, "Zenodo deposition fetched.")
-        if depo.get("submitted"):
-            self.update_progress(
-                10, "Existing deposition already published. Creating new version..."
-            )
-            depo = create_new_version_from_deposition(self.project)
-            self.project.zenodo_deposition_id = depo["id"]
-            self.project.save(update_fields=["zenodo_deposition_id"])
-        else:
-            self.update_progress(10, "Creating initial version...")
-
-        # STEP 2: Update metadata
-        update_deposition_metadata(self.project, depo["id"])
-        self.update_progress(20, "Metadata uploaded.")
-
-        # STEP 3: Upload files
-        readme_path = create_temp_readme_from_project(self.project)
-        try:
-            upload_file_to_deposition(
-                self.project, depo["id"], readme_path, "README.md"
-            )
-        finally:
-            os.remove(readme_path)
-        upload_file_to_deposition(
-            self.project, depo["id"], export.export_file.path, "twf_dataset.zip"
-        )
-        self.update_progress(80, "Files uploaded.")
-
-        # STEP 4: Publish
-        result = publish_deposition(self.project, depo["id"])
-        self.project.project_doi = result.get("doi")
-        self.project.save(update_fields=["project_doi"])
-        self.update_progress(100, f"Published. DOI: {self.project.project_doi}")
-
-    except Exception as e:
-        self.end_task(status="FAILURE", error_msg=str(e))
-        raise
+    export_type = "sql"  # Can be 'sql' or 'json'
+    self.end_task()

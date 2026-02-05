@@ -2,16 +2,23 @@
 {% load crispy_forms_tags %}
 
 {% block content %}
-    <p class="lead">Normalize your date strings to EDTF format.</p>
+    <p class="lead">Enrich tags with normalized data.</p>
     {% include 'twf/base/alert_info.html' %}
 
     {% if not has_active_workflow %}
         {# Show workflow start form when no active workflow #}
         <div class="alert alert-info">
-            <h5><i class="fa fa-info-circle"></i> Start a Date Normalization Workflow</h5>
-            <p>Start a workflow to normalize date tags to EDTF format. Specify the batch size below.</p>
+            <h5><i class="fa fa-info-circle"></i> Start a Tag Enrichment Workflow</h5>
+            <p>Select a tag type to enrich below. Enrichment types are configured in Project Settings > Task Settings > Tag Type Settings.</p>
         </div>
-        {% crispy workflow_start_form %}
+        {% if workflow_start_form %}
+            {% crispy workflow_start_form %}
+        {% else %}
+            <div class="alert alert-warning">
+                <strong>No enrichment types configured.</strong>
+                <p>Configure enrichment types in Project Settings > Task Settings > "Enrichment Types Configuration" field.</p>
+            </div>
+        {% endif %}
     {% else %}
         {# Show workflow interface when workflow is active #}
         {% if workflow %}
@@ -20,10 +27,10 @@
                     <div class="row align-items-center">
                         <div class="col-md-8">
                             <h5 class="card-title mb-1">
-                                <i class="fa fa-calendar"></i> Date Normalization Workflow
+                                <i class="fa fa-tags"></i> {{ workflow_title|default:"Tag Enrichment Workflow" }}
                             </h5>
                             <p class="mb-0 text-muted small">
-                                Progress: {{ workflow_progress.completed }} / {{ workflow_progress.total }} date tags
+                                Progress: {{ workflow_progress.completed }} / {{ workflow_progress.total }} tags
                                 ({{ workflow_progress.percentage }}%)
                             </p>
                             <div class="progress mt-2" style="height: 20px;">
@@ -60,7 +67,7 @@
             </div>
         {% else %}
             <div class="alert alert-info">
-                There are no more dates to normalize
+                There are no more tags to enrich in this workflow.
             </div>
         {% endif %}
     {% endif %} {# End has_active_workflow check #}

@@ -1,9 +1,10 @@
 """Views for the project documents."""
+
 import json
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponseRedirect, JsonResponse
+from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect
 from django.views.decorators.csrf import csrf_exempt
 
@@ -20,12 +21,23 @@ def delete_document(request, pk, doc_pk):
         page.xml_file.delete()
         page.delete()
     document.delete()
-    messages.success(request, f'Document {doc_pk} has been deleted.')
+    messages.success(request, f"Document {doc_pk} has been deleted.")
 
-    return get_referrer_or_default(request, default='twf:document')
+    return get_referrer_or_default(request, default="twf:document")
 
 
 def update_document_metadata(request, pk, base_key):
+    """
+    Update a nested metadata value for a document.
+
+    Args:
+        request: Django HTTP request with JSON body containing key and value
+        pk: Primary key of the document
+        base_key: Top-level metadata key to update within
+
+    Returns:
+        JsonResponse: Response with the new value or error message
+    """
     if request.method == "POST":
         data = json.loads(request.body)
         key = data.get("key")
@@ -45,6 +57,17 @@ def update_document_metadata(request, pk, base_key):
 
 @csrf_exempt
 def delete_document_metadata(request, pk, base_key):
+    """
+    Delete a nested metadata key from a document.
+
+    Args:
+        request: Django HTTP request with JSON body containing key to delete
+        pk: Primary key of the document
+        base_key: Top-level metadata key to delete from
+
+    Returns:
+        JsonResponse: Success response or error message
+    """
     if request.method == "POST":
         data = json.loads(request.body)
         key = data.get("key")
@@ -70,22 +93,22 @@ def update_document_options(request, pk):
         document = get_object_or_404(Document, pk=pk)
 
         # Update status if provided
-        status = request.POST.get('status')
+        status = request.POST.get("status")
         if status and status in dict(Document.STATUS_CHOICES):
             document.status = status
 
         # Update is_parked if provided
-        is_parked = request.POST.get('is_parked')
+        is_parked = request.POST.get("is_parked")
         if is_parked is not None:
-            document.is_parked = is_parked == 'true'
+            document.is_parked = is_parked == "true"
 
         # Update workflow_remarks
-        workflow_remarks = request.POST.get('workflow_remarks', '')
+        workflow_remarks = request.POST.get("workflow_remarks", "")
         document.workflow_remarks = workflow_remarks
 
         document.save(current_user=request.user)
-        messages.success(request, 'Document options updated successfully.')
+        messages.success(request, "Document options updated successfully.")
 
-        return redirect('twf:view_document', pk=pk)
+        return redirect("twf:view_document", pk=pk)
 
-    return redirect('twf:view_document', pk=pk)
+    return redirect("twf:view_document", pk=pk)
