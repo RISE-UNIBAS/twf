@@ -6,8 +6,11 @@ Forms for enriching tags with normalized data (dates, bible verses, locations, e
 """
 
 from django import forms
+from django.urls import reverse
 from abc import ABCMeta, abstractmethod
 import re
+from crispy_forms.helper import FormHelper
+from crispy_forms.layout import Layout, Submit, Div, HTML, ButtonHolder
 from twf.models import TagEnrichment
 
 
@@ -45,6 +48,43 @@ class BaseTagEnrichmentForm(forms.Form, metaclass=AbstractFormMeta):
         # Get initial normalized proposal
         proposal = self.propose_normalization(tag.variation, project)
         self.fields["normalized_value"].initial = proposal
+
+        # Setup crispy forms helper with buttons
+        park_url = reverse("twf:tags_park", kwargs={"pk": tag.pk})
+        self.helper = FormHelper()
+        self.helper.form_method = "post"
+        self.helper.layout = Layout(
+            "tag_id",
+            self._get_form_fields_layout(),
+            ButtonHolder(
+                Submit(
+                    "save_and_next",
+                    "Save & Next",
+                    css_class="btn btn-primary",
+                ),
+                HTML(
+                    f'<a href="{park_url}" class="btn btn-secondary ms-2">'
+                    f'<i class="fa fa-box-archive"></i> Park</a>'
+                ),
+                css_class="mt-3",
+            ),
+        )
+
+    def _get_form_fields_layout(self):
+        """
+        Get layout for form-specific fields.
+
+        Override in subclasses to customize field layout.
+        Returns field names or Layout objects for crispy forms.
+        """
+        # Default: return all fields except tag_id
+        return Div(
+            *[
+                field_name
+                for field_name in self.fields.keys()
+                if field_name != "tag_id"
+            ]
+        )
 
     @abstractmethod
     def propose_normalization(self, variation, project):
@@ -392,6 +432,168 @@ class BibleVerseEnrichmentForm(BaseTagEnrichmentForm):
         return "verse"
 
 
+class IDEnrichmentForm(BaseTagEnrichmentForm):
+    """
+    Form for enriching tags with external authority IDs.
+
+    Supports various ID systems like:
+    - GND (Gemeinsame Normdatei) for persons, places, organizations
+    - GeoNames for geographic locations
+    - VIAF for persons
+    - Wikidata for any entity
+    """
+
+    id_type = forms.ChoiceField(
+        label="ID Type",
+        choices=[
+            ("gnd", "GND (Gemeinsame Normdatei)"),
+            ("geonames", "GeoNames"),
+            ("viaf", "VIAF"),
+            ("wikidata", "Wikidata"),
+            ("other", "Other"),
+        ],
+        widget=forms.Select(attrs={"class": "form-control"}),
+        help_text="The authority control system or database",
+    )
+
+    id_value = forms.CharField(
+        label="ID Value",
+        max_length=100,
+        widget=forms.TextInput(
+            attrs={"class": "form-control", "placeholder": "e.g., 118540238, 2950159"}
+        ),
+        help_text="The identifier in the selected system",
+    )
+
+    resource_url = forms.URLField(
+        label="Resource URL",
+        required=False,
+        widget=forms.URLInput(
+            attrs={"class": "form-control", "placeholder": "https://..."}
+        ),
+        help_text="Direct link to the authority record (optional)",
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Try to extract ID from variation if it looks like one
+        self._populate_from_variation()
+
+    def propose_normalization(self, variation, project):
+        """
+        Generate normalized label for the entity.
+
+        Parameters
+        ----------
+        variation : str
+            The tag variation text
+        project : Project
+            Project context
+
+        Returns
+        -------
+        str
+            Proposed normalized name
+        """
+        # Clean up the variation for use as normalized value
+        return variation.strip()
+
+    def _populate_from_variation(self):
+        """Try to detect ID type and value from the variation text."""
+        variation = self.tag.variation.lower()
+
+        # Check for GND patterns
+        if "gnd" in variation or "d-nb.info" in variation:
+            self.fields["id_type"].initial = "gnd"
+            # Try to extract GND number
+            gnd_match = re.search(r"(\d{8,10})", variation)
+            if gnd_match:
+                self.fields["id_value"].initial = gnd_match.group(1)
+
+        # Check for GeoNames patterns
+        elif "geonames" in variation:
+            self.fields["id_type"].initial = "geonames"
+            geonames_match = re.search(r"(\d{6,8})", variation)
+            if geonames_match:
+                self.fields["id_value"].initial = geonames_match.group(1)
+
+        # Check for VIAF patterns
+        elif "viaf" in variation:
+            self.fields["id_type"].initial = "viaf"
+            viaf_match = re.search(r"(\d{8,})", variation)
+            if viaf_match:
+                self.fields["id_value"].initial = viaf_match.group(1)
+
+        # Check for Wikidata patterns
+        elif "wikidata" in variation or "Q" in variation:
+            self.fields["id_type"].initial = "wikidata"
+            wd_match = re.search(r"Q(\d+)", variation, re.IGNORECASE)
+            if wd_match:
+                self.fields["id_value"].initial = f"Q{wd_match.group(1)}"
+
+    def build_enrichment_data(self, cleaned_data):
+        """
+        Build structured ID data.
+
+        Parameters
+        ----------
+        cleaned_data : dict
+            Form cleaned data
+
+        Returns
+        -------
+        dict
+            ID data with type, value, and optional URL
+        """
+        data = {
+            "id_type": cleaned_data["id_type"],
+            "id_value": cleaned_data["id_value"],
+        }
+
+        if cleaned_data.get("resource_url"):
+            data["resource_url"] = cleaned_data["resource_url"]
+
+        # Generate standard URL if not provided
+        if not data.get("resource_url"):
+            data["resource_url"] = self._generate_standard_url(
+                cleaned_data["id_type"], cleaned_data["id_value"]
+            )
+
+        return data
+
+    def _generate_standard_url(self, id_type, id_value):
+        """
+        Generate standard URL for common ID systems.
+
+        Parameters
+        ----------
+        id_type : str
+            The ID system type
+        id_value : str
+            The ID value
+
+        Returns
+        -------
+        str
+            Standard URL for the resource
+        """
+        url_templates = {
+            "gnd": "https://d-nb.info/gnd/{id}",
+            "geonames": "https://www.geonames.org/{id}/",
+            "viaf": "https://viaf.org/viaf/{id}/",
+            "wikidata": "https://www.wikidata.org/wiki/{id}",
+        }
+
+        template = url_templates.get(id_type)
+        if template:
+            return template.format(id=id_value)
+        return ""
+
+    def get_enrichment_type(self):
+        """Return enrichment type."""
+        return "authority_id"
+
+
 def get_enrichment_form_class(enrichment_type):
     """
     Factory to get form class for enrichment type.
@@ -409,5 +611,6 @@ def get_enrichment_form_class(enrichment_type):
     form_map = {
         "date": DateEnrichmentForm,
         "verse": BibleVerseEnrichmentForm,
+        "authority_id": IDEnrichmentForm,
     }
     return form_map.get(enrichment_type, BaseTagEnrichmentForm)

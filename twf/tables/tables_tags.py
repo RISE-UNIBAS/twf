@@ -128,5 +128,6 @@ class TagTable(tables.Table):
         )
 
         return mark_safe(
-            f"{park_button}{transkribus_button}{assign_button}{delete_button}"
+            # f"{park_button}{transkribus_button}{assign_button}{delete_button}"
+            f"{park_button}{transkribus_button}"
         )

@@ -38,7 +38,10 @@
                             </div>
                         </div>
                         <div class="col-md-4 text-end">
-                            <a href="{% url 'twf:project_task_monitor' %}" class="btn btn-sm btn-warning">
+                            <a href="#"
+                               class="btn btn-sm btn-warning show-danger-modal"
+                               data-message="Are you sure you want to cancel this workflow? All progress will be lost and reserved tags will be released."
+                               data-redirect-url="{% url 'twf:celery_task_cancel' workflow.related_task.pk %}">
                                 <i class="fa fa-times"></i> Cancel Workflow
                             </a>
                         </div>

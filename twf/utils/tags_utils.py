@@ -29,11 +29,20 @@ def get_translated_tag_type(project, tag_type):
 
 
 def get_all_tag_types(project):
-    """Get the distinct tag types."""
+    """
+    Get the distinct tag types configured for grouping workflow.
+
+    Excludes:
+    - Ignored types (workflow_type = 'ignore')
+    - Enrichment types (workflow_type = 'enrich')
+
+    Returns only tag types configured for grouping (workflow_type = 'group').
+    """
+    enrichment_types = get_enrichment_types(project)
     distinct_variation_types = (
         PageTag.objects.filter(page__document__project=project)
         .exclude(variation_type__in=get_excluded_types(project))
-        .exclude(variation_type__in=get_date_types(project))
+        .exclude(variation_type__in=enrichment_types.keys())
         .values("variation_type")
         .annotate(count=Count("variation_type"))
         .order_by("variation_type")

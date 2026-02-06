@@ -20,10 +20,8 @@ from django_filters.views import FilterView
 from django_tables2 import SingleTableMixin
 
 from twf.forms.filters.filters import TagFilter
-from twf.forms.tags.tags_forms import DateNormalizationForm
 from twf.forms.tags.workflow_forms import (
     StartTagGroupingWorkflowForm,
-    StartDateNormalizationWorkflowForm,
     StartEnrichmentWorkflowForm,
 )
 from twf.forms.tags.enrichment_forms import get_enrichment_form_class
@@ -42,11 +40,11 @@ from twf.utils.tags_utils import (
     get_translated_tag_type,
     get_excluded_types,
     get_closest_variations,
+    get_enrichment_types,
 )
 from twf.views.views_base import TWFView
 from twf.workflows.tag_workflows import (
     create_tag_grouping_workflow,
-    create_date_normalization_workflow,
     create_enrichment_workflow,
 )
 
@@ -81,11 +79,6 @@ class TWFTagsView(LoginRequiredMixin, TWFView):
                     {
                         "url": reverse("twf:tags_group"),
                         "value": "Grouping Wizard",
-                        "permission": "tag.edit",
-                    },
-                    {
-                        "url": reverse("twf:tags_dates"),
-                        "value": "Date Normalization",
                         "permission": "tag.edit",
                     },
                     {
@@ -162,6 +155,7 @@ class TWFTagsOverviewView(TWFTagsView):
         project = self.get_project()
         total_pagetags = PageTag.objects.filter(page__document__project=project).count()
         excluded_types = get_excluded_types(project)
+        enrichment_types = get_enrichment_types(project)
 
         # Organize by dictionary type to find the most used entry per type
         entry_counts = (
@@ -204,24 +198,35 @@ class TWFTagsOverviewView(TWFTagsView):
                 translated_type if translated_type != tag_type else None
             )
 
+            # Determine workflow type
+            if tag_type in excluded_types:
+                variation["workflow_type"] = "ignore"
+            elif tag_type in enrichment_types:
+                variation["workflow_type"] = "enrich"
+            else:
+                variation["workflow_type"] = "group"
+
             variation["percentage"] = (
                 (variation["count"] / total_pagetags * 100) if total_pagetags > 0 else 0
             )
 
-            if variation["variation_type"] in get_date_types(project):
+            # Count grouped/unresolved based on workflow type
+            if variation["workflow_type"] == "enrich":
+                # For enrichment workflow: count tags with enrichment entries
                 variation["grouped"] = PageTag.objects.filter(
                     page__document__project=project,
                     variation_type=variation["variation_type"],
-                    date_variation_entry__isnull=False,
+                    tag_enrichment_entry__isnull=False,
                 ).count()
 
                 variation["unresolved"] = PageTag.objects.filter(
                     page__document__project=project,
                     variation_type=variation["variation_type"],
-                    date_variation_entry__isnull=True,
+                    tag_enrichment_entry__isnull=True,
                     is_parked=False,
                 ).count()
-            else:
+            elif variation["workflow_type"] == "group":
+                # For grouping workflow: count tags with dictionary entries
                 variation["grouped"] = PageTag.objects.filter(
                     page__document__project=project,
                     variation_type=variation["variation_type"],
@@ -234,6 +239,10 @@ class TWFTagsOverviewView(TWFTagsView):
                     dictionary_entry__isnull=True,
                     is_parked=False,
                 ).count()
+            else:
+                # For ignored tags: no grouped/unresolved counting
+                variation["grouped"] = 0
+                variation["unresolved"] = 0
 
             variation["grouped_percentage"] = (
                 (variation["grouped"] / variation["count"] * 100)
@@ -749,150 +758,6 @@ class TWFProjectTagsIgnoredView(TWFProjectTagsView):
         return self.filterset.qs
 
 
-class TWFTagsDatesGroupView(FormView, TWFTagsView):
-    """View for the date tags with workflow support."""
-
-    template_name = "twf/tags/dates.html"
-    page_title = "Date Tags"
-    form_class = DateNormalizationForm
-
-    def get_form_class(self):
-        """Return form class only if there's an active workflow."""
-        workflow = self.get_active_workflow()
-        if workflow and workflow.get_next_item():
-            return DateNormalizationForm
-        return None
-
-    def get_form(self, form_class=None):
-        """Return form instance or None if no active workflow."""
-        if form_class is None:
-            form_class = self.get_form_class()
-        if form_class is None:
-            return None
-        return super().get_form(form_class)
-
-    def get_active_workflow(self):
-        """Get active date normalization workflow for current user."""
-        return Workflow.objects.filter(
-            project=self.get_project(),
-            user=self.request.user,
-            workflow_type="review_tags_dates",
-            status="started",
-        ).first()
-
-    def post(self, request, *args, **kwargs):
-        """Handle the post request."""
-        # Handle workflow start
-        if "start_workflow" in request.POST:
-            form = StartDateNormalizationWorkflowForm(
-                request.POST, project=self.get_project()
-            )
-            if form.is_valid():
-                batch_size = form.cleaned_data["batch_size"]
-                workflow = create_date_normalization_workflow(
-                    self.get_project(), request.user, batch_size
-                )
-                if workflow:
-                    messages.success(
-                        request,
-                        f"Workflow started with {workflow.item_count} date tags.",
-                    )
-                else:
-                    messages.error(request, "No date tags available for normalization.")
-            else:
-                messages.error(request, "Invalid form data.")
-            return redirect("twf:tags_dates")
-
-        # Handle date normalization (when workflow is active)
-        return super().post(request, *args, **kwargs)
-
-    def form_valid(self, form):
-        """Handle the form submission."""
-        logger.debug("Date normalization form is valid")
-        workflow = self.get_active_workflow()
-        if not workflow:
-            messages.error(self.request, "No active workflow found.")
-            return redirect("twf:tags_dates")
-
-        tag_id = form.cleaned_data["date_tag"]
-        tag = PageTag.objects.get(pk=tag_id)
-        date_variation = DateVariation(
-            variation=tag.variation,
-            edtf_of_normalized_variation=form.cleaned_data["resulting_date"],
-        )
-        date_variation.save(current_user=self.request.user)
-        tag.date_variation_entry = date_variation
-        tag.save(current_user=self.request.user)
-        messages.success(self.request, "Date normalized successfully.")
-
-        # Check if workflow is complete
-        if not workflow.get_next_item():
-            workflow.finish()
-            messages.success(self.request, "Workflow completed successfully!")
-
-        return redirect("twf:tags_dates")
-
-    def get(self, request, *args, **kwargs):
-        """Override the get method to handle workflow state."""
-        workflow = self.get_active_workflow()
-
-        # If no active workflow, render the workflow start form directly
-        if not workflow:
-            from django.shortcuts import render
-
-            context = self.get_context_data()
-            return render(request, self.template_name, context)
-
-        # Check for the next available date tag in workflow
-        next_date = workflow.get_next_item()
-
-        if next_date is None:
-            workflow.finish()
-            messages.success(
-                request, "Workflow completed! All date tags have been normalized."
-            )
-            return redirect("twf:tags_dates")
-
-        # If `next_date` exists, proceed with the normal FormView flow
-        return super().get(request, *args, **kwargs)
-
-    def get_form_kwargs(self):
-        """Get the form kwargs."""
-        kwargs = super().get_form_kwargs()
-        workflow = self.get_active_workflow()
-
-        if workflow:
-            next_date = workflow.get_next_item()
-            kwargs["project"] = self.get_project()
-            kwargs["date_tag"] = next_date
-
-        return kwargs
-
-    def get_context_data(self, **kwargs):
-        """Get the context data."""
-        project = self.get_project()
-        workflow = self.get_active_workflow()
-
-        # If no active workflow, show workflow start form
-        if not workflow:
-            # Get base context from TWFTagsView (not FormView)
-            context = super(FormView, self).get_context_data(**kwargs)
-            form = StartDateNormalizationWorkflowForm(project=project)
-            context["workflow_start_form"] = form
-            context["has_active_workflow"] = False
-            return context
-
-        # Active workflow exists - get context with form from FormView
-        context = super().get_context_data(**kwargs)
-        context["has_active_workflow"] = True
-        context["workflow"] = workflow
-        context["workflow_progress"] = workflow.get_progress()
-        context["workflow_instructions"] = workflow.get_instructions()
-        context["has_next_tag"] = workflow.get_next_item() is not None
-
-        return context
-
-
 class TWFTagsEnrichmentView(FormView, TWFTagsView):
     """Generic view for tag enrichment workflows."""
 
@@ -1020,7 +885,10 @@ class TWFTagsEnrichmentView(FormView, TWFTagsView):
         context["workflow"] = workflow
         context["workflow_progress"] = workflow.get_progress()
         context["workflow_instructions"] = workflow.get_instructions()
-        context["has_next_tag"] = workflow.get_next_item() is not None
+
+        next_tag = workflow.get_next_item()
+        context["has_next_tag"] = next_tag is not None
+        context["tag"] = next_tag
         context["workflow_title"] = (
             workflow.metadata.get("tag_type", "Tag") + " Enrichment"
         )

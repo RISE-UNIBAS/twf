@@ -5,13 +5,17 @@ import json
 
 from crispy_forms.bootstrap import TabHolder, Tab
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Submit, Layout, Row, Column, Div
+from crispy_forms.layout import Submit, Layout, Row, Column, Div, Field, HTML
 from django import forms
 from django.forms import TextInput
-from django_select2.forms import Select2MultipleWidget, Select2Widget
+from django.urls import reverse
+from django.utils.safestring import mark_safe
+from django_select2.forms import Select2MultipleWidget, Select2Widget, Select2TagWidget
+from markdown import markdown
 
 from twf.clients import zenodo_client
-from twf.models import Project
+from twf.models import Project, Prompt, Note
+from twf.permissions import ENTITY_TYPES
 
 
 class DisplaySettingsForm(forms.ModelForm):

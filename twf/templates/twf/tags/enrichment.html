@@ -44,7 +44,10 @@
                             </div>
                         </div>
                         <div class="col-md-4 text-end">
-                            <a href="{% url 'twf:project_task_monitor' %}" class="btn btn-sm btn-warning">
+                            <a href="#"
+                               class="btn btn-sm btn-warning show-danger-modal"
+                               data-message="Are you sure you want to cancel this workflow? All progress will be lost and reserved tags will be released."
+                               data-redirect-url="{% url 'twf:celery_task_cancel' workflow.related_task.pk %}">
                                 <i class="fa fa-times"></i> Cancel Workflow
                             </a>
                         </div>
@@ -60,6 +63,39 @@
         {% endif %}
 
         {% if has_next_tag %}
+            <div class="alert alert-light border mb-3">
+                <p class="mb-2"><strong>Tag:</strong> <span class="badge bg-primary">{{ tag.variation }}</span></p>
+                <p class="mb-0 small text-muted">
+                    <i class="fa fa-info-circle"></i>
+                    Fill in the normalized data and click "Save & Next" to continue.
+                </p>
+            </div>
+
+            {% if tag.line_text %}
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <h6 class="card-subtitle mb-2 text-muted">
+                            <i class="fa fa-quote-left me-2"></i>Context from document
+                        </h6>
+                        <p class="card-text">
+                            {% load twf_filters %}
+                            {{ tag|highlight_tag_in_context }}
+                        </p>
+                        <p class="card-text small text-muted mb-0">
+                            <i class="fa fa-file-text me-1"></i>Page {{ tag.page.tk_page_number }}
+                            | <i class="fa fa-book me-1"></i>
+                            <a href="{% url 'twf:view_document' tag.page.document.pk %}" class="text-decoration-none">
+                                {{ tag.page.document.title }}
+                            </a>
+                            | <a href="{{ tag.get_transkribus_url }}" target="_blank" class="text-decoration-none"
+                                 title="Open in Transkribus">
+                                <i class="fa fa-external-link me-1"></i>Transkribus
+                            </a>
+                        </p>
+                    </div>
+                </div>
+            {% endif %}
+
             <div class="row">
                 <div class="col-12">
                     {% crispy form %}

@@ -210,7 +210,6 @@ from twf.views.tags.views_tags import (
     TWFProjectTagsParkedView,
     TWFProjectTagsResolvedView,
     TWFProjectTagsIgnoredView,
-    TWFTagsDatesGroupView,
     TWFTagsGroupView,
     TWFTagsOverviewView,
     TWFTagsAssignTagView,
@@ -472,7 +471,6 @@ urlpatterns = [
     ),
     path("tags/group/", TWFTagsGroupView.as_view(), name="tags_group"),
     path("tags/assign/<int:pk>/", TWFTagsAssignTagView.as_view(), name="tags_assign"),
-    path("tags/dates/", TWFTagsDatesGroupView.as_view(), name="tags_dates"),
     path("tags/enrich/", TWFTagsEnrichmentView.as_view(), name="tags_enrichment"),
     path("tags/settings/", TWFTagsSettingsView.as_view(), name="tags_settings"),
     # Tag views

@@ -1,0 +1,63 @@
+{% extends 'twf/base/base.html' %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+    <p class="lead">Configure metadata review workflows for pages and documents.</p>
+
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        {% crispy form %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="alert alert-info">
+                    <h5><i class="fas fa-info-circle"></i> Configuration Guide</h5>
+
+                    <p><strong>Page Metadata Review:</strong> Configure which metadata fields appear in the page metadata review workflow.</p>
+
+                    <p><strong>Document Metadata Review:</strong> Configure which metadata fields appear in the document metadata review workflow.</p>
+
+                    <p><strong>JSON Format:</strong> Both configurations use JSON format with the following structure:</p>
+                    <pre class="bg-light p-3 rounded"><code>{
+  "field.path": {
+    "label": "Display Name",
+    "type": "text"
+  }
+}</code></pre>
+
+                    <p><strong>Field Types:</strong></p>
+                    <ul>
+                        <li><code>text</code> - Single line text input</li>
+                        <li><code>textarea</code> - Multi-line text input</li>
+                        <li><code>number</code> - Numeric input</li>
+                        <li><code>date</code> - Date picker</li>
+                        <li><code>select</code> - Dropdown (requires options)</li>
+                    </ul>
+
+                    <p><strong>Example Configuration:</strong></p>
+                    <pre class="bg-light p-3 rounded"><code>{
+  "json_import.author": {
+    "label": "Author",
+    "type": "text"
+  },
+  "json_import.title": {
+    "label": "Title",
+    "type": "text"
+  },
+  "json_import.year": {
+    "label": "Year",
+    "type": "number"
+  }
+}</code></pre>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

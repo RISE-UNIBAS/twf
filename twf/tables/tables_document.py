@@ -22,7 +22,6 @@ class DocumentTable(tables.Table):
         template_code="""
         <a href="{% url 'twf:view_document' record.pk %}" class="btn btn-sm btn-dark" data-bs-toggle="tooltip" data-bs-placement="bottom" title="View Document Details"><i class="fa-solid fa-eye"></i></a>
         <a href="{{ record.get_transkribus_url }}" class="btn btn-sm btn-ext" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom" title="View Document on Transkribus"><i class="fa-solid fa-scroll"></i></a>
-        <a href="{% url 'twf:view_document' record.pk %}" class="btn btn-sm btn-danger" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Delete Document"><i class="fa-solid fa-trash-can"></i></a>
         """,
         orderable=False,
     )
