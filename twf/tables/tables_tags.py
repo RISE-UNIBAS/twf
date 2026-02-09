@@ -14,40 +14,66 @@ class TagTable(tables.Table):
         verbose_name="Variation", attrs={"td": {"class": "fw-bold"}}
     )
     variation_type = tables.Column(verbose_name="Type")
-    is_parked = tables.Column(
-        verbose_name="Parked",
+    status = tables.Column(
+        verbose_name="Status",
         orderable=False,
+        empty_values=(),
         attrs={"th": {"class": "text-center"}, "td": {"class": "text-center"}},
     )
     entry = tables.Column(
-        accessor="dictionary_entry", verbose_name="Entry", empty_values=()
+        accessor="dictionary_entry", verbose_name="Entry/Enrichment", empty_values=()
     )
     options = tables.Column(empty_values=(), verbose_name="Options", orderable=False)
 
-    def render_is_parked(self, value):
+    def render_status(self, value, record):
         """
-        Render parked status badge for a tag.
+        Render comprehensive status badges for a tag.
+
+        Shows: Reserved, Parked, Processed, or Unresolved status
 
         Args:
-            value: Boolean indicating if tag is parked
+            value: Not used (column has no direct accessor)
+            record: PageTag model instance
 
         Returns:
-            SafeString: Formatted HTML badge with parked status
+            SafeString: Formatted HTML badges showing tag status
         """
-        if value:
-            return format_html(
-                '<span class="badge bg-warning text-dark" data-bs-toggle="tooltip" title="{}">'
-                '<i class="fa fa-box-archive me-1"></i>{}</span>',
-                "This tag is parked",
-                "Yes",
+        from django.utils.safestring import mark_safe
+
+        badges = []
+
+        # Check if reserved (highest priority)
+        if record.is_reserved:
+            badges.append(
+                '<span class="badge bg-info" data-bs-toggle="tooltip" '
+                'title="Reserved in active workflow">'
+                '<i class="fa fa-lock me-1"></i>Reserved</span>'
             )
-        else:
-            return format_html(
-                '<span class="badge bg-success" data-bs-toggle="tooltip" title="{}">'
-                '<i class="fa fa-check-circle me-1"></i>{}</span>',
-                "This tag is active",
-                "No",
+
+        # Check if parked
+        if record.is_parked:
+            badges.append(
+                '<span class="badge bg-warning text-dark" data-bs-toggle="tooltip" '
+                'title="Parked for later processing">'
+                '<i class="fa fa-box-archive me-1"></i>Parked</span>'
             )
+
+        # Check if processed (has dictionary entry or enrichment)
+        if record.dictionary_entry or record.tag_enrichment_entry or record.date_variation_entry:
+            badges.append(
+                '<span class="badge bg-success" data-bs-toggle="tooltip" '
+                'title="Processed (grouped or enriched)">'
+                '<i class="fa fa-check-circle me-1"></i>Processed</span>'
+            )
+        elif not record.is_parked:
+            # Unresolved (not parked and not processed)
+            badges.append(
+                '<span class="badge bg-danger" data-bs-toggle="tooltip" '
+                'title="Unresolved - needs processing">'
+                '<i class="fa fa-exclamation-circle me-1"></i>Unresolved</span>'
+            )
+
+        return mark_safe(" ".join(badges) if badges else "-")
 
     class Meta:
         """
@@ -60,30 +86,45 @@ class TagTable(tables.Table):
 
     def render_entry(self, value, record):
         """
-        Render the dictionary entry or date variation for a tag.
+        Render dictionary entry, enrichment data, or date normalization.
 
         Args:
             value: Dictionary entry value
             record: PageTag model instance
 
         Returns:
-            str: Dictionary entry label or date variation or "-"
+            SafeString: Formatted HTML showing entry or enrichment information
         """
-        date_types = self.get_date_types()
-        if record.variation_type in date_types:
-            if record.date_variation_entry:
-                return record.date_variation_entry.edtf_of_normalized_variation or "-"
-            return "-"
-        return record.dictionary_entry or "-"
-
-    def get_date_types(self):
-        """
-        Get the list of variation types that should be treated as dates.
-
-        Returns:
-            list: List of variation type strings for date fields
-        """
-        return ["date", "date_type_2"]  # Replace with actual variation types for dates
+        # Priority: enrichment > dictionary entry > date variation
+        if record.tag_enrichment_entry:
+            enrichment = record.tag_enrichment_entry
+            return format_html(
+                '<span class="badge bg-success me-1" data-bs-toggle="tooltip" '
+                'title="Enrichment type: {}">'
+                '<i class="fa fa-plus-circle"></i> {}</span>'
+                '<span class="small text-muted">{}</span>',
+                enrichment.enrichment_type,
+                enrichment.enrichment_type.upper(),
+                enrichment.normalized_value[:40] + "..." if len(enrichment.normalized_value) > 40 else enrichment.normalized_value
+            )
+        elif record.dictionary_entry:
+            return format_html(
+                '<span class="badge bg-primary me-1" data-bs-toggle="tooltip" '
+                'title="Dictionary: {}">'
+                '<i class="fa fa-book"></i></span>'
+                '{}',
+                record.dictionary_entry.dictionary.label if record.dictionary_entry.dictionary else "Unknown",
+                record.dictionary_entry.label
+            )
+        elif record.date_variation_entry:
+            return format_html(
+                '<span class="badge bg-info me-1" data-bs-toggle="tooltip" '
+                'title="Date normalization (legacy)">'
+                '<i class="fa fa-calendar"></i></span>'
+                '<code class="small">{}</code>',
+                record.date_variation_entry.edtf_of_normalized_variation
+            )
+        return "-"
 
     def render_options(self, record):
         """
@@ -96,6 +137,13 @@ class TagTable(tables.Table):
             SafeString: Formatted HTML with action buttons
         """
         from django.utils.safestring import mark_safe
+
+        detail_button = format_html(
+            '<a href="{}" class="btn btn-sm btn-primary me-1"'
+            '  data-bs-toggle="tooltip" data-bs-placement="bottom" title="View tag details">'
+            '<i class="fa fa-eye"></i></a>',
+            reverse_lazy("twf:tags_detail", kwargs={"pk": record.pk}),
+        )
 
         park_button = format_html(
             '<a href="{}" class="btn btn-sm btn-dark me-1"'
@@ -111,23 +159,6 @@ class TagTable(tables.Table):
             record.get_transkribus_url(),
         )
 
-        assign_button = format_html(
-            '<a href="{}" class="btn btn-sm btn-dark me-1"'
-            '  data-bs-toggle="tooltip" data-bs-placement="bottom" title="Assign to dictionary entry">'
-            '<i class="fa fa-hand-point-right"></i></a>',
-            reverse_lazy("twf:tags_assign", kwargs={"pk": record.pk}),
-        )
-
-        delete_button = format_html(
-            '<a href="#" class="btn btn-sm btn-danger show-danger-modal"'
-            '  data-message="Are you sure you want to delete this tag?" '
-            '  data-redirect-url="{}" '
-            '  data-bs-toggle="tooltip" data-bs-placement="bottom" title="Delete tag">'
-            '<i class="fa fa-trash"></i></a>',
-            reverse_lazy("twf:tags_delete", kwargs={"pk": record.pk}),
-        )
-
         return mark_safe(
-            # f"{park_button}{transkribus_button}{assign_button}{delete_button}"
-            f"{park_button}{transkribus_button}"
+            f"{detail_button}{park_button}{transkribus_button}"
         )

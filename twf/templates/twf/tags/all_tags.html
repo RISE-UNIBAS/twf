@@ -106,3 +106,16 @@
         </div>
     </div>
 {% endblock %}
+
+{% block script %}
+<script>
+$(document).ready(function() {
+    // Initialize Select2 for multi-select status filter
+    $('.select2-multiple').select2({
+        placeholder: "Select status(es)",
+        allowClear: true,
+        width: '100%'
+    });
+});
+</script>
+{% endblock %}

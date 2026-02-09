@@ -922,3 +922,59 @@ class TWFTagsSettingsView(FormView, TWFTagsView):
         """Handle invalid form submission."""
         messages.error(self.request, "Please correct the errors below.")
         return super().form_invalid(form)
+
+
+class TWFTagDetailView(TWFTagsView):
+    """Detailed view of a single tag showing all associated data."""
+
+    template_name = "twf/tags/detail.html"
+    page_title = "Tag Detail"
+
+    def get(self, request, *args, **kwargs):
+        """Handle GET request."""
+        tag_id = kwargs.get("pk")
+        try:
+            tag = PageTag.objects.select_related(
+                "page__document",
+                "dictionary_entry__dictionary",
+                "date_variation_entry",
+                "tag_enrichment_entry",
+            ).get(pk=tag_id)
+
+            # Check project access
+            if tag.page.document.project.id != self.get_project().id:
+                messages.error(request, "Tag not found in current project.")
+                return redirect("twf:tags_all")
+
+        except PageTag.DoesNotExist:
+            messages.error(request, "Tag not found.")
+            return redirect("twf:tags_all")
+
+        context = self.get_context_data(**kwargs)
+        context["tag"] = tag
+        context["page"] = tag.page
+        context["document"] = tag.page.document
+
+        # Get workflow configuration for this tag type
+        project = self.get_project()
+        enrichment_types = get_enrichment_types(project)
+        excluded_types = get_excluded_types(project)
+
+        if tag.variation_type in excluded_types:
+            context["workflow_type"] = "ignore"
+        elif tag.variation_type in enrichment_types:
+            context["workflow_type"] = "enrich"
+            context["enrichment_config"] = enrichment_types.get(tag.variation_type, {})
+        else:
+            context["workflow_type"] = "group"
+
+        # Get related tags with same variation
+        context["identical_tags"] = PageTag.objects.filter(
+            page__document__project=project,
+            variation=tag.variation,
+            variation_type=tag.variation_type,
+        ).select_related("page__document").order_by("page__document__title", "page__tk_page_number")
+
+        context["identical_count"] = context["identical_tags"].count()
+
+        return self.render_to_response(context)

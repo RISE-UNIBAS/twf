@@ -3,6 +3,7 @@
 import logging
 import django_filters
 from django.db.models import Q
+from django import forms
 from django.forms import CheckboxInput, DateInput
 from django.contrib.auth import get_user_model
 from twf.models import (
@@ -39,22 +40,23 @@ class TagFilter(django_filters.FilterSet):
         empty_label="All Types",
     )
 
-    # Filter for documents
-    document_title = django_filters.CharFilter(
-        field_name="page__document__title",
-        lookup_expr="icontains",
-        label="Document Title Contains",
-    )
-
     document_id = django_filters.CharFilter(
         field_name="page__document__document_id",
         lookup_expr="icontains",
         label="Document ID Contains",
     )
 
-    # Filter for resolved/unresolved tags
-    is_resolved = django_filters.BooleanFilter(
-        method="filter_resolved", label="Resolved Tags Only", widget=CheckboxInput()
+    # Multi-select status filter
+    status = django_filters.MultipleChoiceFilter(
+        method="filter_status",
+        label="Status",
+        choices=[
+            ("parked", "Parked"),
+            ("reserved", "Reserved"),
+            ("processed", "Processed"),
+            ("unresolved", "Unresolved"),
+        ],
+        widget=forms.SelectMultiple(attrs={"class": "form-control select2-multiple"}),
     )
 
     class Meta:
@@ -64,9 +66,8 @@ class TagFilter(django_filters.FilterSet):
         fields = [
             "variation",
             "variation_type",
-            "document_title",
             "document_id",
-            "is_resolved",
+            "status",
         ]
 
     def __init__(self, *args, **kwargs):
@@ -91,16 +92,54 @@ class TagFilter(django_filters.FilterSet):
         logger.debug("Tag variation type filter choices: %s", choices)
         self.filters["variation_type"].extra.update({"choices": choices})
 
-    def filter_resolved(self, queryset, name, value):
-        """Filter for resolved/unresolved tags."""
-        if value:  # If checkbox is checked, show only resolved tags
-            # Tags with dictionary entries or date variations are considered resolved
-            # Note: Using Q objects for database-level filtering (more efficient than loading
-            # all objects and calling is_resolved() method)
-            return queryset.filter(
-                Q(dictionary_entry__isnull=False)
-                | Q(date_variation_entry__isnull=False)
-            )
+    def filter_status(self, queryset, name, value):
+        """
+        Filter by status (multi-select).
+
+        Args:
+            queryset: The base queryset
+            name: Field name
+            value: List of selected status values
+
+        Returns:
+            Filtered queryset matching any of the selected statuses
+        """
+        if not value:
+            return queryset
+
+        # Build list of Q objects for each selected status
+        q_list = []
+
+        for status in value:
+            if status == "parked":
+                q_list.append(Q(is_parked=True))
+            elif status == "reserved":
+                q_list.append(Q(is_reserved=True))
+            elif status == "processed":
+                # Has dictionary entry OR enrichment OR date variation
+                q_list.append(
+                    Q(dictionary_entry__isnull=False)
+                    | Q(tag_enrichment_entry__isnull=False)
+                    | Q(date_variation_entry__isnull=False)
+                )
+            elif status == "unresolved":
+                # Not processed and not parked
+                q_list.append(
+                    Q(
+                        dictionary_entry__isnull=True,
+                        tag_enrichment_entry__isnull=True,
+                        date_variation_entry__isnull=True,
+                        is_parked=False,
+                    )
+                )
+
+        # Combine all Q objects with OR
+        if q_list:
+            combined_q = q_list[0]
+            for q in q_list[1:]:
+                combined_q |= q
+            return queryset.filter(combined_q).distinct()
+
         return queryset
 
 

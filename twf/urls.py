@@ -215,6 +215,7 @@ from twf.views.tags.views_tags import (
     TWFTagsAssignTagView,
     TWFTagsEnrichmentView,
     TWFTagsSettingsView,
+    TWFTagDetailView,
 )
 from twf.workflows.collection_workflows import start_review_collection_workflow
 from twf.workflows.document_workflows import start_review_document_workflow
@@ -473,6 +474,7 @@ urlpatterns = [
     path("tags/assign/<int:pk>/", TWFTagsAssignTagView.as_view(), name="tags_assign"),
     path("tags/enrich/", TWFTagsEnrichmentView.as_view(), name="tags_enrichment"),
     path("tags/settings/", TWFTagsSettingsView.as_view(), name="tags_settings"),
+    path("tags/<int:pk>/", TWFTagDetailView.as_view(), name="tags_detail"),
     # Tag views
     path(
         "tags/view/parked/", TWFProjectTagsParkedView.as_view(), name="tags_view_parked"
