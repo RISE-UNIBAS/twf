@@ -162,3 +162,52 @@ class TagTable(tables.Table):
         return mark_safe(
             f"{detail_button}{park_button}{transkribus_button}"
         )
+
+
+class IgnoredTagTable(tables.Table):
+    """
+    Simplified table for displaying ignored tags.
+    Shows only basic info and minimal action buttons.
+    """
+    variation = tables.Column(
+        verbose_name="Variation", attrs={"td": {"class": "fw-bold"}}
+    )
+    variation_type = tables.Column(verbose_name="Type")
+    options = tables.Column(empty_values=(), verbose_name="Options", orderable=False)
+
+    class Meta:
+        """
+        Table metadata configuration.
+        """
+        model = PageTag
+        fields = ("variation", "variation_type")
+        template_name = "django_tables2/bootstrap4.html"
+        attrs = {"class": "table table-striped table-hover"}
+
+    def render_options(self, record):
+        """
+        Render minimal action buttons for ignored tags.
+
+        Args:
+            record: PageTag model instance
+
+        Returns:
+            SafeString: Formatted HTML with action buttons
+        """
+        from django.utils.safestring import mark_safe
+
+        detail_button = format_html(
+            '<a href="{}" class="btn btn-sm btn-primary me-1"'
+            '  data-bs-toggle="tooltip" data-bs-placement="bottom" title="View tag details">'
+            '<i class="fa fa-eye"></i></a>',
+            reverse_lazy("twf:tags_detail", kwargs={"pk": record.pk}),
+        )
+
+        transkribus_button = format_html(
+            '<a href="{}" class="btn btn-sm btn-ext me-1" target="_blank"'
+            '  data-bs-toggle="tooltip" data-bs-placement="bottom" title="View on Transkribus">'
+            '<i class="fa fa-scroll"></i></a>',
+            record.get_transkribus_url(),
+        )
+
+        return mark_safe(f"{detail_button}{transkribus_button}")

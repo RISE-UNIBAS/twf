@@ -6,6 +6,7 @@ from django.db.models import Q
 from django import forms
 from django.forms import CheckboxInput, DateInput
 from django.contrib.auth import get_user_model
+from django_select2.forms import Select2MultipleWidget
 from twf.models import (
     Document,
     DictionaryEntry,
@@ -56,7 +57,7 @@ class TagFilter(django_filters.FilterSet):
             ("processed", "Processed"),
             ("unresolved", "Unresolved"),
         ],
-        widget=forms.SelectMultiple(attrs={"class": "form-control select2-multiple"}),
+        widget=Select2MultipleWidget(attrs={"style": "width: 100%;"}),
     )
 
     class Meta:
@@ -141,6 +142,50 @@ class TagFilter(django_filters.FilterSet):
             return queryset.filter(combined_q).distinct()
 
         return queryset
+
+
+class IgnoredTagFilter(django_filters.FilterSet):
+    """Simple filter for ignored tags - only text and type."""
+
+    variation = django_filters.CharFilter(
+        lookup_expr="icontains", label="Tag Text Contains"
+    )
+
+    variation_type = django_filters.ChoiceFilter(
+        field_name="variation_type",
+        label="Tag Type",
+        choices=[],  # Placeholder for choices, will populate dynamically
+        empty_label="All Types",
+    )
+
+    class Meta:
+        """Meta class for the ignored tag filter."""
+
+        model = PageTag
+        fields = ["variation", "variation_type"]
+
+    def __init__(self, *args, **kwargs):
+        project = kwargs.pop("project", None)
+        excluded = kwargs.pop("excluded", [])
+
+        super().__init__(*args, **kwargs)
+
+        # Dynamically populate the choices for variation_type (only ignored types)
+        if excluded:
+            distinct_variation_types = (
+                PageTag.objects.filter(page__document__project=project)
+                .filter(variation_type__in=excluded)
+                .distinct()
+                .values("variation_type")
+                .order_by("variation_type")
+            )
+
+            choices = [
+                (vt["variation_type"], vt["variation_type"])
+                for vt in distinct_variation_types
+            ]
+            logger.debug("Ignored tag variation type filter choices: %s", choices)
+            self.filters["variation_type"].extra.update({"choices": choices})
 
 
 class DocumentFilter(django_filters.FilterSet):

@@ -16,12 +16,22 @@ def twf_filter(my_twf_filter):
 @register.filter
 def add_class(field, css_class):
     """
-    Add a CSS class to the given form field.
+    Add a CSS class to the given form field while preserving existing widget attributes.
     :param field:
     :param css_class:
     :return:
     """
-    return field.as_widget(attrs={"class": css_class})
+    # Get existing widget attributes
+    existing_attrs = field.field.widget.attrs.copy() if hasattr(field.field.widget, 'attrs') else {}
+
+    # Merge existing class with new class
+    existing_class = existing_attrs.get('class', '')
+    if existing_class:
+        existing_attrs['class'] = f"{existing_class} {css_class}"
+    else:
+        existing_attrs['class'] = css_class
+
+    return field.as_widget(attrs=existing_attrs)
 
 
 @register.filter

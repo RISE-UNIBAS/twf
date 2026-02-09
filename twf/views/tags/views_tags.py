@@ -19,13 +19,14 @@ from django.views.generic import FormView
 from django_filters.views import FilterView
 from django_tables2 import SingleTableMixin
 
-from twf.forms.filters.filters import TagFilter
+from twf.forms.filters.filters import TagFilter, IgnoredTagFilter
 from twf.forms.tags.workflow_forms import (
     StartTagGroupingWorkflowForm,
     StartEnrichmentWorkflowForm,
 )
 from twf.forms.tags.enrichment_forms import get_enrichment_form_class
 from twf.forms.tags.tag_settings_forms import TagSettingsForm
+from twf.forms.tags.manage_tags_forms import ManageTagsForm
 from twf.models import (
     PageTag,
     DateVariation,
@@ -34,7 +35,7 @@ from twf.models import (
     Variation,
     Workflow,
 )
-from twf.tables.tables_tags import TagTable
+from twf.tables.tables_tags import TagTable, IgnoredTagTable
 from twf.utils.tags_utils import (
     get_date_types,
     get_translated_tag_type,
@@ -92,24 +93,19 @@ class TWFTagsView(LoginRequiredMixin, TWFView):
                 "name": "Tag Views",
                 "options": [
                     {
-                        "url": reverse("twf:tags_view_open"),
-                        "value": "Open Tags",
-                        "permission": "tag.view",
-                    },
-                    {
-                        "url": reverse("twf:tags_view_parked"),
-                        "value": "Parked Tags",
-                        "permission": "tag.view",
-                    },
-                    {
-                        "url": reverse("twf:tags_view_resolved"),
-                        "value": "Resolved Tags",
-                        "permission": "tag.view",
-                    },
-                    {
                         "url": reverse("twf:tags_view_ignored"),
                         "value": "Ignored Tags",
                         "permission": "tag.view",
+                    },
+                    {
+                        "url": reverse("twf:tags_with_comments"),
+                        "value": "Tags with Comments",
+                        "permission": "tag.view",
+                    },
+                    {
+                        "url": reverse("twf:tags_manage"),
+                        "value": "Manage Tags",
+                        "permission": "tag.manage",
                     },
                 ],
             },
@@ -738,11 +734,36 @@ class TWFProjectTagsResolvedView(TWFProjectTagsView):
         return self.filterset.qs
 
 
+class TWFProjectTagsWithCommentsView(TWFProjectTagsView):
+    """View for tags with comments (dictionary entry notes)."""
+
+    template_name = "twf/tags/with_comments.html"
+    page_title = "Tags with Comments"
+    filterset = None
+
+    def get_queryset(self):
+        """Get tags where the dictionary entry has notes."""
+        project = self.get_project()
+        excluded = get_excluded_types(project)
+        queryset = self.model.objects.filter(
+            page__document__project=project,
+            dictionary_entry__isnull=False,
+        ).exclude(
+            dictionary_entry__notes=""
+        ).exclude(variation_type__in=excluded)
+        self.filterset = self.filterset_class(
+            self.request.GET, queryset=queryset, project=project, excluded=excluded
+        )
+        return self.filterset.qs
+
+
 class TWFProjectTagsIgnoredView(TWFProjectTagsView):
     """View for the ignored tags."""
 
     template_name = "twf/tags/ignored.html"
     page_title = "Ignored Tags"
+    filterset_class = IgnoredTagFilter
+    table_class = IgnoredTagTable
     filterset = None
 
     def get_queryset(self):
@@ -922,6 +943,102 @@ class TWFTagsSettingsView(FormView, TWFTagsView):
         """Handle invalid form submission."""
         messages.error(self.request, "Please correct the errors below.")
         return super().form_invalid(form)
+
+
+class TWFManageTagsView(FormView, TWFTagsView):
+    """View for bulk tag management operations."""
+
+    template_name = "twf/tags/manage.html"
+    form_class = ManageTagsForm
+    page_title = "Manage Tags"
+    show_context_help = False
+
+    def get_form_kwargs(self):
+        """Add project to form kwargs."""
+        kwargs = super().get_form_kwargs()
+        kwargs["project"] = self.get_project()
+        return kwargs
+
+    def form_valid(self, form):
+        """Handle successful form submission."""
+        tag_type = form.cleaned_data["tag_type"]
+        action = form.cleaned_data["action"]
+        project = self.get_project()
+
+        # Get all tags of the selected type
+        tags = PageTag.objects.filter(
+            page__document__project=project, variation_type=tag_type
+        )
+
+        if action == "unpark":
+            # Unpark all tags of this type
+            count = tags.filter(is_parked=True).update(is_parked=False)
+            messages.success(
+                self.request,
+                f"Successfully unparked {count} tags of type '{tag_type}'.",
+            )
+        elif action == "remove_dict":
+            # Remove dictionary assignments for this type
+            count = tags.filter(dictionary_entry__isnull=False).update(
+                dictionary_entry=None
+            )
+            messages.success(
+                self.request,
+                f"Successfully removed dictionary assignments from {count} tags of type '{tag_type}'.",
+            )
+        elif action == "remove_enrichment":
+            # Remove enrichment data for this type
+            count = tags.filter(tag_enrichment_entry__isnull=False).update(
+                tag_enrichment_entry=None
+            )
+            messages.success(
+                self.request,
+                f"Successfully removed enrichment data from {count} tags of type '{tag_type}'.",
+            )
+
+        return redirect(reverse("twf:tags_manage"))
+
+    def get_context_data(self, **kwargs):
+        """Get the context data."""
+        context = super().get_context_data(**kwargs)
+        project = self.get_project()
+
+        # Get statistics for all tag types
+        tag_stats = []
+        tag_types = (
+            PageTag.objects.filter(page__document__project=project)
+            .values("variation_type")
+            .distinct()
+            .order_by("variation_type")
+        )
+
+        for tag_type_dict in tag_types:
+            tag_type = tag_type_dict["variation_type"]
+            stats = {
+                "type": tag_type,
+                "total": PageTag.objects.filter(
+                    page__document__project=project, variation_type=tag_type
+                ).count(),
+                "parked": PageTag.objects.filter(
+                    page__document__project=project,
+                    variation_type=tag_type,
+                    is_parked=True,
+                ).count(),
+                "with_dict": PageTag.objects.filter(
+                    page__document__project=project,
+                    variation_type=tag_type,
+                    dictionary_entry__isnull=False,
+                ).count(),
+                "with_enrichment": PageTag.objects.filter(
+                    page__document__project=project,
+                    variation_type=tag_type,
+                    tag_enrichment_entry__isnull=False,
+                ).count(),
+            }
+            tag_stats.append(stats)
+
+        context["tag_stats"] = tag_stats
+        return context
 
 
 class TWFTagDetailView(TWFTagsView):

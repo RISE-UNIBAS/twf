@@ -206,16 +206,15 @@ from twf.views.project.views_project import (
 from twf.views.project.views_project_ai import TWFUnifiedAIQueryView
 from twf.views.tags.views_tags import (
     TWFProjectTagsView,
-    TWFProjectTagsOpenView,
-    TWFProjectTagsParkedView,
-    TWFProjectTagsResolvedView,
     TWFProjectTagsIgnoredView,
+    TWFProjectTagsWithCommentsView,
     TWFTagsGroupView,
     TWFTagsOverviewView,
     TWFTagsAssignTagView,
     TWFTagsEnrichmentView,
     TWFTagsSettingsView,
     TWFTagDetailView,
+    TWFManageTagsView,
 )
 from twf.workflows.collection_workflows import start_review_collection_workflow
 from twf.workflows.document_workflows import start_review_document_workflow
@@ -477,19 +476,16 @@ urlpatterns = [
     path("tags/<int:pk>/", TWFTagDetailView.as_view(), name="tags_detail"),
     # Tag views
     path(
-        "tags/view/parked/", TWFProjectTagsParkedView.as_view(), name="tags_view_parked"
-    ),
-    path("tags/view/open/", TWFProjectTagsOpenView.as_view(), name="tags_view_open"),
-    path(
-        "tags/view/resolved/",
-        TWFProjectTagsResolvedView.as_view(),
-        name="tags_view_resolved",
-    ),
-    path(
         "tags/view/ignored/",
         TWFProjectTagsIgnoredView.as_view(),
         name="tags_view_ignored",
     ),
+    path(
+        "tags/with-comments/",
+        TWFProjectTagsWithCommentsView.as_view(),
+        name="tags_with_comments",
+    ),
+    path("tags/manage/", TWFManageTagsView.as_view(), name="tags_manage"),
     # Park and unpark tags
     path("tags/park/<int:pk>/", park_tag, name="tags_park"),
     path("tags/park-all/<int:pk>/", park_all_identical_tags, name="tags_park_all"),
