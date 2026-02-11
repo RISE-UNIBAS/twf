@@ -9,22 +9,7 @@
       <div class="border p-3 mb-3">
         <h4>A Bit Dangerous</h4>
         <p>These actions are not irreversible but still modify your data significantly.</p>
-        
-        <!-- Unpark All Tags -->
-        <div class="row mb-2">
-          <div class="col-8">
-              <p><strong>Unpark all tags:</strong> Unparks all parked tags in the project.</p>
-          </div>
-          <div class="col-4 text-end">
-            <button
-              class="btn btn-secondary show-confirm-modal" 
-              data-message="Are you sure you want to unpark all tags?"
-              data-redirect-url="{% url 'twf:reset_unpark_all_tags' %}">
-              Unpark All Tags
-            </button>
-          </div>
-        </div>
-    
+
         <!-- Delete All Prompts -->
         <div class="row mb-2">
           <div class="col-8">
@@ -93,23 +78,7 @@
             </button>
           </div>
         </div>
-    
-        <!-- Remove All Tags -->
-        <div class="row mb-2">
-          <div class="col-8">
-              <p><strong>Delete all tags:</strong> Deletes all tags. Tags can be re-extracted from Transkribus
-                  document data. </p>
-          </div>
-          <div class="col-4 text-end">
-            <button
-              class="btn btn-danger show-danger-modal"
-              data-message="Are you sure you want to delete all tags?"
-              data-redirect-url="{% url 'twf:reset_remove_all_tags' %}">
-              Delete All Tags
-            </button>
-          </div>
-        </div>
-    
+
         <!-- Remove All Collections -->
         <div class="row mb-2">
           <div class="col-8">

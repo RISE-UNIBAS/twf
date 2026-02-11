@@ -2,7 +2,7 @@
 {% load crispy_forms_tags %}
 
 {% block content %}
-    <p class="lead">Configure metadata review workflows for pages and documents.</p>
+    <p class="lead">Configure which metadata fields appear in your review workflows.</p>
 
     <div class="container-fluid">
         <div class="row">
@@ -20,42 +20,18 @@
                 <div class="alert alert-info">
                     <h5><i class="fas fa-info-circle"></i> Configuration Guide</h5>
 
-                    <p><strong>Page Metadata Review:</strong> Configure which metadata fields appear in the page metadata review workflow.</p>
+                    <p><strong>Review Workflows:</strong> Select which metadata fields to include in document and page review workflows.</p>
 
-                    <p><strong>Document Metadata Review:</strong> Configure which metadata fields appear in the document metadata review workflow.</p>
-
-                    <p><strong>JSON Format:</strong> Both configurations use JSON format with the following structure:</p>
-                    <pre class="bg-light p-3 rounded"><code>{
-  "field.path": {
-    "label": "Display Name",
-    "type": "text"
-  }
-}</code></pre>
-
-                    <p><strong>Field Types:</strong></p>
+                    <p><strong>Field Configuration:</strong></p>
                     <ul>
-                        <li><code>text</code> - Single line text input</li>
-                        <li><code>textarea</code> - Multi-line text input</li>
-                        <li><code>number</code> - Numeric input</li>
-                        <li><code>date</code> - Date picker</li>
-                        <li><code>select</code> - Dropdown (requires options)</li>
+                        <li><strong>Include:</strong> Check to include this field in the review form</li>
+                        <li><strong>Metadata Key:</strong> The path to the metadata field (e.g., "json_import.author")</li>
+                        <li><strong>Count:</strong> Number of documents/pages with this field</li>
+                        <li><strong>Field Label:</strong> Display name shown in the review form</li>
+                        <li><strong>Field Type:</strong> Input type (text, textarea, number, date, select)</li>
                     </ul>
 
-                    <p><strong>Example Configuration:</strong></p>
-                    <pre class="bg-light p-3 rounded"><code>{
-  "json_import.author": {
-    "label": "Author",
-    "type": "text"
-  },
-  "json_import.title": {
-    "label": "Title",
-    "type": "text"
-  },
-  "json_import.year": {
-    "label": "Year",
-    "type": "number"
-  }
-}</code></pre>
+                    <p><strong>Usage:</strong> After configuring fields here, they will appear in the Document/Page Review workflows where you can edit metadata values in a batch workflow.</p>
                 </div>
             </div>
         </div>

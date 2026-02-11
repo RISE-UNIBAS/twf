@@ -47,7 +47,7 @@ def delete_all_tags(request):
 
     if not check_permission(request.user, "project.manage", project):
         messages.error(request, "You do not have permission to delete all tags.")
-        return redirect("twf:project_reset")
+        return redirect("twf:tags_manage")
 
     PageTag.objects.filter(page__document__project=project).select_related(
         "page", "page__document"
@@ -56,7 +56,7 @@ def delete_all_tags(request):
     save_instant_task_delete_all_tags(project, request.user)
     messages.success(request, "All tags deleted.")
 
-    return redirect("twf:project_reset")
+    return redirect("twf:tags_manage")
 
 
 def delete_all_collections(request):
@@ -279,7 +279,7 @@ def unpark_all_tags(request):
 
     if not check_permission(request.user, "tag.edit", project):
         messages.error(request, "You do not have permission to unpark tags.")
-        return redirect("twf:project_reset")
+        return redirect("twf:tags_manage")
 
     # Get all parked tags in the project and unpark them
     tags = PageTag.objects.filter(page__document__project=project, is_parked=True)
@@ -288,6 +288,8 @@ def unpark_all_tags(request):
 
     save_instant_task_unpark_all_tags(project, request.user)
     messages.success(request, f"{count} tags were unparked.")
+
+    return redirect("twf:tags_manage")
 
     return redirect("twf:project_reset")
 

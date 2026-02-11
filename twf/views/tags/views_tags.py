@@ -35,7 +35,7 @@ from twf.models import (
     Variation,
     Workflow,
 )
-from twf.tables.tables_tags import TagTable, IgnoredTagTable
+from twf.tables.tables_tags import TagTable, IgnoredTagTable, TagsWithCommentsTable
 from twf.utils.tags_utils import (
     get_date_types,
     get_translated_tag_type,
@@ -66,6 +66,11 @@ class TWFTagsView(LoginRequiredMixin, TWFView):
                         "url": reverse("twf:tags_all"),
                         "value": "All Tags",
                         "permission": "tag.view",
+                    },
+                    {
+                        "url": reverse("twf:tags_manage"),
+                        "value": "Manage Tags",
+                        "permission": "tag.manage",
                     },
                     {
                         "url": reverse("twf:tags_settings"),
@@ -101,11 +106,6 @@ class TWFTagsView(LoginRequiredMixin, TWFView):
                         "url": reverse("twf:tags_with_comments"),
                         "value": "Tags with Comments",
                         "permission": "tag.view",
-                    },
-                    {
-                        "url": reverse("twf:tags_manage"),
-                        "value": "Manage Tags",
-                        "permission": "tag.manage",
                     },
                 ],
             },
@@ -739,6 +739,7 @@ class TWFProjectTagsWithCommentsView(TWFProjectTagsView):
 
     template_name = "twf/tags/with_comments.html"
     page_title = "Tags with Comments"
+    table_class = TagsWithCommentsTable
     filterset = None
 
     def get_queryset(self):
@@ -945,68 +946,30 @@ class TWFTagsSettingsView(FormView, TWFTagsView):
         return super().form_invalid(form)
 
 
-class TWFManageTagsView(FormView, TWFTagsView):
+class TWFManageTagsView(TWFTagsView):
     """View for bulk tag management operations."""
 
     template_name = "twf/tags/manage.html"
-    form_class = ManageTagsForm
     page_title = "Manage Tags"
     show_context_help = False
-
-    def get_form_kwargs(self):
-        """Add project to form kwargs."""
-        kwargs = super().get_form_kwargs()
-        kwargs["project"] = self.get_project()
-        return kwargs
-
-    def form_valid(self, form):
-        """Handle successful form submission."""
-        tag_type = form.cleaned_data["tag_type"]
-        action = form.cleaned_data["action"]
-        project = self.get_project()
-
-        # Get all tags of the selected type
-        tags = PageTag.objects.filter(
-            page__document__project=project, variation_type=tag_type
-        )
-
-        if action == "unpark":
-            # Unpark all tags of this type
-            count = tags.filter(is_parked=True).update(is_parked=False)
-            messages.success(
-                self.request,
-                f"Successfully unparked {count} tags of type '{tag_type}'.",
-            )
-        elif action == "remove_dict":
-            # Remove dictionary assignments for this type
-            count = tags.filter(dictionary_entry__isnull=False).update(
-                dictionary_entry=None
-            )
-            messages.success(
-                self.request,
-                f"Successfully removed dictionary assignments from {count} tags of type '{tag_type}'.",
-            )
-        elif action == "remove_enrichment":
-            # Remove enrichment data for this type
-            count = tags.filter(tag_enrichment_entry__isnull=False).update(
-                tag_enrichment_entry=None
-            )
-            messages.success(
-                self.request,
-                f"Successfully removed enrichment data from {count} tags of type '{tag_type}'.",
-            )
-
-        return redirect(reverse("twf:tags_manage"))
 
     def get_context_data(self, **kwargs):
         """Get the context data."""
         context = super().get_context_data(**kwargs)
         project = self.get_project()
 
-        # Get statistics for all tag types
+        # Get statistics for all tag types (excluding ignored types)
+        excluded_types = get_excluded_types(project)
+        enrichment_types = get_enrichment_types(project)
         tag_stats = []
+        total_tags = 0
+        total_parked = 0
+        total_grouped = 0
+        total_enriched = 0
+
         tag_types = (
             PageTag.objects.filter(page__document__project=project)
+            .exclude(variation_type__in=excluded_types)
             .values("variation_type")
             .distinct()
             .order_by("variation_type")
@@ -1014,8 +977,16 @@ class TWFManageTagsView(FormView, TWFTagsView):
 
         for tag_type_dict in tag_types:
             tag_type = tag_type_dict["variation_type"]
+
+            # Determine workflow type
+            if tag_type in enrichment_types:
+                workflow_type = "enrich"
+            else:
+                workflow_type = "group"
+
             stats = {
                 "type": tag_type,
+                "workflow_type": workflow_type,
                 "total": PageTag.objects.filter(
                     page__document__project=project, variation_type=tag_type
                 ).count(),
@@ -1034,10 +1005,25 @@ class TWFManageTagsView(FormView, TWFTagsView):
                     variation_type=tag_type,
                     tag_enrichment_entry__isnull=False,
                 ).count(),
+                "unassigned": PageTag.objects.filter(
+                    page__document__project=project,
+                    variation_type=tag_type,
+                    dictionary_entry__isnull=True,
+                ).count(),
             }
             tag_stats.append(stats)
 
+            # Accumulate totals
+            total_tags += stats["total"]
+            total_parked += stats["parked"]
+            total_grouped += stats["with_dict"]
+            total_enriched += stats["with_enrichment"]
+
         context["tag_stats"] = tag_stats
+        context["total_tags"] = total_tags
+        context["total_parked"] = total_parked
+        context["total_grouped"] = total_grouped
+        context["total_enriched"] = total_enriched
         return context
 
 

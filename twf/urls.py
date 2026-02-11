@@ -144,6 +144,13 @@ from twf.views.tags.views_crud import (
     unpark_tag,
     ungroup_tag,
     delete_tag,
+    unpark_tags_by_type,
+    remove_dict_assignments_by_type,
+    remove_enrichment_by_type,
+    remove_all_dict_assignments,
+    remove_all_enrichment,
+    auto_group_all_tags,
+    auto_group_tags_by_type,
 )
 from twf.views.dictionaries.views_dictionaries import (
     TWFDictionaryOverviewView,
@@ -486,6 +493,41 @@ urlpatterns = [
         name="tags_with_comments",
     ),
     path("tags/manage/", TWFManageTagsView.as_view(), name="tags_manage"),
+    path(
+        "tags/manage/unpark-type/",
+        unpark_tags_by_type,
+        name="tags_manage_unpark_type",
+    ),
+    path(
+        "tags/manage/remove-dict/",
+        remove_dict_assignments_by_type,
+        name="tags_manage_remove_dict",
+    ),
+    path(
+        "tags/manage/remove-enrichment/",
+        remove_enrichment_by_type,
+        name="tags_manage_remove_enrichment",
+    ),
+    path(
+        "tags/manage/remove-all-dict/",
+        remove_all_dict_assignments,
+        name="tags_manage_remove_all_dict",
+    ),
+    path(
+        "tags/manage/remove-all-enrichment/",
+        remove_all_enrichment,
+        name="tags_manage_remove_all_enrichment",
+    ),
+    path(
+        "tags/manage/auto-group/",
+        auto_group_all_tags,
+        name="tags_manage_auto_group",
+    ),
+    path(
+        "tags/manage/auto-group-type/",
+        auto_group_tags_by_type,
+        name="tags_manage_auto_group_type",
+    ),
     # Park and unpark tags
     path("tags/park/<int:pk>/", park_tag, name="tags_park"),
     path("tags/park-all/<int:pk>/", park_all_identical_tags, name="tags_park_all"),

@@ -121,10 +121,16 @@
                         <span class="badge bg-info ms-1">{{ tag.dictionary_entry.dictionary.type }}</span>
                     </dd>
 
-                    {% if tag.dictionary_entry.notes %}
-                        <dt class="col-sm-3">Notes</dt>
-                        <dd class="col-sm-9">{{ tag.dictionary_entry.notes }}</dd>
-                    {% endif %}
+                    <dt class="col-sm-3">Comments</dt>
+                    <dd class="col-sm-9">
+                        {% if tag.dictionary_entry.notes %}
+                            <div class="alert alert-info mb-0">
+                                <i class="fa fa-comment"></i> {{ tag.dictionary_entry.notes }}
+                            </div>
+                        {% else %}
+                            <span class="text-muted">No comments</span>
+                        {% endif %}
+                    </dd>
                 </dl>
             </div>
         </div>
@@ -268,33 +274,79 @@
             </h5>
         </div>
         <div class="card-body">
-            {% if not tag.is_parked %}
-                <a href="{% url 'twf:tags_park' tag.pk %}" class="btn btn-warning">
-                    <i class="fa fa-box-archive"></i> Park Tag
-                </a>
-            {% else %}
-                <a href="{% url 'twf:tags_unpark' tag.pk %}" class="btn btn-success">
-                    <i class="fa fa-play"></i> Unpark Tag
-                </a>
-            {% endif %}
+            <div class="row g-2">
+                <!-- Park/Unpark Actions -->
+                <div class="col-12">
+                    <h6 class="text-muted">Status Actions</h6>
+                    {% if not tag.is_parked %}
+                        <a href="{% url 'twf:tags_park' tag.pk %}" class="btn btn-warning">
+                            <i class="fa fa-box-archive"></i> Park Tag
+                        </a>
+                    {% else %}
+                        <a href="{% url 'twf:tags_unpark' tag.pk %}" class="btn btn-success">
+                            <i class="fa fa-play"></i> Unpark Tag
+                        </a>
+                    {% endif %}
 
-            {% if identical_count > 1 %}
-                <a href="{% url 'twf:tags_park_all' tag.pk %}" class="btn btn-warning ms-2">
-                    <i class="fa fa-box-archive"></i> Park All Identical ({{ identical_count }})
-                </a>
-            {% endif %}
+                    {% if identical_count > 1 %}
+                        <a href="{% url 'twf:tags_park_all' tag.pk %}" class="btn btn-warning ms-2">
+                            <i class="fa fa-box-archive"></i> Park All Identical ({{ identical_count }})
+                        </a>
+                    {% endif %}
+                </div>
 
-            {% if workflow_type == "group" and not tag.dictionary_entry %}
-                <a href="{% url 'twf:tags_assign' tag.pk %}" class="btn btn-primary ms-2">
-                    <i class="fa fa-hand-point-right"></i> Assign to Entry
-                </a>
-            {% endif %}
+                <!-- Workflow Actions -->
+                {% if workflow_type != "ignore" %}
+                    <div class="col-12 mt-3">
+                        <h6 class="text-muted">Workflow Actions</h6>
 
-            <a href="#" class="btn btn-danger ms-2 show-danger-modal"
-               data-message="Are you sure you want to delete this tag?"
-               data-redirect-url="{% url 'twf:tags_delete' tag.pk %}">
-                <i class="fa fa-trash"></i> Delete Tag
-            </a>
+                        {% if workflow_type == "group" %}
+                            <!-- Grouping Workflow Actions -->
+                            {% if tag.dictionary_entry %}
+                                <a href="{% url 'twf:tags_ungroup' tag.pk %}" class="btn btn-warning">
+                                    <i class="fa fa-unlink"></i> Remove Grouping
+                                </a>
+                            {% else %}
+                                <a href="{% url 'twf:tags_assign' tag.pk %}" class="btn btn-primary">
+                                    <i class="fa fa-hand-point-right"></i> Assign to Dictionary Entry
+                                </a>
+                            {% endif %}
+                        {% elif workflow_type == "enrich" %}
+                            <!-- Enrichment Workflow Actions -->
+                            {% if tag.tag_enrichment_entry %}
+                                <button class="btn btn-warning show-confirm-modal"
+                                        data-message="Remove enrichment data from this tag?"
+                                        data-redirect-url="{% url 'twf:tags_ungroup' tag.pk %}">
+                                    <i class="fa fa-eraser"></i> Remove Enrichment
+                                </button>
+                            {% else %}
+                                <span class="text-muted">
+                                    <i class="fa fa-info-circle"></i> Use the enrichment workflow to enrich this tag
+                                </span>
+                            {% endif %}
+                        {% endif %}
+
+                        <!-- Show remove enrichment if it exists (regardless of workflow type) -->
+                        {% if tag.tag_enrichment_entry and workflow_type == "group" %}
+                            <button class="btn btn-warning ms-2 show-confirm-modal"
+                                    data-message="Remove enrichment data from this tag?"
+                                    data-redirect-url="{% url 'twf:tags_ungroup' tag.pk %}">
+                                <i class="fa fa-eraser"></i> Remove Enrichment
+                            </button>
+                        {% endif %}
+                    </div>
+                {% endif %}
+
+                <!-- Danger Zone -->
+                <div class="col-12 mt-3">
+                    <h6 class="text-danger">Danger Zone</h6>
+                    <button class="btn btn-danger show-danger-modal"
+                            data-message="Are you sure you want to delete this tag?"
+                            data-redirect-url="{% url 'twf:tags_delete' tag.pk %}">
+                        <i class="fa fa-trash"></i> Delete Tag
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
 {% endblock %}

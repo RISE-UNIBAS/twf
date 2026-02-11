@@ -347,7 +347,10 @@ class TWFExportConfigurationView(FormView, TWFExportView):
         project = self.get_project()
         sample_doc = project.documents.first()
         sample_page = sample_doc.pages.first()
-        sample_entry = project.selected_dictionaries.first().entries.first()
+
+        # Get sample dictionary entry if available
+        sample_dict = project.selected_dictionaries.first()
+        sample_entry = sample_dict.entries.first() if sample_dict else None
 
         db_fields = {
             "general": [

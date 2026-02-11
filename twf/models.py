@@ -1977,6 +1977,8 @@ class Workflow(models.Model):
         ("review_tags_grouping", "Review Tag Grouping"),
         ("review_tags_dates", "Review Date Normalization"),  # Backward compatibility
         ("review_tags_enrichment", "Review Tag Enrichment"),  # Generic enrichment
+        ("review_metadata_documents", "Review Document Metadata"),
+        ("review_metadata_pages", "Review Page Metadata"),
     ]
 
     project = models.ForeignKey("Project", on_delete=models.CASCADE)
@@ -2023,6 +2025,9 @@ class Workflow(models.Model):
     assigned_tag_items = models.ManyToManyField(
         "PageTag", related_name="workflows", blank=True
     )
+    assigned_page_items = models.ManyToManyField(
+        "Page", related_name="workflows", blank=True
+    )
 
     def get_next_item(self):
         """Fetch the next item to work on."""
@@ -2066,6 +2071,18 @@ class Workflow(models.Model):
                     .order_by("pk")
                     .first()
                 )
+            if self.workflow_type == "review_metadata_documents":
+                if self.current_item_index < self.item_count:
+                    item = self.assigned_document_items.all().order_by("pk")[
+                        self.current_item_index
+                    ]
+                    return item
+            if self.workflow_type == "review_metadata_pages":
+                if self.current_item_index < self.item_count:
+                    item = self.assigned_page_items.all().order_by("pk")[
+                        self.current_item_index
+                    ]
+                    return item
         except IndexError:
             return None
 
