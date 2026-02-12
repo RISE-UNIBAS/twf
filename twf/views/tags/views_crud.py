@@ -140,14 +140,17 @@ def remove_enrichment_by_type(request):
         messages.error(request, "You do not have permission to modify tags.")
         return redirect("twf:tags_manage")
 
-    # Remove enrichment data for this type
+    # Remove enrichment data for this type (both old and new formats)
+    from django.db.models import Q
     tags = PageTag.objects.filter(
         page__document__project=project,
         variation_type=tag_type,
-        tag_enrichment_entry__isnull=False,
+    ).filter(
+        Q(tag_enrichment_entry__isnull=False)
+        | (Q(enrichment__isnull=False) & ~Q(enrichment={}))
     )
     count = tags.count()
-    tags.update(tag_enrichment_entry=None)
+    tags.update(tag_enrichment_entry=None, enrichment={})
 
     messages.success(
         request, f"Removed enrichment data from {count} tags of type '{tag_type}'."
@@ -184,12 +187,16 @@ def remove_all_enrichment(request):
         messages.error(request, "You do not have permission to modify tags.")
         return redirect("twf:tags_manage")
 
-    # Remove all enrichment data
+    # Remove all enrichment data (both old and new formats)
+    from django.db.models import Q
     tags = PageTag.objects.filter(
-        page__document__project=project, tag_enrichment_entry__isnull=False
+        page__document__project=project
+    ).filter(
+        Q(tag_enrichment_entry__isnull=False)
+        | (Q(enrichment__isnull=False) & ~Q(enrichment={}))
     )
     count = tags.count()
-    tags.update(tag_enrichment_entry=None)
+    tags.update(tag_enrichment_entry=None, enrichment={})
 
     messages.success(
         request, f"Removed enrichment data from {count} tags in the project."

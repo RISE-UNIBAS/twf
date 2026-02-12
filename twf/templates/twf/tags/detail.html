@@ -52,7 +52,7 @@
                         <span class="badge bg-warning text-dark">
                             <i class="fa fa-box-archive"></i> Parked
                         </span>
-                    {% elif tag.dictionary_entry or tag.tag_enrichment_entry or tag.date_variation_entry %}
+                    {% elif tag.dictionary_entry or tag.enrichment or tag.tag_enrichment_entry or tag.date_variation_entry %}
                         <span class="badge bg-success">
                             <i class="fa fa-check-circle"></i> Processed
                         </span>
@@ -156,7 +156,56 @@
     {% endif %}
 
     {# Enrichment Data #}
-    {% if tag.tag_enrichment_entry %}
+    {% if tag.enrichment %}
+        {# New enrichment format (JSONField) #}
+        <div class="card mb-3">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0">
+                    <i class="fa fa-plus-circle"></i> Enrichment Data
+                </h5>
+            </div>
+            <div class="card-body">
+                {% for enrich_type, enrich_data in tag.enrichment.items %}
+                    <div class="mb-3">
+                        <dl class="row mb-0">
+                            <dt class="col-sm-3">Type</dt>
+                            <dd class="col-sm-9">
+                                <span class="badge bg-success">{{ enrich_type }}</span>
+                            </dd>
+
+                            <dt class="col-sm-3">Normalized Value</dt>
+                            <dd class="col-sm-9">
+                                <strong>{{ enrich_data.normalized_value }}</strong>
+                            </dd>
+
+                            {% if enrich_data.enrichment_data %}
+                                <dt class="col-sm-3">Enrichment Details</dt>
+                                <dd class="col-sm-9">
+                                    <table class="table table-sm table-borderless mb-0">
+                                        {% for key, value in enrich_data.enrichment_data.items %}
+                                            <tr>
+                                                <th style="width: 30%;">{{ key|title }}</th>
+                                                <td>
+                                                    {% if key == "resource_url" or key == "url" %}
+                                                        <a href="{{ value }}" target="_blank">
+                                                            {{ value }} <i class="fa fa-external-link"></i>
+                                                        </a>
+                                                    {% else %}
+                                                        {{ value }}
+                                                    {% endif %}
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                    </table>
+                                </dd>
+                            {% endif %}
+                        </dl>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    {% elif tag.tag_enrichment_entry %}
+        {# Old enrichment format (FK to TagEnrichment) - for backward compatibility #}
         <div class="card mb-3">
             <div class="card-header bg-success text-white">
                 <h5 class="mb-0">
@@ -242,7 +291,7 @@
                                     <td>
                                         {% if identical_tag.is_parked %}
                                             <span class="badge bg-warning text-dark">Parked</span>
-                                        {% elif identical_tag.dictionary_entry or identical_tag.tag_enrichment_entry %}
+                                        {% elif identical_tag.dictionary_entry or identical_tag.enrichment or identical_tag.tag_enrichment_entry %}
                                             <span class="badge bg-success">Processed</span>
                                         {% else %}
                                             <span class="badge bg-danger">Unresolved</span>
@@ -313,7 +362,7 @@
                             {% endif %}
                         {% elif workflow_type == "enrich" %}
                             <!-- Enrichment Workflow Actions -->
-                            {% if tag.tag_enrichment_entry %}
+                            {% if tag.enrichment or tag.tag_enrichment_entry %}
                                 <button class="btn btn-warning show-confirm-modal"
                                         data-message="Remove enrichment data from this tag?"
                                         data-redirect-url="{% url 'twf:tags_ungroup' tag.pk %}">

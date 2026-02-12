@@ -265,6 +265,8 @@ def create_enrichment_workflow(project, user, tag_type, item_count=None):
         item_count = workflow_def.get("batch_size", 20)
 
     # Find unresolved tags of this type
+    # A tag is unenriched if it has no old tag_enrichment_entry AND no new enrichment data
+    from django.db.models import Q
     available_tags = list(
         PageTag.objects.filter(
             page__document__project=project,
@@ -273,7 +275,9 @@ def create_enrichment_workflow(project, user, tag_type, item_count=None):
             tag_enrichment_entry__isnull=True,
             is_parked=False,
             is_reserved=False,
-        ).values_list("id", flat=True)[:item_count]
+        )
+        .filter(Q(enrichment__isnull=True) | Q(enrichment={}))
+        .values_list("id", flat=True)[:item_count]
     )
 
     if not available_tags:

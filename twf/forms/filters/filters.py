@@ -118,13 +118,16 @@ class TagFilter(django_filters.FilterSet):
                 q_list.append(Q(is_reserved=True))
             elif status == "processed":
                 # Has dictionary entry OR enrichment OR date variation
+                # Check both old (tag_enrichment_entry) and new (enrichment) formats
                 q_list.append(
                     Q(dictionary_entry__isnull=False)
                     | Q(tag_enrichment_entry__isnull=False)
                     | Q(date_variation_entry__isnull=False)
+                    | (Q(enrichment__isnull=False) & ~Q(enrichment={}))
                 )
             elif status == "unresolved":
                 # Not processed and not parked
+                # Must have no dictionary entry, no old enrichment, no new enrichment, no date variation
                 q_list.append(
                     Q(
                         dictionary_entry__isnull=True,
@@ -132,6 +135,7 @@ class TagFilter(django_filters.FilterSet):
                         date_variation_entry__isnull=True,
                         is_parked=False,
                     )
+                    & (Q(enrichment__isnull=True) | Q(enrichment={}))
                 )
 
         # Combine all Q objects with OR

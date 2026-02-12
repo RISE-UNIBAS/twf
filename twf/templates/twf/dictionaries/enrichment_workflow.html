@@ -1,0 +1,132 @@
+{% extends 'twf/base/base.html' %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+    <p class="lead">Enrich dictionary entries with normalized data.</p>
+    {% include 'twf/base/alert_info.html' %}
+
+    {% if not has_active_workflow %}
+        {# Show workflow start form when no active workflow #}
+        <div class="alert alert-info">
+            <h5><i class="fa fa-info-circle"></i> Start a Dictionary Enrichment Workflow</h5>
+            <p>Select a dictionary and enrichment type to begin enriching dictionary entries.</p>
+        </div>
+
+        <form method="post" id="start-workflow-form">
+            {% csrf_token %}
+            <input type="hidden" name="start_workflow" value="1">
+
+            <div class="mb-3">
+                <label for="dictionary_id" class="form-label">Dictionary</label>
+                <select name="dictionary_id" id="dictionary_id" class="form-select" required>
+                    <option value="">Select a dictionary...</option>
+                    {% for dictionary in dictionaries %}
+                        <option value="{{ dictionary.id }}">{{ dictionary.label }} ({{ dictionary.type }})</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label for="enrichment_type" class="form-label">Enrichment Type</label>
+                <select name="enrichment_type" id="enrichment_type" class="form-select" required>
+                    <option value="">Select enrichment type...</option>
+                    {% for value, label in enrichment_types %}
+                        <option value="{{ value }}">{{ label }}</option>
+                    {% endfor %}
+                </select>
+                <div class="form-text">
+                    <strong>Verse:</strong> Bible verse references<br>
+                    <strong>Date:</strong> Dates in EDTF format<br>
+                    <strong>Authority ID:</strong> External authority IDs (GND, Wikidata, GeoNames, etc.)
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label for="batch_size" class="form-label">Batch Size</label>
+                <input type="number" name="batch_size" id="batch_size" class="form-control"
+                       value="20" min="1" max="100" required>
+                <div class="form-text">Number of entries to enrich in this workflow</div>
+            </div>
+
+            <button type="submit" class="btn btn-primary">
+                <i class="fa fa-play"></i> Start Workflow
+            </button>
+        </form>
+    {% else %}
+        {# Show workflow interface when workflow is active #}
+        {% if workflow %}
+            <div class="card mb-3">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h5 class="card-title mb-1">
+                                <i class="fa fa-book"></i> {{ workflow_title|default:"Dictionary Enrichment Workflow" }}
+                            </h5>
+                            <p class="mb-0 text-muted small">
+                                Enrichment Type: <span class="badge bg-info">{{ enrichment_type }}</span>
+                            </p>
+                            <p class="mb-0 text-muted small">
+                                Progress: {{ workflow_progress.completed }} / {{ workflow_progress.total }} entries
+                                ({{ workflow_progress.percentage }}%)
+                            </p>
+                            <div class="progress mt-2" style="height: 20px;">
+                                <div class="progress-bar bg-success" role="progressbar"
+                                     style="width: {{ workflow_progress.percentage }}%"
+                                     aria-valuenow="{{ workflow_progress.completed }}"
+                                     aria-valuemin="0"
+                                     aria-valuemax="{{ workflow_progress.total }}">
+                                    {{ workflow_progress.percentage }}%
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 text-end">
+                            <a href="#"
+                               class="btn btn-sm btn-warning show-danger-modal"
+                               data-message="Are you sure you want to cancel this workflow? All progress will be lost and reserved entries will be released."
+                               data-redirect-url="{% url 'twf:celery_task_cancel' workflow.related_task.pk %}">
+                                <i class="fa fa-times"></i> Cancel Workflow
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+
+        {% if has_next_entry %}
+            <div class="alert alert-light border mb-3">
+                <p class="mb-2"><strong>Dictionary Entry:</strong> <span class="badge bg-primary">{{ entry.label }}</span></p>
+                {% if entry.notes %}
+                    <p class="mb-2 small"><strong>Notes:</strong> {{ entry.notes }}</p>
+                {% endif %}
+                <p class="mb-0 small text-muted">
+                    <i class="fa fa-info-circle"></i>
+                    Fill in the normalized data and click "Save & Next" to continue.
+                </p>
+            </div>
+
+            {# Show usage examples #}
+            {% if entry.get_num_usages > 0 %}
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <h6 class="card-subtitle mb-2 text-muted">
+                            <i class="fa fa-tags me-2"></i>Used {{ entry.get_num_usages }} time{{ entry.get_num_usages|pluralize }}
+                        </h6>
+                        <p class="card-text small text-muted mb-0">
+                            This entry appears in the documents. Enriching it will apply to all occurrences.
+                        </p>
+                    </div>
+                </div>
+            {% endif %}
+
+            <div class="row">
+                <div class="col-12">
+                    {% crispy form %}
+                </div>
+            </div>
+        {% else %}
+            <div class="alert alert-success">
+                <i class="fa fa-check-circle"></i> There are no more entries to enrich in this workflow.
+            </div>
+        {% endif %}
+    {% endif %} {# End has_active_workflow check #}
+{% endblock %}

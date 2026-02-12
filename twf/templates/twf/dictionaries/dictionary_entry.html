@@ -1,5 +1,6 @@
 {% extends 'twf/base/base.html' %}
 {% load django_tables2 %}
+{% load crispy_forms_tags %}
 
 {% block page_title %}
     <div class="d-flex justify-content-between align-items-center">
@@ -119,4 +120,71 @@
             {% endif %}
         </div>
     </div>
+
+    {# Enrichment Data Section - show if entry has enrichment in standard format #}
+    {% if has_enrichment %}
+        <div class="card mb-3">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0">
+                    <i class="fa fa-plus-circle"></i> Enrichment Data
+                </h5>
+            </div>
+            <div class="card-body">
+                {% for enrich_type, enrich_data in enrichment_data.items %}
+                    <div class="mb-3">
+                        <dl class="row mb-0">
+                            <dt class="col-sm-3">Type</dt>
+                            <dd class="col-sm-9">
+                                <span class="badge bg-success">{{ enrich_type }}</span>
+                            </dd>
+
+                            <dt class="col-sm-3">Normalized Value</dt>
+                            <dd class="col-sm-9">
+                                <strong>{{ enrich_data.normalized_value }}</strong>
+                            </dd>
+
+                            {% if enrich_data.enrichment_data %}
+                                <dt class="col-sm-3">Enrichment Details</dt>
+                                <dd class="col-sm-9">
+                                    <table class="table table-sm table-borderless mb-0">
+                                        {% for key, value in enrich_data.enrichment_data.items %}
+                                            <tr>
+                                                <th style="width: 30%;">{{ key|title }}</th>
+                                                <td>
+                                                    {% if key == "resource_url" or key == "url" %}
+                                                        <a href="{{ value }}" target="_blank">
+                                                            {{ value }} <i class="fa fa-external-link"></i>
+                                                        </a>
+                                                    {% else %}
+                                                        {{ value }}
+                                                    {% endif %}
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                    </table>
+                                </dd>
+                            {% endif %}
+                        </dl>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    {% endif %}
+
+    {# Manual Enrichment Form #}
+    {% if enrichment_form %}
+        <div class="card mb-3">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0">
+                    <i class="fa fa-edit"></i> Manual Enrichment
+                </h5>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    {% crispy enrichment_form %}
+                </form>
+            </div>
+        </div>
+    {% endif %}
 {% endblock %}

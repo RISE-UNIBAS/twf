@@ -17,8 +17,10 @@ from twf.forms.dictionaries.dictionaries_forms import (
     DictionaryEntryForm,
 )
 from twf.forms.enrich_forms import EnrichEntryManualForm, EnrichEntryForm
-from twf.models import Dictionary, DictionaryEntry, Variation, PageTag
+from twf.forms.tags.enrichment_forms import get_enrichment_form_class
+from twf.models import Dictionary, DictionaryEntry, Variation, PageTag, Workflow
 from twf.utils.project_statistics import get_dictionary_statistics
+from twf.workflows.dictionary_workflows import create_dictionary_enrichment_workflow
 from twf.tables.tables_dictionary import (
     DictionaryTable,
     DictionaryEntryTable,
@@ -445,7 +447,23 @@ class TWFDictionaryDictionaryEntryView(SingleTableView, TWFDictionaryView):
         table = self.table_class(self.object_list, project=self.get_project())
         context["table"] = table
 
-        context["entry"] = self.get_entry()
+        entry = self.get_entry()
+        context["entry"] = entry
+
+        # Check if entry has enrichment data
+        if entry and entry.metadata:
+            # Filter enrichment data (keys that have normalized_value and enrichment_data structure)
+            enrichment_data = {}
+            for key, value in entry.metadata.items():
+                if isinstance(value, dict) and "normalized_value" in value and "enrichment_data" in value:
+                    enrichment_data[key] = value
+
+            context["has_enrichment"] = bool(enrichment_data)
+            context["enrichment_data"] = enrichment_data
+        else:
+            context["has_enrichment"] = False
+            context["enrichment_data"] = {}
+
         return context
 
 
@@ -723,3 +741,149 @@ class TWFDictionaryDictionaryEntryEditView(FormView, TWFDictionaryView):
 
         # If neither button matches, fallback to the default behavior
         return super().form_invalid(form)
+
+class TWFDictionaryEnrichmentView(FormView, TWFDictionaryView):
+    """Generic view for dictionary entry enrichment workflows."""
+
+    template_name = "twf/dictionaries/enrichment_workflow.html"
+    page_title = "Dictionary Enrichment"
+
+    def get_enrichment_type(self):
+        """Get enrichment type from workflow metadata."""
+        workflow = self.get_active_workflow()
+        if workflow and workflow.metadata:
+            return workflow.metadata.get("enrichment_type")
+        return None
+
+    def get_form_class(self):
+        """Return appropriate form class based on enrichment type."""
+        workflow = self.get_active_workflow()
+        if workflow and workflow.get_next_item():
+            enrichment_type = self.get_enrichment_type()
+            if enrichment_type:
+                return get_enrichment_form_class(enrichment_type)
+        return None
+
+    def get_form(self, form_class=None):
+        """Return form instance or None if no active workflow."""
+        if form_class is None:
+            form_class = self.get_form_class()
+        if form_class is None:
+            return None
+        return super().get_form(form_class)
+
+    def get_form_kwargs(self):
+        """Add project and item to form kwargs."""
+        kwargs = super().get_form_kwargs()
+        workflow = self.get_active_workflow()
+        if workflow:
+            next_entry = workflow.get_next_item()
+            if next_entry:
+                kwargs["project"] = self.get_project()
+                kwargs["item"] = next_entry
+        return kwargs
+
+    def get_active_workflow(self):
+        """Get active dictionary enrichment workflow for current user."""
+        return Workflow.objects.filter(
+            project=self.get_project(),
+            user=self.request.user,
+            workflow_type="review_dictionary_enrichment",
+            status="started",
+        ).first()
+
+    def post(self, request, *args, **kwargs):
+        """Handle the post request."""
+        # Handle workflow start
+        if "start_workflow" in request.POST:
+            dictionary_id = request.POST.get("dictionary_id")
+            enrichment_type = request.POST.get("enrichment_type")
+            batch_size = int(request.POST.get("batch_size", 20))
+            
+            if dictionary_id and enrichment_type:
+                workflow = create_dictionary_enrichment_workflow(
+                    self.get_project(), request.user, 
+                    int(dictionary_id), enrichment_type, batch_size
+                )
+                if workflow:
+                    messages.success(
+                        request, f"Workflow started with {workflow.item_count} entries."
+                    )
+                else:
+                    messages.error(
+                        request, "No unenriched entries available for this dictionary and enrichment type."
+                    )
+            else:
+                messages.error(request, "Invalid form data.")
+            return redirect("twf:dictionaries_enrichment")
+
+        # Handle enrichment form submission (when workflow is active)
+        return super().post(request, *args, **kwargs)
+
+    def form_valid(self, form):
+        """Handle the form submission."""
+        logger.debug("Dictionary enrichment form is valid")
+        workflow = self.get_active_workflow()
+        if not workflow:
+            messages.error(self.request, "No active workflow found.")
+            return redirect("twf:dictionaries_enrichment")
+
+        # Save enrichment using form's save method
+        form.save(user=self.request.user)
+        messages.success(self.request, "Dictionary entry enriched successfully.")
+
+        # Check workflow completion
+        if not workflow.get_next_item():
+            workflow.finish()
+            messages.success(self.request, "Workflow completed!")
+
+        return redirect("twf:dictionaries_enrichment")
+
+    def get(self, request, *args, **kwargs):
+        """Override the get method to handle workflow state."""
+        workflow = self.get_active_workflow()
+
+        # No active workflow - show workflow start options
+        if not workflow:
+            context = self.get_context_data()
+            context["has_active_workflow"] = False
+            return self.render_to_response(context)
+
+        # Active workflow exists
+        return super().get(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        """Get the context data."""
+        project = self.get_project()
+        workflow = self.get_active_workflow()
+
+        # No active workflow - show start form
+        if not workflow:
+            context = super(FormView, self).get_context_data(**kwargs)
+            # Get available dictionaries and enrichment types
+            dictionaries = Dictionary.objects.filter(selected_projects=project)
+            enrichment_types = [
+                ("verse", "Bible Verse"),
+                ("date", "Date"),
+                ("authority_id", "Authority ID"),
+            ]
+            context["dictionaries"] = dictionaries
+            context["enrichment_types"] = enrichment_types
+            context["has_active_workflow"] = False
+            return context
+
+        # Active workflow exists
+        context = super().get_context_data(**kwargs)
+        context["has_active_workflow"] = True
+        context["workflow"] = workflow
+        context["workflow_progress"] = workflow.get_progress()
+
+        next_entry = workflow.get_next_item()
+        context["has_next_entry"] = next_entry is not None
+        context["entry"] = next_entry
+        context["workflow_title"] = (
+            workflow.metadata.get("dictionary_title", "Dictionary") + " Enrichment"
+        )
+        context["enrichment_type"] = workflow.metadata.get("enrichment_type", "")
+
+        return context

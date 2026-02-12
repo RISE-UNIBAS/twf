@@ -1419,6 +1419,50 @@ class DictionaryEntry(TimeStampedModel):
         """Return the number of times this entry is used."""
         return PageTag.objects.filter(dictionary_entry=self).count()
 
+    # Enrichment protocol methods
+    def get_variation(self):
+        """Return the text to be enriched."""
+        return self.label
+
+    def get_enrichment(self):
+        """Return the enrichment data dictionary."""
+        return self.metadata
+
+    def set_enrichment(self, enrichment_type, normalized_value, enrichment_data, user=None):
+        """
+        Set enrichment data for this dictionary entry.
+
+        Args:
+            enrichment_type: Type of enrichment (e.g., "verse", "date", "authority_id")
+            normalized_value: Human-readable normalized value
+            enrichment_data: Dictionary of structured enrichment data
+            user: User performing the enrichment (optional, for audit trail)
+        """
+        if self.metadata is None:
+            self.metadata = {}
+
+        self.metadata[enrichment_type] = {
+            "normalized_value": normalized_value,
+            "enrichment_data": enrichment_data,
+        }
+        self.save()
+
+    def has_enrichment(self, enrichment_type=None):
+        """
+        Check if entry has enrichment data.
+
+        Args:
+            enrichment_type: Specific type to check, or None to check if any enrichment exists
+
+        Returns:
+            bool: True if enrichment exists
+        """
+        if not self.metadata:
+            return False
+        if enrichment_type is None:
+            return len(self.metadata) > 0
+        return enrichment_type in self.metadata
+
     def __str__(self):
         """Return the string representation of the DictionaryEntry."""
         return self.label
@@ -1490,6 +1534,18 @@ class PageTag(TimeStampedModel):
     )
     """Generic enrichment entry for tags that need direct normalization."""
 
+    enrichment = models.JSONField(default=dict, blank=True)
+    """
+    Unified enrichment data storage. Format:
+    {
+        enrichment_type: {
+            "normalized_value": str,
+            "enrichment_data": dict
+        }
+    }
+    Examples: "verse", "date", "authority_id"
+    """
+
     is_parked = models.BooleanField(default=False)
     """Whether the tag is parked."""
 
@@ -1527,7 +1583,8 @@ class PageTag(TimeStampedModel):
         A tag is considered resolved if it has been assigned to either:
         - A dictionary entry (dictionary_entry is not None), or
         - A date variation entry (date_variation_entry is not None), or
-        - A tag enrichment entry (tag_enrichment_entry is not None)
+        - A tag enrichment entry (tag_enrichment_entry is not None), or
+        - Has enrichment data in the enrichment field (enrichment is not empty)
 
         Future resolution criteria (e.g., specific additional_information fields)
         can be added here to centralize the logic.
@@ -1536,7 +1593,52 @@ class PageTag(TimeStampedModel):
             self.dictionary_entry is not None
             or self.date_variation_entry is not None
             or self.tag_enrichment_entry is not None
+            or bool(self.enrichment)
         )
+
+    # Enrichment protocol methods
+    def get_variation(self):
+        """Return the text to be enriched."""
+        return self.variation
+
+    def get_enrichment(self):
+        """Return the enrichment data dictionary."""
+        return self.enrichment
+
+    def set_enrichment(self, enrichment_type, normalized_value, enrichment_data, user=None):
+        """
+        Set enrichment data for this tag.
+
+        Args:
+            enrichment_type: Type of enrichment (e.g., "verse", "date", "authority_id")
+            normalized_value: Human-readable normalized value
+            enrichment_data: Dictionary of structured enrichment data
+            user: User performing the enrichment (optional, for audit trail)
+        """
+        if self.enrichment is None:
+            self.enrichment = {}
+
+        self.enrichment[enrichment_type] = {
+            "normalized_value": normalized_value,
+            "enrichment_data": enrichment_data,
+        }
+        self.save()
+
+    def has_enrichment(self, enrichment_type=None):
+        """
+        Check if tag has enrichment data.
+
+        Args:
+            enrichment_type: Specific type to check, or None to check if any enrichment exists
+
+        Returns:
+            bool: True if enrichment exists
+        """
+        if not self.enrichment:
+            return False
+        if enrichment_type is None:
+            return len(self.enrichment) > 0
+        return enrichment_type in self.enrichment
 
     def get_date(self):
         """Return the date in the format YYYY-MM-DD."""
@@ -1977,6 +2079,7 @@ class Workflow(models.Model):
         ("review_tags_grouping", "Review Tag Grouping"),
         ("review_tags_dates", "Review Date Normalization"),  # Backward compatibility
         ("review_tags_enrichment", "Review Tag Enrichment"),  # Generic enrichment
+        ("review_dictionary_enrichment", "Review Dictionary Enrichment"),
         ("review_metadata_documents", "Review Document Metadata"),
         ("review_metadata_pages", "Review Page Metadata"),
     ]
@@ -2064,13 +2167,33 @@ class Workflow(models.Model):
                 )
             if self.workflow_type == "review_tags_enrichment":
                 # For generic enrichment, get next unenriched tag
+                # A tag is unenriched if BOTH:
+                # - No old tag_enrichment_entry AND
+                # - No new enrichment data (null or empty dict)
+                from django.db.models import Q
                 return (
                     self.assigned_tag_items.filter(
-                        tag_enrichment_entry__isnull=True, is_parked=False
+                        tag_enrichment_entry__isnull=True,
+                        is_parked=False
+                    )
+                    .filter(
+                        Q(enrichment__isnull=True) | Q(enrichment={})
                     )
                     .order_by("pk")
                     .first()
                 )
+            if self.workflow_type == "review_dictionary_enrichment":
+                # For dictionary enrichment, get next unenriched entry
+                # Check if entry has the specific enrichment type from metadata
+                enrichment_type = self.metadata.get("enrichment_type")
+                if not enrichment_type:
+                    return None
+
+                # We need to check each entry individually since metadata structure varies
+                for entry in self.assigned_dictionary_entries.all().order_by("pk"):
+                    if not entry.has_enrichment(enrichment_type):
+                        return entry
+                return None
             if self.workflow_type == "review_metadata_documents":
                 if self.current_item_index < self.item_count:
                     item = self.assigned_document_items.all().order_by("pk")[
@@ -2123,6 +2246,8 @@ class Workflow(models.Model):
             "review_tags_enrichment",
         ]:
             self.assigned_tag_items.all().update(is_reserved=False)
+        if self.workflow_type == "review_dictionary_enrichment":
+            self.assigned_dictionary_entries.all().update(is_reserved=False)
 
     def cancel(self):
         """Cancel the workflow and release reserved items."""
@@ -2140,6 +2265,8 @@ class Workflow(models.Model):
             "review_tags_enrichment",
         ]:
             self.assigned_tag_items.all().update(is_reserved=False)
+        elif self.workflow_type == "review_dictionary_enrichment":
+            self.assigned_dictionary_entries.all().update(is_reserved=False)
 
     def has_more_items(self):
         """Check if there are more items to work on."""
@@ -2165,9 +2292,18 @@ class Workflow(models.Model):
             ).count()
         elif self.workflow_type == "review_tags_enrichment":
             total = self.assigned_tag_items.count()
+            from django.db.models import Q
             remaining = self.assigned_tag_items.filter(
                 tag_enrichment_entry__isnull=True, is_parked=False
-            ).count()
+            ).filter(Q(enrichment__isnull=True) | Q(enrichment={})).count()
+        elif self.workflow_type == "review_dictionary_enrichment":
+            total = self.assigned_dictionary_entries.count()
+            enrichment_type = self.metadata.get("enrichment_type")
+            # Count entries that don't have this specific enrichment type
+            remaining = 0
+            for entry in self.assigned_dictionary_entries.all():
+                if not entry.has_enrichment(enrichment_type):
+                    remaining += 1
         else:
             # For document and collection workflows, use index-based progress
             total = self.item_count

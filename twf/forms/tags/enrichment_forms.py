@@ -13,8 +13,6 @@ from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Submit, Div, HTML, ButtonHolder
 from django_select2.forms import Select2Widget
 
-from twf.models import TagEnrichment
-
 
 class AbstractFormMeta(ABCMeta, type(forms.Form)):
     """Metaclass combining ABC and Django Form metaclass."""
@@ -31,32 +29,55 @@ class BaseTagEnrichmentForm(forms.Form, metaclass=AbstractFormMeta):
     - get_enrichment_type(): Return enrichment type string
     """
 
-    tag_id = forms.IntegerField(widget=forms.HiddenInput())
+    item_id = forms.IntegerField(widget=forms.HiddenInput())
     normalized_value = forms.CharField(
         max_length=500,
         label="Normalized Value",
         widget=forms.TextInput(attrs={"class": "form-control", "readonly": "readonly"}),
     )
 
-    def __init__(self, *args, project=None, tag=None, **kwargs):
-        if not project or not tag:
-            raise ValueError("Project and tag are required.")
+    def __init__(self, *args, project=None, tag=None, item=None, **kwargs):
+        # Support both 'tag' (backward compatibility) and 'item' (new generic name)
+        if item is None:
+            item = tag
+        if not project or not item:
+            raise ValueError("Project and item are required.")
 
         super().__init__(*args, **kwargs)
         self.project = project
-        self.tag = tag
-        self.fields["tag_id"].initial = tag.pk
+        self.item = item
+        # Keep 'tag' attribute for backward compatibility
+        self.tag = item
+        self.fields["item_id"].initial = item.pk
 
-        # Get initial normalized proposal
-        proposal = self.propose_normalization(tag.variation, project)
-        self.fields["normalized_value"].initial = proposal
+        # Check if item already has enrichment of this type
+        enrichment_type = self.get_enrichment_type()
+        if item.has_enrichment(enrichment_type):
+            existing_data = item.get_enrichment().get(enrichment_type, {})
+            # Pre-populate with existing data
+            self.fields["normalized_value"].initial = existing_data.get("normalized_value", "")
+            # Subclasses can override _populate_from_existing to populate specific fields
+            if hasattr(self, '_populate_from_existing'):
+                self._populate_from_existing(existing_data.get("enrichment_data", {}))
+        else:
+            # Get initial normalized proposal
+            proposal = self.propose_normalization(item.get_variation(), project)
+            self.fields["normalized_value"].initial = proposal
 
         # Setup crispy forms helper with buttons
-        park_url = reverse("twf:tags_park", kwargs={"pk": tag.pk})
+        # Park button only for tags (PageTag model)
+        park_button_html = ""
+        if hasattr(item, 'is_parked'):  # PageTag has is_parked attribute
+            park_url = reverse("twf:tags_park", kwargs={"pk": item.pk})
+            park_button_html = (
+                f'<a href="{park_url}" class="btn btn-secondary ms-2">'
+                f'<i class="fa fa-box-archive"></i> Park</a>'
+            )
+
         self.helper = FormHelper()
         self.helper.form_method = "post"
         self.helper.layout = Layout(
-            "tag_id",
+            "item_id",
             self._get_form_fields_layout(),
             ButtonHolder(
                 Submit(
@@ -64,10 +85,7 @@ class BaseTagEnrichmentForm(forms.Form, metaclass=AbstractFormMeta):
                     "Save & Next",
                     css_class="btn btn-primary",
                 ),
-                HTML(
-                    f'<a href="{park_url}" class="btn btn-secondary ms-2">'
-                    f'<i class="fa fa-box-archive"></i> Park</a>'
-                ),
+                HTML(park_button_html) if park_button_html else None,
                 css_class="mt-3",
             ),
         )
@@ -79,12 +97,12 @@ class BaseTagEnrichmentForm(forms.Form, metaclass=AbstractFormMeta):
         Override in subclasses to customize field layout.
         Returns field names or Layout objects for crispy forms.
         """
-        # Default: return all fields except tag_id
+        # Default: return all fields except item_id
         return Div(
             *[
                 field_name
                 for field_name in self.fields.keys()
-                if field_name != "tag_id"
+                if field_name != "item_id"
             ]
         )
 
@@ -135,7 +153,7 @@ class BaseTagEnrichmentForm(forms.Form, metaclass=AbstractFormMeta):
 
     def save(self, user):
         """
-        Create TagEnrichment and link to tag.
+        Save enrichment data to item.enrichment field (or item.metadata for DictionaryEntry).
 
         Parameters
         ----------
@@ -144,21 +162,18 @@ class BaseTagEnrichmentForm(forms.Form, metaclass=AbstractFormMeta):
 
         Returns
         -------
-        TagEnrichment
-            Created enrichment instance
+        PageTag or DictionaryEntry
+            Updated item instance
         """
-        enrichment = TagEnrichment(
-            variation=self.tag.variation,
+        # Use the enrichment protocol (works for both PageTag and DictionaryEntry)
+        self.item.set_enrichment(
             enrichment_type=self.get_enrichment_type(),
             normalized_value=self.cleaned_data["normalized_value"],
             enrichment_data=self.build_enrichment_data(self.cleaned_data),
+            user=user
         )
-        enrichment.save(current_user=user)
 
-        self.tag.tag_enrichment_entry = enrichment
-        self.tag.save(current_user=user)
-
-        return enrichment
+        return self.item
 
 
 class DateEnrichmentForm(BaseTagEnrichmentForm):
@@ -445,7 +460,7 @@ class BibleVerseEnrichmentForm(BaseTagEnrichmentForm):
 
     def _parse_and_populate(self):
         """Parse variation to populate form fields."""
-        variation = self.tag.variation
+        variation = self.item.get_variation()
 
         patterns = [
             r"(\w+)\.\s*(\d+)\.\s*V\.\s*(\d+(?:-\d+)?)",  # "Hebr. 13. V. 7." or "Hebr. 13. V. 7-9."
@@ -730,7 +745,7 @@ class IDEnrichmentForm(BaseTagEnrichmentForm):
 
     def _populate_from_variation(self):
         """Try to detect ID type and value from the variation text."""
-        variation = self.tag.variation.lower()
+        variation = self.item.get_variation().lower()
 
         # Check for GND patterns
         if "gnd" in variation or "d-nb.info" in variation:

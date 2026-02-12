@@ -208,11 +208,14 @@ class TWFTagsOverviewView(TWFTagsView):
 
             # Count grouped/unresolved based on workflow type
             if variation["workflow_type"] == "enrich":
-                # For enrichment workflow: count tags with enrichment entries
+                # For enrichment workflow: count tags with enrichment entries (old or new format)
+                from django.db.models import Q
                 variation["grouped"] = PageTag.objects.filter(
                     page__document__project=project,
                     variation_type=variation["variation_type"],
-                    tag_enrichment_entry__isnull=False,
+                ).filter(
+                    Q(tag_enrichment_entry__isnull=False)
+                    | (Q(enrichment__isnull=False) & ~Q(enrichment={}))
                 ).count()
 
                 variation["unresolved"] = PageTag.objects.filter(
@@ -220,7 +223,7 @@ class TWFTagsOverviewView(TWFTagsView):
                     variation_type=variation["variation_type"],
                     tag_enrichment_entry__isnull=True,
                     is_parked=False,
-                ).count()
+                ).filter(Q(enrichment__isnull=True) | Q(enrichment={})).count()
             elif variation["workflow_type"] == "group":
                 # For grouping workflow: count tags with dictionary entries
                 variation["grouped"] = PageTag.objects.filter(
@@ -1003,7 +1006,9 @@ class TWFManageTagsView(TWFTagsView):
                 "with_enrichment": PageTag.objects.filter(
                     page__document__project=project,
                     variation_type=tag_type,
-                    tag_enrichment_entry__isnull=False,
+                ).filter(
+                    Q(tag_enrichment_entry__isnull=False)
+                    | (Q(enrichment__isnull=False) & ~Q(enrichment={}))
                 ).count(),
                 "unassigned": PageTag.objects.filter(
                     page__document__project=project,

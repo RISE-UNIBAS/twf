@@ -160,6 +160,7 @@ class StartEnrichmentWorkflowForm(forms.Form):
 
         choices = []
         for tag_type, config in enrichment_types.items():
+            from django.db.models import Q
             count = PageTag.objects.filter(
                 page__document__project=project,
                 page__is_ignored=False,
@@ -167,7 +168,7 @@ class StartEnrichmentWorkflowForm(forms.Form):
                 tag_enrichment_entry__isnull=True,
                 is_parked=False,
                 is_reserved=False,
-            ).count()
+            ).filter(Q(enrichment__isnull=True) | Q(enrichment={})).count()
 
             workflow_title = config.get(
                 "workflow_title", f"{tag_type.title()} Enrichment"
