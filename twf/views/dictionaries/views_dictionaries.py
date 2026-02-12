@@ -60,59 +60,32 @@ class TWFDictionaryView(LoginRequiredMixin, TWFView):
                 ],
             },
             {
-                "name": "Automated Workflows",
-                "options": self.get_ai_batch_options()
-                + [
+                "name": "Workflows",
+                "options": [
+                    {
+                        "url": reverse("twf:dictionaries_enrichment"),
+                        "value": "Manual Enrichment",
+                        "permission": "dictionary.edit",
+                    },
+                ],
+            },
+            {
+                "name": "Batch Enrichment",
+                "options": [
                     {
                         "url": reverse("twf:dictionaries_batch_gnd"),
-                        "value": "GND",
+                        "value": "GND Batch",
                         "permission": "dictionary.manage",
                     },
                     {
                         "url": reverse("twf:dictionaries_batch_wikidata"),
-                        "value": "Wikidata",
+                        "value": "Wikidata Batch",
                         "permission": "dictionary.manage",
                     },
                     {
                         "url": reverse("twf:dictionaries_batch_geonames"),
-                        "value": "Geonames",
+                        "value": "GeoNames Batch",
                         "permission": "dictionary.manage",
-                    },
-                ],
-            },
-            {
-                "name": "Supervised Workflows",
-                "options": self.get_ai_request_options()
-                + [
-                    {
-                        "url": reverse("twf:dictionaries_request_gnd"),
-                        "value": "GND",
-                        "permission": "dictionary.edit",
-                    },
-                    {
-                        "url": reverse("twf:dictionaries_request_wikidata"),
-                        "value": "Wikidata",
-                        "permission": "dictionary.edit",
-                    },
-                    {
-                        "url": reverse("twf:dictionaries_request_geonames"),
-                        "value": "Geonames",
-                        "permission": "dictionary.edit",
-                    },
-                ],
-            },
-            {
-                "name": "Manual Workflows",
-                "options": [
-                    {
-                        "url": reverse("twf:dictionaries_normalization"),
-                        "value": "Manual Assignment",
-                        "permission": "dictionary.edit",
-                    },
-                    {
-                        "url": reverse("twf:dictionaries_entry_merging"),
-                        "value": "Merge Entries",
-                        "permission": "dictionary.edit",
                     },
                 ],
             },
@@ -865,7 +838,10 @@ class TWFDictionaryEnrichmentView(FormView, TWFDictionaryView):
             enrichment_types = [
                 ("verse", "Bible Verse"),
                 ("date", "Date"),
-                ("authority_id", "Authority ID"),
+                ("authority_id", "Authority ID (Generic)"),
+                ("gnd", "GND (German National Library)"),
+                ("wikidata", "Wikidata"),
+                ("geonames", "GeoNames"),
             ]
             context["dictionaries"] = dictionaries
             context["enrichment_types"] = enrichment_types

@@ -9,9 +9,45 @@
         {# Show workflow start form when no active workflow #}
         <div class="alert alert-info">
             <h5><i class="fa fa-info-circle"></i> Start a Dictionary Enrichment Workflow</h5>
-            <p>Select a dictionary and enrichment type to begin enriching dictionary entries.</p>
+            <p>Choose between manual enrichment (supervised) or batch enrichment (automated).</p>
         </div>
 
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0"><i class="fa fa-hand-pointer"></i> Manual Enrichment</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>Supervised workflow - enrich entries one at a time with full control.</p>
+                        <p class="text-muted small mb-0">Use this when you need precise control or entries require human judgment.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0"><i class="fa fa-robot"></i> Batch Enrichment</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>Automated workflows - enrich all entries in one batch operation.</p>
+                        <div class="d-grid gap-2">
+                            <a href="{% url 'twf:dictionaries_batch_gnd' %}" class="btn btn-sm btn-outline-success">
+                                <i class="fa fa-book"></i> GND Batch
+                            </a>
+                            <a href="{% url 'twf:dictionaries_batch_wikidata' %}" class="btn btn-sm btn-outline-success">
+                                <i class="fa fa-wikipedia-w"></i> Wikidata Batch
+                            </a>
+                            <a href="{% url 'twf:dictionaries_batch_geonames' %}" class="btn btn-sm btn-outline-success">
+                                <i class="fa fa-map-marker"></i> GeoNames Batch
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <h5 class="mb-3">Start Manual Enrichment Workflow</h5>
         <form method="post" id="start-workflow-form">
             {% csrf_token %}
             <input type="hidden" name="start_workflow" value="1">
@@ -37,7 +73,10 @@
                 <div class="form-text">
                     <strong>Verse:</strong> Bible verse references<br>
                     <strong>Date:</strong> Dates in EDTF format<br>
-                    <strong>Authority ID:</strong> External authority IDs (GND, Wikidata, GeoNames, etc.)
+                    <strong>Authority ID:</strong> Generic external authority IDs<br>
+                    <strong>GND:</strong> German National Library authority IDs<br>
+                    <strong>Wikidata:</strong> Wikidata entity IDs<br>
+                    <strong>GeoNames:</strong> Geographic location IDs
                 </div>
             </div>
 

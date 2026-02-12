@@ -839,6 +839,33 @@ class IDEnrichmentForm(BaseTagEnrichmentForm):
         return "authority_id"
 
 
+class GNDEnrichmentForm(IDEnrichmentForm):
+    """Form for GND authority IDs specifically."""
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["id_type"].initial = "gnd"
+        self.fields["id_type"].widget.attrs["readonly"] = True
+
+
+class WikidataEnrichmentForm(IDEnrichmentForm):
+    """Form for Wikidata IDs specifically."""
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["id_type"].initial = "wikidata"
+        self.fields["id_type"].widget.attrs["readonly"] = True
+
+
+class GeoNamesEnrichmentForm(IDEnrichmentForm):
+    """Form for GeoNames IDs specifically."""
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["id_type"].initial = "geonames"
+        self.fields["id_type"].widget.attrs["readonly"] = True
+
+
 def get_enrichment_form_class(enrichment_type):
     """
     Factory to get form class for enrichment type.
@@ -857,5 +884,8 @@ def get_enrichment_form_class(enrichment_type):
         "date": DateEnrichmentForm,
         "verse": BibleVerseEnrichmentForm,
         "authority_id": IDEnrichmentForm,
+        "gnd": GNDEnrichmentForm,
+        "wikidata": WikidataEnrichmentForm,
+        "geonames": GeoNamesEnrichmentForm,
     }
     return form_map.get(enrichment_type, BaseTagEnrichmentForm)

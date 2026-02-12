@@ -54,9 +54,32 @@ def search_gnd_entries(self, project_id, user_id, **kwargs):
 
             if results:
                 data = results[0]
+                # Convert GND data to standard enrichment format
+                gnd_id = data["gnd_id"][0] if data["gnd_id"] else None
+                preferred_name = data["preferred_name"][0] if data["preferred_name"] else entry.label
+
+                if gnd_id:
+                    # Use set_enrichment method to write in standard format
+                    entry.set_enrichment(
+                        enrichment_type="authority_id",
+                        normalized_value=preferred_name,
+                        enrichment_data={
+                            "id_type": "gnd",
+                            "id_value": gnd_id,
+                            "resource_url": f"https://d-nb.info/gnd/{gnd_id}",
+                            "preferred_name": preferred_name,
+                            "variant_names": data.get("variant_names", []),
+                            "birth_date": data["birth_date"][0] if data.get("birth_date") else None,
+                            "death_date": data["death_date"][0] if data.get("death_date") else None,
+                            "roles": data.get("roles", []),
+                        },
+                        user=self.user
+                    )
+                    found_entries += 1
+
+                # Also keep raw GND data in metadata for backward compatibility
                 entry.metadata["gnd"] = data
                 entry.save(current_user=self.user)
-                found_entries += 1
 
             # Update progress
             self.advance_task()
@@ -92,9 +115,36 @@ def search_wikidata_entries(self, project_id, user_id, **kwargs):
 
         if results:
             data = results[0]
+            # Convert Wikidata data to standard enrichment format
+            wikidata_id = data.get("id")
+            label = data.get("label", entry.label)
+
+            if wikidata_id:
+                enrichment_data = {
+                    "id_type": "wikidata",
+                    "id_value": wikidata_id,
+                    "resource_url": f"https://www.wikidata.org/wiki/{wikidata_id}",
+                    "description": data.get("description", ""),
+                }
+
+                # Add coordinates if available
+                if data.get("coordinates"):
+                    coords = data["coordinates"]
+                    enrichment_data["latitude"] = coords.get("latitude")
+                    enrichment_data["longitude"] = coords.get("longitude")
+
+                # Use set_enrichment method to write in standard format
+                entry.set_enrichment(
+                    enrichment_type="authority_id",
+                    normalized_value=label,
+                    enrichment_data=enrichment_data,
+                    user=self.user
+                )
+                found_entries += 1
+
+            # Also keep raw Wikidata data in metadata for backward compatibility
             entry.metadata["wikidata"] = data
             entry.save(current_user=self.user)
-            found_entries += 1
 
         # Update the progress
         self.advance_task()
@@ -152,9 +202,31 @@ def search_geonames_entries(self, project_id, user_id, **kwargs):
 
             if location_info_list:
                 data, similarity = location_info_list[0]
+                # Convert GeoNames data to standard enrichment format
+                geonames_id = data.get("id")
+                name = data.get("name", entry.label)
+
+                if geonames_id:
+                    # Use set_enrichment method to write in standard format
+                    entry.set_enrichment(
+                        enrichment_type="authority_id",
+                        normalized_value=name,
+                        enrichment_data={
+                            "id_type": "geonames",
+                            "id_value": str(geonames_id),
+                            "resource_url": f"https://www.geonames.org/{geonames_id}/",
+                            "country": data.get("country", ""),
+                            "latitude": data.get("lat"),
+                            "longitude": data.get("lng"),
+                            "similarity_score": similarity,
+                        },
+                        user=self.user
+                    )
+                    found_entries += 1
+
+                # Also keep raw GeoNames data in metadata for backward compatibility
                 entry.metadata["geonames"] = data
                 entry.save(current_user=self.user)
-                found_entries += 1
 
             # Update the progress
             self.advance_task()
