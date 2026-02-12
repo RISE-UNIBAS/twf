@@ -35,7 +35,7 @@ class BaseTagEnrichmentForm(forms.Form, metaclass=AbstractFormMeta):
     normalized_value = forms.CharField(
         max_length=500,
         label="Normalized Value",
-        widget=forms.TextInput(attrs={"class": "form-control"}),
+        widget=forms.TextInput(attrs={"class": "form-control", "readonly": "readonly"}),
     )
 
     def __init__(self, *args, project=None, tag=None, **kwargs):
@@ -249,72 +249,79 @@ class DateEnrichmentForm(BaseTagEnrichmentForm):
 class BibleVerseEnrichmentForm(BaseTagEnrichmentForm):
     """Form for bible verse normalization."""
     BOOK_CHOICES = [
-        ("Gen", "Genesis"),
-        ("Exod", "Exodus"),
-        ("Lev", "Leviticus"),
-        ("Num", "Numbers"),
-        ("Deut", "Deuteronomy"),
-        ("Josh", "Joshua"),
-        ("Judg", "Judges"),
-        ("Ruth", "Ruth"),
-        ("1Sam", "1 Samuel"),
-        ("2Sam", "2 Samuel"),
-        ("1Kgs", "1 Kings"),
-        ("2Kgs", "2 Kings"),
-        ("1Chr", "1 Chronicles"),
-        ("2Chr", "2 Chronicles"),
-        ("Ezra", "Ezra"),
-        ("Neh", "Nehemiah"),
-        ("Esth", "Esther"),
-        ("Job", "Job"),
-        ("Ps", "Psalms"),
-        ("Prov", "Proverbs"),
-        ("Eccl", "Ecclesiastes"),
-        ("Song", "Song of Solomon"),
-        ("Isa", "Isaiah"),
-        ("Jer", "Jeremiah"),
-        ("Lam", "Lamentations"),
-        ("Ezek", "Ezekiel"),
-        ("Dan", "Daniel"),
-        ("Hos", "Hosea"),
-        ("Joel", "Joel"),
-        ("Amos", "Amos"),
-        ("Obad", "Obadiah"),
-        ("Jonah", "Jonah"),
-        ("Mic", "Micah"),
-        ("Nah", "Nahum"),
-        ("Hab", "Habakkuk"),
-        ("Zeph", "Zephaniah"),
-        ("Hag", "Haggai"),
-        ("Zech", "Zechariah"),
-        ("Mal", "Malachi"),
-        ("Matt", "Matthew"),
-        ("Mark", "Mark"),
-        ("Luke", "Luke"),
-        ("John", "John"),
-        ("Acts", "Acts"),
-        ("Rom", "Romans"),
-        ("1Cor", "1 Corinthians"),
-        ("2Cor", "2 Corinthians"),
-        ("Gal", "Galatians"),
-        ("Eph", "Ephesians"),
-        ("Phil", "Philippians"),
-        ("Col", "Colossians"),
-        ("1Thess", "1 Thessalonians"),
-        ("2Thess", "2 Thessalonians"),
-        ("1Tim", "1 Timothy"),
-        ("2Tim", "2 Timothy"),
-        ("Titus", "Titus"),
-        ("Phlm", "Philemon"),
-        ("Heb", "Hebrews"),
-        ("Jas", "James"),
-        ("1Pet", "1 Peter"),
-        ("2Pet", "2 Peter"),
-        ("1John", "1 John"),
-        ("2John", "2 John"),
-        ("3John", "3 John"),
-        ("Jude", "Jude"),
-        ("Rev", "Revelation"),
+        ("Gen", "Genesis / Genesis / Genesis"),
+        ("Exod", "Exodus / Exodus / Exodus"),
+        ("Lev", "Leviticus / Levitikus / Leviticus"),
+        ("Num", "Numbers / Numeri / Numeri"),
+        ("Deut", "Deuteronomy / Deuteronomium / Deuteronomium"),
+        ("Josh", "Joshua / Josua / Josue"),
+        ("Judg", "Judges / Richter / Judicum"),
+        ("Ruth", "Ruth / Ruth / Ruth"),
+        ("1Sam", "1 Samuel / 1. Samuel / 1 Regum"),
+        ("2Sam", "2 Samuel / 2. Samuel / 2 Regum"),
+        ("1Kgs", "1 Kings / 1. Könige / 3 Regum"),
+        ("2Kgs", "2 Kings / 2. Könige / 4 Regum"),
+        ("1Chr", "1 Chronicles / 1. Chronik / 1 Paralipomenon"),
+        ("2Chr", "2 Chronicles / 2. Chronik / 2 Paralipomenon"),
+        ("Ezra", "Ezra / Esra / Esdras"),
+        ("Neh", "Nehemiah / Nehemia / Nehemias"),
+        ("Esth", "Esther / Ester / Esther"),
+        ("Job", "Job / Hiob / Job"),
+        ("Ps", "Psalms / Psalmen / Psalmi"),
+        ("Prov", "Proverbs / Sprüche / Proverbia"),
+        ("Eccl", "Ecclesiastes / Prediger / Ecclesiastes"),
+        ("Song", "Song of Solomon / Hohelied Salomos / Canticum Canticorum"),
+        ("Isa", "Isaiah / Jesaja / Isaias"),
+        ("Jer", "Jeremiah / Jeremia / Jeremias"),
+        ("Lam", "Lamentations / Klagelieder / Threni"),
+        ("Ezek", "Ezekiel / Hesekiel / Ezechiel"),
+        ("Dan", "Daniel / Daniel / Daniel"),
+        ("Hos", "Hosea / Hosea / Osee"),
+        ("Joel", "Joel / Joel / Joel"),
+        ("Amos", "Amos / Amos / Amos"),
+        ("Obad", "Obadiah / Obadja / Abdias"),
+        ("Jonah", "Jonah / Jona / Jonas"),
+        ("Mic", "Micah / Micha / Michaeas"),
+        ("Nah", "Nahum / Nahum / Nahum"),
+        ("Hab", "Habakkuk / Habakuk / Habacuc"),
+        ("Zeph", "Zephaniah / Zefanja / Sophonias"),
+        ("Hag", "Haggai / Haggai / Aggaeus"),
+        ("Zech", "Zechariah / Sacharja / Zacharias"),
+        ("Mal", "Malachi / Maleachi / Malachias"),
+        ("Matt", "Matthew / Matthäus / Matthaeus"),
+        ("Mark", "Mark / Markus / Marcus"),
+        ("Luke", "Luke / Lukas / Lucas"),
+        ("John", "John / Johannes / Joannes"),
+        ("Acts", "Acts / Apostelgeschichte / Actus Apostolorum"),
+        ("Rom", "Romans / Römer / Ad Romanos"),
+        ("1Cor", "1 Corinthians / 1. Korinther / 1 ad Corinthios"),
+        ("2Cor", "2 Corinthians / 2. Korinther / 2 ad Corinthios"),
+        ("Gal", "Galatians / Galater / Ad Galatas"),
+        ("Eph", "Ephesians / Epheser / Ad Ephesios"),
+        ("Phil", "Philippians / Philipper / Ad Philippenses"),
+        ("Col", "Colossians / Kolosser / Ad Colossenses"),
+        ("1Thess", "1 Thessalonians / 1. Thessalonicher / 1 ad Thessalonicenses"),
+        ("2Thess", "2 Thessalonians / 2. Thessalonicher / 2 ad Thessalonicenses"),
+        ("1Tim", "1 Timothy / 1. Timotheus / 1 ad Timotheum"),
+        ("2Tim", "2 Timothy / 2. Timotheus / 2 ad Timotheum"),
+        ("Titus", "Titus / Titus / Ad Titum"),
+        ("Phlm", "Philemon / Philemon / Ad Philemonem"),
+        ("Heb", "Hebrews / Hebräer / Ad Hebraeos"),
+        ("Jas", "James / Jakobus / Jacobus"),
+        ("1Pet", "1 Peter / 1. Petrus / 1 Petrus"),
+        ("2Pet", "2 Peter / 2. Petrus / 2 Petrus"),
+        ("1John", "1 John / 1. Johannes / 1 Joannes"),
+        ("2John", "2 John / 2. Johannes / 2 Joannes"),
+        ("3John", "3 John / 3. Johannes / 3 Joannes"),
+        ("Jude", "Jude / Judas / Judas"),
+        ("Rev", "Revelation / Offenbarung / Apocalypsis"),
+        ("Tob", "Tobit / Tobit / Tobias"),
+        ("Jdt", "Judith / Judith / Judith"),
+        ("Wis", "Wisdom of Solomon / Weisheit Salomos / Sapientia"),
+        ("Sir", "Sirach (Ecclesiasticus) / Jesus Sirach / Ecclesiasticus"),
+        ("Bar", "Baruch / Baruch / Baruch"),
+        ("1Macc", "1 Maccabees / 1. Makkabäer / 1 Machabaeorum"),
+        ("2Macc", "2 Maccabees / 2. Makkabäer / 2 Machabaeorum"),
     ]
 
     book = forms.ChoiceField(
@@ -326,22 +333,78 @@ class BibleVerseEnrichmentForm(BaseTagEnrichmentForm):
 
     chapter = forms.IntegerField(
         label="Chapter",
-        min_value=1,
+        min_value=0,
         widget=forms.NumberInput(attrs={"class": "form-control"}),
+        help_text="Enter 0 for entire book",
     )
 
-    verse = forms.IntegerField(
+    verse = forms.CharField(
         label="Verse",
-        min_value=1,
+        max_length=20,
         required=False,
-        widget=forms.NumberInput(attrs={"class": "form-control"}),
-        help_text="Leave empty for entire chapter",
+        widget=forms.TextInput(attrs={"class": "form-control"}),
+        help_text="Single verse (7) or range (7-9). Leave empty for entire chapter.",
     )
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         # Parse variation to populate fields
         self._parse_and_populate()
+
+        # Build book choices mapping for JavaScript
+        import json
+        book_choices_map = {
+            code: label.split(" / ")[0]
+            for code, label in self.BOOK_CHOICES
+        }
+        book_choices_json = json.dumps(book_choices_map)
+
+        # Add JavaScript to update normalized_value dynamically
+        self.helper.layout.append(
+            HTML(f"""
+            <script>
+            (function() {{
+                const bookField = document.querySelector('[name="book"]');
+                const chapterField = document.querySelector('[name="chapter"]');
+                const verseField = document.querySelector('[name="verse"]');
+                const normalizedField = document.querySelector('[name="normalized_value"]');
+
+                const bookChoices = {book_choices_json};
+
+                function updateNormalizedValue() {{
+                    const book = bookField.value;
+                    const chapter = chapterField.value;
+                    const verse = verseField.value.trim();
+
+                    if (!book || chapter === '') {{
+                        normalizedField.value = '';
+                        return;
+                    }}
+
+                    const bookName = bookChoices[book] || book;
+
+                    // Chapter 0 means entire book
+                    if (chapter === '0') {{
+                        normalizedField.value = bookName;
+                    }} else if (verse) {{
+                        normalizedField.value = `${{bookName}} ${{chapter}}:${{verse}}`;
+                    }} else {{
+                        normalizedField.value = `${{bookName}} ${{chapter}}`;
+                    }}
+                }}
+
+                if (bookField && chapterField && verseField && normalizedField) {{
+                    bookField.addEventListener('change', updateNormalizedValue);
+                    chapterField.addEventListener('input', updateNormalizedValue);
+                    verseField.addEventListener('input', updateNormalizedValue);
+
+                    // Initial update
+                    updateNormalizedValue();
+                }}
+            }})();
+            </script>
+            """)
+        )
 
     def propose_normalization(self, variation, project):
         """
@@ -382,25 +445,28 @@ class BibleVerseEnrichmentForm(BaseTagEnrichmentForm):
         variation = self.tag.variation
 
         patterns = [
-            r"(\w+)\.\s*(\d+)\.\s*V\.\s*(\d+)",  # "Hebr. 13. V. 7."
-            r"(\w+)\s+(\d+):(\d+)",  # "Hebrews 13:7"
-            r"(\w+)\s+(\d+),\s*(\d+)",  # "Hebrews 13, 7"
+            r"(\w+)\.\s*(\d+)\.\s*V\.\s*(\d+(?:-\d+)?)",  # "Hebr. 13. V. 7." or "Hebr. 13. V. 7-9."
+            r"(\w+)\s+(\d+):(\d+(?:-\d+)?)",  # "Hebrews 13:7" or "Hebrews 13:7-9"
+            r"(\w+)\s+(\d+),\s*(\d+(?:-\d+)?)",  # "Hebrews 13, 7" or "Hebrews 13, 7-9"
         ]
 
         for pattern in patterns:
             match = re.search(pattern, variation, re.IGNORECASE)
             if match:
                 book_abbrev, chapter, verse = match.groups()
-                book_full = self.expand_book_abbreviation(book_abbrev)
-                self.fields["book"].initial = book_full
+                book_code = self.expand_book_abbreviation(book_abbrev)
+                self.fields["book"].initial = book_code
                 self.fields["chapter"].initial = int(chapter)
                 if verse:
-                    self.fields["verse"].initial = int(verse)
+                    self.fields["verse"].initial = verse
                 break
+
+        # Update normalized_value based on parsed fields
+        self._update_normalized_value()
 
     def expand_book_abbreviation(self, abbrev):
         """
-        Expand common bible book abbreviations.
+        Map common bible book abbreviations to choice codes.
 
         Parameters
         ----------
@@ -410,68 +476,147 @@ class BibleVerseEnrichmentForm(BaseTagEnrichmentForm):
         Returns
         -------
         str
-            Full book name
+            Book choice code (e.g., 'Heb', 'Gen')
         """
         abbrev_map = {
-            "gen": "Genesis",
-            "exod": "Exodus",
-            "lev": "Leviticus",
-            "num": "Numbers",
-            "deut": "Deuteronomy",
-            "josh": "Joshua",
-            "judg": "Judges",
+            "gen": "Gen",
+            "exod": "Exod",
+            "lev": "Lev",
+            "num": "Num",
+            "deut": "Deut",
+            "josh": "Josh",
+            "judg": "Judg",
             "ruth": "Ruth",
-            "sam": "Samuel",
-            "kgs": "Kings",
-            "chr": "Chronicles",
+            "1sam": "1Sam",
+            "2sam": "2Sam",
+            "1kgs": "1Kgs",
+            "2kgs": "2Kgs",
+            "1chr": "1Chr",
+            "2chr": "2Chr",
             "ezra": "Ezra",
-            "neh": "Nehemiah",
-            "esth": "Esther",
+            "neh": "Neh",
+            "esth": "Esth",
             "job": "Job",
-            "ps": "Psalms",
-            "prov": "Proverbs",
-            "eccl": "Ecclesiastes",
-            "song": "Song of Solomon",
-            "isa": "Isaiah",
-            "jer": "Jeremiah",
-            "lam": "Lamentations",
-            "ezek": "Ezekiel",
-            "dan": "Daniel",
-            "hos": "Hosea",
+            "ps": "Ps",
+            "prov": "Prov",
+            "eccl": "Eccl",
+            "song": "Song",
+            "isa": "Isa",
+            "jer": "Jer",
+            "lam": "Lam",
+            "ezek": "Ezek",
+            "dan": "Dan",
+            "hos": "Hos",
             "joel": "Joel",
             "amos": "Amos",
-            "obad": "Obadiah",
+            "obad": "Obad",
             "jonah": "Jonah",
-            "mic": "Micah",
-            "nah": "Nahum",
-            "hab": "Habakkuk",
-            "zeph": "Zephaniah",
-            "hag": "Haggai",
-            "zech": "Zechariah",
-            "mal": "Malachi",
-            "matt": "Matthew",
+            "mic": "Mic",
+            "nah": "Nah",
+            "hab": "Hab",
+            "zeph": "Zeph",
+            "hag": "Hag",
+            "zech": "Zech",
+            "mal": "Mal",
+            "matt": "Matt",
             "mark": "Mark",
             "luke": "Luke",
             "john": "John",
             "acts": "Acts",
-            "rom": "Romans",
-            "cor": "Corinthians",
-            "gal": "Galatians",
-            "eph": "Ephesians",
-            "phil": "Philippians",
-            "col": "Colossians",
-            "thess": "Thessalonians",
-            "tim": "Timothy",
+            "rom": "Rom",
+            "1cor": "1Cor",
+            "2cor": "2Cor",
+            "gal": "Gal",
+            "eph": "Eph",
+            "phil": "Phil",
+            "col": "Col",
+            "1thess": "1Thess",
+            "2thess": "2Thess",
+            "1tim": "1Tim",
+            "2tim": "2Tim",
             "titus": "Titus",
-            "philem": "Philemon",
-            "hebr": "Hebrews",
-            "jas": "James",
-            "pet": "Peter",
-            "jn": "John",
+            "phlm": "Phlm",
+            "hebr": "Heb",
+            "heb": "Heb",
+            "jas": "Jas",
+            "1pet": "1Pet",
+            "2pet": "2Pet",
+            "1jn": "1John",
+            "2jn": "2John",
+            "3jn": "3John",
+            "1john": "1John",
+            "2john": "2John",
+            "3john": "3John",
             "jude": "Jude",
-            "rev": "Revelation",
+            "rev": "Rev",
+            "tob": "Tob",
+            "jdt": "Jdt",
+            "wis": "Wis",
+            "sir": "Sir",
+            "bar": "Bar",
+            "1macc": "1Macc",
+            "2macc": "2Macc",
         }
         return abbrev_map.get(abbrev.lower(), abbrev.title())
+
+    def _update_normalized_value(self):
+        """Generate normalized_value from current field values."""
+        book = self.fields["book"].initial
+        chapter = self.fields["chapter"].initial
+        verse = self.fields["verse"].initial
+
+        if not book or chapter is None:
+            return
+
+        # Get book display name (first part of the choice label)
+        book_display = dict(self.BOOK_CHOICES).get(book, book)
+        if book_display:
+            book_display = book_display.split(" / ")[0]  # Get English name
+
+        # Chapter 0 means entire book
+        if chapter == 0:
+            self.fields["normalized_value"].initial = book_display
+        elif verse:
+            self.fields["normalized_value"].initial = f"{book_display} {chapter}:{verse}"
+        else:
+            self.fields["normalized_value"].initial = f"{book_display} {chapter}"
+
+    def clean(self):
+        """Validate and auto-generate normalized_value."""
+        cleaned_data = super().clean()
+
+        # Validate verse format (single number or range)
+        verse = cleaned_data.get("verse", "").strip()
+        chapter = cleaned_data.get("chapter")
+
+        if verse:
+            if not re.match(r"^\d+(-\d+)?$", verse):
+                raise forms.ValidationError({
+                    "verse": "Verse must be a single number (7) or range (7-9)"
+                })
+            # Can't have verse without chapter
+            if chapter == 0:
+                raise forms.ValidationError({
+                    "verse": "Cannot specify verse when referencing entire book (chapter 0)"
+                })
+
+        # Auto-generate normalized_value
+        book = cleaned_data.get("book")
+
+        if book and chapter is not None:
+            book_display = dict(self.BOOK_CHOICES).get(book, book)
+            if book_display:
+                book_display = book_display.split(" / ")[0]  # Get English name
+
+            # Chapter 0 means entire book
+            if chapter == 0:
+                cleaned_data["normalized_value"] = book_display
+            elif verse:
+                cleaned_data["normalized_value"] = f"{book_display} {chapter}:{verse}"
+            else:
+                cleaned_data["normalized_value"] = f"{book_display} {chapter}"
+
+        return cleaned_data
 
     def build_enrichment_data(self, cleaned_data):
         """
@@ -485,16 +630,28 @@ class BibleVerseEnrichmentForm(BaseTagEnrichmentForm):
         Returns
         -------
         dict
-            Verse data with book, chapter, verse fields
+            Verse data with book, chapter, verse_start, verse_end fields
         """
         data = {
             "book": cleaned_data["book"],
-            "chapter": cleaned_data["chapter"],
         }
-        if cleaned_data.get("verse"):
-            data["verse"] = cleaned_data["verse"]
 
-        # Could add testament detection, book index, etc.
+        chapter = cleaned_data.get("chapter")
+        # Only include chapter if not 0 (0 means entire book)
+        if chapter != 0:
+            data["chapter"] = chapter
+
+        # Parse verse range
+        verse = cleaned_data.get("verse", "").strip()
+        if verse:
+            if "-" in verse:
+                verse_start, verse_end = verse.split("-")
+                data["verse_start"] = int(verse_start)
+                data["verse_end"] = int(verse_end)
+            else:
+                data["verse_start"] = int(verse)
+                data["verse_end"] = int(verse)
+
         return data
 
     def get_enrichment_type(self):
