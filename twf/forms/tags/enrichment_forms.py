@@ -188,6 +188,9 @@ class DateEnrichmentForm(BaseTagEnrichmentForm):
         self.fields["resolve_to"].initial = conf.get("resolve_to", "day")
         self.fields["input_date_format"].initial = conf.get("input_date_format", "DMY")
 
+        # Make normalized_value editable for dates (override readonly from base)
+        self.fields["normalized_value"].widget.attrs.pop("readonly", None)
+
     def propose_normalization(self, variation, project):
         """
         Parse date string to EDTF format.

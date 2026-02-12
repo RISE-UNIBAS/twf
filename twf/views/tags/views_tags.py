@@ -1068,6 +1068,46 @@ class TWFTagDetailView(TWFTagsView):
         elif tag.variation_type in enrichment_types:
             context["workflow_type"] = "enrich"
             context["enrichment_config"] = enrichment_types.get(tag.variation_type, {})
+
+            # Add manual enrichment form if tag is not enriched and not reserved
+            if not tag.tag_enrichment_entry and not tag.is_reserved:
+                enrichment_type = context["enrichment_config"].get("form_type")
+                # Only show manual enrichment for supported types
+                supported_types = ["date", "verse", "authority_id"]
+                if enrichment_type and enrichment_type in supported_types:
+                    from crispy_forms.layout import Submit, ButtonHolder, HTML
+
+                    form_class = get_enrichment_form_class(enrichment_type)
+                    form = form_class(project=project, tag=tag)
+
+                    # Find and replace the ButtonHolder in the layout
+                    # The layout structure is: tag_id, fields, ButtonHolder, [JavaScript HTML]
+                    new_layout_fields = []
+                    for field in form.helper.layout.fields:
+                        # Keep everything except ButtonHolder (which has the old buttons)
+                        if not isinstance(field, ButtonHolder):
+                            new_layout_fields.append(field)
+                        else:
+                            # Replace with our custom button
+                            new_layout_fields.append(
+                                ButtonHolder(
+                                    Submit(
+                                        "save_enrichment",
+                                        "Save Enrichment",
+                                        css_class="btn btn-success",
+                                    ),
+                                    css_class="mt-3",
+                                )
+                            )
+
+                    form.helper.layout.fields = new_layout_fields
+
+                    context["enrichment_form"] = form
+                    context["can_manually_enrich"] = True
+                else:
+                    context["can_manually_enrich"] = False
+            else:
+                context["can_manually_enrich"] = False
         else:
             context["workflow_type"] = "group"
 
@@ -1081,3 +1121,72 @@ class TWFTagDetailView(TWFTagsView):
         context["identical_count"] = context["identical_tags"].count()
 
         return self.render_to_response(context)
+
+    def post(self, request, *args, **kwargs):
+        """Handle POST request for manual enrichment."""
+        tag_id = kwargs.get("pk")
+
+        try:
+            tag = PageTag.objects.select_related(
+                "page__document",
+                "tag_enrichment_entry",
+            ).get(pk=tag_id)
+
+            # Check project access
+            if tag.page.document.project.id != self.get_project().id:
+                messages.error(request, "Tag not found in current project.")
+                return redirect("twf:tags_all")
+
+            # Check if tag is reserved
+            if tag.is_reserved:
+                messages.error(request, "Cannot enrich: tag is reserved in a workflow.")
+                return redirect("twf:tags_detail", pk=tag_id)
+
+            # Check if already enriched
+            if tag.tag_enrichment_entry:
+                messages.error(request, "Tag is already enriched.")
+                return redirect("twf:tags_detail", pk=tag_id)
+
+            # Get enrichment type
+            project = self.get_project()
+            enrichment_types = get_enrichment_types(project)
+            enrichment_config = enrichment_types.get(tag.variation_type, {})
+            enrichment_type = enrichment_config.get("form_type")
+
+            # Get form class and process submission
+            form_class = get_enrichment_form_class(enrichment_type)
+            if not form_class:
+                messages.error(request, "Invalid enrichment type.")
+                return redirect("twf:tags_detail", pk=tag_id)
+
+            form = form_class(request.POST, project=project, tag=tag)
+
+            if form.is_valid():
+                form.save(user=request.user)
+                messages.success(request, "Tag enriched successfully.")
+                return redirect("twf:tags_detail", pk=tag_id)
+            else:
+                messages.error(request, "Please correct the errors in the form.")
+                # Re-render with form errors
+                context = self.get_context_data(**kwargs)
+                context["tag"] = tag
+                context["page"] = tag.page
+                context["document"] = tag.page.document
+                context["workflow_type"] = "enrich"
+                context["enrichment_config"] = enrichment_config
+                context["enrichment_form"] = form
+                context["can_manually_enrich"] = True
+
+                # Add identical tags context
+                context["identical_tags"] = PageTag.objects.filter(
+                    page__document__project=project,
+                    variation=tag.variation,
+                    variation_type=tag.variation_type,
+                ).select_related("page__document").order_by("page__document__title", "page__tk_page_number")
+                context["identical_count"] = context["identical_tags"].count()
+
+                return self.render_to_response(context)
+
+        except PageTag.DoesNotExist:
+            messages.error(request, "Tag not found.")
+            return redirect("twf:tags_all")

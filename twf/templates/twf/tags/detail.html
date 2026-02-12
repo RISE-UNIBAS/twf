@@ -319,6 +319,26 @@
                                         data-redirect-url="{% url 'twf:tags_ungroup' tag.pk %}">
                                     <i class="fa fa-eraser"></i> Remove Enrichment
                                 </button>
+                            {% elif can_manually_enrich and enrichment_form %}
+                                <!-- Manual Enrichment Form -->
+                                <div class="card mt-2">
+                                    <div class="card-header bg-success text-white">
+                                        <h6 class="mb-0">
+                                            <i class="fa fa-plus-circle"></i> Enrich Tag Manually
+                                        </h6>
+                                    </div>
+                                    <div class="card-body">
+                                        {% load crispy_forms_tags %}
+                                        <form method="post" action="">
+                                            {% csrf_token %}
+                                            {% crispy enrichment_form %}
+                                        </form>
+                                    </div>
+                                </div>
+                            {% elif tag.is_reserved %}
+                                <div class="alert alert-warning">
+                                    <i class="fa fa-lock"></i> This tag is reserved in a workflow. Complete or cancel the workflow to enrich manually.
+                                </div>
                             {% else %}
                                 <span class="text-muted">
                                     <i class="fa fa-info-circle"></i> Use the enrichment workflow to enrich this tag
