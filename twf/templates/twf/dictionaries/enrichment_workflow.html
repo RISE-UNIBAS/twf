@@ -91,6 +91,55 @@
                 <i class="fa fa-play"></i> Start Workflow
             </button>
         </form>
+
+        <script>
+        // Dictionary enrichment type configurations
+        const dictionaryConfigs = {{ dictionary_configs_json|safe }};
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const dictionarySelect = document.getElementById('dictionary_id');
+            const enrichmentSelect = document.getElementById('enrichment_type');
+
+            // Store all enrichment options
+            const allOptions = Array.from(enrichmentSelect.querySelectorAll('option')).slice(1); // Skip first "Select..." option
+
+            function filterEnrichmentTypes() {
+                const selectedDictId = dictionarySelect.value;
+
+                if (!selectedDictId) {
+                    // No dictionary selected, show all options
+                    enrichmentSelect.innerHTML = '<option value="">Select enrichment type...</option>';
+                    allOptions.forEach(opt => enrichmentSelect.appendChild(opt.cloneNode(true)));
+                    enrichmentSelect.disabled = true;
+                    return;
+                }
+
+                // Get configured types for this dictionary
+                const configuredTypes = dictionaryConfigs[selectedDictId] || [];
+
+                // Filter options
+                enrichmentSelect.innerHTML = '<option value="">Select enrichment type...</option>';
+
+                if (configuredTypes.length === 0) {
+                    enrichmentSelect.innerHTML += '<option value="" disabled>No enrichment types configured for this dictionary type. Please configure in Dictionary Settings.</option>';
+                    enrichmentSelect.disabled = true;
+                } else {
+                    allOptions.forEach(opt => {
+                        if (configuredTypes.includes(opt.value)) {
+                            enrichmentSelect.appendChild(opt.cloneNode(true));
+                        }
+                    });
+                    enrichmentSelect.disabled = false;
+                }
+            }
+
+            // Listen for dictionary changes
+            dictionarySelect.addEventListener('change', filterEnrichmentTypes);
+
+            // Initialize on page load
+            filterEnrichmentTypes();
+        });
+        </script>
     {% else %}
         {# Show workflow interface when workflow is active #}
         {% if workflow %}

@@ -164,6 +164,7 @@ from twf.views.dictionaries.views_dictionaries import (
     TWFDictionaryAddView,
     TWFDictionaryEnrichmentView,
     TWFDictionaryMergeEntriesView,
+    TWFDictionarySettingsView,
 )
 from twf.views.export.views_export import (
     TWFExportProjectView,
@@ -546,6 +547,11 @@ urlpatterns = [
         "dictionaries/enrichment",
         TWFDictionaryEnrichmentView.as_view(),
         name="dictionaries_enrichment",
+    ),
+    path(
+        "dictionaries/settings",
+        TWFDictionarySettingsView.as_view(),
+        name="dictionaries_settings",
     ),
     path("dictionaries/", TWFDictionaryDictionariesView.as_view(), name="dictionaries"),
     path("dictionaries/add/", TWFDictionaryAddView.as_view(), name="dictionaries_add"),

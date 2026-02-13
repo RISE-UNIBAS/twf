@@ -856,6 +856,98 @@ class TWFTagsEnrichmentView(FormView, TWFTagsView):
                 messages.error(request, "Invalid form data.")
             return redirect("twf:tags_enrichment")
 
+        # Handle search action for query-assisted forms
+        if "search" in request.POST:
+            import json
+            from twf.clients.gnd_client import search_gnd
+            from twf.clients.wikidata_client import search_wikidata_entities
+            from twf.clients.geonames_client import search_location
+            from twf.forms.tags.enrichment_forms import (
+                GNDQueryEnrichmentForm,
+                WikidataQueryEnrichmentForm,
+                GeoNamesQueryEnrichmentForm,
+            )
+
+            workflow = self.get_active_workflow()
+            if not workflow:
+                messages.error(request, "No active workflow found.")
+                return redirect("twf:tags_enrichment")
+
+            next_item = workflow.get_next_item()
+            if not next_item:
+                messages.error(request, "No items to enrich.")
+                return redirect("twf:tags_enrichment")
+
+            form_class = self.get_form_class()
+            search_query = request.POST.get("search_query", "")
+            results = []
+
+            # Call appropriate API based on form type
+            if form_class == GNDQueryEnrichmentForm:
+                try:
+                    results = search_gnd(search_query)
+                    if not results:
+                        messages.warning(request, f"No GND results found for '{search_query}'.")
+                except Exception as e:
+                    messages.error(request, f"Error searching GND: {e}")
+                    results = []
+
+            elif form_class == WikidataQueryEnrichmentForm:
+                try:
+                    # Get entity_type from workflow metadata or tag type settings
+                    workflow_metadata = workflow.metadata or {}
+                    entity_type = workflow_metadata.get("wikidata_entity_type")
+
+                    # If not in workflow metadata, try to get from tag type settings
+                    if not entity_type:
+                        tag_type = workflow_metadata.get("tag_type")
+                        if tag_type:
+                            enrichment_config = self.get_project().get_tag_enrichment_config(tag_type)
+                            entity_type = enrichment_config.get("wikidata_entity_type", "person")
+                        else:
+                            entity_type = "person"  # Default fallback
+
+                    results = search_wikidata_entities(
+                        query=search_query,
+                        entity_type=entity_type,
+                        limit=10
+                    )
+                    if not results:
+                        messages.warning(request, f"No Wikidata results found for '{search_query}'.")
+                except Exception as e:
+                    messages.error(request, f"Error searching Wikidata: {e}")
+                    results = []
+
+            elif form_class == GeoNamesQueryEnrichmentForm:
+                try:
+                    geonames_username = self.get_project().get_credentials("geonames").get("username")
+                    if not geonames_username:
+                        messages.error(request, "GeoNames username not configured.")
+                        results = []
+                    else:
+                        location_results = search_location(search_query, geonames_username, False)
+                        # search_location returns list of (data, similarity) tuples
+                        results = [data for data, similarity in location_results] if location_results else []
+                        if not results:
+                            messages.warning(request, f"No GeoNames results found for '{search_query}'.")
+                except Exception as e:
+                    messages.error(request, f"Error searching GeoNames: {e}")
+                    results = []
+
+            # Re-render form with results
+            form = form_class(
+                {
+                    "search_query": search_query,
+                    "search_results_json": json.dumps(results),
+                    "item_id": next_item.id,
+                },
+                project=self.get_project(),
+                item=next_item,
+            )
+
+            context = self.get_context_data(form=form)
+            return self.render_to_response(context)
+
         # Handle enrichment form submission (when workflow is active)
         return super().post(request, *args, **kwargs)
 

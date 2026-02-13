@@ -713,6 +713,48 @@ class Project(TimeStampedModel):
             return {}
         return self.conf_tasks.get(service, {})
 
+    def get_tag_enrichment_config(self, tag_type):
+        """Get enrichment configuration for a tag type.
+
+        Parameters
+        ----------
+        tag_type : str
+            The tag type to get configuration for
+
+        Returns
+        -------
+        dict
+            Enrichment configuration with workflow_title, form_type, wikidata_entity_type
+        """
+        conf_tasks = self.conf_tasks or {}
+        tag_types_config = conf_tasks.get("tag_types", {})
+        enrichment_types = {}
+
+        if "enrichment_types_config" in tag_types_config:
+            try:
+                enrichment_types = json.loads(tag_types_config["enrichment_types_config"])
+            except (json.JSONDecodeError, TypeError):
+                pass
+
+        return enrichment_types.get(tag_type, {})
+
+    def get_dictionary_enrichment_config(self, dictionary_type):
+        """Get enrichment configuration for a dictionary type.
+
+        Parameters
+        ----------
+        dictionary_type : str
+            The dictionary type to get configuration for
+
+        Returns
+        -------
+        dict
+            Enrichment configuration with enrichment_types, wikidata_entity_type, workflow_title
+        """
+        conf_tasks = self.conf_tasks or {}
+        dictionary_types = conf_tasks.get("dictionary_types", {})
+        return dictionary_types.get(dictionary_type, {})
+
     def get_workflow_definition(self, workflow_type):
         """Return workflow definition with defaults for backward compatibility.
 
@@ -1445,7 +1487,7 @@ class DictionaryEntry(TimeStampedModel):
             "normalized_value": normalized_value,
             "enrichment_data": enrichment_data,
         }
-        self.save()
+        self.save(current_user=user)
 
     def has_enrichment(self, enrichment_type=None):
         """
@@ -1622,7 +1664,7 @@ class PageTag(TimeStampedModel):
             "normalized_value": normalized_value,
             "enrichment_data": enrichment_data,
         }
-        self.save()
+        self.save(current_user=user)
 
     def has_enrichment(self, enrichment_type=None):
         """

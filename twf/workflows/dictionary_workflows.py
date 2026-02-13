@@ -73,17 +73,26 @@ def create_dictionary_enrichment_workflow(project, user, dictionary_id, enrichme
     )
 
     # Create workflow with metadata
+    workflow_metadata = {
+        "dictionary_id": dictionary_id,
+        "dictionary_title": dictionary.label,
+        "enrichment_type": enrichment_type,
+    }
+
+    # Add wikidata_entity_type if configured and enrichment type is wikidata
+    if enrichment_type == "wikidata":
+        dict_config = project.get_dictionary_enrichment_config(dictionary.type)
+        wikidata_entity_type = dict_config.get("wikidata_entity_type")
+        if wikidata_entity_type:
+            workflow_metadata["wikidata_entity_type"] = wikidata_entity_type
+
     workflow = Workflow.objects.create(
         project=project,
         user=user,
         workflow_type="review_dictionary_enrichment",
         item_count=len(available_entries),
         related_task=task,
-        metadata={
-            "dictionary_id": dictionary_id,
-            "dictionary_title": dictionary.label,
-            "enrichment_type": enrichment_type,
-        },
+        metadata=workflow_metadata,
     )
 
     # Assign entries using the assigned_dictionary_entries M2M field

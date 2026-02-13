@@ -16,6 +16,7 @@ from twf.forms.dictionaries.dictionaries_forms import (
     DictionaryForm,
     DictionaryEntryForm,
 )
+from twf.forms.dictionaries.dictionary_settings_forms import DictionarySettingsForm
 from twf.forms.enrich_forms import EnrichEntryManualForm, EnrichEntryForm
 from twf.forms.tags.enrichment_forms import get_enrichment_form_class
 from twf.models import Dictionary, DictionaryEntry, Variation, PageTag, Workflow
@@ -85,6 +86,16 @@ class TWFDictionaryView(LoginRequiredMixin, TWFView):
                     {
                         "url": reverse("twf:dictionaries_batch_geonames"),
                         "value": "GeoNames Batch",
+                        "permission": "dictionary.manage",
+                    },
+                ],
+            },
+            {
+                "name": "Settings",
+                "options": [
+                    {
+                        "url": reverse("twf:dictionaries_settings"),
+                        "value": "Enrichment Settings",
                         "permission": "dictionary.manage",
                     },
                 ],
@@ -772,10 +783,31 @@ class TWFDictionaryEnrichmentView(FormView, TWFDictionaryView):
             dictionary_id = request.POST.get("dictionary_id")
             enrichment_type = request.POST.get("enrichment_type")
             batch_size = int(request.POST.get("batch_size", 20))
-            
+
             if dictionary_id and enrichment_type:
+                # Validate that enrichment type is configured for this dictionary
+                try:
+                    dictionary = Dictionary.objects.get(
+                        id=int(dictionary_id),
+                        selected_projects=self.get_project()
+                    )
+                    dict_config = self.get_project().get_dictionary_enrichment_config(dictionary.type)
+                    configured_types = dict_config.get("enrichment_types", [])
+
+                    # If no configuration exists, allow all types (backward compatibility)
+                    if configured_types and enrichment_type not in configured_types:
+                        messages.error(
+                            request,
+                            f"Enrichment type '{enrichment_type}' is not configured for dictionary type '{dictionary.type}'. "
+                            f"Please configure it in Dictionary Settings."
+                        )
+                        return redirect("twf:dictionaries_enrichment")
+                except Dictionary.DoesNotExist:
+                    messages.error(request, "Dictionary not found.")
+                    return redirect("twf:dictionaries_enrichment")
+
                 workflow = create_dictionary_enrichment_workflow(
-                    self.get_project(), request.user, 
+                    self.get_project(), request.user,
                     int(dictionary_id), enrichment_type, batch_size
                 )
                 if workflow:
@@ -789,6 +821,89 @@ class TWFDictionaryEnrichmentView(FormView, TWFDictionaryView):
             else:
                 messages.error(request, "Invalid form data.")
             return redirect("twf:dictionaries_enrichment")
+
+        # Handle search action for query-assisted forms
+        if "search" in request.POST:
+            import json
+            from twf.clients.gnd_client import search_gnd
+            from twf.clients.wikidata_client import search_wikidata_entities
+            from twf.clients.geonames_client import search_location
+            from twf.forms.tags.enrichment_forms import (
+                GNDQueryEnrichmentForm,
+                WikidataQueryEnrichmentForm,
+                GeoNamesQueryEnrichmentForm,
+            )
+
+            workflow = self.get_active_workflow()
+            if not workflow:
+                messages.error(request, "No active workflow found.")
+                return redirect("twf:dictionaries_enrichment")
+
+            next_item = workflow.get_next_item()
+            if not next_item:
+                messages.error(request, "No items to enrich.")
+                return redirect("twf:dictionaries_enrichment")
+
+            form_class = self.get_form_class()
+            search_query = request.POST.get("search_query", "")
+            results = []
+
+            # Call appropriate API based on form type
+            if form_class == GNDQueryEnrichmentForm:
+                try:
+                    results = search_gnd(search_query)
+                    if not results:
+                        messages.warning(request, f"No GND results found for '{search_query}'.")
+                except Exception as e:
+                    messages.error(request, f"Error searching GND: {e}")
+                    results = []
+
+            elif form_class == WikidataQueryEnrichmentForm:
+                try:
+                    # Get entity_type from workflow metadata
+                    workflow_metadata = workflow.metadata or {}
+                    entity_type = workflow_metadata.get("wikidata_entity_type", "person")
+
+                    results = search_wikidata_entities(
+                        query=search_query,
+                        entity_type=entity_type,
+                        limit=10
+                    )
+                    if not results:
+                        messages.warning(request, f"No Wikidata results found for '{search_query}'.")
+                except Exception as e:
+                    messages.error(request, f"Error searching Wikidata: {e}")
+                    results = []
+
+            elif form_class == GeoNamesQueryEnrichmentForm:
+                try:
+                    geonames_username = self.get_project().get_credentials("geonames").get("username")
+                    if not geonames_username:
+                        messages.error(request, "GeoNames username not configured.")
+                        results = []
+                    else:
+                        location_results = search_location(search_query, geonames_username, False)
+                        # search_location returns list of (data, similarity) tuples
+                        results = [data for data, similarity in location_results] if location_results else []
+                        if not results:
+                            messages.warning(request, f"No GeoNames results found for '{search_query}'.")
+                except Exception as e:
+                    messages.error(request, f"Error searching GeoNames: {e}")
+                    results = []
+
+            # Re-render form with results
+            form = form_class(
+                {
+                    "search_query": search_query,
+                    "search_results_json": json.dumps(results),
+                    "item_id": next_item.id,
+                },
+                project=self.get_project(),
+                item=next_item,
+            )
+
+            context = self.get_context_data(form=form)
+            return self.render_to_response(context)
 
         # Handle enrichment form submission (when workflow is active)
         return super().post(request, *args, **kwargs)
@@ -835,16 +950,31 @@ class TWFDictionaryEnrichmentView(FormView, TWFDictionaryView):
             context = super(FormView, self).get_context_data(**kwargs)
             # Get available dictionaries and enrichment types
             dictionaries = Dictionary.objects.filter(selected_projects=project)
-            enrichment_types = [
+
+            # All possible enrichment types
+            all_enrichment_types = [
+                ("date", "Date Normalization"),
                 ("verse", "Bible Verse"),
-                ("date", "Date"),
                 ("authority_id", "Authority ID (Generic)"),
                 ("gnd", "GND (German National Library)"),
                 ("wikidata", "Wikidata"),
                 ("geonames", "GeoNames"),
             ]
+
+            # Build dictionary configurations for JavaScript filtering
+            import json
+            dictionary_configs = {}
+            for dictionary in dictionaries:
+                dict_config = project.get_dictionary_enrichment_config(dictionary.type)
+                configured_types = dict_config.get("enrichment_types", [])
+                # If no configuration, allow all types
+                if not configured_types:
+                    configured_types = [et[0] for et in all_enrichment_types]
+                dictionary_configs[str(dictionary.id)] = configured_types
+
             context["dictionaries"] = dictionaries
-            context["enrichment_types"] = enrichment_types
+            context["enrichment_types"] = all_enrichment_types
+            context["dictionary_configs_json"] = json.dumps(dictionary_configs)
             context["has_active_workflow"] = False
             return context
 
@@ -862,4 +992,29 @@ class TWFDictionaryEnrichmentView(FormView, TWFDictionaryView):
         )
         context["enrichment_type"] = workflow.metadata.get("enrichment_type", "")
 
+        return context
+
+
+class TWFDictionarySettingsView(FormView, TWFDictionaryView):
+    """View for configuring dictionary enrichment settings."""
+
+    template_name = "twf/dictionaries/settings.html"
+    form_class = DictionarySettingsForm
+
+    def get_form_kwargs(self):
+        """Pass project to form."""
+        kwargs = super().get_form_kwargs()
+        kwargs["project"] = self.get_project()
+        return kwargs
+
+    def form_valid(self, form):
+        """Save form data."""
+        form.save()
+        messages.success(self.request, "Dictionary settings saved successfully.")
+        return redirect("twf:dictionaries_settings")
+
+    def get_context_data(self, **kwargs):
+        """Add context data."""
+        context = super().get_context_data(**kwargs)
+        context["page_title"] = "Dictionary Settings"
         return context

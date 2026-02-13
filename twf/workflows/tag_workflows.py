@@ -299,16 +299,22 @@ def create_enrichment_workflow(project, user, tag_type, item_count=None):
     )
 
     # Create workflow with metadata
+    workflow_metadata = {
+        "tag_type": tag_type,
+        "enrichment_type": enrichment_config.get("form_type", tag_type),
+    }
+
+    # Add wikidata_entity_type if configured
+    if enrichment_config.get("wikidata_entity_type"):
+        workflow_metadata["wikidata_entity_type"] = enrichment_config["wikidata_entity_type"]
+
     workflow = Workflow.objects.create(
         project=project,
         user=user,
         workflow_type="review_tags_enrichment",
         item_count=len(available_tags),
         related_task=task,
-        metadata={
-            "tag_type": tag_type,
-            "enrichment_type": enrichment_config.get("form_type", tag_type),
-        },
+        metadata=workflow_metadata,
     )
 
     # Assign tags

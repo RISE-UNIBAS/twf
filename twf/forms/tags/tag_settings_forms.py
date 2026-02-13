@@ -22,6 +22,15 @@ class TagTypeConfigForm(forms.Form):
         ("ignore", "Ignore (exclude from processing)"),
     ]
 
+    WIKIDATA_ENTITY_CHOICES = [
+        ("", "-- Select Entity Type --"),
+        ("person", "Person"),
+        ("city", "City"),
+        ("event", "Event"),
+        ("ship", "Ship"),
+        ("building", "Building"),
+    ]
+
     tag_type = forms.CharField(widget=forms.HiddenInput(), required=True)
 
     translation = forms.CharField(
@@ -57,7 +66,10 @@ class TagTypeConfigForm(forms.Form):
         ("", "-- Select Form Type --"),
         ("date", "Date Normalization"),
         ("verse", "Bible Verse"),
-        ("authority_id", "Authority ID (GND, GeoNames, etc.)"),
+        ("authority_id", "Authority ID (Generic)"),
+        ("gnd", "GND (German National Library)"),
+        ("wikidata", "Wikidata"),
+        ("geonames", "GeoNames (Geographic Locations)"),
     ]
 
     form_type = forms.ChoiceField(
@@ -68,6 +80,16 @@ class TagTypeConfigForm(forms.Form):
             attrs={"class": "form-control enrichment-field"}
         ),
         help_text='Form type for enrichment (only for "enrich" workflow)',
+    )
+
+    wikidata_entity_type = forms.ChoiceField(
+        label="Wikidata Entity Type",
+        required=False,
+        choices=WIKIDATA_ENTITY_CHOICES,
+        widget=forms.Select(
+            attrs={"class": "form-control enrichment-field"}
+        ),
+        help_text='Entity type for Wikidata searches (only for "wikidata" form type)',
     )
 
     def __init__(self, *args, **kwargs):
@@ -210,6 +232,19 @@ class TagSettingsForm(forms.Form):
                 ),
             )
 
+            self.fields[f"{prefix}_wikidata_entity_type"] = forms.ChoiceField(
+                label="",
+                required=False,
+                choices=TagTypeConfigForm.WIKIDATA_ENTITY_CHOICES,
+                initial=enrichment_config.get("wikidata_entity_type", ""),
+                widget=forms.Select(
+                    attrs={
+                        "class": "form-control form-control-sm enrichment-field",
+                        "data-tag-type": tag_type,
+                    }
+                ),
+            )
+
         self.tag_types = tag_types
         self.tag_counts = tag_counts
 
@@ -245,6 +280,7 @@ class TagSettingsForm(forms.Form):
                         <th>Workflow</th>
                         <th>Workflow Title <small class="text-muted">(enrich only)</small></th>
                         <th>Form Type <small class="text-muted">(enrich only)</small></th>
+                        <th>Wikidata Entity <small class="text-muted">(wikidata only)</small></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -262,6 +298,7 @@ class TagSettingsForm(forms.Form):
                     <td>{{{{ form.{prefix}_workflow }}}}</td>
                     <td>{{{{ form.{prefix}_workflow_title }}}}</td>
                     <td>{{{{ form.{prefix}_form_type }}}}</td>
+                    <td>{{{{ form.{prefix}_wikidata_entity_type }}}}</td>
                 </tr>
             """
 
@@ -334,12 +371,17 @@ class TagSettingsForm(forms.Form):
                     f"{prefix}_workflow_title", ""
                 ).strip()
                 form_type = self.cleaned_data.get(f"{prefix}_form_type", "").strip()
+                wikidata_entity_type = self.cleaned_data.get(
+                    f"{prefix}_wikidata_entity_type", ""
+                ).strip()
 
                 enrichment_config = {}
                 if workflow_title:
                     enrichment_config["workflow_title"] = workflow_title
                 if form_type:
                     enrichment_config["form_type"] = form_type
+                if wikidata_entity_type:
+                    enrichment_config["wikidata_entity_type"] = wikidata_entity_type
 
                 if enrichment_config:
                     enrichment_types[tag_type] = enrichment_config

@@ -9,9 +9,15 @@ from django import forms
 from django.urls import reverse
 from abc import ABCMeta, abstractmethod
 import re
+import json
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Submit, Div, HTML, ButtonHolder
 from django_select2.forms import Select2Widget
+
+# Import API clients for query-assisted forms
+from twf.clients.gnd_client import search_gnd
+from twf.clients.wikidata_client import search_wikidata_entities
+from twf.clients.geonames_client import search_location
 
 
 class AbstractFormMeta(ABCMeta, type(forms.Form)):
@@ -33,6 +39,7 @@ class BaseTagEnrichmentForm(forms.Form, metaclass=AbstractFormMeta):
     normalized_value = forms.CharField(
         max_length=500,
         label="Normalized Value",
+        required=False,
         widget=forms.TextInput(attrs={"class": "form-control", "readonly": "readonly"}),
     )
 
@@ -884,8 +891,550 @@ def get_enrichment_form_class(enrichment_type):
         "date": DateEnrichmentForm,
         "verse": BibleVerseEnrichmentForm,
         "authority_id": IDEnrichmentForm,
-        "gnd": GNDEnrichmentForm,
-        "wikidata": WikidataEnrichmentForm,
-        "geonames": GeoNamesEnrichmentForm,
+        "gnd": GNDQueryEnrichmentForm,  # Query-assisted form
+        "wikidata": WikidataQueryEnrichmentForm,  # Query-assisted form
+        "geonames": GeoNamesQueryEnrichmentForm,  # Query-assisted form
     }
     return form_map.get(enrichment_type, BaseTagEnrichmentForm)
+
+
+# Query-Assisted Enrichment Forms
+# These forms query external APIs and let users select from results
+
+
+class GNDQueryEnrichmentForm(BaseTagEnrichmentForm):
+    """Form for searching GND and selecting from results."""
+
+    search_query = forms.CharField(
+        label="Search GND",
+        max_length=255,
+        required=False,
+        widget=forms.TextInput(attrs={"class": "form-control", "placeholder": "Edit search term..."}),
+    )
+    
+    selected_result = forms.CharField(
+        widget=forms.HiddenInput(),
+        required=False,
+    )
+    
+    result_choice = forms.ChoiceField(
+        label="Select Result",
+        choices=[],
+        widget=forms.RadioSelect(),
+        required=False,
+    )
+
+    def __init__(self, *args, project=None, item=None, tag=None, **kwargs):
+        # Get search results from POST data if present
+        search_results = None
+        if args and len(args) > 0 and isinstance(args[0], dict):
+            search_results_json = args[0].get('search_results_json')
+            if search_results_json:
+                try:
+                    search_results = json.loads(search_results_json)
+                except json.JSONDecodeError:
+                    pass
+
+        super().__init__(*args, project=project, item=item, tag=tag, **kwargs)
+        
+        # Pre-fill search query with item label
+        self.fields["search_query"].initial = self.item.get_variation()
+        
+        # If we have search results, populate the choices
+        if search_results:
+            choices = []
+            for idx, result in enumerate(search_results):
+                gnd_id = result["gnd_id"][0] if result["gnd_id"] else ""
+                preferred_name = result["preferred_name"][0] if result["preferred_name"] else ""
+                birth = result["birth_date"][0] if result.get("birth_date") else ""
+                death = result["death_date"][0] if result.get("death_date") else ""
+                roles = ", ".join(result.get("roles", [])[:2])  # First 2 roles
+                
+                label = f"{preferred_name}"
+                if birth or death:
+                    label += f" ({birth}–{death})"
+                if roles:
+                    label += f" — {roles}"
+                label += f" [GND: {gnd_id}]"
+                
+                choices.append((str(idx), label))
+            
+            self.fields["result_choice"].choices = choices
+            self.search_results = search_results
+        else:
+            self.search_results = []
+            self.fields["result_choice"].widget = forms.HiddenInput()
+
+        # Update helper to include search button
+        park_button_html = ""
+        if hasattr(self.item, 'is_parked'):
+            park_url = reverse("twf:tags_park", kwargs={"pk": self.item.pk})
+            park_button_html = (
+                f'<a href="{park_url}" class="btn btn-secondary ms-2">'
+                f'<i class="fa fa-box-archive"></i> Park</a>'
+            )
+
+        self.helper = FormHelper()
+        self.helper.form_method = "post"
+        
+        if not search_results:
+            # Show search interface
+            self.helper.layout = Layout(
+                "item_id",
+                "search_query",
+                HTML('<input type="hidden" name="search_results_json" value="">'),
+                ButtonHolder(
+                    Submit(
+                        "search",
+                        "Search GND",
+                        css_class="btn btn-primary",
+                    ),
+                    HTML(park_button_html) if park_button_html else None,
+                    css_class="mt-3",
+                ),
+            )
+        else:
+            # Show results selection
+            self.helper.layout = Layout(
+                "item_id",
+                "search_query",
+                HTML('<input type="hidden" name="search_results_json" value="{}">'.format(
+                    json.dumps(search_results).replace('"', '&quot;')
+                )),
+                "result_choice",
+                "normalized_value",
+                ButtonHolder(
+                    Submit(
+                        "search",
+                        "Search Again",
+                        css_class="btn btn-secondary",
+                    ),
+                    Submit(
+                        "save_and_next",
+                        "Save & Next",
+                        css_class="btn btn-primary ms-2",
+                    ),
+                    HTML(park_button_html) if park_button_html else None,
+                    css_class="mt-3",
+                ),
+            )
+
+    def propose_normalization(self, variation, project):
+        """Return the variation as-is."""
+        return variation
+
+    def clean(self):
+        """Handle search action or validate selection."""
+        cleaned_data = super().clean()
+        
+        # If this is a search action, we don't need to validate the result selection
+        if 'search' in self.data:
+            return cleaned_data
+        
+        # For save action, we need a selected result
+        if 'save_and_next' in self.data:
+            result_choice = cleaned_data.get('result_choice')
+            if not result_choice and self.search_results:
+                raise forms.ValidationError("Please select a result to save.")
+        
+        return cleaned_data
+
+    def build_enrichment_data(self, cleaned_data):
+        """Build enrichment data from selected result."""
+        if not self.search_results:
+            return {}
+        
+        result_idx = int(cleaned_data.get('result_choice', 0))
+        result = self.search_results[result_idx]
+        
+        gnd_id = result["gnd_id"][0] if result["gnd_id"] else None
+        preferred_name = result["preferred_name"][0] if result["preferred_name"] else ""
+        
+        return {
+            "id_type": "gnd",
+            "id_value": gnd_id,
+            "resource_url": f"https://d-nb.info/gnd/{gnd_id}",
+            "preferred_name": preferred_name,
+            "variant_names": result.get("variant_names", []),
+            "birth_date": result["birth_date"][0] if result.get("birth_date") else None,
+            "death_date": result["death_date"][0] if result.get("death_date") else None,
+            "roles": result.get("roles", []),
+        }
+
+    def get_normalized_value(self):
+        """Get normalized value from selected result."""
+        if not self.search_results or not self.cleaned_data.get('result_choice'):
+            return self.item.get_variation()
+        
+        result_idx = int(self.cleaned_data['result_choice'])
+        result = self.search_results[result_idx]
+        preferred_name = result["preferred_name"][0] if result["preferred_name"] else self.item.get_variation()
+        return preferred_name
+
+    def save(self, user):
+        """Save enrichment data."""
+        # Update normalized_value from selected result
+        self.cleaned_data['normalized_value'] = self.get_normalized_value()
+        return super().save(user)
+
+    def get_enrichment_type(self):
+        """Return enrichment type."""
+        return "authority_id"
+
+
+class WikidataQueryEnrichmentForm(BaseTagEnrichmentForm):
+    """Form for searching Wikidata and selecting from results."""
+
+    search_query = forms.CharField(
+        label="Search Wikidata",
+        max_length=255,
+        required=False,
+        widget=forms.TextInput(attrs={"class": "form-control", "placeholder": "Edit search term..."}),
+    )
+
+    selected_result = forms.CharField(
+        widget=forms.HiddenInput(),
+        required=False,
+    )
+
+    result_choice = forms.ChoiceField(
+        label="Select Result",
+        choices=[],
+        widget=forms.RadioSelect(),
+        required=False,
+    )
+
+    def __init__(self, *args, project=None, item=None, tag=None, **kwargs):
+        # Get search results from POST data if present
+        search_results = None
+        if args and len(args) > 0 and isinstance(args[0], dict):
+            search_results_json = args[0].get('search_results_json')
+            if search_results_json:
+                try:
+                    search_results = json.loads(search_results_json)
+                except json.JSONDecodeError:
+                    pass
+
+        super().__init__(*args, project=project, item=item, tag=tag, **kwargs)
+
+        # Pre-fill search query with item label
+        self.fields["search_query"].initial = self.item.get_variation()
+
+        # If we have search results, populate the choices
+        if search_results:
+            choices = []
+            for idx, result in enumerate(search_results):
+                wikidata_id = result.get("id", "")
+                label = result.get("label", "")
+                description = result.get("description", "")
+
+                display_label = f"{label}"
+                if description:
+                    display_label += f" — {description}"
+                display_label += f" [Wikidata: {wikidata_id}]"
+
+                choices.append((str(idx), display_label))
+
+            self.fields["result_choice"].choices = choices
+            self.search_results = search_results
+        else:
+            self.search_results = []
+            self.fields["result_choice"].widget = forms.HiddenInput()
+
+        # Update helper to include search button
+        park_button_html = ""
+        if hasattr(self.item, 'is_parked'):
+            park_url = reverse("twf:tags_park", kwargs={"pk": self.item.pk})
+            park_button_html = (
+                f'<a href="{park_url}" class="btn btn-secondary ms-2">'
+                f'<i class="fa fa-box-archive"></i> Park</a>'
+            )
+
+        self.helper = FormHelper()
+        self.helper.form_method = "post"
+
+        if not search_results:
+            # Show search interface
+            self.helper.layout = Layout(
+                "item_id",
+                "search_query",
+                HTML('<input type="hidden" name="search_results_json" value="">'),
+                ButtonHolder(
+                    Submit(
+                        "search",
+                        "Search Wikidata",
+                        css_class="btn btn-primary",
+                    ),
+                    HTML(park_button_html) if park_button_html else None,
+                    css_class="mt-3",
+                ),
+            )
+        else:
+            # Show results selection
+            self.helper.layout = Layout(
+                "item_id",
+                "search_query",
+                HTML('<input type="hidden" name="search_results_json" value="{}">'.format(
+                    json.dumps(search_results).replace('"', '&quot;')
+                )),
+                "result_choice",
+                "normalized_value",
+                ButtonHolder(
+                    Submit(
+                        "search",
+                        "Search Again",
+                        css_class="btn btn-secondary",
+                    ),
+                    Submit(
+                        "save_and_next",
+                        "Save & Next",
+                        css_class="btn btn-primary ms-2",
+                    ),
+                    HTML(park_button_html) if park_button_html else None,
+                    css_class="mt-3",
+                ),
+            )
+
+    def propose_normalization(self, variation, project):
+        """Return the variation as-is."""
+        return variation
+
+    def clean(self):
+        """Handle search action or validate selection."""
+        cleaned_data = super().clean()
+
+        # If this is a search action, we don't need to validate the result selection
+        if 'search' in self.data:
+            return cleaned_data
+
+        # For save action, we need a selected result
+        if 'save_and_next' in self.data:
+            result_choice = cleaned_data.get('result_choice')
+            if not result_choice and self.search_results:
+                raise forms.ValidationError("Please select a result to save.")
+
+        return cleaned_data
+
+    def build_enrichment_data(self, cleaned_data):
+        """Build enrichment data from selected result."""
+        if not self.search_results:
+            return {}
+
+        result_idx = int(cleaned_data.get('result_choice', 0))
+        result = self.search_results[result_idx]
+
+        wikidata_id = result.get("id", "")
+        label = result.get("label", "")
+
+        enrichment_data = {
+            "id_type": "wikidata",
+            "id_value": wikidata_id,
+            "resource_url": f"https://www.wikidata.org/wiki/{wikidata_id}",
+            "description": result.get("description", ""),
+        }
+
+        # Add coordinates if available
+        if result.get("coordinates"):
+            coords = result["coordinates"]
+            enrichment_data["latitude"] = coords.get("latitude")
+            enrichment_data["longitude"] = coords.get("longitude")
+
+        return enrichment_data
+
+    def get_normalized_value(self):
+        """Get normalized value from selected result."""
+        if not self.search_results or not self.cleaned_data.get('result_choice'):
+            return self.item.get_variation()
+
+        result_idx = int(self.cleaned_data['result_choice'])
+        result = self.search_results[result_idx]
+        label = result.get("label", self.item.get_variation())
+        return label
+
+    def save(self, user):
+        """Save enrichment data."""
+        # Update normalized_value from selected result
+        self.cleaned_data['normalized_value'] = self.get_normalized_value()
+        return super().save(user)
+
+    def get_enrichment_type(self):
+        """Return enrichment type."""
+        return "authority_id"
+
+
+class GeoNamesQueryEnrichmentForm(BaseTagEnrichmentForm):
+    """Form for searching GeoNames and selecting from results."""
+
+    search_query = forms.CharField(
+        label="Search GeoNames",
+        max_length=255,
+        required=False,
+        widget=forms.TextInput(attrs={"class": "form-control", "placeholder": "Edit search term..."}),
+    )
+
+    selected_result = forms.CharField(
+        widget=forms.HiddenInput(),
+        required=False,
+    )
+
+    result_choice = forms.ChoiceField(
+        label="Select Result",
+        choices=[],
+        widget=forms.RadioSelect(),
+        required=False,
+    )
+
+    def __init__(self, *args, project=None, item=None, tag=None, **kwargs):
+        # Get search results from POST data if present
+        search_results = None
+        if args and len(args) > 0 and isinstance(args[0], dict):
+            search_results_json = args[0].get('search_results_json')
+            if search_results_json:
+                try:
+                    search_results = json.loads(search_results_json)
+                except json.JSONDecodeError:
+                    pass
+
+        super().__init__(*args, project=project, item=item, tag=tag, **kwargs)
+
+        # Pre-fill search query with item label
+        self.fields["search_query"].initial = self.item.get_variation()
+
+        # If we have search results, populate the choices
+        if search_results:
+            choices = []
+            for idx, result in enumerate(search_results):
+                geonames_id = result.get("id", "")
+                name = result.get("name", "")
+                country = result.get("country", "")
+                lat = result.get("lat", "")
+                lng = result.get("lng", "")
+
+                display_label = f"{name}"
+                if country:
+                    display_label += f" ({country})"
+                if lat and lng:
+                    display_label += f" — {lat}, {lng}"
+                display_label += f" [GeoNames: {geonames_id}]"
+
+                choices.append((str(idx), display_label))
+
+            self.fields["result_choice"].choices = choices
+            self.search_results = search_results
+        else:
+            self.search_results = []
+            self.fields["result_choice"].widget = forms.HiddenInput()
+
+        # Update helper to include search button
+        park_button_html = ""
+        if hasattr(self.item, 'is_parked'):
+            park_url = reverse("twf:tags_park", kwargs={"pk": self.item.pk})
+            park_button_html = (
+                f'<a href="{park_url}" class="btn btn-secondary ms-2">'
+                f'<i class="fa fa-box-archive"></i> Park</a>'
+            )
+
+        self.helper = FormHelper()
+        self.helper.form_method = "post"
+
+        if not search_results:
+            # Show search interface
+            self.helper.layout = Layout(
+                "item_id",
+                "search_query",
+                HTML('<input type="hidden" name="search_results_json" value="">'),
+                ButtonHolder(
+                    Submit(
+                        "search",
+                        "Search GeoNames",
+                        css_class="btn btn-primary",
+                    ),
+                    HTML(park_button_html) if park_button_html else None,
+                    css_class="mt-3",
+                ),
+            )
+        else:
+            # Show results selection
+            self.helper.layout = Layout(
+                "item_id",
+                "search_query",
+                HTML('<input type="hidden" name="search_results_json" value="{}">'.format(
+                    json.dumps(search_results).replace('"', '&quot;')
+                )),
+                "result_choice",
+                "normalized_value",
+                ButtonHolder(
+                    Submit(
+                        "search",
+                        "Search Again",
+                        css_class="btn btn-secondary",
+                    ),
+                    Submit(
+                        "save_and_next",
+                        "Save & Next",
+                        css_class="btn btn-primary ms-2",
+                    ),
+                    HTML(park_button_html) if park_button_html else None,
+                    css_class="mt-3",
+                ),
+            )
+
+    def propose_normalization(self, variation, project):
+        """Return the variation as-is."""
+        return variation
+
+    def clean(self):
+        """Handle search action or validate selection."""
+        cleaned_data = super().clean()
+
+        # If this is a search action, we don't need to validate the result selection
+        if 'search' in self.data:
+            return cleaned_data
+
+        # For save action, we need a selected result
+        if 'save_and_next' in self.data:
+            result_choice = cleaned_data.get('result_choice')
+            if not result_choice and self.search_results:
+                raise forms.ValidationError("Please select a result to save.")
+
+        return cleaned_data
+
+    def build_enrichment_data(self, cleaned_data):
+        """Build enrichment data from selected result."""
+        if not self.search_results:
+            return {}
+
+        result_idx = int(cleaned_data.get('result_choice', 0))
+        result = self.search_results[result_idx]
+
+        geonames_id = result.get("id", "")
+        name = result.get("name", "")
+
+        return {
+            "id_type": "geonames",
+            "id_value": str(geonames_id),
+            "resource_url": f"https://www.geonames.org/{geonames_id}/",
+            "country": result.get("country", ""),
+            "latitude": result.get("lat"),
+            "longitude": result.get("lng"),
+        }
+
+    def get_normalized_value(self):
+        """Get normalized value from selected result."""
+        if not self.search_results or not self.cleaned_data.get('result_choice'):
+            return self.item.get_variation()
+
+        result_idx = int(self.cleaned_data['result_choice'])
+        result = self.search_results[result_idx]
+        name = result.get("name", self.item.get_variation())
+        return name
+
+    def save(self, user):
+        """Save enrichment data."""
+        # Update normalized_value from selected result
+        self.cleaned_data['normalized_value'] = self.get_normalized_value()
+        return super().save(user)
+
+    def get_enrichment_type(self):
+        """Return enrichment type."""
+        return "authority_id"
