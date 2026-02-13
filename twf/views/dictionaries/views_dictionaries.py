@@ -9,8 +9,6 @@ from django.views.generic import FormView
 from django_filters.views import FilterView
 from django_tables2 import SingleTableView
 
-logger = logging.getLogger(__name__)
-
 from twf.forms.filters.filters import DictionaryEntryFilter, DictionaryFilter
 from twf.forms.dictionaries.dictionaries_forms import (
     DictionaryForm,
@@ -30,6 +28,7 @@ from twf.tables.tables_dictionary import (
 )
 from twf.views.views_base import TWFView
 
+logger = logging.getLogger(__name__)
 
 class TWFDictionaryView(LoginRequiredMixin, TWFView):
     """Base view for all dictionary views."""
@@ -40,7 +39,7 @@ class TWFDictionaryView(LoginRequiredMixin, TWFView):
         """Get the sub navigation."""
         sub_nav = [
             {
-                "name": "Dictionaries Options",
+                "name": "Dictionaries",
                 "options": [
                     {"url": reverse("twf:dictionaries_overview"), "value": "Overview"},
                     {
@@ -48,16 +47,7 @@ class TWFDictionaryView(LoginRequiredMixin, TWFView):
                         "value": "Dictionaries",
                         "permission": "dictionary.view",
                     },
-                    {
-                        "url": reverse("twf:dictionaries_add"),
-                        "value": "Add Dictionaries",
-                        "permission": "dictionary.manage",
-                    },
-                    {
-                        "url": reverse("twf:dictionary_create"),
-                        "value": "Create New Dictionary",
-                        "permission": "dictionary.manage",
-                    },
+
                 ],
             },
             {
@@ -68,11 +58,6 @@ class TWFDictionaryView(LoginRequiredMixin, TWFView):
                         "value": "Manual Enrichment",
                         "permission": "dictionary.edit",
                     },
-                ],
-            },
-            {
-                "name": "Batch Enrichment",
-                "options": [
                     {
                         "url": reverse("twf:dictionaries_batch_gnd"),
                         "value": "GND Batch",
@@ -96,6 +81,16 @@ class TWFDictionaryView(LoginRequiredMixin, TWFView):
                     {
                         "url": reverse("twf:dictionaries_settings"),
                         "value": "Enrichment Settings",
+                        "permission": "dictionary.manage",
+                    },
+                    {
+                        "url": reverse("twf:dictionaries_add"),
+                        "value": "Add Dictionaries",
+                        "permission": "dictionary.manage",
+                    },
+                    {
+                        "url": reverse("twf:dictionary_create"),
+                        "value": "Create New Dictionary",
                         "permission": "dictionary.manage",
                     },
                 ],

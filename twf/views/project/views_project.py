@@ -61,7 +61,9 @@ class TWFProjectView(LoginRequiredMixin, TWFView):
             {
                 "name": "Project",
                 "options": [
-                    {"url": reverse("twf:project_overview"), "value": "Overview"},
+                    {
+                        "url": reverse("twf:project_overview"),
+                        "value": "Overview"},
                     {
                         "url": reverse("twf:project_task_monitor"),
                         "value": "Task Monitor",
@@ -85,7 +87,7 @@ class TWFProjectView(LoginRequiredMixin, TWFView):
                 "options": [
                     {
                         "url": reverse("twf:project_settings_general"),
-                        "value": "General Settings",
+                        "value": "Project Information",
                         "permission": "project.manage",
                     },
                     {

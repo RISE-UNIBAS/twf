@@ -13,7 +13,6 @@ from twf.forms.filters.filters import CollectionItemFilter, CollectionFilter
 from twf.permissions import check_permission
 from twf.tables.tables_collection import CollectionTable
 
-logger = logging.getLogger(__name__)
 from twf.forms.collections.collections_forms import (
     CollectionCreateForm,
     CollectionAddDocumentForm,
@@ -26,6 +25,7 @@ from twf.tables.tables_collection import CollectionItemTable
 from twf.views.collections.views_crud import fill_collection_item, clean_annotation
 from twf.views.views_base import TWFView
 
+logger = logging.getLogger(__name__)
 
 class TWFCollectionsView(LoginRequiredMixin, TWFView):
     """View for the project collections page."""
@@ -60,17 +60,25 @@ class TWFCollectionsView(LoginRequiredMixin, TWFView):
                     },
                 ],
             },
-            {"name": "Automated Workflows", "options": self.get_ai_batch_options()},
             {
-                "name": "Supervised Workflows",
+                "name": "Workflows",
                 "options": [
                     {
                         "url": reverse("twf:collections_review"),
                         "value": "Review Collections",
                         "permission": "collection.edit",
                     },
+                   {
+                       "url": reverse("twf:collections_batch_ai_unified"),
+                       "value": "AI Batch Processing",
+                       "permission": "ai.manage",
+                   },
+                   {
+                       "url": reverse("twf:collections_request_ai_unified"),
+                       "value": "AI Request",
+                       "permission": "collection.edit",
+                   }
                 ]
-                + self.get_ai_request_options(),
             },
         ]
 
@@ -79,34 +87,6 @@ class TWFCollectionsView(LoginRequiredMixin, TWFView):
     def get_navigation_index(self):
         """Get the index of the navigation item."""
         return 6
-
-    def get_ai_batch_options(self):
-        """
-        Get the AI batch options.
-        Returns simplified navigation with unified AI Batch processing.
-        """
-        options = [
-            {
-                "url": reverse("twf:collections_batch_ai_unified"),
-                "value": "AI Batch Processing",
-                "permission": "ai.manage",
-            }
-        ]
-        return options
-
-    def get_ai_request_options(self):
-        """
-        Get the AI request options.
-        Returns simplified navigation with unified AI Request processing.
-        """
-        options = [
-            {
-                "url": reverse("twf:collections_request_ai_unified"),
-                "value": "AI Request",
-                "permission": "collection.edit",
-            }
-        ]
-        return options
 
 
 class TWFCollectionOverviewView(TWFCollectionsView):

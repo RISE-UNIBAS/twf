@@ -59,44 +59,18 @@ class TWFTagsView(LoginRequiredMixin, TWFView):
         """Get the sub navigation."""
         sub_nav = [
             {
-                "name": "Data",
+                "name": "Tags",
                 "options": [
-                    {"url": reverse("twf:tags_overview"), "value": "Overview"},
+                    {
+                        "url": reverse("twf:tags_overview"),
+                        "value": "Overview",
+                        "permission": "tag.view",
+                    },
                     {
                         "url": reverse("twf:tags_all"),
                         "value": "All Tags",
                         "permission": "tag.view",
                     },
-                    {
-                        "url": reverse("twf:tags_manage"),
-                        "value": "Manage Tags",
-                        "permission": "tag.manage",
-                    },
-                    {
-                        "url": reverse("twf:tags_settings"),
-                        "value": "Tag Settings",
-                        "permission": "tag.manage",
-                    },
-                ],
-            },
-            {
-                "name": "Tag Workflows",
-                "options": [
-                    {
-                        "url": reverse("twf:tags_group"),
-                        "value": "Grouping Wizard",
-                        "permission": "tag.edit",
-                    },
-                    {
-                        "url": reverse("twf:tags_enrichment"),
-                        "value": "Tag Enrichment",
-                        "permission": "tag.edit",
-                    },
-                ],
-            },
-            {
-                "name": "Tag Views",
-                "options": [
                     {
                         "url": reverse("twf:tags_view_ignored"),
                         "value": "Ignored Tags",
@@ -106,6 +80,36 @@ class TWFTagsView(LoginRequiredMixin, TWFView):
                         "url": reverse("twf:tags_with_comments"),
                         "value": "Tags with Comments",
                         "permission": "tag.view",
+                    },
+                ],
+            },
+            {
+                "name": "Workflows",
+                "options": [
+                    {
+                        "url": reverse("twf:tags_group"),
+                        "value": "Grouping Tags",
+                        "permission": "tag.edit",
+                    },
+                    {
+                        "url": reverse("twf:tags_enrichment"),
+                        "value": "Enrich Tags",
+                        "permission": "tag.edit",
+                    },
+                ],
+            },
+            {
+                "name": "Settings",
+                "options": [
+                    {
+                        "url": reverse("twf:tags_settings"),
+                        "value": "Tag Settings",
+                        "permission": "tag.manage",
+                    },
+                    {
+                        "url": reverse("twf:tags_manage"),
+                        "value": "Manage Tags",
+                        "permission": "tag.manage",
                     },
                 ],
             },

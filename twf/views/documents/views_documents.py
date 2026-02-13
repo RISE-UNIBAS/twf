@@ -31,7 +31,7 @@ class TWFDocumentView(LoginRequiredMixin, TWFView):
         """Get the sub navigation."""
         sub_nav = [
             {
-                "name": "Your Documents",
+                "name": "Documents",
                 "options": [
                     {"url": reverse("twf:documents_overview"), "value": "Overview"},
                     {
@@ -46,15 +46,25 @@ class TWFDocumentView(LoginRequiredMixin, TWFView):
                     },
                 ],
             },
-            {"name": "Document Batch", "options": self.get_ai_batch_options()},
             {
-                "name": "Manual Workflows",
+                "name": "Workflows",
                 "options": [
                     {
                         "url": reverse("twf:documents_review"),
                         "value": "Review Documents",
                         "permission": "document.edit",
                     },
+                    {
+                        "url": reverse("twf:documents_batch_ai_unified"),
+                        "value": "Batch AI Enrichment",
+                        "permission": "ai.manage",
+                    }
+                ],
+            },
+            {
+                "name": "Settings",
+                "options": [
+
                 ],
             },
         ]
@@ -64,22 +74,6 @@ class TWFDocumentView(LoginRequiredMixin, TWFView):
         """Get the navigation index."""
         return 2
 
-    def get_ai_batch_options(self):
-        """
-        Get the AI batch options.
-
-        Returns simplified navigation with unified AI Batch processing.
-        The AI Batch view provides a dropdown to select from available providers.
-        """
-        options = [
-            {
-                "url": reverse("twf:documents_batch_ai_unified"),
-                "value": "AI Batch Processing",
-                "permission": "ai.manage",
-            }
-        ]
-
-        return options
 
     def get_context_data(self, **kwargs):
         """Get the context data for the view."""

@@ -31,7 +31,7 @@ class TWFMetadataView(LoginRequiredMixin, TWFView):
         """Get the sub navigation."""
         sub_nav = [
             {
-                "name": "Metadata Overview",
+                "name": "Metadata",
                 "options": [
                     {"url": reverse("twf:metadata_overview"), "value": "Overview"},
                     {
@@ -42,28 +42,8 @@ class TWFMetadataView(LoginRequiredMixin, TWFView):
                 ],
             },
             {
-                "name": "Load Metadata",
+                "name": "Workflows",
                 "options": [
-                    {
-                        "url": reverse("twf:metadata_load_metadata"),
-                        "value": "Load JSON Metadata",
-                        "permission": "metadata.manage",
-                    },
-                    {
-                        "url": reverse("twf:metadata_load_sheets_metadata"),
-                        "value": "Load Google Sheets Metadata",
-                        "permission": "metadata.manage",
-                    },
-                ],
-            },
-            {
-                "name": "Metadata Workflows",
-                "options": [
-                    {
-                        "url": reverse("twf:metadata_extract"),
-                        "value": "Extract Controlled Values",
-                        "permission": "metadata.manage",
-                    },
                     {
                         "url": reverse("twf:metadata_review_documents"),
                         "value": "Review Document Metadata",
@@ -73,6 +53,26 @@ class TWFMetadataView(LoginRequiredMixin, TWFView):
                         "url": reverse("twf:metadata_review_pages"),
                         "value": "Review Page Metadata",
                         "permission": "metadata.edit",
+                    },
+                ],
+            },
+            {
+                "name": "Manage",
+                "options": [
+                    {
+                        "url": reverse("twf:metadata_extract"),
+                        "value": "Extract Controlled Values",
+                        "permission": "metadata.manage",
+                    },
+                    {
+                        "url": reverse("twf:metadata_load_metadata"),
+                        "value": "Load JSON Metadata",
+                        "permission": "metadata.manage",
+                    },
+                    {
+                        "url": reverse("twf:metadata_load_sheets_metadata"),
+                        "value": "Load Google Sheets Metadata",
+                        "permission": "metadata.manage",
                     },
                 ],
             },
