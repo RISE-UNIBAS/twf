@@ -65,24 +65,32 @@ def load_json_metadata(self, project_id, user_id, **kwargs):
         with open(data_file_path, "r", encoding="utf-8") as file:
             data = json.load(file)
     except Exception as e:
-        self.end_task(status="FAILURE")
+        self.end_task(status="FAILURE", error_msg=f"Failed to read JSON file: {str(e)}")
+        return
 
     if isinstance(data, list):
+        # Determine which field will be used for matching (same logic as processing)
+        id_field = (
+            json_data_key
+            if json_data_key and json_data_key.strip()
+            else match_to_field
+        )
+
         for item in data:
             if not isinstance(item, dict):
-                self.end_task(status="FAILURE")
+                self.end_task(status="FAILURE", error_msg="JSON list contains non-dictionary items")
                 return
-            if match_to_field not in item:
-                self.end_task(status="FAILURE")
+            if id_field not in item:
+                self.end_task(status="FAILURE", error_msg=f"Required field '{id_field}' not found in JSON item")
                 return
 
     elif isinstance(data, dict):
         for key, value in data.items():
             if not isinstance(value, dict):
-                self.end_task(status="FAILURE")
+                self.end_task(status="FAILURE", error_msg="JSON object values must be dictionaries")
                 return
     else:
-        self.end_task(status="FAILURE")
+        self.end_task(status="FAILURE", error_msg="JSON data must be either a list or an object")
         return
 
     # Process metadata
