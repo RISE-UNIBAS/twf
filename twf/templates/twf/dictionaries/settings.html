@@ -1,0 +1,37 @@
+{% extends 'twf/base/base.html' %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+    <p class="lead">Configure enrichment settings for each dictionary type in your project.</p>
+
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        {% crispy form %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="alert alert-info">
+                    <h5><i class="fas fa-info-circle"></i> Configuration Guide</h5>
+                    <p><strong>Enrichment Types:</strong> Select which enrichment types are available for each dictionary type (click to select multiple):</p>
+                    <ul>
+                        <li><strong>Date:</strong> Normalize dates to EDTF format</li>
+                        <li><strong>Bible Verse:</strong> Normalize biblical references</li>
+                        <li><strong>Authority ID:</strong> Generic authority control ID enrichment</li>
+                        <li><strong>GND:</strong> German National Library authority control for persons, places, and organizations</li>
+                        <li><strong>Wikidata:</strong> Linked open data from Wikidata (requires entity type configuration)</li>
+                        <li><strong>GeoNames:</strong> Geographic database for location enrichment</li>
+                    </ul>
+                    <p><strong>Wikidata Entity Type:</strong> When using Wikidata enrichment, specify the entity type (person, city, etc.) to improve search results. This field is only enabled when Wikidata is selected.</p>
+                    <p><strong>Workflow Title:</strong> Custom title displayed when starting manual enrichment workflows for this dictionary type.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
