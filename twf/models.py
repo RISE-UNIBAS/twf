@@ -2487,25 +2487,64 @@ class Workflow(models.Model):
 
         return None
 
-    def advance(self):
-        """Advance the workflow to the next item."""
+    def advance(self, item_description=None):
+        """
+        Advance the workflow to the next item and log progress.
+
+        Args:
+            item_description: Optional description of the completed item (e.g., "Document 12345")
+        """
         self.current_item_index += 1
         self.save()
 
+        # Update the related task with progress
+        if self.related_task:
+            # Calculate progress percentage
+            progress = int((self.current_item_index / self.item_count) * 100) if self.item_count > 0 else 0
+
+            # Build progress message
+            if item_description:
+                progress_msg = f"✓ Completed: {item_description} ({self.current_item_index}/{self.item_count})\n"
+            else:
+                progress_msg = f"✓ Progress: {self.current_item_index}/{self.item_count} items completed\n"
+
+            # Update task
+            self.related_task.text += progress_msg
+            self.related_task.progress = progress
+            self.related_task.title = f"Review Workflow: {self.current_item_index}/{self.item_count} completed ({progress}%)"
+            self.related_task.save(update_fields=["text", "progress", "title"])
+
     def finish(self, with_error=False):
-        """Mark the workflow as ended."""
+        """Mark the workflow as ended and finalize the related task."""
         self.status = "ended"
         self.save()
 
         # Update the related task status if linked
         if self.related_task:
-            if with_error:
-                self.related_task.status = "FAILURE"
+            # Calculate duration
+            if self.related_task.created_at:
+                duration = (timezone.now() - self.related_task.created_at).total_seconds()
+                duration_str = f"{int(duration // 60)}m {int(duration % 60)}s" if duration > 60 else f"{duration:.0f}s"
             else:
-                self.related_task.status = "SUCCESS"
+                duration_str = "unknown"
 
+            # Add completion summary
+            self.related_task.text += "\n" + "=" * 60 + "\n"
+            if with_error:
+                self.related_task.text += "WORKFLOW ENDED WITH ERRORS\n"
+                self.related_task.status = "FAILURE"
+                self.related_task.title = f"Review Workflow: Failed after {self.current_item_index}/{self.item_count}"
+            else:
+                self.related_task.text += "WORKFLOW COMPLETED SUCCESSFULLY\n"
+                self.related_task.status = "SUCCESS"
+                self.related_task.title = f"Review Workflow: Completed {self.current_item_index}/{self.item_count} items"
+
+            self.related_task.text += "=" * 60 + "\n"
+            self.related_task.text += f"Items completed: {self.current_item_index}/{self.item_count}\n"
+            self.related_task.text += f"Duration: {duration_str}\n"
+            self.related_task.progress = 100
             self.related_task.end_time = timezone.now()
-            self.related_task.save()
+            self.related_task.save(update_fields=["text", "status", "title", "progress", "end_time"])
 
         # Restore the reserved status of the items
         if self.workflow_type == "review_documents":

@@ -1,6 +1,7 @@
 """This module contains Celery tasks for loading metadata from Google Sheets."""
 
 import json
+import logging
 import os
 
 from celery import shared_task
@@ -8,6 +9,8 @@ from celery import shared_task
 from twf.clients.google_sheets_client import GoogleSheetsClient
 from twf.models import Document
 from twf.tasks.task_base import BaseTWFTask
+
+logger = logging.getLogger(__name__)
 
 
 def store_metadata(project, doc_id, metadata, user, metadata_storage_key=None):
@@ -35,7 +38,7 @@ def store_metadata(project, doc_id, metadata, user, metadata_storage_key=None):
                 document.metadata.update(metadata)
             document.save(current_user=user)
     except Exception as e:
-        print(f"Error while storing metadata: {str(e)}")
+        logger.error(f"Error storing metadata for document {doc_id}: {str(e)}")
 
 
 @shared_task(bind=True, base=BaseTWFTask)
@@ -127,63 +130,107 @@ def load_json_metadata(self, project_id, user_id, **kwargs):
 
 @shared_task(bind=True, base=BaseTWFTask)
 def load_sheets_metadata(self, project_id, user_id, **kwargs):
-    """This function loads metadata from Google Sheets.
-    :param self: Celery task
-    :param project_id: Project ID
-    :param user_id: User ID"""
+    """
+    Load metadata from Google Sheets.
 
-    sheets_configuration = self.project.get_task_configuration("google_sheet")
-    auth_json = "transkribusWorkflow/google_key.json"
-    table_data = GoogleSheetsClient.get_data_from_spreadsheet(
-        auth_json, sheets_configuration["sheet_id"], sheets_configuration["range"]
-    )
-    title_row = table_data[0]
-    table_data = table_data[1:]
-    processed_table_lines = 0
-    total_table_lines = len(table_data)
-    doc_id_column_index = title_row.index(sheets_configuration["document_id_column"])
+    Args:
+        self: Celery task
+        project_id: Project ID
+        user_id: User ID
+    """
+    try:
+        sheets_configuration = self.project.get_task_configuration("google_sheet")
+        auth_json = "transkribusWorkflow/google_key.json"
+        table_data = GoogleSheetsClient.get_data_from_spreadsheet(
+            auth_json, sheets_configuration["sheet_id"], sheets_configuration["range"]
+        )
 
-    valid_cols = []
-    valid_cols_str = sheets_configuration["valid_columns"]
-    if valid_cols_str:
-        valid_cols = valid_cols_str.split(",")
+        if not table_data or len(table_data) < 2:
+            error_msg = "Google Sheets data is empty or missing header row"
+            logger.error(error_msg)
+            self.end_task(status="FAILURE", error_msg=error_msg)
+            return
 
-    for table_line in table_data:
-        special_cols = [
-            sheets_configuration["document_title_column"],
-        ]
-        cols_to_check = valid_cols + special_cols
-        doc_id = int(table_line[doc_id_column_index])
-        try:
-            doc = Document.objects.get(project=self.project, document_id=doc_id)
-            doc.metadata["google_sheets"] = {}
-            for column in cols_to_check:
-                try:
-                    index = title_row.index(column)
-                    value = table_line[index]
-                    if column == sheets_configuration["document_title_column"]:
-                        doc.title = value
-                    else:
-                        doc.metadata["google_sheets"][column] = value
-                    # print(f'Column {column} found in metadata for document {doc_id}.')
-                except IndexError:
-                    value = ""
-                    print(
-                        f"Column {column} not found in metadata for document {doc_id}. IE"
-                    )
-                except ValueError:
-                    value = ""
-                    print(
-                        f"Column {column} not found in metadata for document {doc_id}. VE"
-                    )
+        title_row = table_data[0]
+        table_data = table_data[1:]
+        total_table_lines = len(table_data)
 
-            doc.save(current_user=self.user)
-            self.advance_task()
+        # Set total items for progress tracking
+        self.set_total_items(total_table_lines)
 
-        except Document.DoesNotExist:
-            doc = None
-            print(f"Document with ID {doc_id} not found.")
+        if self.twf_task:
+            self.twf_task.text += f"Loading metadata from Google Sheets for {total_table_lines} rows.\n"
+            self.twf_task.save(update_fields=["text"])
 
-        self.advance_task()
+        doc_id_column_index = title_row.index(sheets_configuration["document_id_column"])
 
-    self.end_task()
+        valid_cols = []
+        valid_cols_str = sheets_configuration["valid_columns"]
+        if valid_cols_str:
+            valid_cols = valid_cols_str.split(",")
+
+        processed_count = 0
+        skipped_count = 0
+        error_count = 0
+
+        for table_line in table_data:
+            special_cols = [
+                sheets_configuration["document_title_column"],
+            ]
+            cols_to_check = valid_cols + special_cols
+
+            try:
+                doc_id = int(table_line[doc_id_column_index])
+            except (ValueError, IndexError) as e:
+                error_count += 1
+                logger.warning(f"Invalid document ID in row: {e}")
+                self.advance_task(status="failure")
+                continue
+
+            try:
+                doc = Document.objects.get(project=self.project, document_id=doc_id)
+                doc.metadata["google_sheets"] = {}
+
+                for column in cols_to_check:
+                    try:
+                        index = title_row.index(column)
+                        value = table_line[index]
+                        if column == sheets_configuration["document_title_column"]:
+                            doc.title = value
+                        else:
+                            doc.metadata["google_sheets"][column] = value
+                    except IndexError:
+                        logger.warning(
+                            f"Column '{column}' index out of range for document {doc_id}"
+                        )
+                    except ValueError:
+                        logger.warning(
+                            f"Column '{column}' not found in header row for document {doc_id}"
+                        )
+
+                doc.save(current_user=self.user)
+                processed_count += 1
+                self.advance_task(status="success")
+
+            except Document.DoesNotExist:
+                skipped_count += 1
+                logger.warning(f"Document with ID {doc_id} not found in project")
+                if self.twf_task:
+                    self.twf_task.text += f"  ⚠ Document {doc_id} not found in project, skipping.\n"
+                self.advance_task(status="skipped")
+
+        # Add summary to task text
+        if self.twf_task:
+            self.twf_task.text += f"\nGoogle Sheets Import Summary:\n"
+            self.twf_task.text += f"  • Documents updated: {processed_count}\n"
+            self.twf_task.text += f"  • Documents not found: {skipped_count}\n"
+            self.twf_task.text += f"  • Rows with errors: {error_count}\n"
+            self.twf_task.save(update_fields=["text"])
+
+        self.end_task()
+
+    except Exception as e:
+        error_msg = f"Failed to load Google Sheets metadata: {str(e)}"
+        logger.error(error_msg)
+        self.end_task(status="FAILURE", error_msg=error_msg)
+        raise

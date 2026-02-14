@@ -1,9 +1,13 @@
 """ Celery tasks for creating collections """
 
+import logging
+
 from celery import shared_task
 
 from twf.models import CollectionItem
 from twf.tasks.task_base import BaseTWFTask
+
+logger = logging.getLogger(__name__)
 
 
 @shared_task(bind=True, base=BaseTWFTask)

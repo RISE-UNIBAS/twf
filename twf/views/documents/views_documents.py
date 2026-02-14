@@ -849,8 +849,12 @@ class TWFDocumentReviewView(ProjectPermissionMixin, TWFDocumentView):
                 document.save()
 
                 # Log the action in the workflow if needed
+                document_desc = f"Document {document.document_id}"
+                if document.title:
+                    document_desc += f" ({document.title})"
+
                 if workflow.has_more_items():
-                    workflow.advance()
+                    workflow.advance(item_description=document_desc)
                 else:
                     workflow.finish()
 

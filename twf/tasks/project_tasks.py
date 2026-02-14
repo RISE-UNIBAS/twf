@@ -1,14 +1,17 @@
 """ Celery tasks for duplicating a project and its related objects. """
 
+import logging
+import traceback
+
 from celery import shared_task
 from django.db import transaction
 from django.utils import timezone
 from django.contrib.auth import get_user_model
-import traceback
 
 from twf.models import Project, Note, Workflow
 from twf.tasks.task_base import BaseTWFTask
 
+logger = logging.getLogger(__name__)
 User = get_user_model()
 
 

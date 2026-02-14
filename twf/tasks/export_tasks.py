@@ -1,6 +1,7 @@
 """Celery tasks for exporting data from the project."""
 
 import json
+import logging
 import os
 import shutil
 import tempfile
@@ -35,6 +36,8 @@ from twf.models import (
 )
 from twf.tasks.task_base import BaseTWFTask
 from twf.utils.export_utils import ExportCreator
+
+logger = logging.getLogger(__name__)
 
 
 @shared_task(bind=True, base=BaseTWFTask)

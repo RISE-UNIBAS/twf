@@ -530,8 +530,14 @@ class TWFCollectionsReviewView(ProjectPermissionMixin, FormView, TWFCollectionsV
                 self.next_item.status = "faulty"
             self.next_item.save()
 
+            # Build item description for task logging
+            item_desc = f"Collection item #{self.next_item.id}"
+            if self.next_item.annotation:
+                annotation_preview = self.next_item.annotation[:50] + "..." if len(self.next_item.annotation) > 50 else self.next_item.annotation
+                item_desc += f" ({annotation_preview})"
+
             if self.workflow.has_more_items():
-                self.workflow.advance()
+                self.workflow.advance(item_description=item_desc)
             else:
                 self.workflow.finish()
         elif action_u:

@@ -419,16 +419,24 @@ class TWFMetadataReviewPagesView(ProjectPermissionMixin, TWFMetadataView):
                 if action == "save_and_next":
                     page.save(current_user=request.user)
                     messages.success(request, f"Saved metadata for page {page}")
+
+                    # Build item description for task logging
+                    page_desc = f"Page {page.tk_page_number} of document {page.document.document_id}"
+
                     if workflow.has_more_items():
-                        workflow.advance()
+                        workflow.advance(item_description=page_desc)
                     else:
                         workflow.finish()
                         messages.success(request, "Workflow completed!")
 
                 elif action == "skip":
                     messages.info(request, "Skipped page")
+
+                    # Build item description for task logging
+                    page_desc = f"Page {page.tk_page_number} of document {page.document.document_id} (skipped)"
+
                     if workflow.has_more_items():
-                        workflow.advance()
+                        workflow.advance(item_description=page_desc)
                     else:
                         workflow.finish()
                         messages.success(request, "Workflow completed!")
@@ -658,12 +666,17 @@ class TWFMetadataReviewDocumentsView(ProjectPermissionMixin, TWFMetadataView):
                 if workflow_remarks:
                     document.workflow_remarks = workflow_remarks
 
+                # Build item description for task logging
+                doc_desc = f"Document {document.document_id}"
+                if document.title:
+                    doc_desc += f" ({document.title})"
+
                 # Handle different actions
                 if action == "save_and_next":
                     document.save()
                     messages.success(request, f"Saved metadata for document {document}")
                     if workflow.has_more_items():
-                        workflow.advance()
+                        workflow.advance(item_description=doc_desc)
                     else:
                         workflow.finish()
                         messages.success(request, "Workflow completed!")
@@ -673,7 +686,7 @@ class TWFMetadataReviewDocumentsView(ProjectPermissionMixin, TWFMetadataView):
                     document.save()
                     messages.success(request, f"Parked document {document}")
                     if workflow.has_more_items():
-                        workflow.advance()
+                        workflow.advance(item_description=doc_desc + " (parked)")
                     else:
                         workflow.finish()
                         messages.success(request, "Workflow completed!")
@@ -681,7 +694,7 @@ class TWFMetadataReviewDocumentsView(ProjectPermissionMixin, TWFMetadataView):
                 elif action == "skip":
                     messages.info(request, "Skipped document")
                     if workflow.has_more_items():
-                        workflow.advance()
+                        workflow.advance(item_description=doc_desc + " (skipped)")
                     else:
                         workflow.finish()
                         messages.success(request, "Workflow completed!")

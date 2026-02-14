@@ -1,5 +1,6 @@
 """Celery tasks for searching entities in dictionaries"""
 
+import logging
 import traceback
 
 from celery import shared_task
@@ -9,6 +10,8 @@ from twf.clients.gnd_client import search_gnd
 from twf.clients.wikidata_client import search_wikidata_entities
 from twf.models import Dictionary, DictionaryEntry
 from twf.tasks.task_base import BaseTWFTask
+
+logger = logging.getLogger(__name__)
 
 
 @shared_task(bind=True, base=BaseTWFTask)
@@ -82,15 +85,22 @@ def search_gnd_entries(self, project_id, user_id, **kwargs):
                 entry.save(current_user=self.user)
 
             # Update progress
-            self.advance_task()
+            self.advance_task(status="success")
         except Exception as e:
             # Log the exception details
             error_message = f"Error processing entry '{entry.label}': {e}"
             error_traceback = traceback.format_exc()
-            print(error_message)  # TODO: Log this to the task log
-            print(error_traceback)
+            logger.error(error_message)
+            logger.debug(error_traceback)
 
-            self.end_task(status="FAILURE")
+            # Add error to task text for user visibility
+            if self.twf_task:
+                self.twf_task.text += f"  ✗ {error_message}\n"
+                self.twf_task.save(update_fields=["text"])
+
+            # Continue processing other entries instead of ending task
+            self.advance_task(status="failure")
+            continue
 
     # Finalize the task
     self.end_task()
@@ -107,47 +117,70 @@ def search_wikidata_entries(self, project_id, user_id, **kwargs):
     language = kwargs.get("language")
 
     found_entries = 0
+    failed_entries = 0
+
     for entry in dictionary.entries.all():
-        # Perform Wikidata search for each entry
-        results = search_wikidata_entities(
-            query=entry.label, entity_type=entity_type, language=language, limit=5
-        )
+        try:
+            # Perform Wikidata search for each entry
+            results = search_wikidata_entities(
+                query=entry.label, entity_type=entity_type, language=language, limit=5
+            )
 
-        if results:
-            data = results[0]
-            # Convert Wikidata data to standard enrichment format
-            wikidata_id = data.get("id")
-            label = data.get("label", entry.label)
+            if results:
+                data = results[0]
+                # Convert Wikidata data to standard enrichment format
+                wikidata_id = data.get("id")
+                label = data.get("label", entry.label)
 
-            if wikidata_id:
-                enrichment_data = {
-                    "id_type": "wikidata",
-                    "id_value": wikidata_id,
-                    "resource_url": f"https://www.wikidata.org/wiki/{wikidata_id}",
-                    "description": data.get("description", ""),
-                }
+                if wikidata_id:
+                    enrichment_data = {
+                        "id_type": "wikidata",
+                        "id_value": wikidata_id,
+                        "resource_url": f"https://www.wikidata.org/wiki/{wikidata_id}",
+                        "description": data.get("description", ""),
+                    }
 
-                # Add coordinates if available
-                if data.get("coordinates"):
-                    coords = data["coordinates"]
-                    enrichment_data["latitude"] = coords.get("latitude")
-                    enrichment_data["longitude"] = coords.get("longitude")
+                    # Add coordinates if available
+                    if data.get("coordinates"):
+                        coords = data["coordinates"]
+                        enrichment_data["latitude"] = coords.get("latitude")
+                        enrichment_data["longitude"] = coords.get("longitude")
 
-                # Use set_enrichment method to write in standard format
-                entry.set_enrichment(
-                    enrichment_type="authority_id",
-                    normalized_value=label,
-                    enrichment_data=enrichment_data,
-                    user=self.user
-                )
-                found_entries += 1
+                    # Use set_enrichment method to write in standard format
+                    entry.set_enrichment(
+                        enrichment_type="authority_id",
+                        normalized_value=label,
+                        enrichment_data=enrichment_data,
+                        user=self.user
+                    )
+                    found_entries += 1
 
-            # Also keep raw Wikidata data in metadata for backward compatibility
-            entry.metadata["wikidata"] = data
-            entry.save(current_user=self.user)
+                # Also keep raw Wikidata data in metadata for backward compatibility
+                entry.metadata["wikidata"] = data
+                entry.save(current_user=self.user)
 
-        # Update the progress
-        self.advance_task()
+            # Update the progress
+            self.advance_task(status="success")
+
+        except Exception as e:
+            failed_entries += 1
+            error_message = f"Error processing entry '{entry.label}': {e}"
+            logger.error(error_message)
+
+            # Add error to task text for user visibility
+            if self.twf_task:
+                self.twf_task.text += f"  ✗ {error_message}\n"
+                self.twf_task.save(update_fields=["text"])
+
+            # Continue processing other entries
+            self.advance_task(status="failure")
+
+    # Add summary to task text
+    if self.twf_task:
+        self.twf_task.text += f"\nWikidata Search Summary:\n"
+        self.twf_task.text += f"  • Entries enriched: {found_entries}\n"
+        self.twf_task.text += f"  • Entries failed: {failed_entries}\n"
+        self.twf_task.save(update_fields=["text"])
 
     self.end_task()
 

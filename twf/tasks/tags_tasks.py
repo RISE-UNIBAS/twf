@@ -38,61 +38,92 @@ def create_page_tags(self, project_id, user_id, **kwargs):
         pages = Page.objects.filter(document__project=self.project).order_by(
             "document__document_id", "tk_page_number"
         )
-        self.set_total_items(pages.count())
+        total_pages = pages.count()
+        self.set_total_items(total_pages)
+
+        if self.twf_task:
+            self.twf_task.text += f"Creating tags for {total_pages} pages.\n"
+            self.twf_task.save(update_fields=["text"])
 
         assigned_tags = 0
         total_tags = 0
+        failed_pages = 0
 
         for page in pages:
-            PageTag.objects.filter(page=page).delete()
-            parsed_data = page.parsed_data
+            try:
+                PageTag.objects.filter(page=page).delete()
+                parsed_data = page.parsed_data
 
-            # Extract tags from parsed data using the unified extraction function
-            tags_data = extract_tags_from_parsed_data(parsed_data)
-            num_tags = len(tags_data)
+                # Extract tags from parsed data using the unified extraction function
+                tags_data = extract_tags_from_parsed_data(parsed_data)
+                num_tags = len(tags_data)
 
-            for tag_data in tags_data:
-                # Create PageTag with new explicit positional fields
-                tag = PageTag(
-                    page=page,
-                    variation=tag_data["variation"],
-                    variation_type=tag_data["type"],
-                    # New explicit fields (simple-alto-parser v0.0.22+)
-                    region_index=tag_data.get("region_index", 0),
-                    line_index_in_region=tag_data.get("line_index_in_region", 0),
-                    line_index_global=tag_data.get("line_index_global", 0),
-                    line_text=tag_data.get("line_text", ""),
-                    offset_in_line=tag_data.get("offset", 0),
-                    length=tag_data.get("length", len(tag_data["variation"])),
-                    # DEPRECATED: Store legacy data in additional_information for backward compatibility
-                    additional_information={
-                        "line_id": tag_data.get("line_id", ""),
-                        "continued": tag_data.get("continued", False),
-                    },
-                )
-                is_assigned = assign_tag(tag, self.user)
-                if is_assigned:
-                    assigned_tags += 1
-                total_tags += 1
-                tag.save(current_user=self.user)
+                for tag_data in tags_data:
+                    # Create PageTag with new explicit positional fields
+                    tag = PageTag(
+                        page=page,
+                        variation=tag_data["variation"],
+                        variation_type=tag_data["type"],
+                        # New explicit fields (simple-alto-parser v0.0.22+)
+                        region_index=tag_data.get("region_index", 0),
+                        line_index_in_region=tag_data.get("line_index_in_region", 0),
+                        line_index_global=tag_data.get("line_index_global", 0),
+                        line_text=tag_data.get("line_text", ""),
+                        offset_in_line=tag_data.get("offset", 0),
+                        length=tag_data.get("length", len(tag_data["variation"])),
+                        # DEPRECATED: Store legacy data in additional_information for backward compatibility
+                        additional_information={
+                            "line_id": tag_data.get("line_id", ""),
+                            "continued": tag_data.get("continued", False),
+                        },
+                    )
+                    is_assigned = assign_tag(tag, self.user)
+                    if is_assigned:
+                        assigned_tags += 1
+                    total_tags += 1
+                    tag.save(current_user=self.user)
 
-            page.num_tags = num_tags
+                page.num_tags = num_tags
 
-            page.parsed_data = parsed_data
-            page.last_parsed_at = timezone.now()
-            if (
-                "page_relevance" in parsed_data["file"]
-                and parsed_data["file"]["page_relevance"] == "no"
-            ):
-                page.is_ignored = True
-            page.save()
+                page.parsed_data = parsed_data
+                page.last_parsed_at = timezone.now()
+                if (
+                    "page_relevance" in parsed_data["file"]
+                    and parsed_data["file"]["page_relevance"] == "no"
+                ):
+                    page.is_ignored = True
+                page.save()
 
-            self.advance_task()
+                self.advance_task(status="success")
+
+            except Exception as page_error:
+                failed_pages += 1
+                error_msg = f"Failed to process page {page.tk_page_id} (document {page.document.document_id}): {str(page_error)}"
+                logger.error(error_msg)
+
+                if self.twf_task:
+                    self.twf_task.text += f"  ✗ {error_msg}\n"
+                    self.twf_task.save(update_fields=["text"])
+
+                # Continue processing other pages
+                self.advance_task(status="failure")
+
+        # Add summary to task text
+        if self.twf_task:
+            self.twf_task.text += f"\nTag Creation Summary:\n"
+            self.twf_task.text += f"  • Total tags created: {total_tags}\n"
+            self.twf_task.text += f"  • Tags auto-assigned: {assigned_tags}\n"
+            self.twf_task.text += f"  • Pages processed: {total_pages - failed_pages}\n"
+            self.twf_task.text += f"  • Pages failed: {failed_pages}\n"
+            self.twf_task.save(update_fields=["text"])
 
         self.end_task()
 
     except Exception as e:
-        self.end_task(status="FAILURE")
+        error_msg = f"Tag creation task failed: {str(e)}"
+        logger.error(error_msg)
+        self.end_task(status="FAILURE", error_msg=error_msg)
+        raise
 
 
 def smart_sync_tags(project, user, celery_task):

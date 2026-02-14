@@ -1,6 +1,7 @@
 """Celery tasks for exporting data from the project."""
 
 import json
+import logging
 import os
 import shutil
 import tempfile
@@ -28,6 +29,8 @@ from twf.models import (
 from twf.tasks.task_base import BaseTWFTask
 from twf.utils.create_export_utils import create_data
 
+logger = logging.getLogger(__name__)
+
 
 @shared_task(bind=True, base=BaseTWFTask)
 def export_documents_task(self, project_id, user_id, **kwargs):
@@ -45,7 +48,6 @@ def export_documents_task(self, project_id, user_id, **kwargs):
     Returns:
         None (creates Export object with downloadable file)
     """
-    print(kwargs)
     self.validate_task_parameters(kwargs, ["export_type", "export_single_file"])
 
     docs_to_export = self.project.documents.all()
