@@ -2,12 +2,19 @@ from django.contrib import messages
 from django.shortcuts import get_object_or_404
 
 from twf.models import Dictionary, DictionaryEntry, PageTag, Variation
+from twf.permissions import check_permission
 from twf.tasks.instant_tasks import save_instant_task_add_dictionary
 from twf.views.views_base import TWFView, get_referrer_or_default
 
 
 def remove_dictionary_from_project(request, pk):
     """Remove a dictionary from the project."""
+    # Check dictionary.manage permission
+    project = TWFView.s_get_project(request)
+    if not check_permission(request.user, "dictionary.manage", project):
+        messages.error(request, "You do not have permission to manage dictionaries.")
+        return get_referrer_or_default(request, default="twf:dictionaries")
+
     dictionary = get_object_or_404(Dictionary, pk=pk)
     project = TWFView.s_get_project(request)
     project.selected_dictionaries.remove(dictionary)
@@ -22,6 +29,12 @@ def remove_dictionary_from_project(request, pk):
 
 def delete_variation(request, pk):
     """Delete a variation."""
+    # Check dictionary.edit permission
+    project = TWFView.s_get_project(request)
+    if not check_permission(request.user, "dictionary.edit", project):
+        messages.error(request, "You do not have permission to edit dictionary entries.")
+        return get_referrer_or_default(request, default="twf:dictionaries")
+
     variation = get_object_or_404(Variation, pk=pk)
 
     all_page_tags = PageTag.objects.filter(variation=variation)
@@ -37,6 +50,12 @@ def delete_variation(request, pk):
 
 def delete_entry(request, pk):
     """Delete a dictionary entry."""
+    # Check dictionary.manage permission
+    project = TWFView.s_get_project(request)
+    if not check_permission(request.user, "dictionary.manage", project):
+        messages.error(request, "You do not have permission to delete dictionary entries.")
+        return get_referrer_or_default(request, default="twf:dictionaries")
+
     entry = get_object_or_404(DictionaryEntry, pk=pk)
     entry.delete()
     messages.success(request, f"Dictionary entry {pk} has been deleted.")
@@ -46,6 +65,12 @@ def delete_entry(request, pk):
 
 def skip_entry(request, pk):
     """Skip a dictionary entry."""
+    # Check dictionary.edit permission
+    project = TWFView.s_get_project(request)
+    if not check_permission(request.user, "dictionary.edit", project):
+        messages.error(request, "You do not have permission to edit dictionary entries.")
+        return get_referrer_or_default(request, default="twf:dictionaries")
+
     entry = get_object_or_404(DictionaryEntry, pk=pk)
     entry.save(current_user=request.user)
     messages.success(request, f"Dictionary entry {pk} has been skipped.")
@@ -55,6 +80,12 @@ def skip_entry(request, pk):
 
 def add_dictionary_to_project(request, pk):
     """Add a dictionary to the project."""
+    # Check dictionary.manage permission
+    project = TWFView.s_get_project(request)
+    if not check_permission(request.user, "dictionary.manage", project):
+        messages.error(request, "You do not have permission to manage dictionaries.")
+        return get_referrer_or_default(request, default="twf:dictionaries")
+
     dictionary = get_object_or_404(Dictionary, pk=pk)
     project = TWFView.s_get_project(request)
     project.selected_dictionaries.add(dictionary)
@@ -73,6 +104,12 @@ def add_dictionary_to_project(request, pk):
 
 def delete_dictionary_entry(request, pk):
     """Delete a dictionary entry."""
+    # Check dictionary.manage permission
+    project = TWFView.s_get_project(request)
+    if not check_permission(request.user, "dictionary.manage", project):
+        messages.error(request, "You do not have permission to delete dictionary entries.")
+        return get_referrer_or_default(request, default="twf:dictionaries")
+
     entry = get_object_or_404(DictionaryEntry, pk=pk)
     entry.delete()
     messages.success(request, f"Dictionary entry {pk} has been deleted.")

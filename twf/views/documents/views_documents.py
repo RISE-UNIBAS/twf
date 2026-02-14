@@ -16,7 +16,7 @@ from twf.forms.filters.filters import DocumentFilter
 from twf.forms.documents.documents_forms import DocumentSearchForm
 from twf.models import Document, Workflow
 from twf.tables.tables_document import DocumentTable
-from twf.views.views_base import TWFView
+from twf.views.views_base import TWFView, ProjectPermissionMixin
 
 # Create a logger for this module
 logger = logging.getLogger(__name__)
@@ -194,8 +194,9 @@ class TWFDocumentsOverviewView(TWFDocumentView):
         return context
 
 
-class TWFDocumentsBrowseView(SingleTableView, FilterView, TWFDocumentView):
+class TWFDocumentsBrowseView(ProjectPermissionMixin, SingleTableView, FilterView, TWFDocumentView):
     """View for displaying project documents."""
+    required_permission = "document.view"
 
     template_name = "twf/documents/documents.html"
     page_title = "Browse Documents"
@@ -270,8 +271,9 @@ class TWFDocumentsBrowseView(SingleTableView, FilterView, TWFDocumentView):
         return context
 
 
-class TWFDocumentsSearchView(FormView, TWFDocumentView):
+class TWFDocumentsSearchView(ProjectPermissionMixin, FormView, TWFDocumentView):
     """View for searching documents with simplified interface."""
+    required_permission = "document.view"
 
     template_name = "twf/documents/search_documents.html"
     page_title = "Search Documents"
@@ -650,8 +652,9 @@ class TWFDocumentsSearchView(FormView, TWFDocumentView):
             return None
 
 
-class TWFDocumentDetailView(TWFDocumentView):
+class TWFDocumentDetailView(ProjectPermissionMixin, TWFDocumentView):
     """View for displaying a document."""
+    required_permission = "document.view"
 
     template_name = "twf/documents/document.html"
     page_title = "Document Detail"
@@ -704,8 +707,9 @@ class TWFDocumentDetailView(TWFDocumentView):
         return breadcrumbs
 
 
-class TWFDocumentNameView(TWFDocumentView):
+class TWFDocumentNameView(ProjectPermissionMixin, TWFDocumentView):
     """View for naming documents."""
+    required_permission = "document.edit"
 
     template_name = "twf/documents/name_documents.html"
     page_title = "Name Documents"
@@ -715,8 +719,9 @@ class TWFDocumentNameView(TWFDocumentView):
         return context
 
 
-class TWFDocumentReviewView(TWFDocumentView):
+class TWFDocumentReviewView(ProjectPermissionMixin, TWFDocumentView):
     """View for naming documents."""
+    required_permission = "document.edit"
 
     template_name = "twf/documents/review_documents.html"
     page_title = "Review Documents"

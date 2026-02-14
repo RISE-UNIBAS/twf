@@ -11,6 +11,12 @@ from twf.utils.tags_utils import assign_tag, get_excluded_types
 
 def park_tag(request, pk):
     """Parks a tag."""
+    # Check tag.edit permission
+    project = TWFView.s_get_project(request)
+    if not check_permission(request.user, "tag.edit", project):
+        messages.error(request, "You do not have permission to park tags.")
+        return get_referrer_or_default(request, default="twf:tags_overview")
+
     tag = get_object_or_404(PageTag, pk=pk)
     tag.is_parked = True
     tag.save(current_user=request.user)
@@ -21,6 +27,12 @@ def park_tag(request, pk):
 
 def park_all_identical_tags(request, pk):
     """Parks all tags with the same variation as the specified tag."""
+    # Check tag.edit permission
+    project = TWFView.s_get_project(request)
+    if not check_permission(request.user, "tag.edit", project):
+        messages.error(request, "You do not have permission to park tags.")
+        return get_referrer_or_default(request, default="twf:tags_overview")
+
     tag = get_object_or_404(PageTag, pk=pk)
     project = tag.page.document.project
 
@@ -45,6 +57,12 @@ def park_all_identical_tags(request, pk):
 
 def unpark_tag(request, pk):
     """Unparks a tag."""
+    # Check tag.edit permission
+    project = TWFView.s_get_project(request)
+    if not check_permission(request.user, "tag.edit", project):
+        messages.error(request, "You do not have permission to unpark tags.")
+        return get_referrer_or_default(request, default="twf:tags_overview")
+
     tag = get_object_or_404(PageTag, pk=pk)
     tag.is_parked = False
     tag.save(current_user=request.user)
@@ -55,6 +73,12 @@ def unpark_tag(request, pk):
 
 def ungroup_tag(request, pk):
     """Ungroups a tag and removes all processing data (dictionary, enrichment, date)."""
+    # Check tag.edit permission
+    project = TWFView.s_get_project(request)
+    if not check_permission(request.user, "tag.edit", project):
+        messages.error(request, "You do not have permission to modify tags.")
+        return get_referrer_or_default(request, default="twf:tags_overview")
+
     tag = get_object_or_404(PageTag, pk=pk)
     tag.dictionary_entry = None
     tag.date_variation_entry = None
@@ -67,6 +91,12 @@ def ungroup_tag(request, pk):
 
 def delete_tag(request, pk):
     """Deletes a tag."""
+    # Check tag.manage permission
+    project = TWFView.s_get_project(request)
+    if not check_permission(request.user, "tag.manage", project):
+        messages.error(request, "You do not have permission to delete tags.")
+        return get_referrer_or_default(request, default="twf:tags_overview")
+
     tag = get_object_or_404(PageTag, pk=pk)
     tag.delete()
     messages.success(request, f"Tag {pk} has been deleted.")

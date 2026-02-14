@@ -88,7 +88,26 @@ def start_extraction(request):
     Optional parameters:
     - force_recreate_tags: Boolean to force recreation of all tags (default: False)
     - delete_removed_documents: Boolean to delete documents not in export (default: True)
+    - transkribus_username: Transkribus username (will be saved to project)
+    - transkribus_password: Transkribus password (will be saved to project)
     """
+    # Save Transkribus credentials if provided
+    transkribus_username = request.POST.get("transkribus_username")
+    transkribus_password = request.POST.get("transkribus_password")
+
+    if transkribus_username or transkribus_password:
+        from twf.views.views_base import TWFView
+        project = TWFView.s_get_project(request)
+
+        if project:
+            credentials = project.conf_credentials or {}
+            credentials["transkribus"] = {
+                "username": transkribus_username or "",
+                "password": transkribus_password or "",
+            }
+            project.conf_credentials = credentials
+            project.save()
+
     # Extract optional parameters from form
     force_recreate_tags = (
         request.POST.get("force_recreate_tags", "false").lower() == "true"
@@ -110,7 +129,26 @@ def start_enrich_metadata(request):
 
     Optional parameters:
     - force: Boolean to force re-enrichment even for documents with existing metadata (default: False)
+    - transkribus_username: Transkribus username (will be saved to project)
+    - transkribus_password: Transkribus password (will be saved to project)
     """
+    # Save Transkribus credentials if provided
+    transkribus_username = request.POST.get("transkribus_username")
+    transkribus_password = request.POST.get("transkribus_password")
+
+    if transkribus_username or transkribus_password:
+        from twf.views.views_base import TWFView
+        project = TWFView.s_get_project(request)
+
+        if project:
+            credentials = project.conf_credentials or {}
+            credentials["transkribus"] = {
+                "username": transkribus_username or "",
+                "password": transkribus_password or "",
+            }
+            project.conf_credentials = credentials
+            project.save()
+
     # Extract optional parameters from form
     # Django checkboxes send 'on' when checked, or nothing when unchecked
     force_value = request.POST.get("force", "")
@@ -190,7 +228,25 @@ def start_dict_gnd_batch(request):
 
 
 def start_dict_geonames_batch(request):
-    """Start the GeoNames requests as a Celery task."""
+    """Start the GeoNames requests as a Celery task.
+
+    Optional parameters:
+    - geonames_username: GeoNames username (will be saved to project)
+    """
+    # Save GeoNames credentials if provided
+    geonames_username = request.POST.get("geonames_username")
+
+    if geonames_username:
+        from twf.views.views_base import TWFView
+        project = TWFView.s_get_project(request)
+
+        if project:
+            credentials = project.conf_credentials or {}
+            credentials["geonames"] = {
+                "username": geonames_username or "",
+            }
+            project.conf_credentials = credentials
+            project.save()
 
     dictionary_id = request.POST.get("dictionary")
     country_restriction = request.POST.get("only_search_in")
@@ -515,4 +571,29 @@ def start_export_to_zenodo(request):
         request,
         export_to_zenodo_task,
         export_id=request.POST.get("export_id"),
+    )
+
+
+##############################
+## AI CONFIGURATION TASKS
+def start_test_ai_config(request):
+    """
+    Trigger a task to test an AI configuration.
+
+    Args:
+        request: Django HTTP request containing ai_config_id and test_context
+
+    Returns:
+        JsonResponse: Task ID for tracking
+    """
+    from twf.tasks.ai_config_tasks import test_ai_config_task
+
+    ai_config_id = request.POST.get("ai_config_id")
+    test_context = request.POST.get("test_context", "{}")
+
+    return trigger_task(
+        request,
+        test_ai_config_task,
+        ai_config_id=int(ai_config_id),
+        test_context=test_context,
     )

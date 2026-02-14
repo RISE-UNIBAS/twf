@@ -5,11 +5,13 @@ This module contains forms for project-level batch processing operations,
 including document extraction, project copying, and AI queries with multimodal support.
 """
 
-from crispy_forms.layout import Row, Column
+from crispy_forms.layout import Row, Column, Fieldset
 from django import forms
+from django.forms import TextInput
 from django_select2.forms import Select2MultipleWidget
 
 from twf.forms.base_batch_forms import BaseBatchForm, BaseMultiModalAIBatchForm
+from twf.forms.project.project_forms import PasswordInputRetain
 from twf.models import Document
 
 
@@ -21,6 +23,19 @@ class TranskribusEnrichmentBatchForm(BaseBatchForm):
     (labels, tags, excluded status) from the Transkribus API that is not available in
     the PageXML export.
     """
+
+    transkribus_username = forms.CharField(
+        required=False,
+        label="Transkribus Username",
+        widget=TextInput(attrs={"placeholder": "Transkribus Username"}),
+        help_text="Your Transkribus account username",
+    )
+    transkribus_password = forms.CharField(
+        required=False,
+        label="Transkribus Password",
+        widget=PasswordInputRetain(attrs={"placeholder": "Transkribus Password"}),
+        help_text="Your Transkribus account password",
+    )
 
     force = forms.BooleanField(
         label="Force Re-Enrichment",
@@ -40,6 +55,13 @@ class TranskribusEnrichmentBatchForm(BaseBatchForm):
         """
         super().__init__(*args, **kwargs)
 
+        # Populate Transkribus credentials from project if available
+        if self.project:
+            transkribus_creds = self.project.get_credentials("transkribus")
+            if transkribus_creds:
+                self.fields["transkribus_username"].initial = transkribus_creds.get("username", "")
+                self.fields["transkribus_password"].initial = transkribus_creds.get("password", "")
+
     def get_button_label(self):
         """
         Get the label for the submit button.
@@ -57,11 +79,38 @@ class TranskribusEnrichmentBatchForm(BaseBatchForm):
             list: A list of form field layouts.
         """
         return [
+            Fieldset(
+                "Transkribus Credentials",
+                Row(
+                    Column("transkribus_username", css_class="form-group col-6 mb-3"),
+                    Column("transkribus_password", css_class="form-group col-6 mb-3"),
+                    css_class="row form-row",
+                ),
+            ),
             Row(
                 Column("force", css_class="form-group col-12 mb-3"),
                 css_class="row form-row",
             )
         ]
+
+    def save_credentials(self):
+        """Save Transkribus credentials to the project."""
+        if self.project and self.is_valid():
+            username = self.cleaned_data.get("transkribus_username")
+            password = self.cleaned_data.get("transkribus_password")
+
+            # Get existing credentials
+            credentials = self.project.conf_credentials or {}
+
+            # Update Transkribus credentials
+            credentials["transkribus"] = {
+                "username": username,
+                "password": password,
+            }
+
+            # Save back to project
+            self.project.conf_credentials = credentials
+            self.project.save()
 
 
 class DocumentExtractionBatchForm(BaseBatchForm):
@@ -72,6 +121,19 @@ class DocumentExtractionBatchForm(BaseBatchForm):
     pages, and tags from Transkribus exports. It includes options to control the
     sync behavior.
     """
+
+    transkribus_username = forms.CharField(
+        required=False,
+        label="Transkribus Username",
+        widget=TextInput(attrs={"placeholder": "Transkribus Username"}),
+        help_text="Your Transkribus account username",
+    )
+    transkribus_password = forms.CharField(
+        required=False,
+        label="Transkribus Password",
+        widget=PasswordInputRetain(attrs={"placeholder": "Transkribus Password"}),
+        help_text="Your Transkribus account password",
+    )
 
     force_recreate_tags = forms.BooleanField(
         label="Force Recreate All Tags",
@@ -100,6 +162,13 @@ class DocumentExtractionBatchForm(BaseBatchForm):
         """
         super().__init__(*args, **kwargs)
 
+        # Populate Transkribus credentials from project if available
+        if self.project:
+            transkribus_creds = self.project.get_credentials("transkribus")
+            if transkribus_creds:
+                self.fields["transkribus_username"].initial = transkribus_creds.get("username", "")
+                self.fields["transkribus_password"].initial = transkribus_creds.get("password", "")
+
     def get_button_label(self):
         """
         Get the label for the submit button.
@@ -117,6 +186,14 @@ class DocumentExtractionBatchForm(BaseBatchForm):
             list: A list of form field layouts.
         """
         return [
+            Fieldset(
+                "Transkribus Credentials",
+                Row(
+                    Column("transkribus_username", css_class="form-group col-6 mb-3"),
+                    Column("transkribus_password", css_class="form-group col-6 mb-3"),
+                    css_class="row form-row",
+                ),
+            ),
             Row(
                 Column("force_recreate_tags", css_class="form-group col-12 mb-3"),
                 css_class="row form-row",
@@ -126,6 +203,25 @@ class DocumentExtractionBatchForm(BaseBatchForm):
                 css_class="row form-row",
             ),
         ]
+
+    def save_credentials(self):
+        """Save Transkribus credentials to the project."""
+        if self.project and self.is_valid():
+            username = self.cleaned_data.get("transkribus_username")
+            password = self.cleaned_data.get("transkribus_password")
+
+            # Get existing credentials
+            credentials = self.project.conf_credentials or {}
+
+            # Update Transkribus credentials
+            credentials["transkribus"] = {
+                "username": username,
+                "password": password,
+            }
+
+            # Save back to project
+            self.project.conf_credentials = credentials
+            self.project.save()
 
 
 class ProjectCopyBatchForm(BaseBatchForm):

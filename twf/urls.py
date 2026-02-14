@@ -5,6 +5,7 @@ from django.contrib.auth import views as auth_views
 
 from twf.tasks.task_status import task_status_view
 from twf.tasks.task_triggers import *
+from twf.tasks.task_triggers import start_test_ai_config
 from twf.views.ajax.views_ajax_field_validation import (
     validate_page_field,
     validate_document_field,
@@ -177,6 +178,7 @@ from twf.views.export.views_export import (
     TWFExportRunView,
     TWFExportSampleView,
     TWFExportZenodoVersionView,
+    TWFExportPublicationMetadataView,
 )
 from twf.views.metadata.views_metadata import (
     TWFMetadataReviewDocumentsView,
@@ -193,13 +195,11 @@ from twf.views.project.views_project import (
     TWFProjectTaskMonitorView,
     TWFProjectTaskDetailView,
     TWFProjectGeneralSettingsView,
-    TWFProjectCredentialsSettingsView,
     TWFProjectPromptsView,
     TWFProjectTaskSettingsView,
     TWFProjectCopyView,
     TWFProjectResetView,
     TWFProjectUserManagementView,
-    TWFProjectRepositorySettingsView,
     TWFProjectPromptEditView,
     TWFProjectSetupView,
     TWFProjectTranskribusExtractView,
@@ -208,7 +208,6 @@ from twf.views.project.views_project import (
     TWFProjectPromptDetailView,
     TWFProjectNoteEditView,
     TWFProjectNoteDetailView,
-    TWFProjectPromptSettingsView,
     TWFProjectDisplaySettingsView,
     TWFProjectWorkflowSettingsView,
 )
@@ -401,24 +400,9 @@ urlpatterns = [
         name="project_settings_general",
     ),
     path(
-        "project/settings/credentials/",
-        TWFProjectCredentialsSettingsView.as_view(),
-        name="project_settings_credentials",
-    ),
-    path(
         "project/settings/tasks/",
         TWFProjectTaskSettingsView.as_view(),
         name="project_settings_tasks",
-    ),
-    path(
-        "project/settings/prompt/",
-        TWFProjectPromptSettingsView.as_view(),
-        name="project_settings_prompt",
-    ),
-    path(
-        "project/settings/repositories/",
-        TWFProjectRepositorySettingsView.as_view(),
-        name="project_settings_repository",
     ),
     path(
         "project/settings/display/",
@@ -799,6 +783,7 @@ urlpatterns = [
     #############################
     # EXPORT
     path("export/", TWFExportOverviewView.as_view(), name="export_overview"),
+    path("export/publication-metadata/", TWFExportPublicationMetadataView.as_view(), name="export_publication_metadata"),
     path("export/exports/", TWFExportListView.as_view(), name="export_view_exports"),
     path(
         "export/exports/<int:pk>/delete/", delete_export, name="export_exports_delete"
@@ -964,6 +949,11 @@ urlpatterns = [
     path("celery/export/run/", start_export, name="task_export"),
     path("celery/export/project/", start_export_project, name="task_export_project"),
     path("celery/export/zenodo/", start_export_to_zenodo, name="task_export_zenodo"),
+    path(
+        "celery/ai-config/test/",
+        start_test_ai_config,
+        name="task_test_ai_config",
+    ),
     #############################
     # AJAX CALLS
     path(

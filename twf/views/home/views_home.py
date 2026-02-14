@@ -522,6 +522,13 @@ class TWFManageProjectsView(
     paginate_by = 10
     model = Project
 
+    def dispatch(self, request, *args, **kwargs):
+        """Check system.manage permission before dispatching."""
+        if not check_permission(request.user, "system.manage", None):
+            messages.error(request, "You do not have permission to manage projects. System administration access required.")
+            return redirect("twf:home")
+        return super().dispatch(request, *args, **kwargs)
+
     def get_queryset(self):
         """Get the queryset for the view."""
         queryset = Project.objects.all().order_by("title")
@@ -554,6 +561,13 @@ class TWFManageUsersView(
     filterset_class = UserFilter
     paginate_by = 10
     model = User
+
+    def dispatch(self, request, *args, **kwargs):
+        """Check system.edit permission before dispatching."""
+        if not check_permission(request.user, "system.edit", None):
+            messages.error(request, "You do not have permission to manage users. System administration access required.")
+            return redirect("twf:home")
+        return super().dispatch(request, *args, **kwargs)
 
     def get_queryset(self):
         """Get the queryset for the view."""
@@ -597,6 +611,13 @@ class TWFSystemHealthView(LoginRequiredMixin, TWFHomeView):
     template_name = "twf/home/system_health.html"
     page_title = "System Health"
 
+    def dispatch(self, request, *args, **kwargs):
+        """Check system.view permission before dispatching."""
+        if not check_permission(request.user, "system.view", None):
+            messages.error(request, "You do not have permission to view system health. System administration access required.")
+            return redirect("twf:home")
+        return super().dispatch(request, *args, **kwargs)
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["twf_services"] = TWF_EXTERNAL_SERVICES
@@ -606,6 +627,13 @@ class TWFSystemHealthView(LoginRequiredMixin, TWFHomeView):
 @csrf_exempt
 def check_system_health(request):
     """Check the system health incrementally via SSE."""
+    # Check system.view permission - only staff/superusers can access
+    if not check_permission(request.user, "system.view", None):
+        return StreamingHttpResponse(
+            "data: " + json.dumps({"error": "Permission denied. System administration access required."}) + "\n\n",
+            content_type="text/event-stream",
+            status=403
+        )
 
     def event_stream():
         services = check_service_status()

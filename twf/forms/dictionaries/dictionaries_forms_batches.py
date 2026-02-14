@@ -1,7 +1,8 @@
 """Contains all forms concerning batch processes."""
 
-from crispy_forms.layout import Row, Column
+from crispy_forms.layout import Row, Column, Fieldset
 from django import forms
+from django.forms import TextInput
 from django_select2.forms import Select2Widget
 
 from twf.forms.base_batch_forms import BaseBatchForm, BaseAIBatchForm
@@ -276,6 +277,13 @@ class UnifiedDictionaryAIRequestForm(DictionaryAIBatchForm):
 class GeonamesBatchForm(DictionaryBatchForm):
     """Form for batch processing Geonames data."""
 
+    geonames_username = forms.CharField(
+        required=False,
+        label="GeoNames Username",
+        widget=TextInput(attrs={"placeholder": "GeoNames Username"}),
+        help_text="Your GeoNames account username (register at geonames.org)",
+    )
+
     only_search_in = forms.CharField(
         label="Only search in",
         required=False,
@@ -292,6 +300,12 @@ class GeonamesBatchForm(DictionaryBatchForm):
         super().__init__(*args, **kwargs)
         self.fields["similarity_threshold"].initial = 80
 
+        # Populate GeoNames username from project if available
+        if self.project:
+            geonames_creds = self.project.get_credentials("geonames")
+            if geonames_creds:
+                self.fields["geonames_username"].initial = geonames_creds.get("username", "")
+
     def get_button_label(self):
         """Get the label for the submit button."""
         return "Start Geonames Batch"
@@ -299,6 +313,15 @@ class GeonamesBatchForm(DictionaryBatchForm):
     def get_dynamic_fields(self):
         """Get the dynamic fields for the form."""
         fields = super().get_dynamic_fields()
+        fields.insert(0,
+            Fieldset(
+                "GeoNames Credentials",
+                Row(
+                    Column("geonames_username", css_class="form-group col-12 mb-3"),
+                    css_class="row form-row",
+                ),
+            )
+        )
         fields.append(
             Row(
                 Column("only_search_in", css_class="form-group col-6 mb-0"),
@@ -307,6 +330,23 @@ class GeonamesBatchForm(DictionaryBatchForm):
             )
         )
         return fields
+
+    def save_credentials(self):
+        """Save GeoNames credentials to the project."""
+        if self.project and self.is_valid():
+            username = self.cleaned_data.get("geonames_username")
+
+            # Get existing credentials
+            credentials = self.project.conf_credentials or {}
+
+            # Update GeoNames credentials
+            credentials["geonames"] = {
+                "username": username or "",
+            }
+
+            # Save back to project
+            self.project.conf_credentials = credentials
+            self.project.save()
 
 
 class GNDBatchForm(DictionaryBatchForm):

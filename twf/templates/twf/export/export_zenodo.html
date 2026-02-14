@@ -1,13 +1,13 @@
 {% extends 'twf/base/base.html' %}
+{% load crispy_forms_tags %}
 
 {% block content %}
 
-    {% if not has_zenodo_token %}
-        <div class="alert alert-danger">
-            <i class="fa-solid fa-x"></i>
-            <strong>No Zenodo Token present</strong> - You need to set up a Zenodo token in your credential settings.
+    <div class="card mb-4">
+        <div class="card-body">
+            {% crispy form %}
         </div>
-    {% endif %}
+    </div>
     {% if project.zenodo_deposition_id %}
         <div class="alert alert-info">
             <i class="fa-solid fa-link"></i>

@@ -17,6 +17,7 @@ from django.urls import reverse
 from django.views.generic import TemplateView, FormView
 from django.conf import settings
 from twf.models import Project
+from twf.permissions import check_permission
 
 
 def get_referrer_or_default(request, default="twf:home", kwargs=None):
@@ -32,6 +33,54 @@ def get_referrer_or_default(request, default="twf:home", kwargs=None):
     if kwargs:
         return redirect(default, **kwargs)
     return redirect(default)
+
+
+class ProjectPermissionMixin:
+    """
+    Mixin to enforce permission checking on project-related views.
+
+    Usage:
+        class MyView(ProjectPermissionMixin, TWFProjectView):
+            required_permission = "document.edit"
+            # ... rest of view
+
+    Attributes:
+        required_permission (str): The permission required to access this view.
+            Should be in format "entity_type.permission_level" (e.g., "document.edit").
+            If None, no permission check is performed.
+        permission_denied_message (str): Custom message to display when permission is denied.
+            If None, a default message is used.
+        permission_denied_redirect (str): URL name to redirect to when permission is denied.
+            Defaults to "twf:project_overview".
+    """
+
+    required_permission = None
+    permission_denied_message = None
+    permission_denied_redirect = "twf:project_overview"
+
+    def dispatch(self, request, *args, **kwargs):
+        """
+        Check required permission before dispatching the request.
+
+        If required_permission is set and the user doesn't have it,
+        redirect with an error message.
+        """
+        if self.required_permission:
+            # Get the project context (assumes view has get_project method)
+            project = self.get_project() if hasattr(self, 'get_project') else None
+
+            # Check permission
+            if not check_permission(request.user, self.required_permission, project):
+                # Use custom message or generate a default one
+                if self.permission_denied_message:
+                    message = self.permission_denied_message
+                else:
+                    message = f"You do not have permission to access this page. Required permission: {self.required_permission}"
+
+                messages.error(request, message)
+                return redirect(self.permission_denied_redirect)
+
+        return super().dispatch(request, *args, **kwargs)
 
 
 class TWFView(TemplateView, ABC):

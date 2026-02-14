@@ -12,11 +12,12 @@ from twf.forms.dictionaries.dictionaries_forms_batches import (
     UnifiedDictionaryAIRequestForm,
 )
 from twf.views.dictionaries.views_dictionaries import TWFDictionaryView
-from twf.views.views_base import AIFormView
+from twf.views.views_base import AIFormView, ProjectPermissionMixin
 
 
-class TWFDictionaryGeonamesBatchView(FormView, TWFDictionaryView):
+class TWFDictionaryGeonamesBatchView(ProjectPermissionMixin, FormView, TWFDictionaryView):
     """Normalization Data Wizard."""
+    required_permission = "dictionary.manage"
 
     template_name = "twf/dictionaries/batches/geonames.html"
     page_title = "Geonames Batch"
@@ -33,8 +34,9 @@ class TWFDictionaryGeonamesBatchView(FormView, TWFDictionaryView):
         return kwargs
 
 
-class TWFDictionaryGNDBatchView(FormView, TWFDictionaryView):
+class TWFDictionaryGNDBatchView(ProjectPermissionMixin, FormView, TWFDictionaryView):
     """Normalization Data Wizard."""
+    required_permission = "dictionary.manage"
 
     template_name = "twf/dictionaries/batches/gnd.html"
     page_title = "GND Batch"
@@ -51,8 +53,9 @@ class TWFDictionaryGNDBatchView(FormView, TWFDictionaryView):
         return kwargs
 
 
-class TWFDictionaryWikidataBatchView(FormView, TWFDictionaryView):
+class TWFDictionaryWikidataBatchView(ProjectPermissionMixin, FormView, TWFDictionaryView):
     """Normalization Data Wizard."""
+    required_permission = "dictionary.manage"
 
     template_name = "twf/dictionaries/batches/wikidata.html"
     page_title = "Wikidata Batch"
@@ -69,8 +72,9 @@ class TWFDictionaryWikidataBatchView(FormView, TWFDictionaryView):
         return kwargs
 
 
-class TWFDictionaryGeonamesRequestView(FormView, TWFDictionaryView):
+class TWFDictionaryGeonamesRequestView(ProjectPermissionMixin, FormView, TWFDictionaryView):
     """Normalization Data Wizard."""
+    required_permission = "dictionary.edit"
 
     template_name = "twf/dictionaries/requests/geonames.html"
     page_title = "Geonames Request"
@@ -83,8 +87,9 @@ class TWFDictionaryGeonamesRequestView(FormView, TWFDictionaryView):
         return kwargs
 
 
-class TWFDictionaryGNDRequestView(FormView, TWFDictionaryView):
+class TWFDictionaryGNDRequestView(ProjectPermissionMixin, FormView, TWFDictionaryView):
     """Normalization Data Wizard."""
+    required_permission = "dictionary.edit"
 
     template_name = "twf/dictionaries/requests/gnd.html"
     page_title = "GND Request"
@@ -97,8 +102,9 @@ class TWFDictionaryGNDRequestView(FormView, TWFDictionaryView):
         return kwargs
 
 
-class TWFDictionaryWikidataRequestView(FormView, TWFDictionaryView):
+class TWFDictionaryWikidataRequestView(ProjectPermissionMixin, FormView, TWFDictionaryView):
     """Normalization Data Wizard."""
+    required_permission = "dictionary.edit"
 
     template_name = "twf/dictionaries/requests/wikidata.html"
     page_title = "Wikidata Request"
@@ -111,13 +117,14 @@ class TWFDictionaryWikidataRequestView(FormView, TWFDictionaryView):
         return kwargs
 
 
-class TWFUnifiedDictionaryAIBatchView(AIFormView, TWFDictionaryView):
+class TWFUnifiedDictionaryAIBatchView(ProjectPermissionMixin, AIFormView, TWFDictionaryView):
     """
     Unified view for AI batch processing of dictionary entries.
 
     This view provides a single interface for batch processing with all supported
     AI providers. The provider is selected via a dropdown in the form.
     """
+    required_permission = "dictionary.manage"
 
     template_name = "twf/base/base_ai_batch.html"
     page_title = "AI Batch Processing"
@@ -199,7 +206,7 @@ class TWFUnifiedDictionaryAIBatchView(AIFormView, TWFDictionaryView):
             has_api_key = creds and "api_key" in creds and creds["api_key"]
             context["has_api_key"] = has_api_key
             context["ai_credentials_url"] = (
-                reverse_lazy("twf:project_settings_credentials")
+                reverse_lazy("twf:project_ai_configs")
                 + f"?tab={provider_info['credentials_tab']}"
             )
         else:
@@ -210,7 +217,7 @@ class TWFUnifiedDictionaryAIBatchView(AIFormView, TWFDictionaryView):
             )
             context["has_api_key"] = False
             context["ai_credentials_url"] = reverse_lazy(
-                "twf:project_settings_credentials"
+                "twf:project_ai_configs"
             )
 
         # Build provider config for JavaScript with credentials check
@@ -225,7 +232,7 @@ class TWFUnifiedDictionaryAIBatchView(AIFormView, TWFDictionaryView):
                 "description": provider_info["description"],
                 "multimodal": False,  # Dictionaries don't support multimodal
                 "multimodal_info": "",
-                "credentials_url": str(reverse_lazy("twf:project_settings_credentials"))
+                "credentials_url": str(reverse_lazy("twf:project_ai_configs"))
                 + f"?tab={provider_info['credentials_tab']}",
                 "has_api_key": has_api_key,
                 "default_model": default_model,
@@ -235,13 +242,14 @@ class TWFUnifiedDictionaryAIBatchView(AIFormView, TWFDictionaryView):
         return context
 
 
-class TWFUnifiedDictionaryAIRequestView(AIFormView, TWFDictionaryView):
+class TWFUnifiedDictionaryAIRequestView(ProjectPermissionMixin, AIFormView, TWFDictionaryView):
     """
     Unified view for AI request (supervised) processing of dictionary entries.
 
     This view provides a single interface for supervised, single-entry processing
     with all supported AI providers. The provider is selected via a dropdown in the form.
     """
+    required_permission = "dictionary.edit"
 
     template_name = "twf/base/base_ai_batch.html"
     page_title = "AI Request"
@@ -327,7 +335,7 @@ class TWFUnifiedDictionaryAIRequestView(AIFormView, TWFDictionaryView):
             has_api_key = creds and "api_key" in creds and creds["api_key"]
             context["has_api_key"] = has_api_key
             context["ai_credentials_url"] = (
-                reverse_lazy("twf:project_settings_credentials")
+                reverse_lazy("twf:project_ai_configs")
                 + f"?tab={provider_info['credentials_tab']}"
             )
         else:
@@ -338,7 +346,7 @@ class TWFUnifiedDictionaryAIRequestView(AIFormView, TWFDictionaryView):
             )
             context["has_api_key"] = False
             context["ai_credentials_url"] = reverse_lazy(
-                "twf:project_settings_credentials"
+                "twf:project_ai_configs"
             )
 
         # Build provider config for JavaScript with credentials check
@@ -353,7 +361,7 @@ class TWFUnifiedDictionaryAIRequestView(AIFormView, TWFDictionaryView):
                 "description": provider_info["description"],
                 "multimodal": False,  # Dictionaries don't support multimodal
                 "multimodal_info": "",
-                "credentials_url": str(reverse_lazy("twf:project_settings_credentials"))
+                "credentials_url": str(reverse_lazy("twf:project_ai_configs"))
                 + f"?tab={provider_info['credentials_tab']}",
                 "has_api_key": has_api_key,
                 "default_model": default_model,

@@ -22,12 +22,14 @@ from twf.forms.project.ai_config_forms import (
 )
 from twf.models import AIConfiguration
 from twf.views.project.views_project import TWFProjectView
+from twf.views.views_base import ProjectPermissionMixin
 
 logger = logging.getLogger(__name__)
 
 
-class TWFProjectAIConfigsView(ListView, TWFProjectView):
+class TWFProjectAIConfigsView(ProjectPermissionMixin, ListView, TWFProjectView):
     """List all AI configurations for the project."""
+    required_permission = "ai.manage"
 
     model = AIConfiguration
     template_name = "twf/project/ai_configs/list.html"
@@ -51,8 +53,9 @@ class TWFProjectAIConfigsView(ListView, TWFProjectView):
         return self.render_to_response(context)
 
 
-class TWFProjectAIConfigCreateView(CreateView, TWFProjectView):
+class TWFProjectAIConfigCreateView(ProjectPermissionMixin, CreateView, TWFProjectView):
     """Create a new AI configuration."""
+    required_permission = "ai.manage"
 
     model = AIConfiguration
     form_class = AIConfigurationForm
@@ -88,8 +91,9 @@ class TWFProjectAIConfigCreateView(CreateView, TWFProjectView):
         return context
 
 
-class TWFProjectAIConfigEditView(UpdateView, TWFProjectView):
+class TWFProjectAIConfigEditView(ProjectPermissionMixin, UpdateView, TWFProjectView):
     """Edit an existing AI configuration."""
+    required_permission = "ai.manage"
 
     model = AIConfiguration
     form_class = AIConfigurationForm
@@ -127,8 +131,9 @@ class TWFProjectAIConfigEditView(UpdateView, TWFProjectView):
         return context
 
 
-class TWFProjectAIConfigDetailView(DetailView, TWFProjectView):
+class TWFProjectAIConfigDetailView(ProjectPermissionMixin, DetailView, TWFProjectView):
     """View details of an AI configuration."""
+    required_permission = "ai.manage"
 
     model = AIConfiguration
     template_name = "twf/project/ai_configs/detail.html"
@@ -148,8 +153,9 @@ class TWFProjectAIConfigDetailView(DetailView, TWFProjectView):
         return f"AI Config: {self.object.name}"
 
 
-class TWFProjectAIConfigDeleteView(DeleteView, TWFProjectView):
+class TWFProjectAIConfigDeleteView(ProjectPermissionMixin, DeleteView, TWFProjectView):
     """Delete an AI configuration."""
+    required_permission = "ai.manage"
 
     model = AIConfiguration
     template_name = "twf/project/ai_configs/delete.html"
@@ -182,8 +188,9 @@ class TWFProjectAIConfigDeleteView(DeleteView, TWFProjectView):
         return super().delete(request, *args, **kwargs)
 
 
-class TWFProjectAIConfigTestView(FormView, TWFProjectView):
+class TWFProjectAIConfigTestView(ProjectPermissionMixin, FormView, TWFProjectView):
     """Test an AI configuration with sample context."""
+    required_permission = "ai.manage"
 
     form_class = AIConfigurationTestForm
     template_name = "twf/project/ai_configs/test.html"

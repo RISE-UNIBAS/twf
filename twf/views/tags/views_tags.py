@@ -26,10 +26,9 @@ from twf.forms.tags.workflow_forms import (
 )
 from twf.forms.tags.enrichment_forms import get_enrichment_form_class
 from twf.forms.tags.tag_settings_forms import TagSettingsForm
-from twf.forms.tags.manage_tags_forms import ManageTagsForm
+
 from twf.models import (
     PageTag,
-    DateVariation,
     Dictionary,
     DictionaryEntry,
     Variation,
@@ -43,7 +42,7 @@ from twf.utils.tags_utils import (
     get_closest_variations,
     get_enrichment_types,
 )
-from twf.views.views_base import TWFView
+from twf.views.views_base import TWFView, ProjectPermissionMixin
 from twf.workflows.tag_workflows import (
     create_tag_grouping_workflow,
     create_enrichment_workflow,
@@ -141,8 +140,9 @@ class TWFTagsView(LoginRequiredMixin, TWFView):
             self.page_title = kwargs.get("page_title", "Tags View")
 
 
-class TWFTagsOverviewView(TWFTagsView):
+class TWFTagsOverviewView(ProjectPermissionMixin, TWFTagsView):
     """View for the tags overview."""
+    required_permission = "tag.view"
 
     template_name = "twf/tags/overview.html"
     page_title = "Tags"
@@ -297,8 +297,9 @@ class TWFTagsOverviewView(TWFTagsView):
         return context
 
 
-class TWFTagsGroupView(TWFTagsView):
+class TWFTagsGroupView(ProjectPermissionMixin, TWFTagsView):
     """View for the tag grouping wizard with workflow support."""
+    required_permission = "tag.edit"
 
     template_name = "twf/tags/grouping.html"
     page_title = "Tag Grouping Wizard"
@@ -523,15 +524,17 @@ class TWFTagsGroupView(TWFTagsView):
         return context
 
 
-class TWFTagsAssignTagView(TWFTagsView):
+class TWFTagsAssignTagView(ProjectPermissionMixin, TWFTagsView):
     """View for the tag grouping wizard."""
+    required_permission = "tag.edit"
 
     template_name = "twf/tags/assign.html"
     page_title = "Assign Tag"
 
 
-class TWFProjectTagsView(SingleTableMixin, FilterView, TWFTagsView):
+class TWFProjectTagsView(ProjectPermissionMixin, SingleTableMixin, FilterView, TWFTagsView):
     """Base class for all tag views."""
+    required_permission = "tag.view"
 
     template_name = "twf/tags/all_tags.html"
     page_title = "All Tags"
@@ -675,6 +678,7 @@ class TWFProjectTagsView(SingleTableMixin, FilterView, TWFTagsView):
 class TWFProjectTagsOpenView(TWFProjectTagsView):
     """View for the open tags."""
 
+    required_permission = "tag.view"
     template_name = "twf/tags/open.html"
     page_title = "Open Tags"
     filterset = None
@@ -696,6 +700,7 @@ class TWFProjectTagsOpenView(TWFProjectTagsView):
 
 class TWFProjectTagsParkedView(TWFProjectTagsView):
     """View for the parked tags."""
+    required_permission = "tag.view"
 
     template_name = "twf/tags/parked.html"
     page_title = "Parked Tags"
@@ -715,6 +720,7 @@ class TWFProjectTagsParkedView(TWFProjectTagsView):
 
 class TWFProjectTagsResolvedView(TWFProjectTagsView):
     """View for the resolved tags."""
+    required_permission = "tag.view"
 
     template_name = "twf/tags/resolved.html"
     page_title = "Resolved Tags"
@@ -743,6 +749,7 @@ class TWFProjectTagsResolvedView(TWFProjectTagsView):
 
 class TWFProjectTagsWithCommentsView(TWFProjectTagsView):
     """View for tags with comments (dictionary entry notes)."""
+    required_permission = "tag.view"
 
     template_name = "twf/tags/with_comments.html"
     page_title = "Tags with Comments"
@@ -767,6 +774,7 @@ class TWFProjectTagsWithCommentsView(TWFProjectTagsView):
 
 class TWFProjectTagsIgnoredView(TWFProjectTagsView):
     """View for the ignored tags."""
+    required_permission = "tag.view"
 
     template_name = "twf/tags/ignored.html"
     page_title = "Ignored Tags"
@@ -787,8 +795,9 @@ class TWFProjectTagsIgnoredView(TWFProjectTagsView):
         return self.filterset.qs
 
 
-class TWFTagsEnrichmentView(FormView, TWFTagsView):
+class TWFTagsEnrichmentView(ProjectPermissionMixin, FormView, TWFTagsView):
     """Generic view for tag enrichment workflows."""
+    required_permission = "tag.edit"
 
     template_name = "twf/tags/enrichment.html"
     page_title = "Tag Enrichment"
@@ -1017,8 +1026,9 @@ class TWFTagsEnrichmentView(FormView, TWFTagsView):
         return context
 
 
-class TWFTagsSettingsView(FormView, TWFTagsView):
+class TWFTagsSettingsView(ProjectPermissionMixin, FormView, TWFTagsView):
     """View for tag-specific settings."""
+    required_permission = "tag.manage"
 
     template_name = "twf/tags/settings.html"
     form_class = TagSettingsForm
@@ -1045,8 +1055,9 @@ class TWFTagsSettingsView(FormView, TWFTagsView):
         return super().form_invalid(form)
 
 
-class TWFManageTagsView(TWFTagsView):
+class TWFManageTagsView(ProjectPermissionMixin, TWFTagsView):
     """View for bulk tag management operations."""
+    required_permission = "tag.manage"
 
     template_name = "twf/tags/manage.html"
     page_title = "Manage Tags"
@@ -1128,8 +1139,9 @@ class TWFManageTagsView(TWFTagsView):
         return context
 
 
-class TWFTagDetailView(TWFTagsView):
+class TWFTagDetailView(ProjectPermissionMixin, TWFTagsView):
     """Detailed view of a single tag showing all associated data."""
+    required_permission = "tag.view"
 
     template_name = "twf/tags/detail.html"
     page_title = "Tag Detail"

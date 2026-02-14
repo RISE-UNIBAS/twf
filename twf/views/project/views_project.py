@@ -24,12 +24,9 @@ from twf.forms.project.project_forms_batches import (
 from twf.forms.project.project_forms import (
     QueryDatabaseForm,
     GeneralSettingsForm,
-    CredentialsForm,
     TaskSettingsForm,
-    RepositorySettingsForm,
     PromptForm,
     NoteForm,
-    PromptSettingsForm,
     DisplaySettingsForm,
     WorkflowSettingsForm,
 )
@@ -45,7 +42,7 @@ from twf.utils.project_statistics import (
     get_tag_statistics,
     get_dictionary_statistics,
 )
-from twf.views.views_base import TWFView
+from twf.views.views_base import TWFView, ProjectPermissionMixin
 
 logger = logging.getLogger(__name__)
 
@@ -96,24 +93,9 @@ class TWFProjectView(LoginRequiredMixin, TWFView):
                         "permission": "ai.manage",
                     },
                     {
-                        "url": reverse("twf:project_settings_credentials"),
-                        "value": "Credential Settings",
-                        "permission": "project.manage",
-                    },
-                    {
                         "url": reverse("twf:project_settings_tasks"),
-                        "value": "Task Settings",
+                        "value": "Date Normalization Settings",
                         "permission": "task.manage",
-                    },
-                    {
-                        "url": reverse("twf:project_settings_prompt"),
-                        "value": "AI Prompt Settings",
-                        "permission": "ai.manage",
-                    },
-                    {
-                        "url": reverse("twf:project_settings_repository"),
-                        "value": "Repository Settings",
-                        "permission": "import_export.manage",
                     },
                     {
                         "url": reverse("twf:project_settings_display"),
@@ -124,6 +106,26 @@ class TWFProjectView(LoginRequiredMixin, TWFView):
                         "url": reverse("twf:project_settings_workflows"),
                         "value": "Workflow Settings",
                         "permission": "project.manage",
+                    },
+                    {
+                        "url": reverse("twf:tags_settings"),
+                        "value": "Tag Type Settings",
+                        "permission": "tag.manage",
+                    },
+                    {
+                        "url": reverse("twf:metadata_settings"),
+                        "value": "Metadata Review Settings",
+                        "permission": "metadata.manage",
+                    },
+                    {
+                        "url": reverse("twf:google_sheets_settings"),
+                        "value": "Google Sheets Settings",
+                        "permission": "metadata.manage",
+                    },
+                    {
+                        "url": reverse("twf:dictionaries_settings"),
+                        "value": "Dictionary Type Settings",
+                        "permission": "dictionary.manage",
                     },
                     {
                         "url": reverse("twf:user_management"),
@@ -203,11 +205,12 @@ class TWFProjectView(LoginRequiredMixin, TWFView):
             self.page_title = kwargs.get("page_title", "Project View")
 
 
-class TWFProjectTaskMonitorView(SingleTableView, FilterView, TWFProjectView):
+class TWFProjectTaskMonitorView(ProjectPermissionMixin, SingleTableView, FilterView, TWFProjectView):
     """View for the project task monitor."""
 
     template_name = "twf/project/task_monitor.html"
     page_title = "Task Monitor"
+    required_permission = "task.view"
     table_class = TaskTable
     filterset_class = TaskFilter
     paginate_by = 10
@@ -290,11 +293,12 @@ class TWFProjectTaskMonitorView(SingleTableView, FilterView, TWFProjectView):
         return context
 
 
-class TWFProjectTaskDetailView(TWFProjectView):
+class TWFProjectTaskDetailView(ProjectPermissionMixin, TWFProjectView):
     """View for displaying task details."""
 
     template_name = "twf/project/task_detail.html"
     page_title = "Task Details"
+    required_permission = "task.view"
 
     def get_context_data(self, **kwargs):
         """Get the context data."""
@@ -326,11 +330,12 @@ class TWFProjectTaskDetailView(TWFProjectView):
         return context
 
 
-class TWFProjectPromptsView(SingleTableView, FilterView, TWFProjectView):
+class TWFProjectPromptsView(ProjectPermissionMixin, SingleTableView, FilterView, TWFProjectView):
     """View for the project prompts."""
 
     template_name = "twf/project/prompts.html"
     page_title = "Prompts"
+    required_permission = "prompt.view"
     table_class = PromptTable
     filterset_class = PromptFilter
     paginate_by = 10
@@ -370,11 +375,12 @@ class TWFProjectPromptsView(SingleTableView, FilterView, TWFProjectView):
         return context
 
 
-class TWFProjectNotesView(SingleTableView, FilterView, TWFProjectView):
+class TWFProjectNotesView(ProjectPermissionMixin, SingleTableView, FilterView, TWFProjectView):
     """View for the project notes."""
 
     template_name = "twf/project/notes.html"
     page_title = "Notes"
+    required_permission = "note.view"
     table_class = NoteTable
     filterset_class = NoteFilter
     paginate_by = 10
@@ -414,8 +420,9 @@ class TWFProjectNotesView(SingleTableView, FilterView, TWFProjectView):
         return context
 
 
-class TWFProjectNoteEditView(FormView, TWFProjectView):
+class TWFProjectNoteEditView(ProjectPermissionMixin, FormView, TWFProjectView):
     """View for editing a note."""
+    required_permission = "note.edit"
 
     template_name = "twf/project/edit_note.html"
     page_title = "Edit Note"
@@ -449,8 +456,9 @@ class TWFProjectNoteEditView(FormView, TWFProjectView):
         return context
 
 
-class TWFProjectNoteDetailView(TWFProjectView):
+class TWFProjectNoteDetailView(ProjectPermissionMixin, TWFProjectView):
     """View for displaying note details."""
+    required_permission = "note.view"
 
     template_name = "twf/project/note_detail.html"
     page_title = "Note Details"
@@ -468,8 +476,9 @@ class TWFProjectNoteDetailView(TWFProjectView):
         return context
 
 
-class TWFProjectPromptDetailView(TWFProjectView):
+class TWFProjectPromptDetailView(ProjectPermissionMixin, TWFProjectView):
     """View for displaying prompt details."""
+    required_permission = "prompt.view"
 
     template_name = "twf/project/prompt_detail.html"
     page_title = "Prompt Details"
@@ -489,8 +498,9 @@ class TWFProjectPromptDetailView(TWFProjectView):
         return context
 
 
-class TWFProjectPromptEditView(FormView, TWFProjectView):
+class TWFProjectPromptEditView(ProjectPermissionMixin, FormView, TWFProjectView):
     """View for editing a prompt."""
+    required_permission = "prompt.edit"
 
     template_name = "twf/project/edit_prompt.html"
     page_title = "Edit Prompt"
@@ -526,8 +536,9 @@ class TWFProjectPromptEditView(FormView, TWFProjectView):
         return context
 
 
-class TWFProjectGeneralSettingsView(FormView, TWFProjectView):
+class TWFProjectGeneralSettingsView(ProjectPermissionMixin, FormView, TWFProjectView):
     """View for the general project settings."""
+    required_permission = "project.manage"
 
     template_name = "twf/project/settings/settings_general.html"
     page_title = "General Project Settings"
@@ -556,41 +567,12 @@ class TWFProjectGeneralSettingsView(FormView, TWFProjectView):
         return super().form_valid(form)
 
 
-class TWFProjectCredentialsSettingsView(FormView, TWFProjectView):
-    """View for the general project settings."""
-
-    template_name = "twf/project/settings/settings_credentials.html"
-    page_title = "Credentials Project Settings"
-    form_class = CredentialsForm
-    success_url = reverse_lazy("twf:project_settings_credentials")
-
-    def get_form_kwargs(self):
-        """Get the form kwargs."""
-        kwargs = super().get_form_kwargs()
-        kwargs["instance"] = self.get_project()
-        return kwargs
-
-    def form_valid(self, form):
-        """Handle the form submission."""
-        # Save the form and show a success message
-        self.object = form.save(commit=False)
-        self.object.save(current_user=self.request.user)
-        messages.success(
-            self.request, "Project Credential settings have been updated successfully."
-        )
-
-        # Retrieve the active tab from form data and include it in the success URL
-        active_tab = form.cleaned_data.get("active_tab", "transkribus")
-        success_url = f"{self.success_url}?tab={active_tab}"
-
-        return HttpResponseRedirect(success_url)
-
-
-class TWFProjectTaskSettingsView(FormView, TWFProjectView):
-    """View for the project task settings."""
+class TWFProjectTaskSettingsView(ProjectPermissionMixin, FormView, TWFProjectView):
+    """View for the project date normalization settings."""
+    required_permission = "task.manage"
 
     template_name = "twf/project/settings/settings_tasks.html"
-    page_title = "Task Settings"
+    page_title = "Date Normalization Settings"
     form_class = TaskSettingsForm
     success_url = reverse_lazy("twf:project_settings_tasks")
 
@@ -606,7 +588,7 @@ class TWFProjectTaskSettingsView(FormView, TWFProjectView):
         self.object = form.save(commit=False)
         self.object.save(current_user=self.request.user)
         messages.success(
-            self.request, "Project task settings have been updated successfully."
+            self.request, "Date normalization settings have been updated successfully."
         )
 
         # Retrieve the active tab from form data and include it in the success URL
@@ -616,64 +598,9 @@ class TWFProjectTaskSettingsView(FormView, TWFProjectView):
         return HttpResponseRedirect(success_url)
 
 
-class TWFProjectRepositorySettingsView(FormView, TWFProjectView):
-    """View for the project repository settings."""
-
-    template_name = "twf/project/settings/settings_repository.html"
-    page_title = "Project Repository Settings"
-    form_class = RepositorySettingsForm
-    success_url = reverse_lazy("twf:project_settings_repository")
-
-    def get_form_kwargs(self):
-        """Get the form kwargs."""
-        kwargs = super().get_form_kwargs()
-        kwargs["instance"] = self.get_project()
-        return kwargs
-
-    def form_valid(self, form):
-        """Handle the form submission."""
-        # Save the form
-        self.object = form.save(commit=False)
-        self.object.save(current_user=self.request.user)
-
-        # Add a success message
-        messages.success(
-            self.request, "Project Repository settings have been updated successfully."
-        )
-        # Redirect to the success URL
-        return super().form_valid(form)
-
-
-class TWFProjectPromptSettingsView(FormView, TWFProjectView):
-    """View for the project AI prompt settings."""
-
-    template_name = "twf/project/settings/settings_prompt.html"
-    page_title = "AI Prompt Settings"
-    form_class = PromptSettingsForm
-    success_url = reverse_lazy("twf:project_settings_prompt")
-
-    def get_form_kwargs(self):
-        """Get the form kwargs."""
-        kwargs = super().get_form_kwargs()
-        kwargs["instance"] = self.get_project()
-        return kwargs
-
-    def form_valid(self, form):
-        """Handle the form submission."""
-        # Save the form
-        self.object = form.save(commit=False)
-        self.object.save(current_user=self.request.user)
-
-        # Add a success message
-        messages.success(
-            self.request, "AI Prompt settings have been updated successfully."
-        )
-
-        return HttpResponseRedirect(self.success_url)
-
-
-class TWFProjectDisplaySettingsView(FormView, TWFProjectView):
+class TWFProjectDisplaySettingsView(ProjectPermissionMixin, FormView, TWFProjectView):
     """View for the project display settings."""
+    required_permission = "project.manage"
 
     template_name = "twf/project/settings/settings_display.html"
     page_title = "Display Settings"
@@ -704,8 +631,9 @@ class TWFProjectDisplaySettingsView(FormView, TWFProjectView):
         return HttpResponseRedirect(success_url)
 
 
-class TWFProjectWorkflowSettingsView(FormView, TWFProjectView):
+class TWFProjectWorkflowSettingsView(ProjectPermissionMixin, FormView, TWFProjectView):
     """View for workflow settings."""
+    required_permission = "project.manage"
 
     template_name = "twf/project/settings/settings_workflows.html"
     page_title = "Workflow Settings"
@@ -730,8 +658,9 @@ class TWFProjectWorkflowSettingsView(FormView, TWFProjectView):
         return HttpResponseRedirect(success_url)
 
 
-class TWFProjectQueryView(FormView, TWFProjectView):
+class TWFProjectQueryView(ProjectPermissionMixin, FormView, TWFProjectView):
     """View for querying the database."""
+    required_permission = "ai.edit"
 
     template_name = "twf/project/query/query.html"
     page_title = "SQL Query"
@@ -860,8 +789,9 @@ class TWFProjectOverviewView(TWFProjectView):
         return context
 
 
-class TWFProjectUserManagementView(TWFProjectView):
+class TWFProjectUserManagementView(ProjectPermissionMixin, TWFProjectView):
     """View to manage the users and their permissions."""
+    required_permission = "project.manage"
 
     template_name = "twf/project/user_management.html"
     page_title = "User Management"
@@ -985,8 +915,9 @@ class TWFProjectUserManagementView(TWFProjectView):
         return self.render_to_response(context)
 
 
-class TWFProjectCopyView(FormView, TWFProjectView):
+class TWFProjectCopyView(ProjectPermissionMixin, FormView, TWFProjectView):
     """View for copying a project."""
+    required_permission = "project.manage"
 
     template_name = "twf/project/setup/copy.html"
     page_title = "Copy Project"
@@ -1008,8 +939,9 @@ class TWFProjectCopyView(FormView, TWFProjectView):
         return context
 
 
-class TWFProjectResetView(TWFProjectView):
+class TWFProjectResetView(ProjectPermissionMixin, TWFProjectView):
     """View for copying a project."""
+    required_permission = "project.manage"
 
     template_name = "twf/project/setup/reset.html"
     page_title = "Reset Project"
@@ -1073,10 +1005,32 @@ def dynamic_form_view(request, pk):
     return render(request, "twf/documents/document_metadata.html", {"form": form})
 
 
-class TWFProjectSetupView(TWFProjectView):
-    """View for the project setup."""
+class TWFProjectSetupView(ProjectPermissionMixin, FormView, TWFProjectView):
+    """View for the project setup with Transkribus credentials management."""
 
+    required_permission = "project.manage"
     template_name = None
+    form_class = None  # Will be set via as_view() when needed
+
+    def get_form_class(self):
+        """Return TranskribusCredentialsForm if this is the export page, otherwise None."""
+        if self.form_class:
+            return self.form_class
+        # For the export page, use credentials form
+        from twf.forms.project.project_forms import TranskribusCredentialsForm
+        return TranskribusCredentialsForm
+
+    def get_form_kwargs(self):
+        """Add project to form kwargs."""
+        kwargs = super().get_form_kwargs()
+        kwargs["project"] = self.get_project()
+        return kwargs
+
+    def form_valid(self, form):
+        """Save credentials when form is submitted."""
+        form.save()
+        messages.success(self.request, "Transkribus credentials saved successfully.")
+        return redirect(self.request.path)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -1089,9 +1043,10 @@ class TWFProjectSetupView(TWFProjectView):
         return context
 
 
-class TWFProjectTranskribusExtractView(FormView, TWFProjectView):
+class TWFProjectTranskribusExtractView(ProjectPermissionMixin, FormView, TWFProjectView):
     """View for the project setup."""
 
+    required_permission = "project.manage"
     template_name = "twf/project/setup/setup_structure.html"
     page_title = "Extract Transkribus Export"
     form_class = DocumentExtractionBatchForm
@@ -1109,9 +1064,10 @@ class TWFProjectTranskribusExtractView(FormView, TWFProjectView):
         return kwargs
 
 
-class TWFProjectTranskribusEnrichView(FormView, TWFProjectView):
+class TWFProjectTranskribusEnrichView(ProjectPermissionMixin, FormView, TWFProjectView):
     """View for enriching documents with Transkribus API metadata."""
 
+    required_permission = "project.manage"
     template_name = "twf/project/setup/setup_enrich.html"
     page_title = "Enrich with API Metadata"
     form_class = TranskribusEnrichmentBatchForm
@@ -1129,9 +1085,10 @@ class TWFProjectTranskribusEnrichView(FormView, TWFProjectView):
         return kwargs
 
 
-class TWFProjectExportTestView(TWFProjectView):
+class TWFProjectExportTestView(ProjectPermissionMixin, TWFProjectView):
     """View for testing the export."""
 
+    required_permission = "project.manage"
     template_name = "twf/project/setup/test_export.html"
     page_title = "Test Export"
 

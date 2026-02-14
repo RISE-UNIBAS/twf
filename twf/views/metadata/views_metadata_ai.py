@@ -3,11 +3,13 @@ from django.views.generic import FormView
 
 from twf.forms.metadata.metadata_forms import LoadSheetsMetadataForm, LoadMetadataForm
 from twf.views.metadata.views_metadata import TWFMetadataView
+from twf.views.views_base import ProjectPermissionMixin
 
 
-class TWFMetadataLoadSheetsDataView(FormView, TWFMetadataView):
+class TWFMetadataLoadSheetsDataView(ProjectPermissionMixin, FormView, TWFMetadataView):
     """View for loading metadata from Google Sheets."""
 
+    required_permission = "metadata.manage"
     template_name = "twf/metadata/load_sheets_data.html"
     page_title = "Load Google Sheets Metadata"
     form_class = LoadSheetsMetadataForm
@@ -24,9 +26,10 @@ class TWFMetadataLoadSheetsDataView(FormView, TWFMetadataView):
         return kwargs
 
 
-class TWFMetadataLoadDataView(FormView, TWFMetadataView):
+class TWFMetadataLoadDataView(ProjectPermissionMixin, FormView, TWFMetadataView):
     """View for loading metadata from a JSON file."""
 
+    required_permission = "metadata.manage"
     template_name = "twf/metadata/load_data.html"
     page_title = "Load Metadata"
     form_class = LoadMetadataForm

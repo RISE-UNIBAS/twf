@@ -35,8 +35,8 @@ class AIConfigurationForm(forms.ModelForm):
             ),
             "provider": forms.Select(attrs={"class": "form-control"}),
             "model": forms.TextInput(attrs={"class": "form-control"}),
-            "api_key": forms.PasswordInput(
-                attrs={"class": "form-control", "render_value": True}
+            "api_key": forms.TextInput(
+                attrs={"class": "form-control", "type": "password", "id": "id_api_key"}
             ),
             "system_role": forms.Textarea(
                 attrs={"class": "form-control", "rows": 4}
@@ -72,6 +72,11 @@ class AIConfigurationForm(forms.ModelForm):
             "Common placeholders: {document_text}, {page_text}, {tag_variation}, "
             "{collection_item_text}, {metadata}"
         )
+
+        # For edit mode, make API key not required and show placeholder
+        if self.instance.pk:  # Editing existing config
+            self.fields["api_key"].required = False
+            self.fields["api_key"].help_text = "Leave blank to keep existing API key"
 
         # Set up crispy forms
         self.helper = FormHelper()
@@ -122,6 +127,16 @@ class AIConfigurationForm(forms.ModelForm):
             ),
             Submit("submit", "Save Configuration", css_class="btn btn-primary mt-3"),
         )
+
+    def clean_api_key(self):
+        """Preserve existing API key if field is left blank on edit."""
+        api_key = self.cleaned_data.get("api_key")
+
+        # If editing and API key is blank, keep the existing one
+        if self.instance.pk and not api_key:
+            return self.instance.api_key
+
+        return api_key
 
 
 class AIConfigurationTestForm(forms.Form):

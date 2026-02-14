@@ -5,7 +5,7 @@ import json
 
 from crispy_forms.bootstrap import TabHolder, Tab
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Submit, Layout, Row, Column, Div, Field, HTML
+from crispy_forms.layout import Submit, Layout, Row, Column, Div, Field, HTML, Fieldset
 from django import forms
 from django.forms import TextInput
 from django.urls import reverse
@@ -82,49 +82,6 @@ class DisplaySettingsForm(forms.ModelForm):
         help_text="Display recent project activity on the dashboard",
     )
 
-    # AI provider settings
-    ai_enable_openai = forms.BooleanField(
-        label="Enable OpenAI",
-        required=False,
-        initial=True,
-        help_text="Enable OpenAI features throughout the application",
-    )
-
-    ai_enable_claude = forms.BooleanField(
-        label="Enable Claude",
-        required=False,
-        initial=True,
-        help_text="Enable Anthropic Claude features throughout the application",
-    )
-
-    ai_enable_gemini = forms.BooleanField(
-        label="Enable Gemini",
-        required=False,
-        initial=True,
-        help_text="Enable Google Gemini features throughout the application",
-    )
-
-    ai_enable_mistral = forms.BooleanField(
-        label="Enable Mistral",
-        required=False,
-        initial=True,
-        help_text="Enable Mistral AI features throughout the application",
-    )
-
-    ai_enable_deepseek = forms.BooleanField(
-        label="Enable DeepSeek",
-        required=False,
-        initial=True,
-        help_text="Enable DeepSeek features throughout the application",
-    )
-
-    ai_enable_qwen = forms.BooleanField(
-        label="Enable Qwen",
-        required=False,
-        initial=True,
-        help_text="Enable Qwen features throughout the application",
-    )
-
     # Advanced display settings
     enable_dark_mode = forms.BooleanField(
         label="Enable Dark Mode",
@@ -176,19 +133,6 @@ class DisplaySettingsForm(forms.ModelForm):
             "show_recent_activity", True
         )
 
-        # AI provider settings
-        ai_settings = conf_display.get("ai_providers", {})
-        self.fields["ai_enable_openai"].initial = ai_settings.get("enable_openai", True)
-        self.fields["ai_enable_claude"].initial = ai_settings.get("enable_claude", True)
-        self.fields["ai_enable_gemini"].initial = ai_settings.get("enable_gemini", True)
-        self.fields["ai_enable_mistral"].initial = ai_settings.get(
-            "enable_mistral", True
-        )
-        self.fields["ai_enable_deepseek"].initial = ai_settings.get(
-            "enable_deepseek", True
-        )
-        self.fields["ai_enable_qwen"].initial = ai_settings.get("enable_qwen", True)
-
         # Advanced settings
         advanced_settings = conf_display.get("advanced", {})
         self.fields["enable_dark_mode"].initial = advanced_settings.get(
@@ -232,22 +176,6 @@ class DisplaySettingsForm(forms.ModelForm):
                     css_id="dashboard",
                 ),
                 Tab(
-                    "AI Providers",
-                    Row(
-                        Column("ai_enable_openai", css_class="col-6"),
-                        Column("ai_enable_claude", css_class="col-6"),
-                    ),
-                    Row(
-                        Column("ai_enable_gemini", css_class="col-6"),
-                        Column("ai_enable_mistral", css_class="col-6"),
-                    ),
-                    Row(
-                        Column("ai_enable_deepseek", css_class="col-6"),
-                        Column("ai_enable_qwen", css_class="col-6"),
-                    ),
-                    css_id="ai_providers",
-                ),
-                Tab(
                     "Advanced",
                     Row(
                         Column("enable_dark_mode", css_class="col-12"),
@@ -282,14 +210,6 @@ class DisplaySettingsForm(forms.ModelForm):
                 "show_recent_activity": cleaned_data.get(
                     "dashboard_show_recent_activity"
                 ),
-            },
-            "ai_providers": {
-                "enable_openai": cleaned_data.get("ai_enable_openai"),
-                "enable_claude": cleaned_data.get("ai_enable_claude"),
-                "enable_gemini": cleaned_data.get("ai_enable_gemini"),
-                "enable_mistral": cleaned_data.get("ai_enable_mistral"),
-                "enable_deepseek": cleaned_data.get("ai_enable_deepseek"),
-                "enable_qwen": cleaned_data.get("ai_enable_qwen"),
             },
             "advanced": {
                 "dark_mode": cleaned_data.get("enable_dark_mode"),
@@ -352,6 +272,114 @@ class PasswordInputRetain(forms.PasswordInput):
             attrs = attrs or {}
             attrs["value"] = value
         return super().render(name, value, attrs, renderer)
+
+
+class TranskribusCredentialsForm(forms.Form):
+    """Simple form for managing Transkribus credentials."""
+
+    transkribus_username = forms.CharField(
+        required=False,
+        label="Transkribus Username",
+        widget=TextInput(attrs={"placeholder": "Transkribus Username"}),
+    )
+    transkribus_password = forms.CharField(
+        required=False,
+        label="Transkribus Password",
+        widget=PasswordInputRetain(attrs={"placeholder": "Transkribus Password"}),
+    )
+
+    def __init__(self, *args, **kwargs):
+        self.project = kwargs.pop("project", None)
+        super().__init__(*args, **kwargs)
+
+        # Populate from existing credentials
+        if self.project:
+            transkribus_creds = self.project.get_credentials("transkribus")
+            if transkribus_creds:
+                self.fields["transkribus_username"].initial = transkribus_creds.get("username", "")
+                self.fields["transkribus_password"].initial = transkribus_creds.get("password", "")
+
+        self.helper = FormHelper()
+        self.helper.form_method = "post"
+        self.helper.form_class = "form form-control"
+        self.helper.layout = Layout(
+            Fieldset(
+                "Transkribus Credentials",
+                Row(
+                    Column("transkribus_username", css_class="form-group col-6 mb-3"),
+                    Column("transkribus_password", css_class="form-group col-6 mb-3"),
+                    css_class="row form-row",
+                ),
+            ),
+            Div(
+                Submit("submit", "Save Credentials", css_class="btn btn-dark"),
+                css_class="text-end pt-3",
+            ),
+        )
+
+    def save(self):
+        """Save credentials to project."""
+        if self.project and self.is_valid():
+            username = self.cleaned_data.get("transkribus_username")
+            password = self.cleaned_data.get("transkribus_password")
+
+            credentials = self.project.conf_credentials or {}
+            credentials["transkribus"] = {
+                "username": username or "",
+                "password": password or "",
+            }
+            self.project.conf_credentials = credentials
+            self.project.save()
+
+
+class ZenodoCredentialsForm(forms.Form):
+    """Simple form for managing Zenodo credentials."""
+
+    zenodo_token = forms.CharField(
+        required=False,
+        label="Zenodo Access Token",
+        widget=TextInput(attrs={"placeholder": "Zenodo Access Token"}),
+        help_text="Get your access token from zenodo.org (Account → Applications → Personal access tokens)",
+    )
+
+    def __init__(self, *args, **kwargs):
+        self.project = kwargs.pop("project", None)
+        super().__init__(*args, **kwargs)
+
+        # Populate from existing credentials
+        if self.project:
+            zenodo_creds = self.project.get_credentials("zenodo")
+            if zenodo_creds:
+                self.fields["zenodo_token"].initial = zenodo_creds.get("zenodo_token", "")
+
+        self.helper = FormHelper()
+        self.helper.form_method = "post"
+        self.helper.form_class = "form form-control"
+        self.helper.layout = Layout(
+            Fieldset(
+                "Zenodo Credentials",
+                Row(
+                    Column("zenodo_token", css_class="form-group col-12 mb-3"),
+                    css_class="row form-row",
+                ),
+            ),
+            Div(
+                Submit("submit", "Save Credentials", css_class="btn btn-dark"),
+                css_class="text-end pt-3",
+            ),
+        )
+
+    def save(self):
+        """Save credentials to project."""
+        if self.project and self.is_valid():
+            token = self.cleaned_data.get("zenodo_token")
+
+            credentials = self.project.conf_credentials or {}
+            credentials["zenodo"] = {
+                "zenodo_token": token or "",
+            }
+            self.project.conf_credentials = credentials
+            self.project.save()
 
 
 class GeneralSettingsForm(forms.ModelForm):
@@ -519,50 +547,6 @@ class CredentialsForm(forms.ModelForm):
 
     active_tab = forms.CharField(widget=forms.HiddenInput(), required=False)
 
-    openai_api_key = forms.CharField(
-        required=False, widget=TextInput(attrs={"placeholder": "OpenAI API Key"})
-    )
-    openai_default_model = forms.CharField(
-        required=False, widget=TextInput(attrs={"placeholder": "OpenAI Default Model"})
-    )
-
-    genai_api_key = forms.CharField(
-        required=False, widget=TextInput(attrs={"placeholder": "Google API Key"})
-    )
-    genai_default_model = forms.CharField(
-        required=False, widget=TextInput(attrs={"placeholder": "Google Default Model"})
-    )
-
-    anthropic_api_key = forms.CharField(
-        required=False, widget=TextInput(attrs={"placeholder": "Anthropic API Key"})
-    )
-    anthropic_default_model = forms.CharField(
-        required=False,
-        widget=TextInput(attrs={"placeholder": "Anthropic Default Model"}),
-    )
-
-    mistral_api_key = forms.CharField(
-        required=False, widget=TextInput(attrs={"placeholder": "Mistral API Key"})
-    )
-    mistral_default_model = forms.CharField(
-        required=False, widget=TextInput(attrs={"placeholder": "Mistral Default Model"})
-    )
-
-    deepseek_api_key = forms.CharField(
-        required=False, widget=TextInput(attrs={"placeholder": "DeepSeek API Key"})
-    )
-    deepseek_default_model = forms.CharField(
-        required=False,
-        widget=TextInput(attrs={"placeholder": "DeepSeek Default Model"}),
-    )
-
-    qwen_api_key = forms.CharField(
-        required=False, widget=TextInput(attrs={"placeholder": "Qwen API Key"})
-    )
-    qwen_default_model = forms.CharField(
-        required=False, widget=TextInput(attrs={"placeholder": "Qwen Default Model"})
-    )
-
     transkribus_username = forms.CharField(
         required=False, widget=TextInput(attrs={"placeholder": "Transkribus Username"})
     )
@@ -588,47 +572,6 @@ class CredentialsForm(forms.ModelForm):
 
         # Populate the fields from `conf_credentials` JSON if data exists
         conf_credentials = self.instance.conf_credentials or {}
-        self.fields["openai_api_key"].initial = conf_credentials.get("openai", {}).get(
-            "api_key", ""
-        )
-        self.fields["openai_default_model"].initial = conf_credentials.get(
-            "openai", {}
-        ).get("default_model", "")
-
-        self.fields["genai_api_key"].initial = conf_credentials.get("genai", {}).get(
-            "api_key", ""
-        )
-        self.fields["genai_default_model"].initial = conf_credentials.get(
-            "genai", {}
-        ).get("default_model", "")
-
-        self.fields["anthropic_api_key"].initial = conf_credentials.get(
-            "anthropic", {}
-        ).get("api_key", "")
-        self.fields["anthropic_default_model"].initial = conf_credentials.get(
-            "anthropic", {}
-        ).get("default_model", "")
-
-        self.fields["mistral_api_key"].initial = conf_credentials.get(
-            "mistral", {}
-        ).get("api_key", "")
-        self.fields["mistral_default_model"].initial = conf_credentials.get(
-            "mistral", {}
-        ).get("default_model", "")
-
-        self.fields["deepseek_api_key"].initial = conf_credentials.get(
-            "deepseek", {}
-        ).get("api_key", "")
-        self.fields["deepseek_default_model"].initial = conf_credentials.get(
-            "deepseek", {}
-        ).get("default_model", "")
-
-        self.fields["qwen_api_key"].initial = conf_credentials.get("qwen", {}).get(
-            "api_key", ""
-        )
-        self.fields["qwen_default_model"].initial = conf_credentials.get(
-            "qwen", {}
-        ).get("default_model", "")
 
         self.fields["transkribus_username"].initial = conf_credentials.get(
             "transkribus", {}
@@ -649,130 +592,37 @@ class CredentialsForm(forms.ModelForm):
         self.helper.form_method = "post"
         self.helper.form_class = "form form-control"
 
-        # Get AI provider settings from display settings to filter tabs
-        conf_display = getattr(self.instance, "conf_display", {}) or {}
-        ai_settings = conf_display.get("ai_providers", {})
-
-        # Create tabs list, starting with non-AI tabs
-        tabs = [
-            Tab(
+        self.helper.layout = Layout(
+            Fieldset(
                 "Transkribus",
                 Row(
                     Column("transkribus_username", css_class="col-6"),
                     Column("transkribus_password", css_class="col-6"),
                 ),
-                css_id="transkribus",
             ),
-            Tab(
-                "Geonames",
+            Fieldset(
+                "GeoNames",
                 Row(Column("geonames_username", css_class="col-12")),
-                css_id="geonames",
             ),
-            Tab(
+            Fieldset(
                 "Zenodo",
                 Row(Column("zenodo_token", css_class="col-12")),
-                css_id="zenodo",
             ),
-        ]
-
-        # Add AI provider tabs based on display settings
-        if ai_settings.get("enable_openai", True):
-            tabs.append(
-                Tab(
-                    "OpenAI",
-                    Row(Column("openai_api_key", css_class="col-12")),
-                    Row(Column("openai_default_model", css_class="col-12")),
-                    css_id="openai",
-                )
-            )
-
-        if ai_settings.get("enable_gemini", True):
-            tabs.append(
-                Tab(
-                    "Google",
-                    Row(Column("genai_api_key", css_class="col-12")),
-                    Row(Column("genai_default_model", css_class="col-12")),
-                    css_id="genai",
-                )
-            )
-
-        if ai_settings.get("enable_claude", True):
-            tabs.append(
-                Tab(
-                    "Anthropic",
-                    Row(Column("anthropic_api_key", css_class="col-12")),
-                    Row(Column("anthropic_default_model", css_class="col-12")),
-                    css_id="anthropic",
-                )
-            )
-
-        if ai_settings.get("enable_mistral", True):
-            tabs.append(
-                Tab(
-                    "Mistral",
-                    Row(Column("mistral_api_key", css_class="col-12")),
-                    Row(Column("mistral_default_model", css_class="col-12")),
-                    css_id="mistral",
-                )
-            )
-
-        if ai_settings.get("enable_deepseek", True):
-            tabs.append(
-                Tab(
-                    "DeepSeek",
-                    Row(Column("deepseek_api_key", css_class="col-12")),
-                    Row(Column("deepseek_default_model", css_class="col-12")),
-                    css_id="deepseek",
-                )
-            )
-
-        if ai_settings.get("enable_qwen", True):
-            tabs.append(
-                Tab(
-                    "Qwen",
-                    Row(Column("qwen_api_key", css_class="col-12")),
-                    Row(Column("qwen_default_model", css_class="col-12")),
-                    css_id="qwen",
-                )
-            )
-
-        self.helper.layout = Layout(
-            TabHolder(*tabs),
             Div(
                 Submit("submit", "Save Settings", css_class="btn btn-dark"),
                 css_class="text-end pt-3",
             ),
-            "active_tab",
         )
 
     def clean(self):
         """Clean and save credential data back into the JSONField `conf_credentials`."""
         cleaned_data = super().clean()
+
+        # Preserve existing AI provider credentials
+        existing_credentials = self.instance.conf_credentials or {}
+
         self.instance.conf_credentials = {
-            "openai": {
-                "api_key": cleaned_data.get("openai_api_key"),
-                "default_model": cleaned_data.get("openai_default_model"),
-            },
-            "genai": {
-                "api_key": cleaned_data.get("genai_api_key"),
-                "default_model": cleaned_data.get("genai_default_model"),
-            },
-            "anthropic": {
-                "api_key": cleaned_data.get("anthropic_api_key"),
-                "default_model": cleaned_data.get("anthropic_default_model"),
-            },
-            "mistral": {
-                "api_key": cleaned_data.get("mistral_api_key"),
-                "default_model": cleaned_data.get("mistral_default_model"),
-            },
-            "deepseek": {
-                "api_key": cleaned_data.get("deepseek_api_key"),
-                "default_model": cleaned_data.get("deepseek_default_model"),
-            },
-            "qwen": {
-                "api_key": cleaned_data.get("qwen_api_key"),
-                "default_model": cleaned_data.get("qwen_default_model"),
-            },
+            # Update non-AI credentials from form
             "transkribus": {
                 "username": cleaned_data.get("transkribus_username"),
                 "password": cleaned_data.get("transkribus_password"),
@@ -784,11 +634,16 @@ class CredentialsForm(forms.ModelForm):
 
 
 class TaskSettingsForm(forms.ModelForm):
-    """Form for creating and updating task settings."""
+    """Form for configuring date normalization settings.
+
+    This form manages how dates are detected, parsed, and normalized throughout
+    the project. It controls the input date format detection and the precision
+    to which dates should be resolved.
+    """
 
     active_tab = forms.CharField(widget=forms.HiddenInput(), required=False)
 
-    # Define the fields for the form: Date normalization settings
+    # Date normalization settings
     date_input_format = forms.ChoiceField(
         required=False,
         choices=[
@@ -1384,160 +1239,6 @@ class NoteForm(forms.ModelForm):
                 css_class="text-end pt-3",
             ),
         )
-
-
-class PromptSettingsForm(forms.ModelForm):
-    """Form for creating and updating AI prompt settings.
-
-    This form provides controls for configuring AI-specific parameters such as
-    temperature, max tokens, and image resize settings for the generic LLM client.
-    These settings apply to all AI providers.
-    """
-
-    # Generic AI Settings (applies to all providers)
-    temperature = forms.FloatField(
-        label="Temperature",
-        required=False,
-        min_value=0.0,
-        max_value=2.0,
-        initial=0.5,
-        widget=forms.NumberInput(attrs={"step": "0.1", "class": "form-control"}),
-        help_text="Controls randomness in responses. Lower values (0.0-0.5) are more focused "
-                  "and deterministic, higher values (0.5-2.0) are more creative and varied. Default: 0.5",
-    )
-    max_tokens = forms.IntegerField(
-        label="Max Tokens",
-        required=False,
-        min_value=1,
-        max_value=8192,
-        initial=2048,
-        widget=forms.NumberInput(attrs={"class": "form-control"}),
-        help_text="Maximum number of tokens to generate in the response. Default: 2048",
-    )
-    max_image_size = forms.IntegerField(
-        label="Max Image Size (pixels)",
-        required=False,
-        min_value=256,
-        max_value=2048,
-        initial=1024,
-        widget=forms.NumberInput(attrs={"class": "form-control"}),
-        help_text="Maximum width/height for image resizing before sending to AI. "
-                  "Images are resized proportionally. Default: 1024",
-    )
-    top_p = forms.FloatField(
-        label="Top P",
-        required=False,
-        min_value=0.0,
-        max_value=1.0,
-        initial=1.0,
-        widget=forms.NumberInput(attrs={"step": "0.01", "class": "form-control"}),
-        help_text="Nucleus sampling: only tokens with cumulative probability up to this value are considered. "
-                  "Lower values make output more focused. Default: 1.0",
-    )
-    frequency_penalty = forms.FloatField(
-        label="Frequency Penalty",
-        required=False,
-        min_value=-2.0,
-        max_value=2.0,
-        initial=0.0,
-        widget=forms.NumberInput(attrs={"step": "0.1", "class": "form-control"}),
-        help_text="Penalizes tokens based on their frequency in the text so far. "
-                  "Positive values reduce repetition. Default: 0.0",
-    )
-    presence_penalty = forms.FloatField(
-        label="Presence Penalty",
-        required=False,
-        min_value=-2.0,
-        max_value=2.0,
-        initial=0.0,
-        widget=forms.NumberInput(attrs={"step": "0.1", "class": "form-control"}),
-        help_text="Penalizes tokens that have appeared at all so far. "
-                  "Positive values encourage new topics. Default: 0.0",
-    )
-    seed = forms.IntegerField(
-        label="Random Seed",
-        required=False,
-        min_value=0,
-        widget=forms.NumberInput(attrs={"class": "form-control"}),
-        help_text="Random seed for deterministic results. Leave empty for non-deterministic responses. Default: None",
-    )
-
-    class Meta:
-        model = Project
-        fields = ["conf_ai_settings"]
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-        # Populate fields from conf_ai_settings JSON if data exists
-        conf_ai_settings = self.instance.conf_ai_settings or {}
-        generic_settings = conf_ai_settings.get("generic", {})
-
-        self.fields["temperature"].initial = generic_settings.get("temperature", 0.5)
-        self.fields["max_tokens"].initial = generic_settings.get("max_tokens", 2048)
-        self.fields["max_image_size"].initial = generic_settings.get(
-            "max_image_size", 1024
-        )
-        self.fields["top_p"].initial = generic_settings.get("top_p", 1.0)
-        self.fields["frequency_penalty"].initial = generic_settings.get(
-            "frequency_penalty", 0.0
-        )
-        self.fields["presence_penalty"].initial = generic_settings.get(
-            "presence_penalty", 0.0
-        )
-        self.fields["seed"].initial = generic_settings.get("seed")
-
-        self.helper = FormHelper()
-        self.helper.form_method = "post"
-        self.helper.form_class = "form"
-
-        self.helper.layout = Layout(
-            Div(
-                HTML('<h5 class="mb-3">Generic AI Settings</h5>'),
-                HTML(
-                    '<p class="text-muted">These settings apply to all AI providers '
-                    'when using the generic LLM client.</p>'
-                ),
-                Row(
-                    Column("temperature", css_class="col-md-6 mb-3"),
-                    Column("max_tokens", css_class="col-md-6 mb-3"),
-                ),
-                Row(
-                    Column("max_image_size", css_class="col-md-6 mb-3"),
-                    Column("top_p", css_class="col-md-6 mb-3"),
-                ),
-                Row(
-                    Column("frequency_penalty", css_class="col-md-6 mb-3"),
-                    Column("presence_penalty", css_class="col-md-6 mb-3"),
-                ),
-                Row(
-                    Column("seed", css_class="col-md-6 mb-3"),
-                ),
-                Div(
-                    Submit("submit", "Save AI Settings", css_class="btn btn-dark"),
-                    css_class="text-end mt-3",
-                ),
-                css_class="card-body",
-            )
-        )
-
-    def clean(self):
-        """Save the form data to conf_ai_settings."""
-        cleaned_data = super().clean()
-
-        # Build generic settings dict
-        self.instance.conf_ai_settings = {
-            "generic": {
-                "temperature": cleaned_data.get("temperature"),
-                "max_tokens": cleaned_data.get("max_tokens"),
-                "max_image_size": cleaned_data.get("max_image_size"),
-                "top_p": cleaned_data.get("top_p"),
-                "frequency_penalty": cleaned_data.get("frequency_penalty"),
-                "presence_penalty": cleaned_data.get("presence_penalty"),
-                "seed": cleaned_data.get("seed"),
-            }
-        }
-        return cleaned_data
 
 
 class UserPermissionForm(forms.Form):

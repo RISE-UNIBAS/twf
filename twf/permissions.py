@@ -174,6 +174,23 @@ ENTITY_TYPES = {
             "description": "Configure AI settings and run batch operations",
         },
     },
+    "system": {
+        "view": {
+            "label": "View system information",
+            "description": "View system health, statistics, and configuration",
+        },
+        "edit": {
+            "label": "Manage users",
+            "description": "Manage user accounts, activate/deactivate users, and reset passwords",
+        },
+        "manage": {
+            "label": "Manage system",
+            "description": mark_safe(
+                "Full system administration including project management, user deletion, and system configuration. "
+                '<span class="text-danger">Restricted to superusers and staff only.</span>'
+            ),
+        },
+    },
 }
 
 
@@ -199,6 +216,11 @@ def check_permission(user, action, project, object_id=None):
     # Superusers and staff have all permissions
     if user.is_superuser or user.is_staff:
         return True
+
+    # For system-level permissions (no project context), only staff/superusers have access
+    # Regular users cannot have system permissions
+    if project is None:
+        return False
 
     # Check if the user is the project owner - owners have all permissions
     if hasattr(user, "profile") and project.owner == user.profile:

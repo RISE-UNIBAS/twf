@@ -3,6 +3,7 @@
 import json
 import logging
 
+from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.contenttypes.models import ContentType
 from django.shortcuts import redirect
@@ -20,13 +21,14 @@ from twf.forms.export_forms import (
     RunExportForm,
 )
 from twf.forms.filters.filters import ExportFilter, ExportConfigFilter
+from twf.forms.project.project_forms import RepositorySettingsForm
 from twf.models import (
     Export,
     ExportConfiguration
 )
 from twf.tables.tables_export import ExportTable, ExportConfigTable
 from twf.utils.export_utils import ExportCreator
-from twf.views.views_base import TWFView
+from twf.views.views_base import TWFView, ProjectPermissionMixin
 
 logger = logging.getLogger(__name__)
 
@@ -49,6 +51,11 @@ class TWFExportView(LoginRequiredMixin, TWFView):
                     {
                         "url": reverse_lazy("twf:export_overview"),
                         "value": "Export Overview",
+                    },
+                    {
+                        "url": reverse_lazy("twf:export_publication_metadata"),
+                        "value": "Publication Metadata",
+                        "permission": "import_export.manage",
                     },
                     {
                         "url": reverse_lazy("twf:export_view_export_confs"),
@@ -122,8 +129,9 @@ class TWFExportOverviewView(TWFExportView):
         return breadcrumbs
 
 
-class TWFExportListView(SingleTableView, FilterView, TWFExportView):
+class TWFExportListView(ProjectPermissionMixin, SingleTableView, FilterView, TWFExportView):
     """View for the export overview."""
+    required_permission = "import_export.view"
 
     template_name = "twf/export/export_list.html"
     page_title = "Export Overview"
@@ -164,8 +172,9 @@ class TWFExportListView(SingleTableView, FilterView, TWFExportView):
         return context
 
 
-class TWFExportConfListView(SingleTableView, FilterView, TWFExportView):
+class TWFExportConfListView(ProjectPermissionMixin, SingleTableView, FilterView, TWFExportView):
     """View for the export overview."""
+    required_permission = "import_export.view"
 
     template_name = "twf/export/export_conf_list.html"
     page_title = "Export Configurations Overview"
@@ -205,10 +214,11 @@ class TWFExportConfListView(SingleTableView, FilterView, TWFExportView):
         return context
 
 
-class TWFExportSampleView(TWFExportView):
+class TWFExportSampleView(ProjectPermissionMixin, TWFExportView):
     """
     View for displaying a sample export based on an export configuration.
     """
+    required_permission = "import_export.view"
     template_name = "twf/export/export_configuration_sample.html"
     page_title = "View Sample Export"
     navigation_anchor = reverse_lazy("twf:export_view_export_confs")
@@ -238,8 +248,9 @@ class TWFExportSampleView(TWFExportView):
         return breadcrumbs
 
 
-class TWFExportConfigurationView(FormView, TWFExportView):
+class TWFExportConfigurationView(ProjectPermissionMixin, FormView, TWFExportView):
     """View for exporting documents."""
+    required_permission = "import_export.edit"
 
     template_name = "twf/export/export_configuration.html"
     page_title = "Export Configuration"
@@ -568,8 +579,9 @@ class TWFExportConfigurationView(FormView, TWFExportView):
         return fields
 
 
-class TWFExportRunView(FormView, TWFExportView):
+class TWFExportRunView(ProjectPermissionMixin, FormView, TWFExportView):
     """View for the export overview."""
+    required_permission = "import_export.manage"
 
     template_name = "twf/export/export_documents.html"
     page_title = "Run Export"
@@ -601,8 +613,9 @@ class TWFExportRunView(FormView, TWFExportView):
         return context
 
 
-class TWFExportProjectView(FormView, TWFExportView):
+class TWFExportProjectView(ProjectPermissionMixin, FormView, TWFExportView):
     """View for exporting a project"""
+    required_permission = "import_export.manage"
 
     template_name = "twf/export/export_project.html"
     page_title = "Export Project"
@@ -634,7 +647,7 @@ class TWFExportProjectView(FormView, TWFExportView):
         return kwargs
 
 
-class TWFExportZenodoView(TWFExportView):
+class TWFExportZenodoView(ProjectPermissionMixin, FormView, TWFExportView):
     """View for exporting a project to Zenodo.
     This view allows users to create and/or connect their project to a Zenodo deposition,
     or unlink the two. Furthermore, it provides the starting point for the
@@ -642,9 +655,28 @@ class TWFExportZenodoView(TWFExportView):
     a user can select the export they want to upload to Zenodo and review their
     upload metadata.
     This view does not handle the actual upload process."""
+    required_permission = "import_export.manage"
 
     template_name = "twf/export/export_zenodo.html"
     page_title = "Export to Zenodo"
+    form_class = None  # Will be set dynamically
+
+    def get_form_class(self):
+        """Return ZenodoCredentialsForm."""
+        from twf.forms.project.project_forms import ZenodoCredentialsForm
+        return ZenodoCredentialsForm
+
+    def get_form_kwargs(self):
+        """Add project to form kwargs."""
+        kwargs = super().get_form_kwargs()
+        kwargs["project"] = self.get_project()
+        return kwargs
+
+    def form_valid(self, form):
+        """Save credentials when form is submitted."""
+        form.save()
+        messages.success(self.request, "Zenodo credentials saved successfully.")
+        return redirect(self.request.path)
 
     def get_context_data(self, **kwargs):
         """Get the context data for the view."""
@@ -659,16 +691,21 @@ class TWFExportZenodoView(TWFExportView):
         return context
 
     def post(self, request, *args, **kwargs):
-        """Handle 'Prepare Upload' Form"""
+        """Handle both credential form and 'Prepare Upload' form."""
+        # Check if this is an export selection (has export_id)
         export_id = request.POST.get("export_id")
         if export_id:
             return redirect("twf:zenodo_upload", export_id=int(export_id))
 
+        # Otherwise, handle as credential form submission
+        return super().post(request, *args, **kwargs)
 
-class TWFExportZenodoVersionView(FormView, TWFExportView):
+
+class TWFExportZenodoVersionView(ProjectPermissionMixin, FormView, TWFExportView):
     """View for exporting a project to Zenodo.
     This view is called from the Zenodo upload view. A connection
     to the Zenodo repository is required to upload the export."""
+    required_permission = "import_export.manage"
 
     template_name = "twf/export/export_zenodo_upload.html"
     page_title = "Upload Export to Zenodo"
@@ -699,8 +736,9 @@ class TWFExportZenodoVersionView(FormView, TWFExportView):
         return context
 
 
-class TWFImportDictionaryView(FormView, TWFExportView):
+class TWFImportDictionaryView(ProjectPermissionMixin, FormView, TWFExportView):
     """View for importing a dictionary."""
+    required_permission = "import_export.manage"
 
     template_name = "twf/export/import_dictionaries.html"
     page_title = "Import Dictionary"
@@ -710,6 +748,44 @@ class TWFImportDictionaryView(FormView, TWFExportView):
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
         return kwargs
+
+    def get_breadcrumbs(self):
+        """Get the breadcrumbs for the view."""
+        breadcrumbs = [
+            {"url": reverse_lazy("twf:home"), "value": '<i class="fas fa-home"></i>'},
+            {"url": reverse_lazy("twf:export_overview"), "value": "Import/Export"},
+            {"url": "#", "value": self.page_title},
+        ]
+        return breadcrumbs
+
+
+class TWFExportPublicationMetadataView(ProjectPermissionMixin, FormView, TWFExportView):
+    """View for the publication metadata settings (formerly repository settings)."""
+    required_permission = "import_export.manage"
+    template_name = "twf/export/publication_metadata.html"
+    page_title = "Publication Metadata"
+    form_class = RepositorySettingsForm
+    success_url = reverse_lazy("twf:export_publication_metadata")
+    navigation_anchor = reverse_lazy("twf:export_publication_metadata")
+
+    def get_form_kwargs(self):
+        """Get the form kwargs."""
+        kwargs = super().get_form_kwargs()
+        kwargs["instance"] = self.get_project()
+        return kwargs
+
+    def form_valid(self, form):
+        """Save the form and redirect."""
+        # Save the form
+        self.object = form.save(commit=False)
+        self.object.save(current_user=self.request.user)
+
+        # Add a success message
+        messages.success(
+            self.request, "Publication metadata saved successfully."
+        )
+        # Redirect to the success URL
+        return super().form_valid(form)
 
     def get_breadcrumbs(self):
         """Get the breadcrumbs for the view."""

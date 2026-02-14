@@ -1,5 +1,5 @@
 {% extends 'twf/base/base.html' %}
-{% load static %}
+{% load static crispy_forms_tags %}
 
 {% block content %}
     <p class="lead">
@@ -7,16 +7,11 @@
         Your collection ID is <strong>{{ project.collection_id }}</strong>.
     </p>
 
-    {% if not transkribus_username or not transkribus_password %}
-        <div class="alert alert-warning" role="alert">
-            <h4 class="alert-heading">Set up authentication data</h4>
-            <p>
-                You need to set up your Transkribus authentication data in order to use the export functionality.
-                Please go to the <a href="{% url 'twf:project_settings_credentials' %}">project settings</a> page and
-                enter your Transkribus username and password.
-            </p>
+    <div class="card mb-4">
+        <div class="card-body">
+            {% crispy form %}
         </div>
-    {% endif %}
+    </div>
 
     <div class="row">
         <div class="col-4">

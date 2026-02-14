@@ -8,10 +8,10 @@ from twf.forms.collections.collections_forms_batches import (
     UnifiedCollectionAIRequestForm,
 )
 from twf.views.collections.views_collections import TWFCollectionsView
-from twf.views.views_base import AIFormView
+from twf.views.views_base import AIFormView, ProjectPermissionMixin
 
 
-class TWFUnifiedCollectionAIBatchView(AIFormView, TWFCollectionsView):
+class TWFUnifiedCollectionAIBatchView(ProjectPermissionMixin, AIFormView, TWFCollectionsView):
     """
     Unified view for AI batch processing of collections.
 
@@ -19,6 +19,7 @@ class TWFUnifiedCollectionAIBatchView(AIFormView, TWFCollectionsView):
     AI providers. The provider is selected via a dropdown in the form.
     """
 
+    required_permission = "ai.manage"
     template_name = "twf/base/base_ai_batch.html"
     page_title = "AI Batch Processing"
     form_class = UnifiedCollectionAIBatchForm
@@ -99,7 +100,7 @@ class TWFUnifiedCollectionAIBatchView(AIFormView, TWFCollectionsView):
             has_api_key = creds and "api_key" in creds and creds["api_key"]
             context["has_api_key"] = has_api_key
             context["ai_credentials_url"] = (
-                reverse_lazy("twf:project_settings_credentials")
+                reverse_lazy("twf:project_ai_configs")
                 + f"?tab={provider_info['credentials_tab']}"
             )
         else:
@@ -108,7 +109,7 @@ class TWFUnifiedCollectionAIBatchView(AIFormView, TWFCollectionsView):
             context["ai_lead"] = "AI will process collection items."
             context["has_api_key"] = False
             context["ai_credentials_url"] = reverse_lazy(
-                "twf:project_settings_credentials"
+                "twf:project_ai_configs"
             )
 
         # Build provider config for JavaScript with credentials check
@@ -123,7 +124,7 @@ class TWFUnifiedCollectionAIBatchView(AIFormView, TWFCollectionsView):
                 "description": provider_info["description"],
                 "multimodal": False,  # Collections don't support multimodal
                 "multimodal_info": "",
-                "credentials_url": str(reverse_lazy("twf:project_settings_credentials"))
+                "credentials_url": str(reverse_lazy("twf:project_ai_configs"))
                 + f"?tab={provider_info['credentials_tab']}",
                 "has_api_key": has_api_key,
                 "default_model": default_model,
@@ -133,7 +134,7 @@ class TWFUnifiedCollectionAIBatchView(AIFormView, TWFCollectionsView):
         return context
 
 
-class TWFUnifiedCollectionAIRequestView(AIFormView, TWFCollectionsView):
+class TWFUnifiedCollectionAIRequestView(ProjectPermissionMixin, AIFormView, TWFCollectionsView):
     """
     Unified view for AI request (supervised) processing of collection items.
 
@@ -141,6 +142,7 @@ class TWFUnifiedCollectionAIRequestView(AIFormView, TWFCollectionsView):
     with all supported AI providers. The provider is selected via a dropdown in the form.
     """
 
+    required_permission = "collection.edit"
     template_name = "twf/base/base_ai_batch.html"
     page_title = "AI Request"
     form_class = UnifiedCollectionAIRequestForm
@@ -221,7 +223,7 @@ class TWFUnifiedCollectionAIRequestView(AIFormView, TWFCollectionsView):
             has_api_key = creds and "api_key" in creds and creds["api_key"]
             context["has_api_key"] = has_api_key
             context["ai_credentials_url"] = (
-                reverse_lazy("twf:project_settings_credentials")
+                reverse_lazy("twf:project_ai_configs")
                 + f"?tab={provider_info['credentials_tab']}"
             )
         else:
@@ -230,7 +232,7 @@ class TWFUnifiedCollectionAIRequestView(AIFormView, TWFCollectionsView):
             context["ai_lead"] = "AI will process this collection item."
             context["has_api_key"] = False
             context["ai_credentials_url"] = reverse_lazy(
-                "twf:project_settings_credentials"
+                "twf:project_ai_configs"
             )
 
         # Build provider config for JavaScript with credentials check
@@ -245,7 +247,7 @@ class TWFUnifiedCollectionAIRequestView(AIFormView, TWFCollectionsView):
                 "description": provider_info["description"],
                 "multimodal": False,  # Collections don't support multimodal
                 "multimodal_info": "",
-                "credentials_url": str(reverse_lazy("twf:project_settings_credentials"))
+                "credentials_url": str(reverse_lazy("twf:project_ai_configs"))
                 + f"?tab={provider_info['credentials_tab']}",
                 "has_api_key": has_api_key,
                 "default_model": default_model,

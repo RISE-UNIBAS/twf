@@ -5,10 +5,10 @@ from django.urls import reverse_lazy
 
 from twf.forms.documents.documents_forms_batches import UnifiedDocumentBatchAIForm
 from twf.views.documents.views_documents import TWFDocumentView
-from twf.views.views_base import AIFormView
+from twf.views.views_base import AIFormView, ProjectPermissionMixin
 
 
-class TWFUnifiedDocumentBatchView(AIFormView, TWFDocumentView):
+class TWFUnifiedDocumentBatchView(ProjectPermissionMixin, AIFormView, TWFDocumentView):
     """
     Unified view for batch processing documents with any AI provider.
 
@@ -16,6 +16,7 @@ class TWFUnifiedDocumentBatchView(AIFormView, TWFDocumentView):
     AI providers. The provider is selected via a dropdown in the form.
     """
 
+    required_permission = "ai.manage"
     template_name = "twf/base/base_ai_batch.html"
     page_title = "AI Batch Processing"
     form_class = UnifiedDocumentBatchAIForm
@@ -128,7 +129,7 @@ class TWFUnifiedDocumentBatchView(AIFormView, TWFDocumentView):
             context["ai_lead"] = provider_info["description"]
             context["has_api_key"] = has_api_key
             context["ai_credentials_url"] = (
-                reverse_lazy("twf:project_settings_credentials")
+                reverse_lazy("twf:project_ai_configs")
                 + f"?tab={provider_info['credentials_tab']}"
             )
             context["supports_multimodal"] = provider_info["multimodal"]
@@ -141,7 +142,7 @@ class TWFUnifiedDocumentBatchView(AIFormView, TWFDocumentView):
             )
             context["has_api_key"] = False
             context["ai_credentials_url"] = reverse_lazy(
-                "twf:project_settings_credentials"
+                "twf:project_ai_configs"
             )
             context["supports_multimodal"] = True
             context["multimodal_info"] = "Multimodal support varies by provider."
@@ -158,7 +159,7 @@ class TWFUnifiedDocumentBatchView(AIFormView, TWFDocumentView):
                 "description": provider_info["description"],
                 "multimodal": provider_info["multimodal"],
                 "multimodal_info": provider_info["multimodal_info"],
-                "credentials_url": str(reverse_lazy("twf:project_settings_credentials"))
+                "credentials_url": str(reverse_lazy("twf:project_ai_configs"))
                 + f"?tab={provider_info['credentials_tab']}",
                 "has_api_key": has_api_key,
                 "default_model": default_model,

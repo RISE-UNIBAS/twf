@@ -5,6 +5,7 @@ from django.contrib.auth import get_user_model
 from django.shortcuts import redirect, get_object_or_404
 from django.utils.crypto import get_random_string
 
+from twf.permissions import check_permission
 from twf.utils.mail_utils import send_reset_email
 from twf.views.views_base import get_referrer_or_default
 
@@ -13,8 +14,8 @@ User = get_user_model()
 
 def activate_user(request, pk):
     """Activate a user account."""
-    # Check permissions - only superusers or staff can manage users
-    if not request.user.is_superuser and not request.user.is_staff:
+    # Check system.edit permission - staff/superusers can manage users
+    if not check_permission(request.user, "system.edit", None):
         messages.error(request, "You do not have permission to manage users.")
         return redirect("twf:home")
 
@@ -33,8 +34,8 @@ def activate_user(request, pk):
 
 def deactivate_user(request, pk):
     """Deactivate a user account."""
-    # Check permissions - only superusers or staff can manage users
-    if not request.user.is_superuser and not request.user.is_staff:
+    # Check system.edit permission - staff/superusers can manage users
+    if not check_permission(request.user, "system.edit", None):
         messages.error(request, "You do not have permission to manage users.")
         return redirect("twf:home")
 
@@ -64,8 +65,8 @@ def deactivate_user(request, pk):
 
 def delete_user(request, pk):
     """Delete a user."""
-    # Check permissions - only superusers can delete users
-    if not request.user.is_superuser:
+    # Check system.manage permission - only superusers/staff can delete users
+    if not check_permission(request.user, "system.manage", None):
         messages.error(request, "Only administrators can delete users.")
         return redirect("twf:home")
 
@@ -101,8 +102,8 @@ def delete_user(request, pk):
 
 def reset_password(request, pk):
     """Reset a user's password and send them a new one."""
-    # Check permissions - only superusers or staff can reset passwords
-    if not request.user.is_superuser and not request.user.is_staff:
+    # Check system.edit permission - staff/superusers can reset passwords
+    if not check_permission(request.user, "system.edit", None):
         messages.error(request, "You do not have permission to reset passwords.")
         return redirect("twf:home")
 

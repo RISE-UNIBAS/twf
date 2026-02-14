@@ -138,8 +138,12 @@ def split_collection_item(request, pk, index):
 
 def download_collection_item_txt(request, pk):
     """Download the text of a collection item as a .txt file."""
-
-    # TODO - Implement permission check
+    # Check collection.view permission
+    if not check_permission(request.user, "collection.view", pk):
+        messages.error(
+            request, "You do not have permission to download this collection item."
+        )
+        return redirect("twf:collections")
 
     item = CollectionItem.objects.get(id=pk)
     text = f"Title: {item.title}\n"
@@ -153,8 +157,12 @@ def download_collection_item_txt(request, pk):
 
 def download_collection_item_json(request, pk):
     """Download the annotations of a collection item as a .json file."""
-
-    # TODO - Implement permission check
+    # Check collection.view permission
+    if not check_permission(request.user, "collection.view", pk):
+        messages.error(
+            request, "You do not have permission to download this collection item."
+        )
+        return redirect("twf:collections")
 
     item = CollectionItem.objects.get(id=pk)
     json = item.document_configuration

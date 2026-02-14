@@ -26,7 +26,7 @@ from twf.tables.tables_dictionary import (
     DictionaryEntryVariationTable,
     DictionaryAddTable,
 )
-from twf.views.views_base import TWFView
+from twf.views.views_base import TWFView, ProjectPermissionMixin
 
 logger = logging.getLogger(__name__)
 
@@ -161,9 +161,10 @@ class TWFDictionaryOverviewView(TWFDictionaryView):
         return context
 
 
-class TWFDictionaryDictionariesView(SingleTableView, FilterView, TWFDictionaryView):
+class TWFDictionaryDictionariesView(ProjectPermissionMixin, SingleTableView, FilterView, TWFDictionaryView):
     """View for the dictionaries. Provides a table of all dictionaries.
     The table is filterable and sortable."""
+    required_permission = "dictionary.view"
 
     template_name = "twf/dictionaries/dictionaries.html"
     page_title = "Dictionaries Overview"
@@ -212,8 +213,9 @@ class TWFDictionaryDictionariesView(SingleTableView, FilterView, TWFDictionaryVi
         return context
 
 
-class TWFDictionaryAddView(SingleTableView, FilterView, TWFDictionaryView):
+class TWFDictionaryAddView(ProjectPermissionMixin, SingleTableView, FilterView, TWFDictionaryView):
     """View for adding dictionaries to the project."""
+    required_permission = "dictionary.manage"
 
     template_name = "twf/dictionaries/dictionaries_add.html"
     page_title = "Add Dictionaries"
@@ -267,8 +269,9 @@ class TWFDictionaryAddView(SingleTableView, FilterView, TWFDictionaryView):
         return context
 
 
-class TWFDictionaryCreateView(FormView, TWFDictionaryView):
+class TWFDictionaryCreateView(ProjectPermissionMixin, FormView, TWFDictionaryView):
     """Create a new dictionary."""
+    required_permission = "dictionary.manage"
 
     template_name = "twf/dictionaries/create.html"
     form_class = DictionaryForm
@@ -298,9 +301,10 @@ class TWFDictionaryCreateView(FormView, TWFDictionaryView):
         return context
 
 
-class TWFDictionaryDictionaryView(SingleTableView, FilterView, TWFDictionaryView):
+class TWFDictionaryDictionaryView(ProjectPermissionMixin, SingleTableView, FilterView, TWFDictionaryView):
     """View for the dictionary entries. Provides a table of dictionary entries of a single dictionary.
     The table is filterable and sortable."""
+    required_permission = "dictionary.view"
 
     template_name = "twf/dictionaries/dictionary.html"
     page_title = "View Dictionary"
@@ -368,8 +372,9 @@ class TWFDictionaryDictionaryView(SingleTableView, FilterView, TWFDictionaryView
         return breadcrumbs
 
 
-class TWFDictionaryDictionaryEntryView(SingleTableView, TWFDictionaryView):
+class TWFDictionaryDictionaryEntryView(ProjectPermissionMixin, SingleTableView, TWFDictionaryView):
     """View for a single dictionary entry."""
+    required_permission = "dictionary.view"
 
     template_name = "twf/dictionaries/dictionary_entry.html"
     page_title = "View Dictionary Entry"
@@ -446,8 +451,9 @@ class TWFDictionaryDictionaryEntryView(SingleTableView, TWFDictionaryView):
         return context
 
 
-class TWFDictionaryDictionaryEditView(FormView, TWFDictionaryView):
+class TWFDictionaryDictionaryEditView(ProjectPermissionMixin, FormView, TWFDictionaryView):
     """Edit a dictionary."""
+    required_permission = "dictionary.manage"
 
     template_name = "twf/dictionaries/dictionary_edit.html"
     page_title = "Edit Dictionary"
@@ -485,8 +491,9 @@ class TWFDictionaryDictionaryEditView(FormView, TWFDictionaryView):
         return super().form_valid(form)
 
 
-class TWFDictionaryNormDataView(TWFDictionaryView):
+class TWFDictionaryNormDataView(ProjectPermissionMixin, TWFDictionaryView):
     """Normalization Data Wizard."""
+    required_permission = "dictionary.manage"
 
     template_name = "twf/dictionaries/normalization_wizard.html"
     page_title = "Normalization Data Wizard"
@@ -543,8 +550,9 @@ class TWFDictionaryNormDataView(TWFDictionaryView):
         return entry
 
 
-class TWFDictionaryMergeEntriesView(TWFDictionaryView):
+class TWFDictionaryMergeEntriesView(ProjectPermissionMixin, TWFDictionaryView):
     """Normalization Data Wizard."""
+    required_permission = "dictionary.manage"
 
     template_name = "twf/dictionaries/merge_entries.html"
     page_title = "Merge Dictionary Entries"
@@ -623,8 +631,9 @@ class TWFDictionaryMergeEntriesView(TWFDictionaryView):
         return context
 
 
-class TWFDictionaryDictionaryEntryEditView(FormView, TWFDictionaryView):
+class TWFDictionaryDictionaryEntryEditView(ProjectPermissionMixin, FormView, TWFDictionaryView):
     """Edit a dictionary entry."""
+    required_permission = "dictionary.edit"
 
     template_name = "twf/dictionaries/dictionary_entry_edit.html"
     page_title = "Edit Dictionary Entry"
@@ -721,8 +730,9 @@ class TWFDictionaryDictionaryEntryEditView(FormView, TWFDictionaryView):
         # If neither button matches, fallback to the default behavior
         return super().form_invalid(form)
 
-class TWFDictionaryEnrichmentView(FormView, TWFDictionaryView):
+class TWFDictionaryEnrichmentView(ProjectPermissionMixin, FormView, TWFDictionaryView):
     """Generic view for dictionary entry enrichment workflows."""
+    required_permission = "dictionary.edit"
 
     template_name = "twf/dictionaries/enrichment_workflow.html"
     page_title = "Dictionary Enrichment"
@@ -990,8 +1000,9 @@ class TWFDictionaryEnrichmentView(FormView, TWFDictionaryView):
         return context
 
 
-class TWFDictionarySettingsView(FormView, TWFDictionaryView):
+class TWFDictionarySettingsView(ProjectPermissionMixin, FormView, TWFDictionaryView):
     """View for configuring dictionary enrichment settings."""
+    required_permission = "dictionary.manage"
 
     template_name = "twf/dictionaries/settings.html"
     form_class = DictionarySettingsForm

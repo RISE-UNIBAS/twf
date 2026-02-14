@@ -9,13 +9,20 @@ from django.shortcuts import get_object_or_404, redirect
 from django.views.decorators.csrf import csrf_exempt
 
 from twf.models import Document
+from twf.permissions import check_permission
 from twf.utils.metadata_utils import delete_nested_key, set_nested_value
-from twf.views.views_base import get_referrer_or_default
+from twf.views.views_base import get_referrer_or_default, TWFView
 
 
 @login_required
 def delete_document(request, pk, doc_pk):
     """Deletes a document."""
+    # Check document.manage permission
+    project = TWFView.s_get_project(request)
+    if not check_permission(request.user, "document.manage", project):
+        messages.error(request, "You do not have permission to delete documents.")
+        return get_referrer_or_default(request, default="twf:documents_overview")
+
     document = get_object_or_404(Document, pk=doc_pk)
     for page in document.pages.all():
         page.xml_file.delete()
@@ -38,6 +45,14 @@ def update_document_metadata(request, pk, base_key):
     Returns:
         JsonResponse: Response with the new value or error message
     """
+    # Check metadata.edit permission
+    project = TWFView.s_get_project(request)
+    if not check_permission(request.user, "metadata.edit", project):
+        return JsonResponse(
+            {"error": "You do not have permission to edit metadata."},
+            status=403
+        )
+
     if request.method == "POST":
         data = json.loads(request.body)
         key = data.get("key")
@@ -68,6 +83,14 @@ def delete_document_metadata(request, pk, base_key):
     Returns:
         JsonResponse: Success response or error message
     """
+    # Check metadata.edit permission
+    project = TWFView.s_get_project(request)
+    if not check_permission(request.user, "metadata.edit", project):
+        return JsonResponse(
+            {"error": "You do not have permission to edit metadata."},
+            status=403
+        )
+
     if request.method == "POST":
         data = json.loads(request.body)
         key = data.get("key")
@@ -89,6 +112,12 @@ def delete_document_metadata(request, pk, base_key):
 @login_required
 def update_document_options(request, pk):
     """Update document status and workflow remarks."""
+    # Check document.edit permission
+    project = TWFView.s_get_project(request)
+    if not check_permission(request.user, "document.edit", project):
+        messages.error(request, "You do not have permission to edit documents.")
+        return redirect("twf:view_document", pk=pk)
+
     if request.method == "POST":
         document = get_object_or_404(Document, pk=pk)
 

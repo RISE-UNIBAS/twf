@@ -11,7 +11,7 @@ from django.views.generic import FormView
 
 from twf.forms.metadata.metadata_forms import ExtractMetadataValuesForm
 from twf.models import Page, Document, PageTag, Variation, Workflow
-from twf.views.views_base import TWFView
+from twf.views.views_base import TWFView, ProjectPermissionMixin
 
 logger = logging.getLogger(__name__)
 
@@ -133,8 +133,9 @@ class TWFMetadataOverviewView(TWFMetadataView):
         return context
 
 
-class TWFMetadataExtractTagsView(FormView, TWFMetadataView):
+class TWFMetadataExtractTagsView(ProjectPermissionMixin, FormView, TWFMetadataView):
     """View for extracting metadata values."""
+    required_permission = "metadata.manage"
 
     template_name = "twf/metadata/extract.html"
     page_title = "Extract Metadata Values"
@@ -245,8 +246,9 @@ class TWFMetadataExtractTagsView(FormView, TWFMetadataView):
         return kwargs
 
 
-class TWFMetadataReviewPagesView(TWFMetadataView):
+class TWFMetadataReviewPagesView(ProjectPermissionMixin, TWFMetadataView):
     """View for reviewing page metadata with workflow support."""
+    required_permission = "metadata.edit"
 
     template_name = "twf/metadata/review_page.html"
     page_title = "Review Page Metadata"
@@ -482,8 +484,9 @@ def set_nested_value(d, keys, value):
             raise ValueError(f"Unexpected type {type(d).__name__} at {last_key}.")
 
 
-class TWFMetadataReviewDocumentsView(TWFMetadataView):
+class TWFMetadataReviewDocumentsView(ProjectPermissionMixin, TWFMetadataView):
     """View for reviewing document metadata with workflow support."""
+    required_permission = "metadata.edit"
 
     template_name = "twf/metadata/review_document.html"
     page_title = "Review Document Metadata"
@@ -686,8 +689,9 @@ class TWFMetadataReviewDocumentsView(TWFMetadataView):
         return redirect("twf:metadata_review_documents")
 
 
-class TWFMetadataSettingsView(FormView, TWFMetadataView):
+class TWFMetadataSettingsView(ProjectPermissionMixin, FormView, TWFMetadataView):
     """View for metadata review settings."""
+    required_permission = "metadata.manage"
 
     template_name = "twf/metadata/settings.html"
     page_title = "Metadata Review Settings"
@@ -716,8 +720,9 @@ class TWFMetadataSettingsView(FormView, TWFMetadataView):
         return super().form_valid(form)
 
 
-class TWFGoogleSheetsSettingsView(FormView, TWFMetadataView):
+class TWFGoogleSheetsSettingsView(ProjectPermissionMixin, FormView, TWFMetadataView):
     """View for Google Sheets settings."""
+    required_permission = "metadata.manage"
 
     template_name = "twf/metadata/google_sheets_settings.html"
     page_title = "Google Sheets Settings"
@@ -744,8 +749,9 @@ class TWFGoogleSheetsSettingsView(FormView, TWFMetadataView):
         return super().form_valid(form)
 
 
-class TWFMetadataManagementView(FormView, TWFMetadataView):
+class TWFMetadataManagementView(ProjectPermissionMixin, FormView, TWFMetadataView):
     """View for managing (deleting) metadata blocks."""
+    required_permission = "metadata.manage"
 
     template_name = "twf/metadata/manage.html"
     page_title = "Manage Metadata"

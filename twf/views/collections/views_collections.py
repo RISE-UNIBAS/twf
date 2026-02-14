@@ -23,7 +23,7 @@ from twf.forms.collections.collections_forms import (
 from twf.models import CollectionItem, Collection, Workflow, Document
 from twf.tables.tables_collection import CollectionItemTable
 from twf.views.collections.views_crud import fill_collection_item, clean_annotation
-from twf.views.views_base import TWFView
+from twf.views.views_base import TWFView, ProjectPermissionMixin
 
 logger = logging.getLogger(__name__)
 
@@ -129,8 +129,9 @@ class TWFCollectionOverviewView(TWFCollectionsView):
         return context
 
 
-class TWFCollectionListView(SingleTableView, FilterView, TWFCollectionsView):
+class TWFCollectionListView(ProjectPermissionMixin, SingleTableView, FilterView, TWFCollectionsView):
     """View for listing all collections."""
+    required_permission = "collection.view"
 
     template_name = "twf/collections/collections_list.html"
     page_title = "Collection List"
@@ -172,8 +173,9 @@ class TWFCollectionListView(SingleTableView, FilterView, TWFCollectionsView):
         return context
 
 
-class TWFCollectionsEditView(FormView, TWFCollectionsView):
+class TWFCollectionsEditView(ProjectPermissionMixin, FormView, TWFCollectionsView):
     """View for creating a new collection."""
+    required_permission = "collection.edit"
 
     template_name = "twf/collections/collections_edit.html"
     page_title = "Edit Collection"
@@ -203,8 +205,9 @@ class TWFCollectionsEditView(FormView, TWFCollectionsView):
         return context
 
 
-class TWFCollectionItemView(TWFCollectionsView):
+class TWFCollectionItemView(ProjectPermissionMixin, TWFCollectionsView):
     """View for viewing a collection item."""
+    required_permission = "collection.view"
 
     template_name = "twf/collections/collection_item_view.html"
     page_title = "View Collection Item"
@@ -215,8 +218,9 @@ class TWFCollectionItemView(TWFCollectionsView):
         return context
 
 
-class TWFCollectionItemEditView(FormView, TWFCollectionsView):
+class TWFCollectionItemEditView(ProjectPermissionMixin, FormView, TWFCollectionsView):
     """View for editing a collection item."""
+    required_permission = "collection.edit"
 
     template_name = "twf/collections/collection_item_edit.html"
     page_title = "Edit Collection Item"
@@ -247,8 +251,9 @@ class TWFCollectionItemEditView(FormView, TWFCollectionsView):
         return context
 
 
-class TWFCollectionsCreateView(FormView, TWFCollectionsView):
+class TWFCollectionsCreateView(ProjectPermissionMixin, FormView, TWFCollectionsView):
     """View for creating a new collection."""
+    required_permission = "collection.manage"
 
     template_name = "twf/collections/collections_create.html"
     page_title = "Create New Collection"
@@ -356,8 +361,9 @@ class TWFCollectionsCreateView(FormView, TWFCollectionsView):
         return context
 
 
-class TWFCollectionsDetailView(SingleTableView, FilterView, TWFCollectionsView):
+class TWFCollectionsDetailView(ProjectPermissionMixin, SingleTableView, FilterView, TWFCollectionsView):
     """View for the collection detail page."""
+    required_permission = "collection.view"
 
     template_name = "twf/collections/collection_view.html"
     page_title = "View Collection"
@@ -399,8 +405,9 @@ class TWFCollectionsDetailView(SingleTableView, FilterView, TWFCollectionsView):
         return context
 
 
-class TWFCollectionsAddDocumentView(FormView, TWFCollectionsView):
+class TWFCollectionsAddDocumentView(ProjectPermissionMixin, FormView, TWFCollectionsView):
     """View for adding a document to a collection."""
+    required_permission = "collection.edit"
 
     template_name = "twf/collections/collections_add_doc.html"
     page_title = "Add Document To Collection"
@@ -436,8 +443,9 @@ class TWFCollectionsAddDocumentView(FormView, TWFCollectionsView):
         return context
 
 
-class TWFCollectionsReviewView(FormView, TWFCollectionsView):
+class TWFCollectionsReviewView(ProjectPermissionMixin, FormView, TWFCollectionsView):
     """View for naming documents."""
+    required_permission = "collection.edit"
 
     template_name = "twf/collections/review_collections.html"
     page_title = "Review Collections"

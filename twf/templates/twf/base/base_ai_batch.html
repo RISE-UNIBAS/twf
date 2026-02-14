@@ -18,7 +18,7 @@
     {% if not has_api_key %}
             <div class="alert alert-warning" role="alert">
                 <strong>Warning!</strong> You have not set up an API key yet.
-                Please <a href="{{ ai_credentials_url }}">set up API credentials</a> before using this feature.
+                Please <a href="{{ ai_credentials_url }}" id="credentials-link">set up API credentials</a> before using this feature.
             </div>
     {% endif %}
     {% if has_api_key %}
@@ -94,7 +94,7 @@
 
             // Update credentials URL
             if (config.credentials_url) {
-                $('a[href*="project_settings_credentials"]').attr('href', config.credentials_url);
+                $('#credentials-link').attr('href', config.credentials_url);
             }
 
             // Update credentials warning - only show if NO API KEY is present
