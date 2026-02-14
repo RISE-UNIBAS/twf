@@ -15,7 +15,6 @@ from .models import (
     DateVariation,
     Workflow,
     Task,
-    Prompt,
     ExportConfiguration,
     Export,
     Note,
@@ -166,15 +165,6 @@ class TaskAdmin(admin.ModelAdmin):
     list_display = ["title", "project", "status", "progress", "start_time", "end_time"]
     list_filter = ["status", "project", "start_time"]
     search_fields = ["title", "celery_task_id", "user__username"]
-
-
-@admin.register(Prompt)
-class PromptAdmin(admin.ModelAdmin):
-    """Admin View for Prompt."""
-
-    list_display = ["system_role", "project", "created_at"]
-    list_filter = ["project", "created_at"]
-    search_fields = ["system_role", "prompt"]
 
 
 @admin.register(ExportConfiguration)

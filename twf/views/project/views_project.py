@@ -15,7 +15,7 @@ from django_filters.views import FilterView
 from django_tables2 import SingleTableView
 
 from twf.forms.dynamic_forms import DynamicForm
-from twf.forms.filters.filters import TaskFilter, PromptFilter, NoteFilter
+from twf.forms.filters.filters import TaskFilter, NoteFilter
 from twf.forms.project.project_forms_batches import (
     ProjectCopyBatchForm,
     DocumentExtractionBatchForm,
@@ -25,15 +25,13 @@ from twf.forms.project.project_forms import (
     QueryDatabaseForm,
     GeneralSettingsForm,
     TaskSettingsForm,
-    PromptForm,
     NoteForm,
     DisplaySettingsForm,
     WorkflowSettingsForm,
 )
-from twf.models import Page, PageTag, Prompt, Task, Note
+from twf.models import Page, PageTag, Task, Note
 from twf.tables.tables_project import (
     TaskTable,
-    PromptTable,
     NoteTable,
     ProjectUserTable,
 )
@@ -65,11 +63,6 @@ class TWFProjectView(LoginRequiredMixin, TWFView):
                         "url": reverse("twf:project_task_monitor"),
                         "value": "Task Monitor",
                         "permission": "task.view",
-                    },
-                    {
-                        "url": reverse("twf:project_prompts"),
-                        "value": "Saved Prompts",
-                        "permission": "prompt.view",
                     },
                     {
                         "url": reverse("twf:project_notes"),
@@ -330,51 +323,6 @@ class TWFProjectTaskDetailView(ProjectPermissionMixin, TWFProjectView):
         return context
 
 
-class TWFProjectPromptsView(ProjectPermissionMixin, SingleTableView, FilterView, TWFProjectView):
-    """View for the project prompts."""
-
-    template_name = "twf/project/prompts.html"
-    page_title = "Prompts"
-    required_permission = "prompt.view"
-    table_class = PromptTable
-    filterset_class = PromptFilter
-    paginate_by = 10
-    model = Prompt
-    strict = False
-
-    def get_queryset(self):
-        """Get the queryset for the view."""
-        # Get all prompts for the current project
-        queryset = Prompt.objects.filter(
-            project_id=self.request.session.get("project_id")
-        )
-        return queryset
-
-    def get(self, request, *args, **kwargs):
-        """Handle GET requests."""
-        # Set up initial queryset
-        queryset = self.get_queryset()
-
-        # Initialize the filter
-        self.filterset = self.filterset_class(request.GET or None, queryset=queryset)
-
-        # Set object_list either to all items or filtered items
-        if request.GET and self.filterset.is_bound:
-            self.object_list = self.filterset.qs
-        else:
-            self.object_list = queryset
-
-        # Get context and render response
-        context = self.get_context_data()
-        return self.render_to_response(context)
-
-    def get_context_data(self, **kwargs):
-        """Get the context data."""
-        context = super().get_context_data(**kwargs)
-        context["filter"] = self.filterset
-        return context
-
-
 class TWFProjectNotesView(ProjectPermissionMixin, SingleTableView, FilterView, TWFProjectView):
     """View for the project notes."""
 
@@ -473,66 +421,6 @@ class TWFProjectNoteDetailView(ProjectPermissionMixin, TWFProjectView):
         """Get the context data."""
         context = super().get_context_data(**kwargs)
         context["note"] = self.get_object()
-        return context
-
-
-class TWFProjectPromptDetailView(ProjectPermissionMixin, TWFProjectView):
-    """View for displaying prompt details."""
-    required_permission = "prompt.view"
-
-    template_name = "twf/project/prompt_detail.html"
-    page_title = "Prompt Details"
-
-    def get_object(self):
-        """Get the prompt to view."""
-        from django.shortcuts import get_object_or_404
-
-        return get_object_or_404(
-            Prompt, pk=self.kwargs["pk"], project=self.get_project()
-        )
-
-    def get_context_data(self, **kwargs):
-        """Get the context data."""
-        context = super().get_context_data(**kwargs)
-        context["prompt"] = self.get_object()
-        return context
-
-
-class TWFProjectPromptEditView(ProjectPermissionMixin, FormView, TWFProjectView):
-    """View for editing a prompt."""
-    required_permission = "prompt.edit"
-
-    template_name = "twf/project/edit_prompt.html"
-    page_title = "Edit Prompt"
-    form_class = PromptForm
-    success_url = reverse_lazy("twf:project_prompts")
-
-    def get_object(self):
-        """Get the prompt to edit."""
-        from django.shortcuts import get_object_or_404
-
-        return get_object_or_404(
-            Prompt, pk=self.kwargs["pk"], project=self.get_project()
-        )
-
-    def get_form_kwargs(self):
-        """Get the form kwargs."""
-        kwargs = super().get_form_kwargs()
-        kwargs["instance"] = self.get_object()
-        return kwargs
-
-    def form_valid(self, form):
-        """Handle the form submission."""
-        # Save the form and show a success message
-        self.object = form.save(commit=False)
-        self.object.save(current_user=self.request.user)
-
-        messages.success(self.request, "Prompt has been updated successfully.")
-        return super().form_valid(form)
-
-    def get_context_data(self, **kwargs):
-        """Get the context data."""
-        context = super().get_context_data(**kwargs)
         return context
 
 

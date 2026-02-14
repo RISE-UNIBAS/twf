@@ -1,7 +1,7 @@
 import django_tables2 as tables
 from django.utils.safestring import mark_safe
 
-from twf.models import Task, Prompt, Note, UserProfile
+from twf.models import Task, Note, UserProfile
 from django.utils.html import format_html
 
 class TaskTable(tables.Table):
@@ -131,64 +131,6 @@ class TaskTable(tables.Table):
         template_name = "django_tables2/bootstrap4.html"
         fields = ("title", "status", "user", "start_time", "end_time", "progress")
         attrs = {"class": "table table-striped table-hover"}
-
-
-class PromptTable(tables.Table):
-    """
-    Table for displaying prompts associated with a project.
-    """
-    system_role = tables.Column(verbose_name="Role", attrs={"td": {"class": "fw-bold"}})
-
-    prompt_preview = tables.Column(empty_values=(), verbose_name="Prompt")
-
-    created_at = tables.DateTimeColumn(format="Y-m-d H:i", verbose_name="Created")
-    modified_at = tables.DateTimeColumn(format="Y-m-d H:i", verbose_name="Modified")
-
-    actions = tables.Column(empty_values=(), verbose_name="Options")
-
-    class Meta:
-        """
-        Table metadata for PromptTable.
-        """
-        model = Prompt
-        fields = ("system_role", "prompt_preview", "created_at", "modified_at")
-        attrs = {"class": "table table-striped table-hover table-sm"}
-
-    def render_prompt_preview(self, record):
-        """
-        Render a truncated preview of the prompt with full text in tooltip.
-
-        Args:
-            record: Prompt model instance
-
-        Returns:
-            SafeString: Formatted HTML with truncated prompt and full text tooltip
-        """
-        return format_html(
-            '<span title="{}">{}</span>',
-            record.prompt,
-            record.prompt[:80] + "..." if len(record.prompt) > 80 else record.prompt,
-        )
-
-    def render_actions(self, record):
-        """Render action buttons (view, edit, delete) for the prompt."""
-        from django.urls import reverse
-
-        view_url = reverse("twf:prompt_detail", kwargs={"pk": record.pk})
-        edit_url = reverse("twf:project_edit_prompt", kwargs={"pk": record.pk})
-        delete_url = reverse("twf:project_delete_prompt", kwargs={"pk": record.pk})
-
-        return format_html(
-            '<a href="{}" class="btn btn-sm btn-dark me-1" title="View Details"><i class="fa fa-eye"></i></a>'
-            '<a href="{}" class="btn btn-sm btn-dark me-1" title="Edit"><i class="fa fa-edit"></i></a>'
-            '<a href="#" class="btn btn-sm btn-danger show-danger-modal" '
-            'data-redirect-url="{}" '
-            'data-message="Are you sure you want to delete this prompt? This action cannot be undone." '
-            'title="Delete Prompt"><i class="fa fa-trash"></i></a>',
-            view_url,
-            edit_url,
-            delete_url,
-        )
 
 
 class NoteTable(tables.Table):

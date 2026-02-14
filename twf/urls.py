@@ -15,7 +15,6 @@ from twf.views.ajax.views_ajax_markdown import (
     ajax_markdown_preview,
 )
 from twf.views.ajax.views_ajax_notes import save_ai_result_as_note
-from twf.views.ajax.views_ajax_prompts import load_prompt, save_prompt, get_prompts
 from twf.views.ajax.views_ajax_ai_config import load_ai_configuration
 from twf.views.ajax.views_ajax_transkribus_export import (
     ajax_transkribus_request_export,
@@ -196,17 +195,14 @@ from twf.views.project.views_project import (
     TWFProjectTaskMonitorView,
     TWFProjectTaskDetailView,
     TWFProjectGeneralSettingsView,
-    TWFProjectPromptsView,
     TWFProjectTaskSettingsView,
     TWFProjectCopyView,
     TWFProjectResetView,
     TWFProjectUserManagementView,
-    TWFProjectPromptEditView,
     TWFProjectSetupView,
     TWFProjectTranskribusExtractView,
     TWFProjectTranskribusEnrichView,
     TWFProjectNotesView,
-    TWFProjectPromptDetailView,
     TWFProjectNoteEditView,
     TWFProjectNoteDetailView,
     TWFProjectDisplaySettingsView,
@@ -369,19 +365,8 @@ urlpatterns = [
         TWFProjectTaskDetailView.as_view(),
         name="task_detail",
     ),
-    path("project/prompts/", TWFProjectPromptsView.as_view(), name="project_prompts"),
     path(
         "project/prompts/delete/<int:pk>/", delete_prompt, name="project_delete_prompt"
-    ),
-    path(
-        "project/prompts/edit/<int:pk>/",
-        TWFProjectPromptEditView.as_view(),
-        name="project_edit_prompt",
-    ),
-    path(
-        "project/prompt/<int:pk>/view/",
-        TWFProjectPromptDetailView.as_view(),
-        name="prompt_detail",
     ),
     path("project/notes/", TWFProjectNotesView.as_view(), name="project_notes"),
     path("project/notes/<int:pk>/delete/", delete_note, name="project_notes_delete"),
@@ -986,9 +971,6 @@ urlpatterns = [
         "ajax/markdown-generate/", ajax_markdown_generate, name="ajax_markdown_generate"
     ),
     path("ajax/markdown-preview/", ajax_markdown_preview, name="ajax_markdown_preview"),
-    path("ajax/load/prompt/", load_prompt, name="ajax_load_prompt"),
-    path("ajax/save/prompt/", save_prompt, name="ajax_save_prompt"),
-    path("ajax/get/prompts/", get_prompts, name="ajax_get_prompts"),
     path("ajax/ai-config/<int:config_id>/", load_ai_configuration, name="ajax_load_ai_config"),
     path(
         "ajax/save/ai_result_as_note/",

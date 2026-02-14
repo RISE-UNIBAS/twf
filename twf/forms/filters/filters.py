@@ -3,7 +3,6 @@
 import logging
 import django_filters
 from django.db.models import Q
-from django import forms
 from django.forms import CheckboxInput, DateInput
 from django.contrib.auth import get_user_model
 from django_select2.forms import Select2MultipleWidget
@@ -13,7 +12,6 @@ from twf.models import (
     PageTag,
     CollectionItem,
     Task,
-    Prompt,
     Project,
     Export,
     Note,
@@ -339,23 +337,6 @@ class TaskFilter(django_filters.FilterSet):
 
         logger.debug(f"Final filtered count: {result.count()}")
         return result
-
-
-class PromptFilter(django_filters.FilterSet):
-    """Filter for the prompts table."""
-
-    system_role = django_filters.CharFilter(
-        lookup_expr="icontains", label="Role contains"
-    )
-    prompt = django_filters.CharFilter(
-        lookup_expr="icontains", label="Prompt text contains"
-    )
-
-    class Meta:
-        """Meta class for the prompt filter."""
-
-        model = Prompt
-        fields = ["system_role", "prompt"]
 
 
 class NoteFilter(django_filters.FilterSet):
