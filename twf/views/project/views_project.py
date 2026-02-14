@@ -91,6 +91,11 @@ class TWFProjectView(LoginRequiredMixin, TWFView):
                         "permission": "project.manage",
                     },
                     {
+                        "url": reverse("twf:project_ai_configs"),
+                        "value": "AI Configurations",
+                        "permission": "ai.manage",
+                    },
+                    {
                         "url": reverse("twf:project_settings_credentials"),
                         "value": "Credential Settings",
                         "permission": "project.manage",

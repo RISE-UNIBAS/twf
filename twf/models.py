@@ -2111,6 +2111,241 @@ class Prompt(TimeStampedModel):
         return self.prompt[:50]
 
 
+class AIConfiguration(TimeStampedModel):
+    """
+    AIConfiguration Model
+    ---------------------
+
+    Reusable AI configuration that bundles everything needed for an AI call.
+    Replaces the separation between Prompts, Credentials, and AI Settings.
+
+    Each configuration includes:
+    - Provider and model selection
+    - API credentials
+    - System role and prompt template
+    - Execution settings (temperature, max_tokens, etc.)
+    - Context relationships (documents, pages, collections)
+
+    Attributes
+    ~~~~~~~~~~
+    project : ForeignKey
+        The project this AI configuration belongs to.
+    name : CharField
+        Display name for the configuration (e.g., "Document Summarizer (GPT-4)").
+    description : TextField
+        What this configuration is used for.
+    provider : CharField
+        AI provider (openai, anthropic, genai, mistral, deepseek, qwen).
+    model : CharField
+        Model identifier (e.g., "gpt-4", "claude-3-opus-20240229").
+    api_key : CharField
+        API key for this provider.
+    system_role : TextField
+        System role/instructions for the AI.
+    prompt_template : TextField
+        Prompt template with {placeholders} for context variables.
+    temperature : FloatField
+        Sampling temperature (0.0-2.0).
+    max_tokens : IntegerField
+        Maximum tokens to generate.
+    top_p : FloatField
+        Nucleus sampling threshold.
+    frequency_penalty : FloatField
+        Frequency penalty (-2.0 to 2.0).
+    presence_penalty : FloatField
+        Presence penalty (-2.0 to 2.0).
+    seed : IntegerField
+        Random seed for deterministic sampling.
+    document_context : ManyToManyField
+        Documents to include in context.
+    page_context : ManyToManyField
+        Pages to include in context.
+    collection_context : ManyToManyField
+        Collection items to include in context.
+    is_active : BooleanField
+        Whether this configuration is active and visible in selectors.
+    usage_count : IntegerField
+        Number of times this configuration has been used.
+    """
+
+    PROVIDER_CHOICES = [
+        ("openai", "OpenAI (ChatGPT)"),
+        ("anthropic", "Anthropic (Claude)"),
+        ("genai", "Google (Gemini)"),
+        ("mistral", "Mistral AI"),
+        ("deepseek", "DeepSeek"),
+        ("qwen", "Qwen"),
+    ]
+
+    project = models.ForeignKey(
+        Project, related_name="ai_configs", on_delete=models.CASCADE
+    )
+    """The project this AI configuration belongs to."""
+
+    # Identity
+    name = models.CharField(
+        max_length=200,
+        help_text="Display name, e.g., 'Document Summarizer (GPT-4)'",
+    )
+    """Display name for the configuration."""
+
+    description = models.TextField(
+        blank=True, help_text="What this configuration is used for"
+    )
+    """Description of what this configuration is used for."""
+
+    # Provider & Model
+    provider = models.CharField(max_length=50, choices=PROVIDER_CHOICES)
+    """AI provider selection."""
+
+    model = models.CharField(
+        max_length=100,
+        help_text="Model identifier, e.g., 'gpt-4', 'claude-3-opus-20240229'",
+    )
+    """Model identifier."""
+
+    # Credentials
+    api_key = models.CharField(
+        max_length=500, help_text="API key for this provider"
+    )
+    """API key for this provider."""
+
+    # Prompt Configuration
+    system_role = models.TextField(
+        help_text="System role/instructions for the AI"
+    )
+    """System role/instructions for the AI."""
+
+    prompt_template = models.TextField(
+        help_text="Prompt template with {placeholders} for context. "
+        "Example: 'Summarize: {document_text}'"
+    )
+    """Prompt template with placeholders for context variables."""
+
+    # Execution Settings (optional overrides)
+    temperature = models.FloatField(
+        null=True, blank=True, default=0.5, help_text="Sampling temperature (0.0-2.0)"
+    )
+    """Sampling temperature."""
+
+    max_tokens = models.IntegerField(
+        null=True, blank=True, default=2048, help_text="Maximum tokens to generate"
+    )
+    """Maximum tokens to generate."""
+
+    top_p = models.FloatField(
+        null=True, blank=True, default=1.0, help_text="Nucleus sampling threshold"
+    )
+    """Nucleus sampling threshold."""
+
+    frequency_penalty = models.FloatField(
+        null=True,
+        blank=True,
+        default=0.0,
+        help_text="Frequency penalty (-2.0 to 2.0)",
+    )
+    """Frequency penalty."""
+
+    presence_penalty = models.FloatField(
+        null=True, blank=True, default=0.0, help_text="Presence penalty (-2.0 to 2.0)"
+    )
+    """Presence penalty."""
+
+    seed = models.IntegerField(
+        null=True, blank=True, help_text="Random seed for deterministic sampling"
+    )
+    """Random seed for deterministic sampling."""
+
+    # Context relationships (preserved from Prompt model)
+    document_context = models.ManyToManyField(
+        Document, related_name="ai_configs", blank=True
+    )
+    """Documents to include in context."""
+
+    page_context = models.ManyToManyField(Page, related_name="ai_configs", blank=True)
+    """Pages to include in context."""
+
+    collection_context = models.ManyToManyField(
+        CollectionItem, related_name="ai_configs", blank=True
+    )
+    """Collection items to include in context."""
+
+    # Metadata
+    is_active = models.BooleanField(
+        default=True, help_text="Disable to hide from workflow selectors"
+    )
+    """Whether this configuration is active."""
+
+    usage_count = models.IntegerField(
+        default=0, help_text="Track how often this config is used"
+    )
+    """Number of times this configuration has been used."""
+
+    class Meta:
+        """Meta options for the AIConfiguration model."""
+
+        ordering = ["name"]
+        unique_together = [["project", "name"]]
+
+    def __str__(self):
+        """Return the string representation of the AIConfiguration."""
+        return f"{self.name} ({self.get_provider_display()})"
+
+    def execute(self, context_variables: dict) -> tuple:
+        """
+        Execute this AI configuration with given context variables.
+
+        Parameters
+        ----------
+        context_variables : dict
+            Variables to fill into prompt_template, e.g., {"document_text": "..."}
+
+        Returns
+        -------
+        tuple[str, float]
+            (response_text, duration_seconds)
+        """
+        from twf.clients.ai_client_adapter import create_ai_client
+
+        # Fill in prompt template
+        filled_prompt = self.prompt_template.format(**context_variables)
+
+        # Create client with temperature=1 (the default most models accept)
+        client = create_ai_client(
+            provider=self.provider,
+            api_key=self.api_key,
+            system_prompt=self.system_role,
+            temperature=1,
+        )
+
+        # Execute with just model and prompt - no extra parameters
+        response_text, duration = client.prompt(
+            model=self.model,
+            prompt=filled_prompt
+        )
+
+        # Track usage
+        self.usage_count += 1
+        self.save()
+
+        return response_text, duration
+
+    def test_connection(self) -> bool:
+        """
+        Test if the API credentials are valid.
+
+        Returns
+        -------
+        bool
+            True if connection is successful, False otherwise.
+        """
+        try:
+            self.execute({"test": "connection"})
+            return True
+        except Exception:
+            return False
+
+
 class Workflow(models.Model):
     """Model to store workflow information."""
 

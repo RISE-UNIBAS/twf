@@ -212,6 +212,15 @@ from twf.views.project.views_project import (
     TWFProjectDisplaySettingsView,
     TWFProjectWorkflowSettingsView,
 )
+from twf.views.project.views_project_ai_configs import (
+    TWFProjectAIConfigsView,
+    TWFProjectAIConfigCreateView,
+    TWFProjectAIConfigEditView,
+    TWFProjectAIConfigDetailView,
+    TWFProjectAIConfigDeleteView,
+    TWFProjectAIConfigTestView,
+    ajax_test_ai_config,
+)
 from twf.views.project.views_project_ai import TWFUnifiedAIQueryView
 from twf.views.tags.views_tags import (
     TWFProjectTagsView,
@@ -420,6 +429,37 @@ urlpatterns = [
         "project/settings/workflows/",
         TWFProjectWorkflowSettingsView.as_view(),
         name="project_settings_workflows",
+    ),
+    # AI Configurations
+    path(
+        "project/ai-configs/",
+        TWFProjectAIConfigsView.as_view(),
+        name="project_ai_configs",
+    ),
+    path(
+        "project/ai-configs/create/",
+        TWFProjectAIConfigCreateView.as_view(),
+        name="project_ai_config_create",
+    ),
+    path(
+        "project/ai-configs/<int:pk>/",
+        TWFProjectAIConfigDetailView.as_view(),
+        name="project_ai_config_detail",
+    ),
+    path(
+        "project/ai-configs/<int:pk>/edit/",
+        TWFProjectAIConfigEditView.as_view(),
+        name="project_ai_config_edit",
+    ),
+    path(
+        "project/ai-configs/<int:pk>/delete/",
+        TWFProjectAIConfigDeleteView.as_view(),
+        name="project_ai_config_delete",
+    ),
+    path(
+        "project/ai-configs/<int:pk>/test/",
+        TWFProjectAIConfigTestView.as_view(),
+        name="project_ai_config_test",
     ),
     path(
         "project/user/management/",
@@ -962,6 +1002,11 @@ urlpatterns = [
         "ajax/save/ai_result_as_note/",
         save_ai_result_as_note,
         name="ajax_save_ai_result_as_note",
+    ),
+    path(
+        "ajax/test/ai-config/<int:pk>/",
+        ajax_test_ai_config,
+        name="ajax_test_ai_config",
     ),
     #############################
     # METADATA
