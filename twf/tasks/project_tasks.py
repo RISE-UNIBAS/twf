@@ -447,25 +447,27 @@ def query_project_unified(self, project_id, user_id, **kwargs):
     """
     Unified task for AI query processing with project documents.
 
-    Supports any AI provider through the generic AI client.
+    Uses AIConfiguration which contains all AI settings (provider, model, prompt, etc.).
 
     Args:
         project_id: Project ID
         user_id: User ID
         **kwargs: Must include:
-            - ai_provider: Provider key ('openai', 'genai', 'anthropic', 'mistral', etc.)
-            - model: Model name to use
-            - prompt: The prompt text
-            - role_description: System role description
+            - ai_configuration_id: ID of the AIConfiguration to use
             - documents: List of document IDs
             - prompt_mode (optional): One of "text_only", "images_only", or "text_and_images"
     """
-    self.validate_task_parameters(
-        kwargs, ["ai_provider", "model", "prompt", "role_description", "documents"]
-    )
+    from twf.models import AIConfiguration
 
-    provider = kwargs.get("ai_provider")
-    model = kwargs.get("model")
+    self.validate_task_parameters(kwargs, ["ai_configuration_id", "documents"])
+
+    # Load the AI configuration
+    ai_config_id = kwargs.get("ai_configuration_id")
+    try:
+        ai_config = AIConfiguration.objects.get(id=ai_config_id, project=self.project)
+    except AIConfiguration.DoesNotExist:
+        raise ValueError(f"AIConfiguration with id {ai_config_id} not found for this project")
+
     doc_ids = kwargs.pop("documents")
     documents = self.project.documents.filter(pk__in=doc_ids)
 
@@ -474,16 +476,17 @@ def query_project_unified(self, project_id, user_id, **kwargs):
 
     # Note about image support for non-supporting providers
     if prompt_mode in ["images_only", "text_and_images"]:
-        if provider in ["anthropic", "mistral", "deepseek", "qwen"]:
-            self.twf_task.text += f"Note: {provider} does not currently support image inputs. Using text-only mode.\n"
+        if ai_config.provider in ["mistral"]:  # Update as needed based on provider capabilities
+            self.twf_task.text += f"Note: {ai_config.provider} does not currently support image inputs. Using text-only mode.\n"
             prompt_mode = "text_only"
 
+    # Process query using the AI configuration settings
     return self.process_single_ai_request(
         documents,
-        provider,
-        kwargs["prompt"],
-        kwargs["role_description"],
-        provider,
+        ai_config.provider,
+        ai_config.prompt_template,
+        ai_config.system_role,
+        ai_config.provider,
         prompt_mode=prompt_mode,
-        model=model,
+        model=ai_config.model,
     )

@@ -371,34 +371,36 @@ def search_ai_entries(self, project_id, user_id, **kwargs):
     """
     Unified task for AI batch processing of dictionary entries.
 
-    Supports any AI provider through the generic AI client.
+    Uses AIConfiguration which contains all AI settings (provider, model, prompt, etc.).
 
     Args:
         project_id: Project ID
         user_id: User ID
         **kwargs: Must include:
             - dictionary_id: ID of the dictionary to process
-            - ai_provider: Provider key ('openai', 'genai', 'anthropic', 'mistral', etc.)
-            - model: Model name to use
-            - prompt: The prompt template
-            - role_description: System role description
+            - ai_configuration_id: ID of the AIConfiguration to use
     """
-    self.validate_task_parameters(
-        kwargs, ["dictionary_id", "ai_provider", "model", "prompt", "role_description"]
-    )
+    from twf.models import AIConfiguration
+
+    self.validate_task_parameters(kwargs, ["dictionary_id", "ai_configuration_id"])
+
+    # Load the AI configuration
+    ai_config_id = kwargs.get("ai_configuration_id")
+    try:
+        ai_config = AIConfiguration.objects.get(id=ai_config_id, project=self.project)
+    except AIConfiguration.DoesNotExist:
+        raise ValueError(f"AIConfiguration with id {ai_config_id} not found for this project")
 
     dictionary = Dictionary.objects.get(id=kwargs.get("dictionary_id"))
-    provider = kwargs.get("ai_provider")
 
-    # Map provider keys to the keys expected by process_ai_request
-    # (genai->genai, anthropic->anthropic, etc. - they happen to match)
+    # Process dictionary entries using the AI configuration settings
     self.process_ai_request(
         dictionary.entries.all(),
-        provider,
-        kwargs["prompt"],
-        kwargs["role_description"],
-        provider,
-        model=kwargs.get("model"),
+        ai_config.provider,
+        ai_config.prompt_template,
+        ai_config.system_role,
+        ai_config.provider,
+        model=ai_config.model,
     )
 
 
@@ -407,30 +409,34 @@ def search_ai_entry(self, project_id, user_id, **kwargs):
     """
     Unified task for AI request (supervised) processing of a single dictionary entry.
 
-    Supports any AI provider through the generic AI client.
+    Uses AIConfiguration which contains all AI settings (provider, model, prompt, etc.).
 
     Args:
         project_id: Project ID
         user_id: User ID
         **kwargs: Must include:
             - entry_id: ID of the dictionary entry to process
-            - ai_provider: Provider key ('openai', 'genai', 'anthropic', 'mistral', etc.)
-            - model: Model name to use
-            - prompt: The prompt template
-            - role_description: System role description
+            - ai_configuration_id: ID of the AIConfiguration to use
     """
-    self.validate_task_parameters(
-        kwargs, ["entry_id", "ai_provider", "model", "prompt", "role_description"]
-    )
+    from twf.models import AIConfiguration
+
+    self.validate_task_parameters(kwargs, ["entry_id", "ai_configuration_id"])
+
+    # Load the AI configuration
+    ai_config_id = kwargs.get("ai_configuration_id")
+    try:
+        ai_config = AIConfiguration.objects.get(id=ai_config_id, project=self.project)
+    except AIConfiguration.DoesNotExist:
+        raise ValueError(f"AIConfiguration with id {ai_config_id} not found for this project")
 
     dictionary_entry = DictionaryEntry.objects.get(id=kwargs.get("entry_id"))
-    provider = kwargs.get("ai_provider")
 
+    # Process single dictionary entry using the AI configuration settings
     self.process_ai_request(
         [dictionary_entry],
-        provider,
-        kwargs["prompt"],
-        kwargs["role_description"],
-        provider,
-        model=kwargs.get("model"),
+        ai_config.provider,
+        ai_config.prompt_template,
+        ai_config.system_role,
+        ai_config.provider,
+        model=ai_config.model,
     )

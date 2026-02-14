@@ -144,8 +144,9 @@ class BaseAIBatchForm(BaseBatchForm):
     """
     Base form for AI batch operations.
 
-    This class extends the base batch form with fields and functionality
-    specific to AI operations, including prompts and role descriptions.
+    This class extends the base batch form with AI configuration selection.
+    All AI settings (provider, model, prompt, role, etc.) are stored in the
+    selected AIConfiguration object.
     """
 
     class Meta:
@@ -161,14 +162,15 @@ class BaseAIBatchForm(BaseBatchForm):
         """
         super().__init__(*args, **kwargs)
 
-        self.fields["role_description"] = forms.CharField(
-            label="Role Description", required=True
-        )
-        self.fields["prompt"] = forms.CharField(
-            label="Prompt", required=True, widget=forms.Textarea(attrs={"rows": 5})
-        )
-        self.fields["saved_prompts"] = forms.ModelChoiceField(
-            queryset=Prompt.objects.filter(project=self.project), required=False
+        # Import here to avoid circular imports
+        from twf.models import AIConfiguration
+
+        self.fields["ai_configuration"] = forms.ModelChoiceField(
+            queryset=AIConfiguration.objects.filter(project=self.project),
+            required=True,
+            label="AI Configuration",
+            help_text="Select an AI configuration. All settings (provider, model, prompt, etc.) are defined in the configuration.",
+            empty_label="(Select AI Configuration...)"
         )
 
     def get_dynamic_fields(self):
@@ -178,29 +180,53 @@ class BaseAIBatchForm(BaseBatchForm):
         Returns:
             list: A list of form field layouts including AI-specific fields.
         """
-        button_html = """
-         <div class="mt-4">
-            <button type="button" id="loadPrompt" class="btn btn-sm btn-dark"
-             data-bs-toggle="tooltip" title="Load the selected saved prompt. Unsaved edits are lost.">Load Prompt</button>
-            <button type="button" id="savePrompt" class="btn btn-sm btn-dark"
-             data-bs-toggle="tooltip" title="Overwrite selected prompt or save as new if no prompt selected.">Save Prompt</button>
+        manage_button_html = """
+         <div class="text-end mb-3">
+            <a href="{% url 'twf:project_ai_configs' %}" class="btn btn-sm btn-dark" target="_blank"
+             data-bs-toggle="tooltip" title="Open AI Configurations page to create or edit configurations">
+             <i class="fa fa-gear"></i> Manage AI Configs</a>
+        </div>"""
+
+        preview_html = """
+        <div id="ai-config-preview" class="card mb-3" style="display: none;">
+            <div class="card-header bg-light">
+                <strong>Configuration Preview</strong>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <p class="mb-1"><strong>Provider:</strong> <span id="preview-provider"></span></p>
+                        <p class="mb-1"><strong>Model:</strong> <span id="preview-model"></span></p>
+                    </div>
+                    <div class="col-md-6">
+                        <p class="mb-1"><strong>Temperature:</strong> <span id="preview-temperature"></span></p>
+                        <p class="mb-1"><strong>Max Tokens:</strong> <span id="preview-max-tokens"></span></p>
+                    </div>
+                </div>
+                <hr>
+                <p class="mb-1"><strong>System Role:</strong></p>
+                <p class="text-muted small" id="preview-role"></p>
+                <p class="mb-1"><strong>Prompt Template:</strong></p>
+                <p class="text-muted small" id="preview-prompt"></p>
+            </div>
         </div>"""
 
         fields = super().get_dynamic_fields() or []
+
+        # Add manage button
+        fields.append(HTML(manage_button_html))
+
+        # Add AI Configuration selector
         fields.append(
             Row(
-                Column("role_description", css_class="form-group col-8 mb-0"),
-                Column(HTML(button_html), css_class="form-group col-4 mb-0"),
+                Column("ai_configuration", css_class="form-group col-12 mb-0"),
                 css_class="row form-row",
             )
         )
-        fields.append(
-            Row(
-                Column("prompt", css_class="form-group col-8 mb-0"),
-                Column("saved_prompts", css_class="form-group col-4 mb-0"),
-                css_class="row form-row",
-            )
-        )
+
+        # Add preview area
+        fields.append(HTML(preview_html))
+
         return fields
 
 

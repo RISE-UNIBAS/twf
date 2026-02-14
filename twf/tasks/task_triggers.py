@@ -279,20 +279,18 @@ def start_dict_wikidata_batch(request):
 def start_dictionaries_batch_unified(request):
     """
     Unified task trigger for dictionary AI batch processing.
-    Uses the unified task that works with any AI provider.
+    Uses AIConfiguration for all AI settings (provider, model, prompt, etc.).
     """
     from twf.tasks.dictionary_tasks import search_ai_entries
 
-    provider = request.POST.get("ai_provider", "openai")
-    model = request.POST.get("model", "")
+    ai_configuration_id = request.POST.get("ai_configuration")
     dictionary_id = request.POST.get("dictionary")
 
     return trigger_ai_task(
         request,
         search_ai_entries,
         dictionary_id=dictionary_id,
-        ai_provider=provider,
-        model=model,
+        ai_configuration_id=ai_configuration_id,
     )
 
 
@@ -374,16 +372,15 @@ def start_dict_wikidata_request(request):
 def start_dictionaries_request_unified(request):
     """
     Unified task trigger for dictionary AI request (supervised) processing.
-    Uses the unified task that works with any AI provider.
+    Uses AIConfiguration for all AI settings (provider, model, prompt, etc.).
     """
     from twf.tasks.dictionary_tasks import search_ai_entry
 
-    provider = request.POST.get("ai_provider", "openai")
-    model = request.POST.get("model", "")
+    ai_configuration_id = request.POST.get("ai_configuration")
     entry_id = request.GET.get("entry_id")
 
     return trigger_ai_task(
-        request, search_ai_entry, entry_id=entry_id, ai_provider=provider, model=model
+        request, search_ai_entry, entry_id=entry_id, ai_configuration_id=ai_configuration_id
     )
 
 
@@ -392,19 +389,17 @@ def start_dictionaries_request_unified(request):
 def start_documents_batch_unified(request):
     """
     Unified task trigger for document AI batch processing.
-    Uses the unified task that works with any AI provider.
+    Uses AIConfiguration for all AI settings (provider, model, prompt, etc.).
     """
     from twf.tasks.document_tasks import search_ai_for_docs
 
-    provider = request.POST.get("ai_provider", "openai")
-    model = request.POST.get("model", "")
+    ai_configuration_id = request.POST.get("ai_configuration")
     request_level = request.POST.get("request_level")
 
     return trigger_ai_task(
         request,
         search_ai_for_docs,
-        ai_provider=provider,
-        model=model,
+        ai_configuration_id=ai_configuration_id,
         request_level=request_level,
     )
 
@@ -460,40 +455,36 @@ def start_sheet_metadata(request):
 def start_collections_batch_unified(request):
     """
     Unified task trigger for collection AI batch processing.
-    Uses the unified task that works with any AI provider.
+    Uses AIConfiguration for all AI settings (provider, model, prompt, etc.).
     """
     from twf.tasks.collection_tasks import search_ai_for_collection
 
-    provider = request.POST.get("ai_provider", "openai")
-    model = request.POST.get("model", "")
+    ai_configuration_id = request.POST.get("ai_configuration")
     collection_id = request.POST.get("collection")
 
     return trigger_ai_task(
         request,
         search_ai_for_collection,
         collection_id=collection_id,
-        ai_provider=provider,
-        model=model,
+        ai_configuration_id=ai_configuration_id,
     )
 
 
 def start_collections_request_unified(request):
     """
     Unified task trigger for collection AI request (supervised) processing.
-    Uses the unified task that works with any AI provider.
+    Uses AIConfiguration for all AI settings (provider, model, prompt, etc.).
     """
     from twf.tasks.collection_tasks import search_ai_for_collection_item
 
-    provider = request.POST.get("ai_provider", "openai")
-    model = request.POST.get("model", "")
+    ai_configuration_id = request.POST.get("ai_configuration")
     item_id = request.GET.get("item_id")
 
     return trigger_ai_task(
         request,
         search_ai_for_collection_item,
         item_id=item_id,
-        ai_provider=provider,
-        model=model,
+        ai_configuration_id=ai_configuration_id,
     )
 
 
@@ -514,19 +505,17 @@ def start_copy_project(request):
 def start_query_project_unified(request):
     """
     Unified task trigger for AI queries.
-    Uses the unified task that works with any AI provider.
+    Uses AIConfiguration for all AI settings (provider, model, prompt, etc.).
     """
     from twf.tasks.project_tasks import query_project_unified
 
-    provider = request.POST.get("ai_provider", "openai")
-    model = request.POST.get("model", "")
+    ai_configuration_id = request.POST.get("ai_configuration")
     documents = request.POST.getlist("documents")
 
     return trigger_ai_task(
         request,
         query_project_unified,
-        ai_provider=provider,
-        model=model,
+        ai_configuration_id=ai_configuration_id,
         documents=documents,
     )
 

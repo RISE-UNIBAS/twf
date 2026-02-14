@@ -333,93 +333,12 @@ class ProjectAIBaseForm(BaseMultiModalAIBatchForm):
 
 class UnifiedAIQueryForm(ProjectAIBaseForm):
     """
-    Unified form for querying any AI provider with dynamic provider selection.
+    Unified form for querying AI with configurations.
 
-    This form provides a dropdown to select from available AI providers
-    and dynamically adjusts multimodal support based on the selected provider.
+    Uses AIConfiguration objects which contain all settings
+    (provider, model, prompt, role, etc.). The form only selects
+    which configuration to use and query-specific options.
     """
-
-    # Provider configuration with multimodal support flags
-    PROVIDER_CONFIG = {
-        "openai": {"label": "OpenAI (ChatGPT)", "multimodal": True},
-        "genai": {"label": "Google Gemini", "multimodal": True},
-        "anthropic": {"label": "Anthropic Claude", "multimodal": True},
-        "mistral": {"label": "Mistral", "multimodal": False},
-        "deepseek": {"label": "DeepSeek", "multimodal": True},
-        "qwen": {"label": "Qwen", "multimodal": True},
-    }
-
-    ai_provider = forms.ChoiceField(
-        label="AI Provider",
-        required=True,
-        help_text="Select the AI provider to use for this query.",
-        widget=forms.Select(attrs={"class": "form-select", "style": "width: 100%;"}),
-    )
-
-    model = forms.CharField(
-        label="Model",
-        required=True,
-        help_text="The AI model to use (e.g., gpt-4o, claude-3-5-sonnet-20241022, gemini-2.0-flash-exp).",
-        widget=forms.TextInput(
-            attrs={
-                "class": "form-control",
-                "style": "width: 100%;",
-                "placeholder": "Model name",
-            }
-        ),
-    )
-
-    def __init__(self, *args, **kwargs):
-        """
-        Initialize the unified AI query form.
-
-        Args:
-            *args: Variable length argument list.
-            **kwargs: Arbitrary keyword arguments.
-        """
-        # Extract project to check enabled providers
-        project = kwargs.get("project")
-
-        # Determine multimodal support based on provider (if specified in data)
-        provider = None
-        if args and isinstance(args[0], dict):
-            provider = args[0].get("ai_provider")
-        elif "data" in kwargs and kwargs["data"]:
-            provider = kwargs["data"].get("ai_provider")
-
-        # Set multimodal support based on provider
-        if provider and provider in self.PROVIDER_CONFIG:
-            kwargs["multimodal_support"] = self.PROVIDER_CONFIG[provider]["multimodal"]
-        else:
-            # Default to True for initial form display
-            kwargs["multimodal_support"] = True
-
-        super().__init__(*args, **kwargs)
-
-        # Build provider choices based on project configuration
-        if project:
-            display_conf = project.conf_display.get("ai_providers", {})
-            enabled_providers = []
-
-            for provider_key, provider_info in self.PROVIDER_CONFIG.items():
-                # Check if provider is enabled (default to True if not specified)
-                provider_enabled_key = f"enable_{provider_key.replace('genai', 'gemini').
-                replace('anthropic', 'claude')}"
-                if display_conf.get(provider_enabled_key, True):
-                    enabled_providers.append((provider_key, provider_info["label"]))
-
-            self.fields["ai_provider"].choices = enabled_providers
-        else:
-            # Fallback to all providers if no project
-            self.fields["ai_provider"].choices = [
-                (key, info["label"]) for key, info in self.PROVIDER_CONFIG.items()
-            ]
-
-        # Set default model from credentials if available
-        if project and provider:
-            creds = project.get_credentials(provider)
-            if creds and "default_model" in creds and creds["default_model"]:
-                self.fields["model"].initial = creds["default_model"]
 
     def get_button_label(self):
         """
@@ -429,21 +348,3 @@ class UnifiedAIQueryForm(ProjectAIBaseForm):
             str: The button label.
         """
         return "Ask AI"
-
-    def get_dynamic_fields(self):
-        """
-        Get the dynamic fields for the form.
-
-        Returns:
-            list: A list of form field layouts including provider selection.
-        """
-        # Add provider and model selection at the top
-        provider_fields = [
-            Row(
-                Column("ai_provider", css_class="form-group col-6 mb-3"),
-                Column("model", css_class="form-group col-6 mb-3"),
-                css_class="row form-row",
-            ),
-        ]
-        # Then add parent fields (prompt, role, etc.) and documents
-        return provider_fields + super().get_dynamic_fields()
