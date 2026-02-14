@@ -104,16 +104,4 @@
     </div>
     {% endif %}
 </div>
-
-<script>
-    // Clear test result from session after displaying
-    {% if request.session.test_result %}
-    fetch("{% url 'twf:project_ai_config_test' ai_config.pk %}", {
-        method: 'DELETE',
-        headers: {
-            'X-CSRFToken': '{{ csrf_token }}'
-        }
-    });
-    {% endif %}
-</script>
 {% endblock %}

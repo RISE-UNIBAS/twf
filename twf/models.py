@@ -2310,12 +2310,11 @@ class AIConfiguration(TimeStampedModel):
         # Fill in prompt template
         filled_prompt = self.prompt_template.format(**context_variables)
 
-        # Create client with temperature=1 (the default most models accept)
+        # Create client with minimal settings
         client = create_ai_client(
             provider=self.provider,
             api_key=self.api_key,
             system_prompt=self.system_role,
-            temperature=1,
         )
 
         # Execute with just model and prompt - no extra parameters
