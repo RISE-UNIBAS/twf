@@ -342,6 +342,6 @@ def end_tag_enrichment_workflow(request):
     project = TWFView.s_get_project(request)
     user = request.user
 
-    end_workflow(request, project, user, "review_tags_enrichment", "twf:tags_enrich")
+    end_workflow(request, project, user, "review_tags_enrichment", "twf:tags_enrichment")
 
-    return redirect("twf:tags_enrich")
+    return redirect("twf:tags_enrichment")

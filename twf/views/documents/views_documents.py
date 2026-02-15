@@ -707,18 +707,6 @@ class TWFDocumentDetailView(ProjectPermissionMixin, TWFDocumentView):
         return breadcrumbs
 
 
-class TWFDocumentNameView(ProjectPermissionMixin, TWFDocumentView):
-    """View for naming documents."""
-    required_permission = "document.edit"
-
-    template_name = "twf/documents/name_documents.html"
-    page_title = "Name Documents"
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        return context
-
-
 class TWFDocumentReviewView(ProjectPermissionMixin, TWFDocumentView):
     """View for naming documents."""
     required_permission = "document.edit"

@@ -62,18 +62,14 @@ class StartTagGroupingWorkflowForm(forms.Form):
         self.helper.method = "post"
         self.helper.form_id = "start-tag-grouping-workflow-form"
         self.helper.layout = Layout(
+            "tag_type",
+            "batch_size",
             Div(
-                HTML("<h5>Start Tag Grouping Workflow</h5>"),
-                "tag_type",
-                "batch_size",
-                Div(
-                    Submit(
-                        "start_workflow", "Start Workflow", css_class="btn btn-primary"
-                    ),
-                    css_class="mt-3",
+                Submit(
+                    "start_workflow", "Start Workflow", css_class="btn btn-dark"
                 ),
-                css_class="card card-body mb-3",
-            )
+                css_class="mt-3",
+            ),
         )
 
 
@@ -188,16 +184,12 @@ class StartEnrichmentWorkflowForm(forms.Form):
         self.helper.method = "post"
         self.helper.form_id = "start-enrichment-workflow-form"
         self.helper.layout = Layout(
+            "tag_type",
+            "batch_size",
             Div(
-                HTML("<h5>Start Tag Enrichment Workflow</h5>"),
-                "tag_type",
-                "batch_size",
-                Div(
-                    Submit(
-                        "start_workflow", "Start Workflow", css_class="btn btn-primary"
-                    ),
-                    css_class="mt-3",
+                Submit(
+                    "start_workflow", "Start Workflow", css_class="btn btn-dark"
                 ),
-                css_class="card card-body mb-3",
-            )
+                css_class="mt-3",
+            ),
         )

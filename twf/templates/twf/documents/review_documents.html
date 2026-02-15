@@ -336,8 +336,10 @@
         <div class="row">
             <div class="col-md-8 mx-auto">
                 <div class="card">
+                    <div class="card-header bg-dark text-white">
+                        <h5 class="card-title mb-0">{{ workflow_definition.title }}</h5>
+                    </div>
                     <div class="card-body text-center">
-                        <h3>{{ workflow_definition.title }}</h3>
                         <p class="lead">{{ workflow_definition.description }}</p>
 
                         {% if workflow_instructions %}
@@ -376,7 +378,7 @@
 
                         <p>There is no active Review Documents Workflow for user {{ request.user }}.</p>
 
-                        <button type="button" class="btn btn-primary btn-lg show-confirm-modal"
+                        <button type="button" class="btn btn-dark btn-lg show-confirm-modal"
                                 data-message="Do you really want to start a Review workflow with {{ workflow_definition.batch_size }} documents?"
                                 data-redirect-url="{% url 'twf:start_review_document_workflow' %}">
                             <i class="bi bi-play-circle"></i> Start Document Review Workflow

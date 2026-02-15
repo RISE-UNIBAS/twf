@@ -3,16 +3,19 @@
 
 {% block content %}
     <p class="lead">Enrich tags with normalized data.</p>
-    {% include 'twf/base/alert_info.html' %}
 
     {% if not has_active_workflow %}
         {# Show workflow start form when no active workflow #}
-        <div class="alert alert-info">
-            <h5><i class="fa fa-info-circle"></i> Start a Tag Enrichment Workflow</h5>
-            <p>Select a tag type to enrich below. Enrichment types are configured in Project Settings > Task Settings > Tag Type Settings.</p>
-        </div>
         {% if workflow_start_form %}
-            {% crispy workflow_start_form %}
+            <div class="card">
+                <div class="card-header bg-dark text-white">
+                    <h5 class="card-title mb-0">Start Tag Enrichment Workflow</h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted mb-3">Select a tag type to enrich below. Enrichment types are configured in Project Settings > Task Settings > Tag Type Settings.</p>
+                    {% crispy workflow_start_form %}
+                </div>
+            </div>
         {% else %}
             <div class="alert alert-warning">
                 <strong>No enrichment types configured.</strong>

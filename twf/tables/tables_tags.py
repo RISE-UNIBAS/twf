@@ -11,7 +11,7 @@ class TagTable(tables.Table):
     Table for displaying tags associated with pages.
     """
     variation = tables.Column(
-        verbose_name="Variation", attrs={"td": {"class": "fw-bold"}}
+        verbose_name="Page Tag", attrs={"td": {"class": "fw-bold"}}
     )
     variation_type = tables.Column(verbose_name="Type")
     status = tables.Column(
@@ -170,7 +170,7 @@ class IgnoredTagTable(tables.Table):
     Shows only basic info and minimal action buttons.
     """
     variation = tables.Column(
-        verbose_name="Variation", attrs={"td": {"class": "fw-bold"}}
+        verbose_name="Page Tag", attrs={"td": {"class": "fw-bold"}}
     )
     variation_type = tables.Column(verbose_name="Type")
     options = tables.Column(empty_values=(), verbose_name="Options", orderable=False)
@@ -219,7 +219,7 @@ class TagsWithCommentsTable(tables.Table):
     Includes a comments column showing the dictionary entry notes.
     """
     variation = tables.Column(
-        verbose_name="Variation", attrs={"td": {"class": "fw-bold"}}
+        verbose_name="Page Tag", attrs={"td": {"class": "fw-bold"}}
     )
     variation_type = tables.Column(verbose_name="Type")
     status = tables.Column(

@@ -64,7 +64,6 @@ from twf.views.documents.views_crud import (
 from twf.views.documents.views_documents import (
     TWFDocumentsOverviewView,
     TWFDocumentsBrowseView,
-    TWFDocumentNameView,
     TWFDocumentDetailView,
     TWFDocumentReviewView,
     TWFDocumentsSearchView,
@@ -480,7 +479,6 @@ urlpatterns = [
         "documents/search/", TWFDocumentsSearchView.as_view(), name="documents_search"
     ),
     path("documents/review/", TWFDocumentReviewView.as_view(), name="documents_review"),
-    path("documents/name/", TWFDocumentNameView.as_view(), name="name_documents"),
     path("document/<int:pk>/", TWFDocumentDetailView.as_view(), name="view_document"),
     path(
         "document/<int:pk>/update-options/",
