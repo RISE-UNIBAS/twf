@@ -92,7 +92,7 @@ class DocumentSearchForm(forms.Form):
 
         self.helper = FormHelper()
         self.helper.form_method = "post"
-        self.helper.form_class = "form form-control"
+        self.helper.form_class = "form"
         controls_html_list = []
         metadata_object_list = sorted(
             set(
@@ -284,7 +284,7 @@ class DocumentForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         helper = FormHelper()
         helper.form_method = "post"
-        helper.form_class = "form form-control"
+        helper.form_class = "form"
 
         helper.layout = Layout(
             Row(

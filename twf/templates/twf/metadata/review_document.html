@@ -6,10 +6,8 @@
     {% if has_active_workflow %}
         <div class="row">
             <div class="col-12">
-                <div class="alert alert-primary">
-                    <strong>Review Document Metadata</strong>
-                    <span class="float-end">Progress: <strong>{{ workflow.current_item_index|add:1 }} of {{ workflow.item_count }}</strong></span>
-                </div>
+                {% url 'twf:end_metadata_document_review_workflow' as end_url %}
+                {% include 'twf/includes/workflow_progress_card.html' with workflow=workflow workflow_definition=workflow_definition end_workflow_url=end_url %}
             </div>
         </div>
 

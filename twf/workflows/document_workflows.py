@@ -4,6 +4,7 @@ from django.shortcuts import redirect
 from twf.models import Workflow, Document
 from twf.tasks.instant_tasks import start_related_task
 from twf.views.views_base import TWFView
+from twf.workflows.workflow_utils import end_workflow
 
 
 def create_document_workflow(project, user, item_count=None):
@@ -75,5 +76,15 @@ def start_review_document_workflow(request):
     if not started_workflow:
         messages.error(request, "No documents available for review.")
         return redirect("twf:documents_review")
+
+    return redirect("twf:documents_review")
+
+
+def end_review_document_workflow(request):
+    """End/cancel the current document review workflow."""
+    project = TWFView.s_get_project(request)
+    user = request.user
+
+    end_workflow(request, project, user, "review_documents", "twf:documents_review")
 
     return redirect("twf:documents_review")

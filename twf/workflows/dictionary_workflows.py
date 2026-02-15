@@ -6,8 +6,11 @@ This module provides functions for creating and managing dictionary-related work
 """
 
 from django.db.models import Q
+from django.shortcuts import redirect
 from twf.models import Workflow, DictionaryEntry, Dictionary
 from twf.tasks.instant_tasks import start_related_task
+from twf.workflows.workflow_utils import end_workflow
+from twf.views.views_base import TWFView
 
 
 def create_dictionary_enrichment_workflow(project, user, dictionary_id, enrichment_type, item_count=None):
@@ -135,3 +138,13 @@ def get_available_dictionary_entry_count(project, dictionary_id, enrichment_type
             count += 1
 
     return count
+
+
+def end_dictionary_enrichment_workflow(request):
+    """End/cancel the current dictionary enrichment workflow."""
+    project = TWFView.s_get_project(request)
+    user = request.user
+
+    end_workflow(request, project, user, "review_dictionary_enrichment", "twf:dictionaries_enrichment")
+
+    return redirect("twf:dictionaries_enrichment")

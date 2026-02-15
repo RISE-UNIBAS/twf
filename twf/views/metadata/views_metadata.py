@@ -283,6 +283,7 @@ class TWFMetadataReviewPagesView(ProjectPermissionMixin, TWFMetadataView):
         # Fetch the next page
         next_page = workflow.get_next_item()
         context["workflow"] = workflow
+        context["workflow_definition"] = workflow.get_workflow_definition()
         context["page"] = next_page
 
         # Get field configuration
@@ -529,6 +530,7 @@ class TWFMetadataReviewDocumentsView(ProjectPermissionMixin, TWFMetadataView):
         # Fetch the next document
         next_document = workflow.get_next_item()
         context["workflow"] = workflow
+        context["workflow_definition"] = workflow.get_workflow_definition()
         context["document"] = next_document
 
         # Get field configuration

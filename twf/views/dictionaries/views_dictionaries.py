@@ -987,6 +987,7 @@ class TWFDictionaryEnrichmentView(ProjectPermissionMixin, FormView, TWFDictionar
         context = super().get_context_data(**kwargs)
         context["has_active_workflow"] = True
         context["workflow"] = workflow
+        context["workflow_definition"] = workflow.get_workflow_definition()
         context["workflow_progress"] = workflow.get_progress()
 
         next_entry = workflow.get_next_item()

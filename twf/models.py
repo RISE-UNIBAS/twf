@@ -2469,8 +2469,8 @@ class Workflow(models.Model):
         # Update the related task status if linked
         if self.related_task:
             # Calculate duration
-            if self.related_task.created_at:
-                duration = (timezone.now() - self.related_task.created_at).total_seconds()
+            if self.related_task.start_time:
+                duration = (timezone.now() - self.related_task.start_time).total_seconds()
                 duration_str = f"{int(duration // 60)}m {int(duration % 60)}s" if duration > 60 else f"{duration:.0f}s"
             else:
                 duration_str = "unknown"

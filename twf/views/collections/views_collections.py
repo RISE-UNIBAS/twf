@@ -581,6 +581,7 @@ class TWFCollectionsReviewView(ProjectPermissionMixin, FormView, TWFCollectionsV
 
         # Fetch the next document
         context["workflow"] = self.workflow
+        context["workflow_definition"] = self.workflow.get_workflow_definition()
         context["collection_item"] = self.next_item
 
         # Add workflow configuration

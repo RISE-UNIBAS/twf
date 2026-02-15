@@ -5,7 +5,12 @@
     <p class="lead">Review and update collection items in a structured workflow.</p>
 
     {% if has_active_workflow %}
-        <p>There is an active Review Collection Items Workflow for user {{ request.user }}.</p>
+        <div class="row">
+            <div class="col-12">
+                {% url 'twf:end_review_collection_workflow' as end_url %}
+                {% include 'twf/includes/workflow_progress_card.html' with workflow=workflow workflow_definition=workflow_definition end_workflow_url=end_url %}
+            </div>
+        </div>
         {% crispy form %}
     {% else %}
          <p>There is no active Review Collection Items Workflow for user {{ request.user }}.</p>

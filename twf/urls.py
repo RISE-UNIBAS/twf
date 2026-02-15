@@ -230,8 +230,23 @@ from twf.views.tags.views_tags import (
     TWFTagDetailView,
     TWFManageTagsView,
 )
-from twf.workflows.collection_workflows import start_review_collection_workflow
-from twf.workflows.document_workflows import start_review_document_workflow
+from twf.workflows.collection_workflows import (
+    start_review_collection_workflow,
+    end_review_collection_workflow,
+)
+from twf.workflows.document_workflows import (
+    start_review_document_workflow,
+    end_review_document_workflow,
+)
+from twf.workflows.tag_workflows import (
+    end_tag_grouping_workflow,
+    end_tag_enrichment_workflow,
+)
+from twf.workflows.dictionary_workflows import end_dictionary_enrichment_workflow
+from twf.workflows.metadata_workflows import (
+    end_metadata_document_review_workflow,
+    end_metadata_page_review_workflow,
+)
 
 urlpatterns = [
     #############################
@@ -831,9 +846,44 @@ urlpatterns = [
         name="start_review_document_workflow",
     ),
     path(
+        "workflows/documents/review/end/",
+        end_review_document_workflow,
+        name="end_review_document_workflow",
+    ),
+    path(
         "workflows/collection/review/start/<int:collection_id>/",
         start_review_collection_workflow,
         name="start_review_collection_workflow",
+    ),
+    path(
+        "workflows/collection/review/end/",
+        end_review_collection_workflow,
+        name="end_review_collection_workflow",
+    ),
+    path(
+        "workflows/tags/grouping/end/",
+        end_tag_grouping_workflow,
+        name="end_tag_grouping_workflow",
+    ),
+    path(
+        "workflows/tags/enrichment/end/",
+        end_tag_enrichment_workflow,
+        name="end_tag_enrichment_workflow",
+    ),
+    path(
+        "workflows/dictionaries/enrichment/end/",
+        end_dictionary_enrichment_workflow,
+        name="end_dictionary_enrichment_workflow",
+    ),
+    path(
+        "workflows/metadata/documents/end/",
+        end_metadata_document_review_workflow,
+        name="end_metadata_document_review_workflow",
+    ),
+    path(
+        "workflows/metadata/pages/end/",
+        end_metadata_page_review_workflow,
+        name="end_metadata_page_review_workflow",
     ),
     #############################
     # CELERY TASKS

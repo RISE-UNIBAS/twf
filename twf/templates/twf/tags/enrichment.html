@@ -22,44 +22,15 @@
     {% else %}
         {# Show workflow interface when workflow is active #}
         {% if workflow %}
-            <div class="card mb-3">
-                <div class="card-body">
-                    <div class="row align-items-center">
-                        <div class="col-md-8">
-                            <h5 class="card-title mb-1">
-                                <i class="fa fa-tags"></i> {{ workflow_title|default:"Tag Enrichment Workflow" }}
-                            </h5>
-                            <p class="mb-0 text-muted small">
-                                Progress: {{ workflow_progress.completed }} / {{ workflow_progress.total }} tags
-                                ({{ workflow_progress.percentage }}%)
-                            </p>
-                            <div class="progress mt-2" style="height: 20px;">
-                                <div class="progress-bar bg-success" role="progressbar"
-                                     style="width: {{ workflow_progress.percentage }}%"
-                                     aria-valuenow="{{ workflow_progress.completed }}"
-                                     aria-valuemin="0"
-                                     aria-valuemax="{{ workflow_progress.total }}">
-                                    {{ workflow_progress.percentage }}%
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-4 text-end">
-                            <a href="#"
-                               class="btn btn-sm btn-warning show-danger-modal"
-                               data-message="Are you sure you want to cancel this workflow? All progress will be lost and reserved tags will be released."
-                               data-redirect-url="{% url 'twf:celery_task_cancel' workflow.related_task.pk %}">
-                                <i class="fa fa-times"></i> Cancel Workflow
-                            </a>
-                        </div>
-                    </div>
-                    {% if workflow_instructions %}
-                        <div class="mt-3 alert alert-light">
-                            <strong>Instructions:</strong>
-                            <div>{{ workflow_instructions|safe }}</div>
-                        </div>
-                    {% endif %}
+            {% url 'twf:end_tag_enrichment_workflow' as end_url %}
+            {% include 'twf/includes/workflow_progress_card.html' with workflow=workflow workflow_definition=workflow_definition end_workflow_url=end_url %}
+
+            {% if workflow_instructions %}
+                <div class="alert alert-info">
+                    <strong>Instructions:</strong>
+                    <div>{{ workflow_instructions|safe }}</div>
                 </div>
-            </div>
+            {% endif %}
         {% endif %}
 
         {% if has_next_tag %}

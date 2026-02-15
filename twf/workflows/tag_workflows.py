@@ -6,9 +6,12 @@ This module provides functions for creating and managing tag-related workflows.
 """
 
 from django.db.models import Count
+from django.shortcuts import redirect
 from twf.models import Workflow, PageTag
 from twf.tasks.instant_tasks import start_related_task
 from twf.utils.tags_utils import get_date_types, get_enrichment_type_for_tag_type
+from twf.workflows.workflow_utils import end_workflow
+from twf.views.views_base import TWFView
 
 
 def get_available_tag_count(project, tag_type):
@@ -321,3 +324,24 @@ def create_enrichment_workflow(project, user, tag_type, item_count=None):
     workflow.assigned_tag_items.set(PageTag.objects.filter(id__in=available_tags))
 
     return workflow
+
+
+# End workflow functions
+def end_tag_grouping_workflow(request):
+    """End/cancel the current tag grouping workflow."""
+    project = TWFView.s_get_project(request)
+    user = request.user
+
+    end_workflow(request, project, user, "review_tags_grouping", "twf:tags_group")
+
+    return redirect("twf:tags_group")
+
+
+def end_tag_enrichment_workflow(request):
+    """End/cancel the current tag enrichment workflow."""
+    project = TWFView.s_get_project(request)
+    user = request.user
+
+    end_workflow(request, project, user, "review_tags_enrichment", "twf:tags_enrich")
+
+    return redirect("twf:tags_enrich")

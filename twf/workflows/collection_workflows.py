@@ -4,6 +4,7 @@ from django.shortcuts import redirect, get_object_or_404
 from twf.models import Workflow, Document, CollectionItem, Collection
 from twf.tasks.instant_tasks import start_related_task
 from twf.views.views_base import TWFView
+from twf.workflows.workflow_utils import end_workflow
 
 
 def create_collection_workflow(project, user, collection, item_count=None):
@@ -83,5 +84,15 @@ def start_review_collection_workflow(request, collection_id):
     if not started_workflow:
         messages.error(request, "No items available for review.")
         return redirect("twf:collections_review")
+
+    return redirect("twf:collections_review")
+
+
+def end_review_collection_workflow(request):
+    """End/cancel the current collection review workflow."""
+    project = TWFView.s_get_project(request)
+    user = request.user
+
+    end_workflow(request, project, user, "review_collection", "twf:collections_review")
 
     return redirect("twf:collections_review")
