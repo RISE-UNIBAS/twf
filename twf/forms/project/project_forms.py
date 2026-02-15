@@ -236,7 +236,7 @@ class CreateProjectForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.helper = FormHelper()
         self.helper.form_method = "post"
-        self.helper.form_class = "form form-control"
+        self.helper.form_class = "form"
         self.helper.layout = Layout(
             Row(
                 Column("title", css_class="form-group col-6 mb-3"),

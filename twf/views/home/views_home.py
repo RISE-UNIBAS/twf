@@ -83,11 +83,6 @@ class TWFHomeView(TWFView):
 
             nav += [
                 {"url": reverse("twf:user_overview"), "value": "Your Profile"},
-                {"url": reverse("twf:user_profile"), "value": "Change User Info"},
-                {
-                    "url": reverse("twf:user_change_password"),
-                    "value": "Change Password",
-                },
                 {"url": reverse("twf:user_logout"), "value": "Logout"},
             ]
 
@@ -199,7 +194,7 @@ class TWFHomePasswordChangeView(TWFHomeView, PasswordChangeView):
     template_name = "twf/home/users/change_password.html"
     page_title = "Change Password"
     form_class = ChangePasswordForm
-    success_url = reverse_lazy("twf:home")
+    success_url = reverse_lazy("twf:user_overview")
 
     def form_valid(self, form):
         """Add success message before redirecting."""
@@ -213,7 +208,7 @@ class TWFHomeUserProfileView(LoginRequiredMixin, FormView, TWFHomeView):
     template_name = "twf/home/users/profile.html"
     page_title = "User Profile"
     form_class = UserProfileForm
-    success_url = reverse_lazy("twf:user_profile")
+    success_url = reverse_lazy("twf:user_overview")
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

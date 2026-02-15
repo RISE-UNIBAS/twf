@@ -67,7 +67,7 @@ class TWFTagsView(LoginRequiredMixin, TWFView):
                     },
                     {
                         "url": reverse("twf:tags_all"),
-                        "value": "All Tags",
+                        "value": "Browse Tags",
                         "permission": "tag.view",
                     },
                     {
