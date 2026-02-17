@@ -83,35 +83,6 @@
                 </div>
             </div>
         </div>
-
-        <div class="row mt-4">
-            <div class="col-12">
-                <div class="alert alert-info">
-                    <h5><i class="fas fa-info-circle"></i> About Metadata Blocks</h5>
-
-                    <p><strong>What are metadata blocks?</strong></p>
-                    <p>Metadata blocks are top-level keys in the document or page metadata JSON. For example, if you imported JSON metadata with a storage key of <code>json_import</code>, that becomes a metadata block.</p>
-
-                    <p><strong>Common metadata blocks:</strong></p>
-                    <ul>
-                        <li><code>json_import</code> - Default key for JSON metadata imports</li>
-                        <li><code>google_sheets</code> - Metadata loaded from Google Sheets</li>
-                        <li><code>transkribus_metadata</code> - Metadata enriched from Transkribus API</li>
-                    </ul>
-
-                    <p><strong>How to delete a block:</strong></p>
-                    <ol>
-                        <li>Select whether you want to delete from documents or pages</li>
-                        <li>Choose the metadata block to delete from the dropdown</li>
-                        <li>Check the confirmation box</li>
-                        <li>Click "Delete Metadata Block"</li>
-                    </ol>
-
-                    <p><strong>What happens when you delete?</strong></p>
-                    <p>The selected metadata key and all its nested data will be removed from every document or page in this project. Other metadata blocks will remain untouched.</p>
-                </div>
-            </div>
-        </div>
     </div>
 
     {{ doc_keys|json_script:"doc-keys-data" }}

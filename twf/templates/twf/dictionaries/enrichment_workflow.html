@@ -2,20 +2,13 @@
 {% load crispy_forms_tags %}
 
 {% block content %}
-    <p class="lead">Enrich dictionary entries with normalized data.</p>
-    {% include 'twf/base/alert_info.html' %}
-
     {% if not has_active_workflow %}
         {# Show workflow start form when no active workflow #}
-        <div class="alert alert-info">
-            <h5><i class="fa fa-info-circle"></i> Start a Dictionary Enrichment Workflow</h5>
-            <p>Choose between manual enrichment (supervised) or batch enrichment (automated).</p>
-        </div>
 
         <div class="row mb-4">
             <div class="col-md-6">
                 <div class="card">
-                    <div class="card-header bg-primary text-white">
+                    <div class="card-header bg-dark text-white">
                         <h5 class="mb-0"><i class="fa fa-hand-pointer"></i> Manual Enrichment</h5>
                     </div>
                     <div class="card-body">
@@ -26,19 +19,19 @@
             </div>
             <div class="col-md-6">
                 <div class="card">
-                    <div class="card-header bg-success text-white">
+                    <div class="card-header bg-dark text-white">
                         <h5 class="mb-0"><i class="fa fa-robot"></i> Batch Enrichment</h5>
                     </div>
                     <div class="card-body">
                         <p>Automated workflows - enrich all entries in one batch operation.</p>
                         <div class="d-grid gap-2">
-                            <a href="{% url 'twf:dictionaries_batch_gnd' %}" class="btn btn-sm btn-outline-success">
+                            <a href="{% url 'twf:dictionaries_batch_gnd' %}" class="btn btn-sm btn-outline-dark">
                                 <i class="fa fa-book"></i> GND Batch
                             </a>
-                            <a href="{% url 'twf:dictionaries_batch_wikidata' %}" class="btn btn-sm btn-outline-success">
+                            <a href="{% url 'twf:dictionaries_batch_wikidata' %}" class="btn btn-sm btn-outline-dark">
                                 <i class="fa fa-wikipedia-w"></i> Wikidata Batch
                             </a>
-                            <a href="{% url 'twf:dictionaries_batch_geonames' %}" class="btn btn-sm btn-outline-success">
+                            <a href="{% url 'twf:dictionaries_batch_geonames' %}" class="btn btn-sm btn-outline-dark">
                                 <i class="fa fa-map-marker"></i> GeoNames Batch
                             </a>
                         </div>
@@ -47,50 +40,57 @@
             </div>
         </div>
 
-        <h5 class="mb-3">Start Manual Enrichment Workflow</h5>
-        <form method="post" id="start-workflow-form">
-            {% csrf_token %}
-            <input type="hidden" name="start_workflow" value="1">
-
-            <div class="mb-3">
-                <label for="dictionary_id" class="form-label">Dictionary</label>
-                <select name="dictionary_id" id="dictionary_id" class="form-select" required>
-                    <option value="">Select a dictionary...</option>
-                    {% for dictionary in dictionaries %}
-                        <option value="{{ dictionary.id }}">{{ dictionary.label }} ({{ dictionary.type }})</option>
-                    {% endfor %}
-                </select>
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h5 class="mb-0">Start Manual Enrichment Workflow</h5>
             </div>
+            <div class="card-body">
+                <p class="text-muted mb-3">Supervised workflow - enrich entries one at a time with full control.</p>
+                <form method="post" id="start-workflow-form">
+                    {% csrf_token %}
+                    <input type="hidden" name="start_workflow" value="1">
 
-            <div class="mb-3">
-                <label for="enrichment_type" class="form-label">Enrichment Type</label>
-                <select name="enrichment_type" id="enrichment_type" class="form-select" required>
-                    <option value="">Select enrichment type...</option>
-                    {% for value, label in enrichment_types %}
-                        <option value="{{ value }}">{{ label }}</option>
-                    {% endfor %}
-                </select>
-                <div class="form-text">
-                    <strong>Verse:</strong> Bible verse references<br>
-                    <strong>Date:</strong> Dates in EDTF format<br>
-                    <strong>Authority ID:</strong> Generic external authority IDs<br>
-                    <strong>GND:</strong> German National Library authority IDs<br>
-                    <strong>Wikidata:</strong> Wikidata entity IDs<br>
-                    <strong>GeoNames:</strong> Geographic location IDs
-                </div>
+                    <div class="mb-3">
+                        <label for="dictionary_id" class="form-label">Dictionary</label>
+                        <select name="dictionary_id" id="dictionary_id" class="form-select" required>
+                            <option value="">Select a dictionary...</option>
+                            {% for dictionary in dictionaries %}
+                                <option value="{{ dictionary.id }}">{{ dictionary.label }} ({{ dictionary.type }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="enrichment_type" class="form-label">Enrichment Type</label>
+                        <select name="enrichment_type" id="enrichment_type" class="form-select" required>
+                            <option value="">Select enrichment type...</option>
+                            {% for value, label in enrichment_types %}
+                                <option value="{{ value }}">{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                        <div class="form-text">
+                            <strong>Verse:</strong> Bible verse references<br>
+                            <strong>Date:</strong> Dates in EDTF format<br>
+                            <strong>Authority ID:</strong> Generic external authority IDs<br>
+                            <strong>GND:</strong> German National Library authority IDs<br>
+                            <strong>Wikidata:</strong> Wikidata entity IDs<br>
+                            <strong>GeoNames:</strong> Geographic location IDs
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="batch_size" class="form-label">Batch Size</label>
+                        <input type="number" name="batch_size" id="batch_size" class="form-control"
+                               value="20" min="1" max="100" required>
+                        <div class="form-text">Number of entries to enrich in this workflow</div>
+                    </div>
+
+                    <button type="submit" class="btn btn-dark">
+                        <i class="fa fa-play"></i> Start Workflow
+                    </button>
+                </form>
             </div>
-
-            <div class="mb-3">
-                <label for="batch_size" class="form-label">Batch Size</label>
-                <input type="number" name="batch_size" id="batch_size" class="form-control"
-                       value="20" min="1" max="100" required>
-                <div class="form-text">Number of entries to enrich in this workflow</div>
-            </div>
-
-            <button type="submit" class="btn btn-primary">
-                <i class="fa fa-play"></i> Start Workflow
-            </button>
-        </form>
+        </div>
 
         <script>
         // Dictionary enrichment type configurations

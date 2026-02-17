@@ -47,12 +47,7 @@ class TWFCollectionsView(LoginRequiredMixin, TWFView):
             {
                 "name": "Overview",
                 "options": [
-                    {"url": reverse("twf:collections"), "value": "Overview"},
-                    {
-                        "url": reverse("twf:collections_view"),
-                        "value": "Your Collections",
-                        "permission": "collection.view",
-                    },
+                    {"url": reverse("twf:collections"), "value": "Collections"},
                     {
                         "url": reverse("twf:project_collections_create"),
                         "value": "Create New Collection",
@@ -89,42 +84,50 @@ class TWFCollectionsView(LoginRequiredMixin, TWFView):
         return 6
 
 
-class TWFCollectionOverviewView(TWFCollectionsView):
+class TWFCollectionOverviewView(ProjectPermissionMixin, SingleTableView, FilterView, TWFCollectionsView):
     """View for the collection overview page."""
+    required_permission = "collection.view"
 
     template_name = "twf/collections/collections_overview.html"
     page_title = "Collections"
     show_context_help = False
+    table_class = CollectionTable
+    filterset_class = CollectionFilter
+    paginate_by = 10
+    model = Collection
+    strict = False
 
-    def post(self, request, *args, **kwargs):
-        """Handle the post request."""
-        logger.debug("Collection post request: %s", request.POST)
-        if "delete_collection" in request.POST:
-            collection = Collection.objects.get(pk=request.POST.get("collection_id"))
-            collection.delete()
-            messages.success(request, "Collection has been deleted successfully.")
+    def get_queryset(self):
+        """Get the queryset for the view."""
+        queryset = Collection.objects.filter(
+            project_id=self.request.session.get("project_id")
+        )
+        return queryset
+
+    def get(self, request, *args, **kwargs):
+        """Handle GET requests."""
+        # Set up initial queryset
+        queryset = self.get_queryset()
+
+        # Initialize the filter
+        self.filterset = self.filterset_class(request.GET or None, queryset=queryset)
+
+        # Set object_list either to all items or filtered items
+        if request.GET and self.filterset.is_bound:
+            self.object_list = self.filterset.qs
+        else:
+            self.object_list = queryset
+
+        # Get context and render response
+        context = self.get_context_data()
+        return self.render_to_response(context)
 
     def get_context_data(self, **kwargs):
         """Get the context data for the view."""
         context = super().get_context_data(**kwargs)
 
-        open_workflows = Workflow.objects.filter(
-            project=self.get_project(),
-            workflow_type="review_collection",
-            status="started",
-        ).count()
-        total_items = CollectionItem.objects.filter(
-            collection__project=self.get_project()
-        ).count()
-        reviewed_items = CollectionItem.objects.filter(
-            collection__project=self.get_project(), status="reviewed"
-        ).count()
-        percentage_reviewed = (
-            reviewed_items / total_items * 100 if total_items > 0 else 0
-        )
-
-        context["open_workflows"] = open_workflows
-        context["percentage_reviewed"] = percentage_reviewed
+        # Add filter to context
+        context["filter"] = self.filterset
 
         return context
 

@@ -2,38 +2,13 @@
 {% load crispy_forms_tags %}
 
 {% block content %}
-    <p class="lead">Configure which metadata fields appear in your review workflows.</p>
-
-    <div class="container-fluid">
-        <div class="row">
-            <div class="col-12">
-                <div class="card">
-                    <div class="card-body">
-                        {% crispy form %}
-                    </div>
-                </div>
-            </div>
+    <div class="card">
+        <div class="card-header bg-dark text-white">
+            <h5 class="mb-0">Metadata Settings</h5>
         </div>
-
-        <div class="row mt-4">
-            <div class="col-12">
-                <div class="alert alert-info">
-                    <h5><i class="fas fa-info-circle"></i> Configuration Guide</h5>
-
-                    <p><strong>Review Workflows:</strong> Select which metadata fields to include in document and page review workflows.</p>
-
-                    <p><strong>Field Configuration:</strong></p>
-                    <ul>
-                        <li><strong>Include:</strong> Check to include this field in the review form</li>
-                        <li><strong>Metadata Key:</strong> The path to the metadata field (e.g., "json_import.author")</li>
-                        <li><strong>Count:</strong> Number of documents/pages with this field</li>
-                        <li><strong>Field Label:</strong> Display name shown in the review form</li>
-                        <li><strong>Field Type:</strong> Input type (text, textarea, number, date, select)</li>
-                    </ul>
-
-                    <p><strong>Usage:</strong> After configuring fields here, they will appear in the Document/Page Review workflows where you can edit metadata values in a batch workflow.</p>
-                </div>
-            </div>
+        <div class="card-body">
+            <p class="text-muted mb-3">Configure which metadata fields appear in your review workflows.</p>
+            {% crispy form %}
         </div>
     </div>
 {% endblock %}

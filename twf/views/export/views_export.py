@@ -46,60 +46,55 @@ class TWFExportView(LoginRequiredMixin, TWFView):
     def get_sub_navigation(self):
         sub_nav = [
             {
-                "name": "Overview",
+                "name": "Exports",
                 "options": [
                     {
                         "url": reverse_lazy("twf:export_overview"),
-                        "value": "Export Overview",
-                    },
-                    {
-                        "url": reverse_lazy("twf:export_publication_metadata"),
-                        "value": "Publication Metadata",
-                        "permission": "import_export.manage",
-                    },
-                    {
-                        "url": reverse_lazy("twf:export_view_export_confs"),
-                        "value": "Export Configurations",
-                        "permission": "import_export.view",
+                        "value": "Overview",
                     },
                     {
                         "url": reverse_lazy("twf:export_view_exports"),
                         "value": "Exports",
                         "permission": "import_export.view",
                     },
-                ],
-            },
-            {
-                "name": "Import Data",
-                "options": [
                     {
-                        "url": reverse_lazy("twf:import_dictionaries"),
-                        "value": "Import Dictionaries",
-                        "permission": "import_export.manage",
+                        "url": reverse_lazy("twf:export_view_export_confs"),
+                        "value": "Export Configurations",
+                        "permission": "import_export.view",
                     },
                 ],
             },
             {
-                "name": "Export Data",
+                "name": "Options",
                 "options": [
                     {
                         "url": reverse_lazy("twf:export_configure"),
-                        "value": "Configure Exports",
+                        "value": "Create Configuration",
                         "permission": "import_export.edit",
                     },
                     {
                         "url": reverse_lazy("twf:export_run"),
-                        "value": "Run Exports",
+                        "value": "Run Configuration",
                         "permission": "import_export.manage",
                     },
                     {
                         "url": reverse_lazy("twf:export_project"),
-                        "value": "Export Project",
+                        "value": "Mosaic Export",
+                        "permission": "import_export.manage",
+                    },
+                ],
+            },
+            {
+                "name": "Settings",
+                "options": [
+                    {
+                        "url": reverse_lazy("twf:export_publication_metadata"),
+                        "value": "Publication Metadata",
                         "permission": "import_export.manage",
                     },
                     {
                         "url": reverse_lazy("twf:export_to_zenodo"),
-                        "value": "Connect to Zenodo",
+                        "value": "Zenodo Connection",
                         "permission": "import_export.manage",
                     },
                 ],

@@ -25,13 +25,6 @@ class MetadataManagementForm(forms.Form):
                   "This will remove the entire block from all documents/pages.",
     )
 
-    confirm_deletion = forms.BooleanField(
-        label="I confirm I want to delete this metadata block",
-        required=True,
-        widget=forms.CheckboxInput(attrs={"class": "form-check-input"}),
-        help_text="This action cannot be undone.",
-    )
-
     def __init__(self, *args, project=None, **kwargs):
         if not project:
             raise ValueError("Project is required.")
@@ -56,18 +49,21 @@ class MetadataManagementForm(forms.Form):
         # Setup crispy forms
         self.helper = FormHelper()
         self.helper.form_method = "post"
+        self.helper.form_id = "metadata-delete-form"
         self.helper.layout = Layout(
             Row(
                 Column("target_type", css_class="form-group col-md-6 mb-3"),
                 Column("metadata_key", css_class="form-group col-md-6 mb-3"),
                 css_class="row",
             ),
-            Row(
-                Column("confirm_deletion", css_class="form-group col-12 mb-3"),
-                css_class="row",
-            ),
             Div(
-                Submit("submit", "Delete Metadata Block", css_class="btn btn-danger"),
+                Submit(
+                    'delete_block',
+                    'Delete Metadata Block',
+                    css_class='btn btn-danger show-danger-modal',
+                    css_id='delete-metadata-btn',
+                    data_message='Are you sure you want to delete this metadata block? This will permanently remove it from all documents/pages and cannot be undone.'
+                ),
                 css_class="text-end",
             ),
         )

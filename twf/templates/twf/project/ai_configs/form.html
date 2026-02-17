@@ -12,6 +12,9 @@
     </div>
 
     <div class="card">
+        <div class="card-header bg-dark text-white">
+            <h5 class="mb-0">{% if is_create %}Create{% else %}Edit{% endif %} Configuration</h5>
+        </div>
         <div class="card-body">
             {% crispy form %}
 

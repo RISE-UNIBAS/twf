@@ -2,17 +2,19 @@
 {% load crispy_forms_tags %}
 
 {% block content %}
-    <p class="lead">Configure workflow definitions for document review, collection review, tag grouping, and date normalization workflows.</p>
-
-    <div class="alert alert-info">
-        <i class="bi bi-info-circle"></i>
-        <strong>About Workflow Configurations:</strong>
-        <ul class="mb-0">
-            <li>Define custom instructions, fields, and batch sizes for review workflows</li>
-            <li>Instructions support Markdown formatting for rich text</li>
-            <li>Custom fields allow you to collect structured data during review</li>
-            <li>Changes apply to new workflows (existing workflows are not affected)</li>
-        </ul>
+    <div class="card mb-4">
+        <div class="card-header bg-dark text-white">
+            <h5 class="mb-0">About Workflow Configurations</h5>
+        </div>
+        <div class="card-body">
+            <p class="text-muted mb-3">Configure workflow definitions for document review, collection review, tag grouping, and date normalization workflows.</p>
+            <ul class="mb-0">
+                <li>Define custom instructions, fields, and batch sizes for review workflows</li>
+                <li>Instructions support Markdown formatting for rich text</li>
+                <li>Custom fields allow you to collect structured data during review</li>
+                <li>Changes apply to new workflows (existing workflows are not affected)</li>
+            </ul>
+        </div>
     </div>
 
     <form method="post" id="workflow-settings-form">

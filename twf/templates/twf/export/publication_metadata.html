@@ -2,8 +2,15 @@
 {% load crispy_forms_tags %}
 
 {% block content %}
-    <p class="lead">Configure publication metadata for your project exports. This information is used when exporting your data to repositories like Zenodo.</p>
-    {% crispy form %}
+    <div class="card">
+        <div class="card-header bg-dark text-white">
+            <h5 class="mb-0">Publication Metadata</h5>
+        </div>
+        <div class="card-body">
+            <p class="text-muted mb-3">Configure publication metadata for your project exports. This information is used when exporting your data to repositories like Zenodo.</p>
+            {% crispy form %}
+        </div>
+    </div>
 {% endblock %}
 
 {% block script %}

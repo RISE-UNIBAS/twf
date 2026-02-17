@@ -370,24 +370,12 @@ class DictionaryFilter(django_filters.FilterSet):
     """Filter for the dictionaries table."""
 
     label = django_filters.CharFilter(lookup_expr="icontains", label="Label contains")
-    type = django_filters.ChoiceFilter(
-        choices=[
-            ("person", "Person"),
-            ("place", "Place"),
-            ("organization", "Organization"),
-            ("topic", "Topic"),
-            ("date", "Date"),
-            ("other", "Other"),
-        ],
-        label="Dictionary type",
-        empty_label="All types",
-    )
 
     class Meta:
         """Meta class for the dictionary filter."""
 
         model = Dictionary
-        fields = ["label", "type"]
+        fields = ["label"]
 
 
 class DictionaryEntryFilter(django_filters.FilterSet):

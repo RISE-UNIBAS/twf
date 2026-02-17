@@ -116,6 +116,14 @@ def save_instant_task_remove_all_dictionaries(project, user):
     )
 
 
+def save_instant_task_merge_entries(project, user, remaining_entry_label, merge_entry_label):
+    """Save an instant task for merging dictionary entries."""
+    title = "Merge Dictionary Entries"
+    description = "Merge two dictionary entries into one."
+    text = f"Merged entry '{merge_entry_label}' into '{remaining_entry_label}'."
+    save_instant_task(project, user, title, description, text)
+
+
 def start_related_task(project, user, title, description, text):
     """Start an instant task."""
     task = Task(

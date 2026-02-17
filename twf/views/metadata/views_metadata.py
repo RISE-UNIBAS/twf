@@ -60,11 +60,6 @@ class TWFMetadataView(LoginRequiredMixin, TWFView):
                 "name": "Manage",
                 "options": [
                     {
-                        "url": reverse("twf:metadata_extract"),
-                        "value": "Extract Controlled Values",
-                        "permission": "metadata.manage",
-                    },
-                    {
                         "url": reverse("twf:metadata_load_metadata"),
                         "value": "Load JSON Metadata",
                         "permission": "metadata.manage",
@@ -129,6 +124,30 @@ class TWFMetadataOverviewView(TWFMetadataView):
             )
         except ZeroDivisionError:
             context["doc_coverage"] = 0
+
+        # Get metadata block statistics
+        doc_keys = Document.get_distinct_metadata_keys()
+        page_keys = Page.get_distinct_metadata_keys()
+
+        # Count documents/pages for each key
+        doc_key_counts = {}
+        for key in doc_keys:
+            count = Document.objects.filter(
+                project=project, metadata__has_key=key
+            ).count()
+            doc_key_counts[key] = count
+
+        page_key_counts = {}
+        for key in page_keys:
+            count = Page.objects.filter(
+                document__project=project, metadata__has_key=key
+            ).count()
+            page_key_counts[key] = count
+
+        context["doc_keys"] = doc_keys
+        context["page_keys"] = page_keys
+        context["doc_key_counts"] = doc_key_counts
+        context["page_key_counts"] = page_key_counts
 
         return context
 

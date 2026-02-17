@@ -161,7 +161,7 @@ class DictionaryEntryTable(tables.Table):
             return format_html('<span class="badge bg-warning">{}</span>', "No data")
 
         # Show a success badge for entries with metadata
-        status_badge = '<span class="badge bg-success mb-1">Normalized</span>'
+        status_badge = format_html('<span class="badge bg-success mb-1">{}</span>', "Normalized")
 
         # Extract key information from metadata
         metadata_info = ""

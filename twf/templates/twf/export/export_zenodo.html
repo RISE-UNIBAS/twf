@@ -4,6 +4,9 @@
 {% block content %}
 
     <div class="card mb-4">
+        <div class="card-header bg-dark text-white">
+            <h5 class="mb-0">Zenodo Credentials</h5>
+        </div>
         <div class="card-body">
             {% crispy form %}
         </div>
@@ -22,6 +25,9 @@
 
     {% if project.zenodo_deposition_id %}
         <div class="card mb-4">
+            <div class="card-header bg-dark text-white">
+                <h5 class="mb-0"><i class="fa-solid fa-cloud-upload-alt me-2"></i>Upload to Zenodo</h5>
+            </div>
             <div class="card-body">
                 <div class="row">
                     <div class="col-md-8">
@@ -127,8 +133,8 @@
                     </div>
 
                     <div class="col-md-4">
-                        <div class="card bg-light">
-                            <div class="card-header">
+                        <div class="card">
+                            <div class="card-header bg-dark text-white">
                                 <h5 class="mb-0">Information</h5>
                             </div>
                             <div class="card-body">

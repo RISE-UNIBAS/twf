@@ -13,6 +13,7 @@ from twf.forms.filters.filters import DictionaryEntryFilter, DictionaryFilter
 from twf.forms.dictionaries.dictionaries_forms import (
     DictionaryForm,
     DictionaryEntryForm,
+    MergeEntriesForm,
 )
 from twf.forms.dictionaries.dictionary_settings_forms import DictionarySettingsForm
 from twf.forms.enrich_forms import EnrichEntryManualForm, EnrichEntryForm
@@ -20,6 +21,7 @@ from twf.forms.tags.enrichment_forms import get_enrichment_form_class
 from twf.models import Dictionary, DictionaryEntry, Variation, PageTag, Workflow
 from twf.utils.project_statistics import get_dictionary_statistics
 from twf.workflows.dictionary_workflows import create_dictionary_enrichment_workflow
+from twf.tasks.instant_tasks import save_instant_task_merge_entries
 from twf.tables.tables_dictionary import (
     DictionaryTable,
     DictionaryEntryTable,
@@ -57,6 +59,11 @@ class TWFDictionaryView(LoginRequiredMixin, TWFView):
                         "url": reverse("twf:dictionaries_enrichment"),
                         "value": "Manual Enrichment",
                         "permission": "dictionary.edit",
+                    },
+                    {
+                        "url": reverse("twf:dictionaries_merge_entries"),
+                        "value": "Merge Entries",
+                        "permission": "dictionary.manage",
                     },
                     {
                         "url": reverse("twf:dictionaries_batch_gnd"),
@@ -559,12 +566,15 @@ class TWFDictionaryMergeEntriesView(ProjectPermissionMixin, TWFDictionaryView):
 
     def post(self, request, *args, **kwargs):
         """Handle the POST request to merge entries."""
-        remaining_entry_id = request.POST.get("remaining_entry")
-        merge_entry_id = request.POST.get("merge_entry")
+        project = self.get_project()
+        form = MergeEntriesForm(request.POST, project=project)
 
-        if not remaining_entry_id or not merge_entry_id:
-            messages.error(request, "Both entries must be selected.")
+        if not form.is_valid():
+            messages.error(request, "Please select both entries to merge.")
             return redirect(self.request.path)
+
+        remaining_entry_id = form.cleaned_data["remaining_entry"]
+        merge_entry_id = form.cleaned_data["merge_entry"]
 
         if remaining_entry_id == merge_entry_id:
             messages.error(request, "You cannot merge an entry into itself.")
@@ -597,12 +607,21 @@ class TWFDictionaryMergeEntriesView(ProjectPermissionMixin, TWFDictionaryView):
 
         remaining_entry.save()
 
+        # Store labels before deletion
+        merge_entry_label = merge_entry.label
+        remaining_entry_label = remaining_entry.label
+
         # Step 4: Delete the merged entry
         merge_entry.delete()
 
+        # Create instant task
+        save_instant_task_merge_entries(
+            project, request.user, remaining_entry_label, merge_entry_label
+        )
+
         messages.success(
             request,
-            f"Successfully merged entry '{merge_entry.label}' into '{remaining_entry.label}'.",
+            f"Successfully merged entry '{merge_entry_label}' into '{remaining_entry_label}'.",
         )
         return redirect(self.request.path)
 
@@ -611,23 +630,10 @@ class TWFDictionaryMergeEntriesView(ProjectPermissionMixin, TWFDictionaryView):
         context = super().get_context_data(**kwargs)
         project = self.get_project()
 
-        # Get all dictionaries in the project
-        dictionaries = project.selected_dictionaries.all()
+        # Create form with project
+        form = MergeEntriesForm(project=project)
+        context["form"] = form
 
-        # Fetch all entries from these dictionaries
-        entries = (
-            DictionaryEntry.objects.filter(dictionary__in=dictionaries)
-            .select_related("dictionary")
-            .order_by("dictionary__label", "label")
-        )
-
-        # Add formatted entries for display
-        formatted_entries = [
-            {"id": entry.id, "label": f"{entry.dictionary.label} - {entry.label}"}
-            for entry in entries
-        ]
-
-        context["entries"] = formatted_entries
         return context
 
 

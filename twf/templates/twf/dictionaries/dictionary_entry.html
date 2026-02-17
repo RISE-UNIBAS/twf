@@ -17,8 +17,8 @@
     <div class="row mb-4">
         <div class="col-md-6">
             <div class="card h-100">
-                <div class="card-header">
-                    <h5 class="card-title mb-0">Entry Information</h5>
+                <div class="card-header bg-dark text-white">
+                    <h5 class="mb-0">Entry Information</h5>
                 </div>
                 <div class="card-body">
                     <table class="table table-sm">
@@ -48,11 +48,11 @@
                 </div>
             </div>
         </div>
-        
+
         <div class="col-md-6">
             <div class="card h-100">
-                <div class="card-header">
-                    <h5 class="card-title mb-0">Normalization Data</h5>
+                <div class="card-header bg-dark text-white">
+                    <h5 class="mb-0">Normalization Data</h5>
                 </div>
                 <div class="card-body">
                     {% if entry.metadata %}
@@ -107,8 +107,8 @@
     </div>
     
     <div class="card mb-4">
-        <div class="card-header">
-            <h5 class="card-title mb-0">Variations</h5>
+        <div class="card-header bg-dark text-white">
+            <h5 class="mb-0">Variations</h5>
         </div>
         <div class="card-body">
             {% if table.rows %}
@@ -124,7 +124,7 @@
     {# Enrichment Data Section - show if entry has enrichment in standard format #}
     {% if has_enrichment %}
         <div class="card mb-3">
-            <div class="card-header bg-success text-white">
+            <div class="card-header bg-dark text-white">
                 <h5 class="mb-0">
                     <i class="fa fa-plus-circle"></i> Enrichment Data
                 </h5>
@@ -135,7 +135,7 @@
                         <dl class="row mb-0">
                             <dt class="col-sm-3">Type</dt>
                             <dd class="col-sm-9">
-                                <span class="badge bg-success">{{ enrich_type }}</span>
+                                <span class="badge bg-dark">{{ enrich_type }}</span>
                             </dd>
 
                             <dt class="col-sm-3">Normalized Value</dt>
@@ -174,7 +174,7 @@
     {# Manual Enrichment Form #}
     {% if enrichment_form %}
         <div class="card mb-3">
-            <div class="card-header bg-info text-white">
+            <div class="card-header bg-dark text-white">
                 <h5 class="mb-0">
                     <i class="fa fa-edit"></i> Manual Enrichment
                 </h5>

@@ -629,7 +629,7 @@ urlpatterns = [
     path(
         "dictionaries/merge/entries/",
         TWFDictionaryMergeEntriesView.as_view(),
-        name="dictionaries_entry_merging",
+        name="dictionaries_merge_entries",
     ),
     path(
         "dictionaries/variations/delete/<int:pk>/",

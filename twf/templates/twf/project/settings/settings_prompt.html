@@ -2,19 +2,25 @@
 {% load crispy_forms_tags %}
 
 {% block content %}
-    <p class="lead">Configure AI prompt parameters for the generic LLM client. These settings apply to all AI providers.</p>
-
     <div class="row">
         <div class="col-lg-8">
             <div class="card">
-                {% crispy form %}
+                <div class="card-header bg-dark text-white">
+                    <h5 class="mb-0">AI Prompt Settings</h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted mb-3">Configure AI prompt parameters for the generic LLM client. These settings apply to all AI providers.</p>
+                    {% crispy form %}
+                </div>
             </div>
         </div>
         <div class="col-lg-4">
             <div class="card">
+                <div class="card-header bg-dark text-white">
+                    <h5 class="mb-0">About These Settings</h5>
+                </div>
                 <div class="card-body">
-                    <h5 class="card-title">About These Settings</h5>
-                    <p class="card-text">
+                    <p>
                         These settings control how the AI generates responses across all providers (OpenAI, Anthropic, Google, Mistral, etc.).
                     </p>
                     <h6 class="mt-3">Parameter Guide:</h6>

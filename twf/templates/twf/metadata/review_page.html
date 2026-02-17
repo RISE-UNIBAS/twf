@@ -155,20 +155,11 @@
         <div class="row">
             <div class="col-md-8 mx-auto">
                 <div class="card">
-                    <div class="card-body text-center">
-                        <h3>Review Page Metadata</h3>
-                        <p class="lead">Review and edit metadata fields for pages in your project.</p>
-
-                        <div class="alert alert-secondary text-start mt-3">
-                            <i class="fa fa-info-circle"></i>
-                            <strong>Workflow Details:</strong>
-                            <ul class="mb-0">
-                                <li>Pages with metadata: <strong>{{ available_items_count }}</strong></li>
-                                <li>Default batch size: <strong>10</strong> pages</li>
-                            </ul>
-                        </div>
-
-                        <p>There is no active Review Page Metadata Workflow for user {{ request.user }}.</p>
+                    <div class="card-header bg-dark text-white">
+                        <h5 class="mb-0">Start Page Metadata Review Workflow</h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="text-muted mb-3">Review and edit metadata fields for pages in your project. <strong>{{ available_items_count }}</strong> pages with metadata available.</p>
 
                         <form method="post">
                             {% csrf_token %}
@@ -183,11 +174,11 @@
                                        value="10"
                                        min="1"
                                        max="100"
-                                       style="width: 150px; margin: 0 auto;">
+                                       style="width: 200px;">
                             </div>
 
-                            <button type="submit" class="btn btn-primary btn-lg">
-                                <i class="fa fa-play"></i> Start Metadata Review Workflow
+                            <button type="submit" class="btn btn-dark">
+                                <i class="fa fa-play"></i> Start Workflow
                             </button>
                         </form>
                     </div>

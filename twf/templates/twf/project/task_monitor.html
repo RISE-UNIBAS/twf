@@ -7,8 +7,6 @@
 {% endblock %}
 
 {% block content %}
-    <p class="lead">All tasks from your project are listed here. Use the filters to narrow down the list.</p>
-
     <!-- Task Statistics Cards -->
     <div class="row mb-4">
         <div class="col-md-3 mb-2">
@@ -84,16 +82,20 @@
     </div>
     
     <!-- Task Types Info -->
-    <div class="mt-4 alert alert-info">
-        <h5><i class="fas fa-info-circle"></i> Task Status Information</h5>
-        <ul class="mb-0">
-            <li><strong>Pending</strong> - Task has been created but not yet started</li>
-            <li><strong>Started</strong> - Task is currently running</li>
-            <li><strong>Progress</strong> - Task is running with reported progress</li>
-            <li><strong>Success</strong> - Task completed successfully</li>
-            <li><strong>Failure</strong> - Task failed to complete</li>
-            <li><strong>Cancelled</strong> - Task was manually cancelled</li>
-        </ul>
+    <div class="card mt-4">
+        <div class="card-header bg-dark text-white">
+            <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>Task Status Information</h5>
+        </div>
+        <div class="card-body">
+            <ul class="mb-0">
+                <li><strong>Pending</strong> - Task has been created but not yet started</li>
+                <li><strong>Started</strong> - Task is currently running</li>
+                <li><strong>Progress</strong> - Task is running with reported progress</li>
+                <li><strong>Success</strong> - Task completed successfully</li>
+                <li><strong>Failure</strong> - Task failed to complete</li>
+                <li><strong>Cancelled</strong> - Task was manually cancelled</li>
+            </ul>
+        </div>
     </div>
 
 {% endblock %}
