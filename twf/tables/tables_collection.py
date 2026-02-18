@@ -12,7 +12,7 @@ class CollectionTable(tables.Table):
 
     title = tables.Column(verbose_name="Collection Title")
     description = tables.Column(verbose_name="Description")
-    item_count = tables.Column(empty_values=(), verbose_name="Items")
+    item_count = tables.Column(empty_values=(), verbose_name="Items", order_by="item_count_annotated")
     created_at = tables.DateTimeColumn(format="Y-m-d H:i", verbose_name="Created")
     created_by = tables.Column(verbose_name="Created By")
     actions = tables.Column(empty_values=(), verbose_name="Options", orderable=False)

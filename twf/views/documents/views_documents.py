@@ -212,9 +212,17 @@ class TWFDocumentsBrowseView(ProjectPermissionMixin, SingleTableView, FilterView
         By default, excludes documents with is_ignored=True (Transkribus 'Exclude' label).
         Users can see excluded documents by using the 'Show excluded documents only' filter.
         """
-        # Get all documents for the current project
+        from django.db.models import Count
+
+        # Get all documents for the current project with annotations for sorting
         queryset = Document.objects.filter(
             project_id=self.request.session.get("project_id")
+        ).annotate(
+            # Count total pages
+            num_pages_count=Count('pages', distinct=True),
+            # Count tags across all pages
+            num_tags_count=Count('pages__tags', distinct=True)
+            # Note: num_blocks cannot be annotated as blocks are stored in JSONField (parsed_data)
         )
 
         # By default, exclude ignored documents unless explicitly filtering for them

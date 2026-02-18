@@ -10,9 +10,9 @@ class DocumentTable(tables.Table):
     Table for displaying documents with various attributes.
     """
     id = tables.Column(accessor="document_id", verbose_name="ID", orderable=True)
-    num_pages = tables.Column(verbose_name="Pages", empty_values=[])
-    num_tags = tables.Column(verbose_name="Tags", empty_values=[])
-    num_blocks = tables.Column(verbose_name="Blocks", empty_values=[])
+    num_pages = tables.Column(verbose_name="Pages", empty_values=[], order_by="num_pages_count")
+    num_tags = tables.Column(verbose_name="Tags", empty_values=[], order_by="num_tags_count")
+    num_blocks = tables.Column(verbose_name="Blocks", empty_values=[], orderable=False)
     title_metadata = tables.Column(
         verbose_name="Title / Metadata", orderable=False, empty_values=[]
     )

@@ -99,8 +99,12 @@ class TWFCollectionOverviewView(ProjectPermissionMixin, SingleTableView, FilterV
 
     def get_queryset(self):
         """Get the queryset for the view."""
+        from django.db.models import Count
+
         queryset = Collection.objects.filter(
             project_id=self.request.session.get("project_id")
+        ).annotate(
+            item_count_annotated=Count('items', distinct=True)
         )
         return queryset
 
@@ -146,8 +150,12 @@ class TWFCollectionListView(ProjectPermissionMixin, SingleTableView, FilterView,
 
     def get_queryset(self):
         """Get the queryset for the view."""
+        from django.db.models import Count
+
         queryset = Collection.objects.filter(
             project_id=self.request.session.get("project_id")
+        ).annotate(
+            item_count_annotated=Count('items', distinct=True)
         )
         return queryset
 

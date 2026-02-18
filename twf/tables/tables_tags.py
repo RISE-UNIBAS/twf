@@ -16,8 +16,9 @@ class TagTable(tables.Table):
     variation_type = tables.Column(verbose_name="Type")
     status = tables.Column(
         verbose_name="Status",
-        orderable=False,
+        orderable=True,
         empty_values=(),
+        order_by=("is_reserved", "is_parked", "dictionary_entry"),
         attrs={"th": {"class": "text-center"}, "td": {"class": "text-center"}},
     )
     entry = tables.Column(
@@ -224,8 +225,9 @@ class TagsWithCommentsTable(tables.Table):
     variation_type = tables.Column(verbose_name="Type")
     status = tables.Column(
         verbose_name="Status",
-        orderable=False,
+        orderable=True,
         empty_values=(),
+        order_by=("is_reserved", "is_parked", "dictionary_entry"),
         attrs={"th": {"class": "text-center"}, "td": {"class": "text-center"}},
     )
     entry = tables.Column(
@@ -234,7 +236,7 @@ class TagsWithCommentsTable(tables.Table):
     comments = tables.Column(
         accessor="dictionary_entry__notes",
         verbose_name="Comments",
-        orderable=False,
+        orderable=True,
         empty_values=(),
     )
     options = tables.Column(empty_values=(), verbose_name="Options", orderable=False)
