@@ -14,7 +14,11 @@ from django.views.decorators.csrf import csrf_exempt
 
 from twf.models import Collection, CollectionItem, Workflow
 from twf.permissions import check_permission
-from twf.views.views_base import get_referrer_or_default
+from twf.tasks.instant_tasks import (
+    save_instant_task_delete_collection,
+    save_instant_task_delete_collection_item,
+)
+from twf.views.views_base import TWFView, get_referrer_or_default
 
 logger = logging.getLogger(__name__)
 
@@ -50,6 +54,17 @@ def delete_collection_item(request, pk):
 
     collection_item = CollectionItem.objects.get(id=pk)
     collection_id = collection_item.collection.id
+
+    # Capture info before deletion
+    project = TWFView.s_get_project(request)
+    item_title = collection_item.title
+    collection_title = collection_item.collection.title if collection_item.collection else "Unknown"
+
+    # Save instant task before deletion
+    save_instant_task_delete_collection_item(
+        project, request.user, item_title, collection_item.id, collection_title
+    )
+
     collection_item.delete()
     messages.success(request, "Collection item deleted.")
 
@@ -220,6 +235,15 @@ def delete_collection(request, collection_id):
         return redirect("twf:collections")
 
     collection = Collection.objects.get(id=collection_id)
+
+    # Capture info before deletion
+    project = TWFView.s_get_project(request)
+    collection_title = collection.title
+
+    # Save instant task before deletion
+    save_instant_task_delete_collection(
+        project, request.user, collection_title, collection.id
+    )
 
     workflows = Workflow.objects.filter(collection=collection)
     for workflow in workflows:

@@ -103,12 +103,17 @@ class BaseTWFTask(CeleryTask):
         # Get standard description for this task type
         task_description = self.TASK_DESCRIPTIONS.get(self.name, "")
 
+        # Determine category based on task name
+        category = self._get_task_category()
+
         # Create a new task object in the database
         self.twf_task = Task.objects.create(
             celery_task_id=task_id,
             project=self.project,
             user=self.user,
             status="STARTED",
+            task_type="celery",
+            category=category,
             title=f"Started: {self.name}",
             description=task_description,
             text=f"Task initiated at {self.start_datetime.strftime('%Y-%m-%d %H:%M:%S')}.\n",
@@ -120,6 +125,37 @@ class BaseTWFTask(CeleryTask):
         self.update_state(
             state="STARTED", meta={"current": 0, "total": 100, "text": "Task started"}
         )
+
+    def _get_task_category(self):
+        """Determine the category of a task based on its name."""
+        task_name = self.name.lower()
+
+        # AI processing tasks
+        if any(x in task_name for x in ['openai', 'gemini', 'claude', 'mistral', 'deepseek', 'qwen', 'query_project']):
+            return 'ai_processing'
+
+        # Dictionary enrichment tasks
+        if any(x in task_name for x in ['gnd', 'geonames', 'wikidata', 'search_ai_entries', 'search_ai_entry']):
+            return 'enrichment'
+
+        # Import/extraction tasks
+        if any(x in task_name for x in ['extract', 'import', 'load']):
+            return 'import'
+
+        # Export tasks
+        if 'export' in task_name:
+            return 'export'
+
+        # Enrichment tasks
+        if 'enrich' in task_name:
+            return 'enrichment'
+
+        # Copy/system tasks
+        if 'copy' in task_name:
+            return 'system'
+
+        # Default
+        return None
 
     @staticmethod
     def validate_task_parameters(kwargs, required_params):
@@ -184,7 +220,9 @@ class BaseTWFTask(CeleryTask):
             item_type = self.get_item_type_name()
             self.twf_task.title = f"Processing {total} {item_type}"
             self.twf_task.text += f"Found {total} {item_type} to process.\n"
-            self.twf_task.save(update_fields=["title", "text"])
+            self.twf_task.total_items = total
+            self.twf_task.processed_items = 0
+            self.twf_task.save(update_fields=["title", "text", "total_items", "processed_items"])
             logger.info(f"Task {self.task_id}: set to process {total} {item_type}")
 
     def get_item_type_name(self):
@@ -240,7 +278,16 @@ class BaseTWFTask(CeleryTask):
                     self.twf_task.text += (
                         f"({elapsed:.1f}s elapsed, {avg_time:.2f}s per item).\n"
                     )
-                    self.twf_task.save(update_fields=["text"])
+                    # Update database item counters
+                    self.twf_task.processed_items = self.processed_items
+                    self.twf_task.successful_items = self.successful_items
+                    self.twf_task.failed_items = self.failed_items
+                    self.twf_task.save(update_fields=[
+                        "text",
+                        "processed_items",
+                        "successful_items",
+                        "failed_items"
+                    ])
 
     def update_progress(self, progress, text="In progress"):
         """Update task progress in the database."""
@@ -555,8 +602,20 @@ class BaseTWFTask(CeleryTask):
             self.twf_task.end_time = end_time
             self.twf_task.status = status
             self.twf_task.meta = meta
+            self.twf_task.processed_items = self.processed_items
+            self.twf_task.successful_items = self.successful_items
+            self.twf_task.failed_items = self.failed_items
             self.twf_task.save(
-                update_fields=["title", "text", "end_time", "status", "meta"]
+                update_fields=[
+                    "title",
+                    "text",
+                    "end_time",
+                    "status",
+                    "meta",
+                    "processed_items",
+                    "successful_items",
+                    "failed_items"
+                ]
             )
 
             # Log completion

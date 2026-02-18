@@ -1149,42 +1149,6 @@ class RepositorySettingsForm(forms.ModelForm):
         return cleaned_data
 
 
-class QueryDatabaseForm(forms.Form):
-    """Form for querying the database with a SQL query."""
-
-    query = forms.CharField(
-        widget=forms.Textarea(attrs={"rows": 5}),
-        label="Query",
-        help_text="Please provide a SQL query to execute on the database."
-        "Only SELECT queries are allowed.",
-        initial="SELECT * FROM twf_pagetag LIMIT 100 OFFSET 0;",
-        required=True,
-    )
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        helper = FormHelper()
-        helper.form_method = "post"
-        helper.form_class = "form form-control"
-
-        layout = helper.layout = Layout(
-            Row(
-                Column("query", css_class="form-group col-12 mb-3"),
-                css_class="row form-row",
-            ),
-            Div(
-                HTML(
-                    f'<a href="{reverse("twf:project_query")}" class="btn btn-dark '
-                    f'color-light me-2">Clear</a>'
-                ),
-                Submit("submit", "Execute Query", css_class="btn btn-dark"),
-                css_class="text-end pt-3",
-            ),
-        )
-        helper.layout = layout
-        self.helper = helper
-
-
 class NoteForm(forms.ModelForm):
     """Form for creating and updating prompts."""
 

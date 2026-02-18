@@ -5,6 +5,11 @@ from django.shortcuts import get_object_or_404, redirect
 
 from twf.models import PageTag
 from twf.permissions import check_permission
+from twf.tasks.instant_tasks import (
+    save_instant_task_delete_tag,
+    save_instant_task_park_tag,
+    save_instant_task_unpark_tag,
+)
 from twf.views.views_base import get_referrer_or_default, TWFView
 from twf.utils.tags_utils import assign_tag, get_excluded_types
 
@@ -18,6 +23,13 @@ def park_tag(request, pk):
         return get_referrer_or_default(request, default="twf:tags_overview")
 
     tag = get_object_or_404(PageTag, pk=pk)
+
+    # Capture info before parking
+    tag_variation = tag.variation
+
+    # Save instant task
+    save_instant_task_park_tag(project, request.user, tag_variation, tag.id)
+
     tag.is_parked = True
     tag.save(current_user=request.user)
     messages.success(request, f"Tag {pk} has been parked.")
@@ -64,6 +76,13 @@ def unpark_tag(request, pk):
         return get_referrer_or_default(request, default="twf:tags_overview")
 
     tag = get_object_or_404(PageTag, pk=pk)
+
+    # Capture info before unparking
+    tag_variation = tag.variation
+
+    # Save instant task
+    save_instant_task_unpark_tag(project, request.user, tag_variation, tag.id)
+
     tag.is_parked = False
     tag.save(current_user=request.user)
     messages.success(request, f"Tag {pk} has been unparked.")
@@ -98,6 +117,13 @@ def delete_tag(request, pk):
         return get_referrer_or_default(request, default="twf:tags_overview")
 
     tag = get_object_or_404(PageTag, pk=pk)
+
+    # Capture info before deletion
+    tag_variation = tag.variation
+
+    # Save instant task before deletion
+    save_instant_task_delete_tag(project, request.user, tag_variation, tag.id)
+
     tag.delete()
     messages.success(request, f"Tag {pk} has been deleted.")
 

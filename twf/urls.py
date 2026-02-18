@@ -189,7 +189,6 @@ from twf.views.metadata.views_metadata import (
     TWFMetadataManagementView,
 )
 from twf.views.project.views_project import (
-    TWFProjectQueryView,
     TWFProjectOverviewView,
     TWFProjectTaskMonitorView,
     TWFProjectTaskDetailView,
@@ -461,8 +460,6 @@ urlpatterns = [
         update_user_permissions,
         name="update_user_permissions",
     ),
-    # Project options
-    path("project/query/", TWFProjectQueryView.as_view(), name="project_query"),
     # Unified AI query view
     path(
         "project/ai/query/",

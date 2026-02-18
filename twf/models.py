@@ -833,9 +833,15 @@ class Task(models.Model):
     """
     Task Model
     ----------
-    Tasks are used to store Celery tasks in the database. This model is used to keep track of the status of tasks
-    and to store additional information about the tasks. The Task model is linked to the Project model via a ForeignKey,
-    which means that each task belongs to a specific project.
+    Tasks are used to track operations in the database. This includes Celery background tasks,
+    instant operations (deletes, creates, updates), and workflow progress tracking.
+    The Task model is linked to the Project model via a ForeignKey.
+
+    Task Types
+    ~~~~~~~~~~
+    - instant: Operations that complete immediately (single deletes, creates, updates)
+    - celery: Background tasks processed by Celery (AI processing, exports, bulk operations)
+    - workflow: User workflows with step-by-step progress tracking (review workflows)
 
     Attributes
     ~~~~~~~~~~
@@ -843,10 +849,12 @@ class Task(models.Model):
         The project this task belongs to.
     user : ForeignKey
         The user who created the task.
-    task_id : CharField
-        The ID of the Celery task.
+    celery_task_id : CharField
+        The unique ID of the task (Celery task ID or generated UUID).
+    progress : IntegerField
+        Progress percentage (0-100).
     status : CharField
-        The status of the task.
+        The status of the task (PENDING, STARTED, SUCCESS, FAILURE, PROGRESS, CANCELLED).
     start_time : DateTimeField
         The time the task was started.
     end_time : DateTimeField
@@ -856,9 +864,23 @@ class Task(models.Model):
     description : TextField
         The description of the task.
     text : TextField
-        The text of the task.
+        Detailed log text for the task.
     meta : JSONField
         Additional metadata for the task.
+    task_type : CharField
+        The type of task (instant, celery, workflow).
+    category : CharField
+        The category of the task (create, delete, ai_processing, etc.).
+    total_items : IntegerField
+        Total number of items to process in this task.
+    processed_items : IntegerField
+        Number of items processed so far.
+    successful_items : IntegerField
+        Number of items processed successfully.
+    failed_items : IntegerField
+        Number of items that failed to process.
+    workflow_steps : JSONField
+        For workflow tasks, tracks the progression through workflow steps.
     """
 
     TASK_STATUS_CHOICES = [
@@ -868,6 +890,25 @@ class Task(models.Model):
         ("FAILURE", "Failure"),
         ("PROGRESS", "Progress"),
         ("CANCELLED", "Cancelled"),
+    ]
+
+    TASK_TYPE_CHOICES = [
+        ("instant", "Instant"),
+        ("celery", "Celery Background Task"),
+        ("workflow", "Workflow"),
+    ]
+
+    CATEGORY_CHOICES = [
+        ("create", "Create"),
+        ("update", "Update"),
+        ("delete", "Delete"),
+        ("bulk_delete", "Bulk Delete"),
+        ("import", "Import/Extract"),
+        ("export", "Export"),
+        ("ai_processing", "AI Processing"),
+        ("enrichment", "Enrichment"),
+        ("workflow", "Workflow"),
+        ("system", "System"),
     ]
 
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name="tasks")
@@ -904,6 +945,31 @@ class Task(models.Model):
 
     meta = models.JSONField(default=dict, blank=True)
     """Additional metadata for the task."""
+
+    task_type = models.CharField(
+        max_length=20, choices=TASK_TYPE_CHOICES, default="celery"
+    )
+    """The type of task (instant, celery, or workflow)."""
+
+    category = models.CharField(
+        max_length=30, choices=CATEGORY_CHOICES, null=True, blank=True
+    )
+    """The category of the task (create, delete, ai_processing, etc.)."""
+
+    total_items = models.IntegerField(null=True, blank=True)
+    """Total number of items to process in this task."""
+
+    processed_items = models.IntegerField(default=0)
+    """Number of items processed so far."""
+
+    successful_items = models.IntegerField(default=0)
+    """Number of items processed successfully."""
+
+    failed_items = models.IntegerField(default=0)
+    """Number of items that failed to process."""
+
+    workflow_steps = models.JSONField(default=dict, blank=True)
+    """For workflow tasks, tracks the progression through workflow steps."""
 
     def __str__(self):
         return f"Task - {self.celery_task_id} ({self.status})"

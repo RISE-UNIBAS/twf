@@ -10,6 +10,7 @@ from django.views.decorators.csrf import csrf_exempt
 
 from twf.models import Document
 from twf.permissions import check_permission
+from twf.tasks.instant_tasks import save_instant_task_delete_document
 from twf.utils.metadata_utils import delete_nested_key, set_nested_value
 from twf.views.views_base import get_referrer_or_default, TWFView
 
@@ -24,6 +25,15 @@ def delete_document(request, pk, doc_pk):
         return get_referrer_or_default(request, default="twf:documents_overview")
 
     document = get_object_or_404(Document, pk=doc_pk)
+
+    # Capture info before deletion
+    document_title = document.title
+
+    # Save instant task before deletion
+    save_instant_task_delete_document(
+        project, request.user, document_title, document.id
+    )
+
     for page in document.pages.all():
         page.xml_file.delete()
         page.delete()

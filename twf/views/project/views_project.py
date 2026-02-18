@@ -5,7 +5,6 @@ from datetime import timedelta
 
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.db import connection
 from django.http import HttpResponseRedirect
 from django.shortcuts import redirect, render
 from django.urls import reverse, reverse_lazy
@@ -22,7 +21,6 @@ from twf.forms.project.project_forms_batches import (
     TranskribusEnrichmentBatchForm,
 )
 from twf.forms.project.project_forms import (
-    QueryDatabaseForm,
     GeneralSettingsForm,
     TaskSettingsForm,
     NoteForm,
@@ -71,7 +69,13 @@ class TWFProjectView(LoginRequiredMixin, TWFView):
                     },
                 ],
             },
-            {"name": "Ask Questions", "options": self.get_ai_navigation_options()},
+            {"name": "Ask Questions", "options": [
+                {
+                    "url": reverse("twf:project_ai_query_unified"),
+                    "value": "AI Query",
+                    "permission": "ai.edit",
+                },
+            ]},
             {
                 "name": "Settings",
                 "options": [
@@ -164,28 +168,6 @@ class TWFProjectView(LoginRequiredMixin, TWFView):
     def get_navigation_index(self):
         """Get the index of the navigation."""
         return 1
-
-    def get_ai_navigation_options(self):
-        """
-        Get the AI navigation options.
-
-        Returns simplified navigation with Query Database and unified AI Query.
-        The AI Query view provides a dropdown to select from available providers.
-        """
-        options = [
-            {
-                "url": reverse("twf:project_query"),
-                "value": "Query Database",
-                "permission": "ai.edit",
-            },
-            {
-                "url": reverse("twf:project_ai_query_unified"),
-                "value": "AI Query",
-                "permission": "ai.edit",
-            },
-        ]
-
-        return options
 
     def get_context_data(self, **kwargs):
         """Get the context data."""
@@ -544,43 +526,6 @@ class TWFProjectWorkflowSettingsView(ProjectPermissionMixin, FormView, TWFProjec
         success_url = f"{self.success_url}?tab={active_tab}"
 
         return HttpResponseRedirect(success_url)
-
-
-class TWFProjectQueryView(ProjectPermissionMixin, FormView, TWFProjectView):
-    """View for querying the database."""
-    required_permission = "ai.edit"
-
-    template_name = "twf/project/query/query.html"
-    page_title = "SQL Query"
-    form_class = QueryDatabaseForm
-    results = None
-
-    def form_valid(self, form):
-        """Handle the form submission."""
-        sql_query = form.cleaned_data["query"]
-        logger.debug("Executing SQL query: %s", sql_query)
-
-        try:
-            with connection.cursor() as cursor:
-                cursor.execute(sql_query)
-                columns = [col[0] for col in cursor.description]
-                logger.debug("Query columns: %s", columns)
-                results = [dict(zip(columns, row)) for row in cursor.fetchall()]
-                if len(results) == 0:
-                    messages.info(self.request, "No results found.")
-
-                self.results = results
-        except Exception as e:
-            messages.error(self.request, f"Error executing query: {e}")
-            return self.render_to_response(self.get_context_data(form=form))
-
-        return self.render_to_response(self.get_context_data(form=form))
-
-    def get_context_data(self, **kwargs):
-        """Get the context data."""
-        context = super().get_context_data(**kwargs)
-        context["results"] = self.results
-        return context
 
 
 class TWFProjectOverviewView(TWFProjectView):

@@ -4,6 +4,7 @@ from django.shortcuts import redirect
 from twf.clients.zenodo_client import create_new_deposition
 from twf.models import Export, ExportConfiguration
 from twf.permissions import check_permission
+from twf.tasks.instant_tasks import save_instant_task_delete_export_config
 from twf.views.views_base import TWFView, get_referrer_or_default
 
 
@@ -39,6 +40,15 @@ def delete_export_configuration(request, pk):
 
     try:
         export_config = ExportConfiguration.objects.get(pk=pk)
+
+        # Capture info before deletion
+        config_name = export_config.name
+
+        # Save instant task before deletion
+        save_instant_task_delete_export_config(
+            project, request.user, config_name, export_config.id
+        )
+
         export_config.delete()
         messages.success(request, "Export configuration deleted successfully.")
     except Export.DoesNotExist:

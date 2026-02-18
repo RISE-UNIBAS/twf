@@ -21,6 +21,10 @@ from twf.forms.project.ai_config_forms import (
     AIConfigurationTestForm,
 )
 from twf.models import AIConfiguration
+from twf.tasks.instant_tasks import (
+    save_instant_task_create_ai_config,
+    save_instant_task_delete_ai_config,
+)
 from twf.views.project.views_project import TWFProjectView
 from twf.views.views_base import ProjectPermissionMixin
 
@@ -82,6 +86,12 @@ class TWFProjectAIConfigCreateView(ProjectPermissionMixin, CreateView, TWFProjec
             f"AI Configuration '{form.instance.name}' created successfully.",
         )
         self.object = form.save()
+
+        # Save instant task
+        save_instant_task_create_ai_config(
+            self.get_project(), self.request.user, self.object.name, self.object.id
+        )
+
         return redirect("twf:project_ai_config_detail", pk=self.object.pk)
 
     def get_context_data(self, **kwargs):
@@ -180,8 +190,14 @@ class TWFProjectAIConfigDeleteView(ProjectPermissionMixin, DeleteView, TWFProjec
         return reverse("twf:project_ai_configs")
 
     def delete(self, request, *args, **kwargs):
-        """Add success message."""
+        """Add success message and save instant task."""
         ai_config = self.object
+
+        # Save instant task before deletion
+        save_instant_task_delete_ai_config(
+            self.get_project(), request.user, ai_config.name, ai_config.id
+        )
+
         messages.success(
             request, f"AI Configuration '{ai_config.name}' deleted successfully."
         )
