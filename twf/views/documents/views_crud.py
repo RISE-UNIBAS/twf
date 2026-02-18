@@ -10,7 +10,10 @@ from django.views.decorators.csrf import csrf_exempt
 
 from twf.models import Document
 from twf.permissions import check_permission
-from twf.tasks.instant_tasks import save_instant_task_delete_document
+from twf.tasks.instant_tasks import (
+    save_instant_task_delete_document,
+    save_instant_task_update_document,
+)
 from twf.utils.metadata_utils import delete_nested_key, set_nested_value
 from twf.views.views_base import get_referrer_or_default, TWFView
 
@@ -131,19 +134,35 @@ def update_document_options(request, pk):
     if request.method == "POST":
         document = get_object_or_404(Document, pk=pk)
 
+        # Track what changed
+        changes = []
+
         # Update status if provided
         status = request.POST.get("status")
         if status and status in dict(Document.STATUS_CHOICES):
+            if document.status != status:
+                changes.append(f"status: {document.status} → {status}")
             document.status = status
 
         # Update is_parked if provided
         is_parked = request.POST.get("is_parked")
         if is_parked is not None:
-            document.is_parked = is_parked == "true"
+            new_parked = is_parked == "true"
+            if document.is_parked != new_parked:
+                changes.append(f"parked: {document.is_parked} → {new_parked}")
+            document.is_parked = new_parked
 
         # Update workflow_remarks
         workflow_remarks = request.POST.get("workflow_remarks", "")
+        if document.workflow_remarks != workflow_remarks:
+            changes.append("workflow_remarks updated")
         document.workflow_remarks = workflow_remarks
+
+        # Save instant task if there were changes
+        if changes:
+            save_instant_task_update_document(
+                project, request.user, document.title, document.id, ", ".join(changes)
+            )
 
         document.save(current_user=request.user)
         messages.success(request, "Document options updated successfully.")

@@ -28,6 +28,10 @@ from twf.forms.project.project_forms import (
     WorkflowSettingsForm,
 )
 from twf.models import Page, PageTag, Task, Note
+from twf.tasks.instant_tasks import (
+    save_instant_task_update_note,
+    save_instant_task_update_project_settings,
+)
 from twf.tables.tables_project import (
     TaskTable,
     NoteTable,
@@ -377,6 +381,11 @@ class TWFProjectNoteEditView(ProjectPermissionMixin, FormView, TWFProjectView):
         self.object = form.save(commit=False)
         self.object.save(current_user=self.request.user)
 
+        # Save instant task
+        save_instant_task_update_note(
+            self.get_project(), self.request.user, self.object.title, self.object.id
+        )
+
         messages.success(self.request, "Note has been updated successfully.")
         return super().form_valid(form)
 
@@ -424,10 +433,18 @@ class TWFProjectGeneralSettingsView(ProjectPermissionMixin, FormView, TWFProject
 
     def form_valid(self, form):
         """Handle the form submission."""
+        # Track what changed
+        changes = ", ".join(form.changed_data) if form.changed_data else "settings updated"
+
         # Save the form
         self.object = form.save(commit=False)
         self.object.save(current_user=self.request.user)
         form.save_m2m()
+
+        # Save instant task
+        save_instant_task_update_project_settings(
+            self.get_project(), self.request.user, "General", changes
+        )
 
         # Add a success message
         messages.success(
@@ -454,9 +471,18 @@ class TWFProjectTaskSettingsView(ProjectPermissionMixin, FormView, TWFProjectVie
 
     def form_valid(self, form):
         """Handle the form submission."""
+        # Track what changed
+        changes = ", ".join(form.changed_data) if form.changed_data else "settings updated"
+
         # Save the form and show a success message
         self.object = form.save(commit=False)
         self.object.save(current_user=self.request.user)
+
+        # Save instant task
+        save_instant_task_update_project_settings(
+            self.get_project(), self.request.user, "Date Normalization", changes
+        )
+
         messages.success(
             self.request, "Date normalization settings have been updated successfully."
         )
@@ -485,9 +511,17 @@ class TWFProjectDisplaySettingsView(ProjectPermissionMixin, FormView, TWFProject
 
     def form_valid(self, form):
         """Handle the form submission."""
+        # Track what changed
+        changes = ", ".join(form.changed_data) if form.changed_data else "settings updated"
+
         # Save the form
         self.object = form.save(commit=False)
         self.object.save(current_user=self.request.user)
+
+        # Save instant task
+        save_instant_task_update_project_settings(
+            self.get_project(), self.request.user, "Display", changes
+        )
 
         # Add a success message
         messages.success(
@@ -518,7 +552,16 @@ class TWFProjectWorkflowSettingsView(ProjectPermissionMixin, FormView, TWFProjec
 
     def form_valid(self, form):
         """Handle the form submission."""
+        # Track what changed
+        changes = ", ".join(form.changed_data) if form.changed_data else "settings updated"
+
         form.save()
+
+        # Save instant task
+        save_instant_task_update_project_settings(
+            self.get_project(), self.request.user, "Workflow", changes
+        )
+
         messages.success(self.request, "Workflow settings updated successfully.")
 
         # Retrieve the active tab from form data and include it in the success URL

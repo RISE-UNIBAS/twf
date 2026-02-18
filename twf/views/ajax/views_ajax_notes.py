@@ -11,6 +11,7 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 
 from twf.models import Note
+from twf.tasks.instant_tasks import save_instant_task_create_note
 from twf.views.views_base import TWFView
 
 
@@ -40,6 +41,9 @@ def save_ai_result_as_note(request):
         # Create a new note with the AI result
         note = Note(project=project, title=ai_result[:20], note=ai_result)
         note.save(current_user=request.user)
+
+        # Save instant task
+        save_instant_task_create_note(project, request.user, note.title, note.id)
 
         return JsonResponse({"success": True, "note_id": note.id}, status=200)
 

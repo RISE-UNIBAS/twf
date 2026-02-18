@@ -24,6 +24,7 @@ from twf.models import AIConfiguration
 from twf.tasks.instant_tasks import (
     save_instant_task_create_ai_config,
     save_instant_task_delete_ai_config,
+    save_instant_task_update_ai_config,
 )
 from twf.views.project.views_project import TWFProjectView
 from twf.views.views_base import ProjectPermissionMixin
@@ -127,11 +128,21 @@ class TWFProjectAIConfigEditView(ProjectPermissionMixin, UpdateView, TWFProjectV
     def form_valid(self, form):
         """Update modified_by before saving."""
         form.instance.modified_by = self.request.user
+
+        # Track what changed
+        changes = ", ".join(form.changed_data) if form.changed_data else "configuration updated"
+
         messages.success(
             self.request,
             f"AI Configuration '{form.instance.name}' updated successfully.",
         )
         self.object = form.save()
+
+        # Save instant task
+        save_instant_task_update_ai_config(
+            self.get_project(), self.request.user, self.object.name, self.object.id, changes
+        )
+
         return redirect("twf:project_ai_config_detail", pk=self.object.pk)
 
     def get_context_data(self, **kwargs):

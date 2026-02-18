@@ -19,6 +19,7 @@ from twf.tasks.instant_tasks import (
     save_instant_task_remove_all_prompts,
     save_instant_task_remove_all_tasks,
     save_instant_task_remove_all_dictionaries,
+    save_instant_task_delete_note,
 )
 from twf.views.views_base import TWFView, get_referrer_or_default
 
@@ -224,6 +225,14 @@ def delete_note(request, pk):
 
     try:
         note = project.notes.get(pk=pk)
+
+        # Capture info before deletion
+        note_title = note.title
+        note_id = note.id
+
+        # Save instant task before deletion
+        save_instant_task_delete_note(project, request.user, note_title, note_id)
+
         note.delete()
         messages.success(request, "Note deleted.")
     except project.notes.model.DoesNotExist:
