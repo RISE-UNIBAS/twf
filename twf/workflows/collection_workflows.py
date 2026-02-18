@@ -63,6 +63,19 @@ def create_collection_workflow(project, user, collection, item_count=None):
         related_task=task,
     )
 
+    # Initialize workflow_steps in the related task
+    if task:
+        task.workflow_steps = {
+            "current_step": 0,
+            "total_steps": item_count,
+            "steps": [],
+            "workflow_type": "review_collection",
+            "collection_id": collection.id,
+            "collection_title": collection.title,
+            "started_at": task.start_time.isoformat() if task.start_time else None
+        }
+        task.save(update_fields=["workflow_steps"])
+
     # Assign documents to the workflow
     workflow.assigned_collection_items.set(
         CollectionItem.objects.filter(id__in=available_collection_item_ids)

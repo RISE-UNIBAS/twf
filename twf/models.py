@@ -2525,7 +2525,32 @@ class Workflow(models.Model):
             self.related_task.text += progress_msg
             self.related_task.progress = progress
             self.related_task.title = f"Review Workflow: {self.current_item_index}/{self.item_count} completed ({progress}%)"
-            self.related_task.save(update_fields=["text", "progress", "title"])
+
+            # Update workflow_steps in the task
+            if not self.related_task.workflow_steps:
+                self.related_task.workflow_steps = {
+                    "current_step": 0,
+                    "total_steps": self.item_count,
+                    "steps": []
+                }
+
+            # Mark previous step as completed if it exists
+            if self.related_task.workflow_steps.get("steps"):
+                last_step_index = len(self.related_task.workflow_steps["steps"]) - 1
+                if last_step_index >= 0:
+                    self.related_task.workflow_steps["steps"][last_step_index]["status"] = "completed"
+                    self.related_task.workflow_steps["steps"][last_step_index]["completed_at"] = timezone.now().isoformat()
+
+            # Add new step
+            self.related_task.workflow_steps["current_step"] = self.current_item_index
+            self.related_task.workflow_steps["steps"].append({
+                "index": self.current_item_index,
+                "description": item_description or f"Item {self.current_item_index}",
+                "status": "in_progress" if self.current_item_index < self.item_count else "completed",
+                "started_at": timezone.now().isoformat()
+            })
+
+            self.related_task.save(update_fields=["text", "progress", "title", "workflow_steps"])
 
     def finish(self, with_error=False):
         """Mark the workflow as ended and finalize the related task."""
@@ -2557,7 +2582,21 @@ class Workflow(models.Model):
             self.related_task.text += f"Duration: {duration_str}\n"
             self.related_task.progress = 100
             self.related_task.end_time = timezone.now()
-            self.related_task.save(update_fields=["text", "status", "title", "progress", "end_time"])
+
+            # Finalize workflow_steps - mark last step as completed
+            if self.related_task.workflow_steps and self.related_task.workflow_steps.get("steps"):
+                last_step_index = len(self.related_task.workflow_steps["steps"]) - 1
+                if last_step_index >= 0 and self.related_task.workflow_steps["steps"][last_step_index].get("status") == "in_progress":
+                    self.related_task.workflow_steps["steps"][last_step_index]["status"] = "completed"
+                    self.related_task.workflow_steps["steps"][last_step_index]["completed_at"] = timezone.now().isoformat()
+
+                # Add summary to workflow_steps
+                self.related_task.workflow_steps["completed"] = True
+                self.related_task.workflow_steps["completed_at"] = timezone.now().isoformat()
+                self.related_task.workflow_steps["with_error"] = with_error
+                self.related_task.workflow_steps["duration_seconds"] = duration if self.related_task.start_time else None
+
+            self.related_task.save(update_fields=["text", "status", "title", "progress", "end_time", "workflow_steps"])
 
         # Restore the reserved status of the items
         if self.workflow_type == "review_documents":

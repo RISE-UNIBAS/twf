@@ -58,6 +58,17 @@ def create_document_workflow(project, user, item_count=None):
         related_task=task,
     )
 
+    # Initialize workflow_steps in the related task
+    if task:
+        task.workflow_steps = {
+            "current_step": 0,
+            "total_steps": item_count,
+            "steps": [],
+            "workflow_type": "review_documents",
+            "started_at": task.start_time.isoformat() if task.start_time else None
+        }
+        task.save(update_fields=["workflow_steps"])
+
     # Assign documents to the workflow
     workflow.assigned_document_items.set(
         Document.objects.filter(id__in=available_document_ids)

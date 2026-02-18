@@ -266,6 +266,11 @@ class TWFProjectTaskMonitorView(ProjectPermissionMixin, SingleTableView, FilterV
         }
         context["task_stats"] = stats
 
+        # Get active/running tasks for overview
+        context["active_tasks"] = all_tasks.filter(
+            status__in=["PENDING", "STARTED", "PROGRESS"]
+        ).order_by("-start_time")[:5]  # Show max 5 most recent active tasks
+
         # Make sure the filter is available in the context
         context["filter"] = self.filterset
 

@@ -98,6 +98,20 @@ def create_dictionary_enrichment_workflow(project, user, dictionary_id, enrichme
         metadata=workflow_metadata,
     )
 
+    # Initialize workflow_steps in the related task
+    if task:
+        task.workflow_steps = {
+            "current_step": 0,
+            "total_steps": len(available_entries),
+            "steps": [],
+            "workflow_type": "review_dictionary_enrichment",
+            "dictionary_id": dictionary.id,
+            "dictionary_type": dictionary.type,
+            "enrichment_type": enrichment_type,
+            "started_at": task.start_time.isoformat() if task.start_time else None
+        }
+        task.save(update_fields=["workflow_steps"])
+
     # Assign entries using the assigned_dictionary_entries M2M field
     workflow.assigned_dictionary_entries.set(
         DictionaryEntry.objects.filter(id__in=available_entries)

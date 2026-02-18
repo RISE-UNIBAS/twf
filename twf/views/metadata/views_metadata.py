@@ -372,6 +372,16 @@ class TWFMetadataReviewPagesView(ProjectPermissionMixin, TWFMetadataView):
                 messages.warning(request, "No pages with metadata available for review.")
                 return redirect("twf:metadata_review_pages")
 
+            # Create task for workflow tracking
+            from twf.tasks.instant_tasks import start_related_task
+            task = start_related_task(
+                self.get_project(),
+                request.user,
+                "Review Page Metadata",
+                "Review metadata for pages in the project.",
+                f"The user has started a workflow to review metadata for {available_pages.count()} page(s).",
+            )
+
             # Create workflow
             workflow = Workflow.objects.create(
                 project=self.get_project(),
@@ -379,7 +389,19 @@ class TWFMetadataReviewPagesView(ProjectPermissionMixin, TWFMetadataView):
                 workflow_type="review_metadata_pages",
                 item_count=available_pages.count(),
                 status="started",
+                related_task=task,
             )
+
+            # Initialize workflow_steps in the related task
+            if task:
+                task.workflow_steps = {
+                    "current_step": 0,
+                    "total_steps": available_pages.count(),
+                    "steps": [],
+                    "workflow_type": "review_metadata_pages",
+                    "started_at": task.start_time.isoformat() if task.start_time else None
+                }
+                task.save(update_fields=["workflow_steps"])
 
             # Assign pages to workflow
             workflow.assigned_page_items.set(available_pages)
@@ -619,6 +641,16 @@ class TWFMetadataReviewDocumentsView(ProjectPermissionMixin, TWFMetadataView):
                 messages.warning(request, "No documents with metadata available for review.")
                 return redirect("twf:metadata_review_documents")
 
+            # Create task for workflow tracking
+            from twf.tasks.instant_tasks import start_related_task
+            task = start_related_task(
+                self.get_project(),
+                request.user,
+                "Review Document Metadata",
+                "Review metadata for documents in the project.",
+                f"The user has started a workflow to review metadata for {available_documents.count()} document(s).",
+            )
+
             # Create workflow
             workflow = Workflow.objects.create(
                 project=self.get_project(),
@@ -626,7 +658,19 @@ class TWFMetadataReviewDocumentsView(ProjectPermissionMixin, TWFMetadataView):
                 workflow_type="review_metadata_documents",
                 item_count=available_documents.count(),
                 status="started",
+                related_task=task,
             )
+
+            # Initialize workflow_steps in the related task
+            if task:
+                task.workflow_steps = {
+                    "current_step": 0,
+                    "total_steps": available_documents.count(),
+                    "steps": [],
+                    "workflow_type": "review_metadata_documents",
+                    "started_at": task.start_time.isoformat() if task.start_time else None
+                }
+                task.save(update_fields=["workflow_steps"])
 
             # Assign documents to workflow
             workflow.assigned_document_items.set(available_documents)

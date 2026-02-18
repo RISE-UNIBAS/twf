@@ -155,6 +155,18 @@ def create_tag_grouping_workflow(project, user, tag_type, item_count=None):
         metadata={"tag_type": tag_type},
     )
 
+    # Initialize workflow_steps in the related task
+    if task:
+        task.workflow_steps = {
+            "current_step": 0,
+            "total_steps": actual_item_count,
+            "steps": [],
+            "workflow_type": "review_tags_grouping",
+            "tag_type": tag_type,
+            "started_at": task.start_time.isoformat() if task.start_time else None
+        }
+        task.save(update_fields=["workflow_steps"])
+
     # Assign all reserved tags to the workflow
     workflow.assigned_tag_items.set(PageTag.objects.filter(id__in=all_tag_ids))
 
@@ -226,6 +238,17 @@ def create_date_normalization_workflow(project, user, item_count=None):
         item_count=actual_item_count,
         related_task=task,
     )
+
+    # Initialize workflow_steps in the related task
+    if task:
+        task.workflow_steps = {
+            "current_step": 0,
+            "total_steps": actual_item_count,
+            "steps": [],
+            "workflow_type": "review_tags_dates",
+            "started_at": task.start_time.isoformat() if task.start_time else None
+        }
+        task.save(update_fields=["workflow_steps"])
 
     # Assign date tags to the workflow
     workflow.assigned_tag_items.set(PageTag.objects.filter(id__in=available_tag_ids))
@@ -319,6 +342,19 @@ def create_enrichment_workflow(project, user, tag_type, item_count=None):
         related_task=task,
         metadata=workflow_metadata,
     )
+
+    # Initialize workflow_steps in the related task
+    if task:
+        task.workflow_steps = {
+            "current_step": 0,
+            "total_steps": len(available_tags),
+            "steps": [],
+            "workflow_type": "review_tags_enrichment",
+            "tag_type": tag_type,
+            "enrichment_type": enrichment_config.get("form_type", tag_type),
+            "started_at": task.start_time.isoformat() if task.start_time else None
+        }
+        task.save(update_fields=["workflow_steps"])
 
     # Assign tags
     workflow.assigned_tag_items.set(PageTag.objects.filter(id__in=available_tags))

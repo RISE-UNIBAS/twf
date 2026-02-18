@@ -9,13 +9,105 @@ class TaskTable(tables.Table):
     Table for displaying tasks with status, progress, and action buttons.
     """
     title = tables.Column(verbose_name="Task")
+    task_type = tables.Column(verbose_name="Type", empty_values=())
+    category = tables.Column(verbose_name="Category", empty_values=())
     status = tables.Column()
+    items = tables.Column(empty_values=(), verbose_name="Items", orderable=False)
     user = tables.Column(verbose_name="Started By")
     start_time = tables.DateTimeColumn(verbose_name="Start", format="Y-m-d H:i")
     end_time = tables.DateTimeColumn(verbose_name="End", format="Y-m-d H:i")
     progress = tables.Column(empty_values=())
 
     actions = tables.Column(empty_values=(), verbose_name="Options")
+
+    def render_task_type(self, record):
+        """
+        Render task type as a colored badge.
+
+        Args:
+            record: Task model instance
+
+        Returns:
+            SafeString: Formatted HTML badge with appropriate color
+        """
+        type_map = {
+            "instant": ("secondary", "fa-bolt", "Instant"),
+            "celery": ("primary", "fa-cog", "Background"),
+            "workflow": ("info", "fa-stream", "Workflow"),
+        }
+        color, icon, label = type_map.get(record.task_type, ("secondary", "fa-question", "Unknown"))
+        return format_html(
+            '<span class="badge bg-{}"><i class="fas {} me-1"></i>{}</span>',
+            color, icon, label
+        )
+
+    def render_category(self, record):
+        """
+        Render task category as a colored badge.
+
+        Args:
+            record: Task model instance
+
+        Returns:
+            SafeString: Formatted HTML badge with appropriate color or dash if no category
+        """
+        if not record.category:
+            return "-"
+
+        category_map = {
+            "create": ("success", "fa-plus"),
+            "update": ("warning", "fa-edit"),
+            "delete": ("danger", "fa-trash"),
+            "bulk_delete": ("danger", "fa-trash-alt"),
+            "import": ("info", "fa-download"),
+            "export": ("info", "fa-upload"),
+            "ai_processing": ("primary", "fa-robot"),
+            "enrichment": ("secondary", "fa-sparkles"),
+            "workflow": ("info", "fa-stream"),
+            "system": ("dark", "fa-cog"),
+        }
+        color, icon = category_map.get(record.category, ("secondary", "fa-tag"))
+        label = record.category.replace("_", " ").title()
+        return format_html(
+            '<span class="badge bg-{} text-white"><i class="fas {} me-1"></i>{}</span>',
+            color, icon, label
+        )
+
+    def render_items(self, record):
+        """
+        Render item processing counts for tasks that process multiple items.
+
+        Args:
+            record: Task model instance
+
+        Returns:
+            SafeString: Formatted HTML showing processed/total items or dash if not applicable
+        """
+        if record.total_items and record.total_items > 0:
+            # Show progress with color coding
+            if record.status == "SUCCESS":
+                badge_color = "success"
+            elif record.status == "FAILURE":
+                badge_color = "danger"
+            else:
+                badge_color = "secondary"
+
+            success_part = ""
+            if record.successful_items and record.failed_items:
+                success_part = format_html(
+                    ' <small class="text-muted">(<span class="text-success">{}</span>/<span class="text-danger">{}</span>)</small>',
+                    record.successful_items,
+                    record.failed_items
+                )
+
+            return format_html(
+                '<span class="badge bg-{}">{}/{}</span>{}',
+                badge_color,
+                record.processed_items or 0,
+                record.total_items,
+                success_part
+            )
+        return "-"
 
     def render_status(self, value):
         """
@@ -129,7 +221,7 @@ class TaskTable(tables.Table):
         """
         model = Task
         template_name = "django_tables2/bootstrap4.html"
-        fields = ("title", "status", "user", "start_time", "end_time", "progress")
+        fields = ("title", "task_type", "category", "status", "items", "user", "start_time", "end_time", "progress")
         attrs = {"class": "table table-striped table-hover"}
 
 
