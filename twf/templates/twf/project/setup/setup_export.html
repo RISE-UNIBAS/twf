@@ -2,13 +2,15 @@
 {% load static crispy_forms_tags %}
 
 {% block content %}
-    <p class="lead">
-        Use this page to request and manage an export of your Transkribus collection.
-        Your collection ID is <strong>{{ project.collection_id }}</strong>.
-    </p>
-
     <div class="card mb-4">
+        <div class="card-header bg-dark text-white">
+            <h5 class="mb-0">Transkribus Export</h5>
+        </div>
         <div class="card-body">
+            <p class="text-muted mb-3">
+                Use this page to request and manage an export of your Transkribus collection.
+                Your collection ID is <strong>{{ project.collection_id }}</strong>.
+            </p>
             {% crispy form %}
         </div>
     </div>
