@@ -1510,6 +1510,9 @@ class DictionaryEntry(TimeStampedModel):
     is_reserved = models.BooleanField(default=False)
     """Whether the entry is reserved for a workflow."""
 
+    is_parked = models.BooleanField(default=False)
+    """Whether the entry is parked (temporarily set aside during workflow)."""
+
     class Meta:
         """Meta options for the DictionaryEntry model."""
 
@@ -1546,6 +1549,9 @@ class DictionaryEntry(TimeStampedModel):
             enrichment_data: Dictionary of structured enrichment data
             user: User performing the enrichment (optional, for audit trail)
         """
+        import logging
+        logger = logging.getLogger(__name__)
+
         if self.metadata is None:
             self.metadata = {}
 
@@ -1553,7 +1559,12 @@ class DictionaryEntry(TimeStampedModel):
             "normalized_value": normalized_value,
             "enrichment_data": enrichment_data,
         }
+        logger.debug(f"DictionaryEntry.set_enrichment: ID={self.id}, label='{self.label}', type={enrichment_type}, value={normalized_value}")
+        logger.debug(f"DictionaryEntry.set_enrichment: metadata before save={self.metadata}")
         self.save(current_user=user)
+        # Reload from database to confirm
+        self.refresh_from_db()
+        logger.debug(f"DictionaryEntry.set_enrichment: After save, has_enrichment({enrichment_type})={self.has_enrichment(enrichment_type)}")
 
     def has_enrichment(self, enrichment_type=None):
         """
@@ -2423,6 +2434,10 @@ class Workflow(models.Model):
 
     def get_next_item(self):
         """Fetch the next item to work on."""
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.debug(f"===== Workflow.get_next_item CALLED: type={self.workflow_type}, index={self.current_item_index}/{self.item_count} =====")
+
         try:
             if self.workflow_type == "review_documents":
                 if self.current_item_index < self.item_count:
@@ -2475,13 +2490,36 @@ class Workflow(models.Model):
                 # For dictionary enrichment, get next unenriched entry
                 # Check if entry has the specific enrichment type from metadata
                 enrichment_type = self.metadata.get("enrichment_type")
+                logger.debug(f"DICT ENRICH: enrichment_type={enrichment_type}, current_index={self.current_item_index}/{self.item_count}")
+
                 if not enrichment_type:
+                    logger.error("DICT ENRICH: No enrichment_type in workflow metadata!")
                     return None
 
                 # We need to check each entry individually since metadata structure varies
-                for entry in self.assigned_dictionary_entries.all().order_by("pk"):
-                    if not entry.has_enrichment(enrichment_type):
+                all_entries = list(self.assigned_dictionary_entries.all().order_by("pk"))
+                logger.debug(f"DICT ENRICH: Checking {len(all_entries)} assigned entries")
+
+                for idx, entry in enumerate(all_entries):
+                    # Refresh from database to ensure we have latest data
+                    entry.refresh_from_db()
+                    logger.debug(f"DICT ENRICH: Entry {idx}: ID={entry.id}, label='{entry.label}', is_parked={entry.is_parked}, metadata keys={list(entry.metadata.keys() if entry.metadata else [])}")
+
+                    # Skip parked entries
+                    if entry.is_parked:
+                        logger.debug(f"DICT ENRICH: ✗ Skipping entry {idx} (parked)")
+                        continue
+
+                    has_enrich = entry.has_enrichment(enrichment_type)
+                    logger.debug(f"DICT ENRICH: Entry {idx}: has_enrichment({enrichment_type})={has_enrich}")
+
+                    if not has_enrich:
+                        logger.debug(f"DICT ENRICH: ✓ Returning entry {idx} (ID={entry.id}, label='{entry.label}')")
                         return entry
+                    else:
+                        logger.debug(f"DICT ENRICH: ✗ Skipping entry {idx} (already enriched)")
+
+                logger.debug("DICT ENRICH: No unenriched entries found, returning None")
                 return None
             if self.workflow_type == "review_metadata_documents":
                 if self.current_item_index < self.item_count:

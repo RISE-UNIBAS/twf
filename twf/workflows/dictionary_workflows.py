@@ -48,18 +48,41 @@ def create_dictionary_enrichment_workflow(project, user, dictionary_id, enrichme
 
     # Find unenriched entries in this dictionary
     # An entry is unenriched if it has no enrichment data for this specific type
+    import logging
+    logger = logging.getLogger(__name__)
+    logger.debug(f"CREATE WORKFLOW: Dictionary={dictionary.label}, enrichment_type={enrichment_type}, batch_size={item_count}")
+
     available_entries = []
-    for entry in DictionaryEntry.objects.filter(
+    all_candidates = DictionaryEntry.objects.filter(
         dictionary=dictionary,
         is_reserved=False,
-    )[:item_count * 2]:  # Get more to filter
+        is_parked=False,
+    ).order_by('pk')  # Check all unreserved/unparked entries
+
+    total_candidates = all_candidates.count()
+    logger.debug(f"CREATE WORKFLOW: Checking {total_candidates} candidate entries (unreserved, unparked)")
+
+    for idx, entry in enumerate(all_candidates):
+        entry.refresh_from_db()  # Ensure fresh data
+        has_enrich = entry.has_enrichment(enrichment_type)
+        metadata_keys = list(entry.metadata.keys()) if entry.metadata else []
+
+        logger.debug(f"CREATE WORKFLOW: Entry {idx}: ID={entry.id}, label='{entry.label}', is_parked={entry.is_parked}, has_enrichment({enrichment_type})={has_enrich}, metadata_keys={metadata_keys}")
+
         # Check if entry has this specific enrichment type
-        if not entry.has_enrichment(enrichment_type):
+        if not has_enrich:
             available_entries.append(entry.id)
+            logger.debug(f"CREATE WORKFLOW: ✓ Added entry {entry.id} to workflow")
             if len(available_entries) >= item_count:
+                logger.debug(f"CREATE WORKFLOW: Reached batch size limit ({item_count})")
                 break
+        else:
+            logger.debug(f"CREATE WORKFLOW: ✗ Skipped entry {entry.id} (already enriched)")
+
+    logger.debug(f"CREATE WORKFLOW: Found {len(available_entries)} unenriched entries")
 
     if not available_entries:
+        logger.warning(f"CREATE WORKFLOW: No unenriched entries found for {enrichment_type}")
         return False
 
     # Mark as reserved
@@ -147,6 +170,7 @@ def get_available_dictionary_entry_count(project, dictionary_id, enrichment_type
     for entry in DictionaryEntry.objects.filter(
         dictionary=dictionary,
         is_reserved=False,
+        is_parked=False,
     ):
         if not entry.has_enrichment(enrichment_type):
             count += 1

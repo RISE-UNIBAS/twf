@@ -434,6 +434,35 @@ def save_instant_task_unpark_tag(project, user, tag_variation, tag_id):
     )
 
 
+# Dictionary entry operations
+def save_instant_task_park_dictionary_entry(project, user, entry_label, entry_id):
+    """Record parking of a dictionary entry."""
+    title = f"Park Dictionary Entry: {entry_label}"
+    description = "Parked a dictionary entry."
+    text = f"Dictionary entry '{entry_label}' (ID: {entry_id}) was parked."
+    return save_instant_task(
+        project, user, title, description, text,
+        category="update",
+        object_type="DictionaryEntry",
+        object_id=entry_id,
+        action="park"
+    )
+
+
+def save_instant_task_unpark_dictionary_entry(project, user, entry_label, entry_id):
+    """Record unparking of a dictionary entry."""
+    title = f"Unpark Dictionary Entry: {entry_label}"
+    description = "Unparked a dictionary entry."
+    text = f"Dictionary entry '{entry_label}' (ID: {entry_id}) was unparked."
+    return save_instant_task(
+        project, user, title, description, text,
+        category="update",
+        object_type="DictionaryEntry",
+        object_id=entry_id,
+        action="unpark"
+    )
+
+
 # AI Configuration operations
 def save_instant_task_create_ai_config(project, user, config_name, config_id):
     """Record creation of an AI configuration."""

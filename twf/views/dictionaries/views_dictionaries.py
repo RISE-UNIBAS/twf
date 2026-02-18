@@ -789,6 +789,45 @@ class TWFDictionaryEnrichmentView(ProjectPermissionMixin, FormView, TWFDictionar
 
     def post(self, request, *args, **kwargs):
         """Handle the post request."""
+        logger.debug(f"POST request received. Buttons: start_workflow={'start_workflow' in request.POST}, search={'search' in request.POST}, save_and_next={'save_and_next' in request.POST}, park_and_next={'park_and_next' in request.POST}")
+
+        # Handle park_and_next action
+        if "park_and_next" in request.POST:
+            from twf.tasks.instant_tasks import save_instant_task_park_dictionary_entry
+
+            workflow = self.get_active_workflow()
+            if not workflow:
+                messages.error(request, "No active workflow found.")
+                return redirect("twf:dictionaries_enrichment")
+
+            current_entry = workflow.get_next_item()
+            if not current_entry:
+                messages.error(request, "No entry to park.")
+                return redirect("twf:dictionaries_enrichment")
+
+            # Park the entry
+            current_entry.is_parked = True
+            current_entry.save()
+
+            # Log the action
+            save_instant_task_park_dictionary_entry(
+                self.get_project(),
+                request.user,
+                current_entry.label,
+                current_entry.id
+            )
+
+            # Advance workflow (don't save enrichment, just skip this entry)
+            workflow.advance(item_description=f"Parked '{current_entry.label}'")
+            messages.info(request, f"Dictionary entry '{current_entry.label}' parked.")
+
+            # Check workflow completion
+            if not workflow.get_next_item():
+                workflow.finish()
+                messages.success(request, "Workflow completed!")
+
+            return redirect("twf:dictionaries_enrichment")
+
         # Handle workflow start
         if "start_workflow" in request.POST:
             dictionary_id = request.POST.get("dictionary_id")
@@ -927,16 +966,43 @@ class TWFDictionaryEnrichmentView(ProjectPermissionMixin, FormView, TWFDictionar
             messages.error(self.request, "No active workflow found.")
             return redirect("twf:dictionaries_enrichment")
 
+        # Get current item info for logging
+        current_item = workflow.get_next_item()
+        item_description = current_item.label if current_item else "Unknown"
+
         # Save enrichment using form's save method
         form.save(user=self.request.user)
-        messages.success(self.request, "Dictionary entry enriched successfully.")
+        logger.debug(f"Saved enrichment for item: {item_description}")
+
+        # Advance workflow to next item
+        workflow.advance(item_description=f"Enriched '{item_description}'")
+        logger.debug(f"Advanced workflow. Current index: {workflow.current_item_index}/{workflow.item_count}")
+
+        messages.success(self.request, f"Dictionary entry '{item_description}' enriched successfully.")
 
         # Check workflow completion
         if not workflow.get_next_item():
             workflow.finish()
             messages.success(self.request, "Workflow completed!")
+            logger.debug("Workflow finished - no more items")
 
         return redirect("twf:dictionaries_enrichment")
+
+    def form_invalid(self, form):
+        """Handle invalid form submission with better error reporting."""
+        logger.error(f"Dictionary enrichment form is INVALID. Errors: {form.errors}")
+        logger.error(f"Non-field errors: {form.non_field_errors()}")
+        logger.error(f"POST data keys: {list(self.request.POST.keys())}")
+
+        # Add a user-friendly error message
+        if form.errors:
+            for field, errors in form.errors.items():
+                for error in errors:
+                    messages.error(self.request, f"{field}: {error}")
+        else:
+            messages.error(self.request, "Form validation failed. Please check your input.")
+
+        return super().form_invalid(form)
 
     def get(self, request, *args, **kwargs):
         """Override the get method to handle workflow state."""

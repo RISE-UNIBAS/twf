@@ -18,6 +18,7 @@ from django_select2.forms import Select2Widget
 from twf.clients.gnd_client import search_gnd
 from twf.clients.wikidata_client import search_wikidata_entities
 from twf.clients.geonames_client import search_location
+from twf.models import DictionaryEntry
 
 
 class AbstractFormMeta(ABCMeta, type(forms.Form)):
@@ -72,14 +73,35 @@ class BaseTagEnrichmentForm(forms.Form, metaclass=AbstractFormMeta):
             self.fields["normalized_value"].initial = proposal
 
         # Setup crispy forms helper with buttons
-        # Park button only for tags (PageTag model)
-        park_button_html = ""
-        if hasattr(item, 'is_parked'):  # PageTag has is_parked attribute
-            park_url = reverse("twf:tags_park", kwargs={"pk": item.pk})
-            park_button_html = (
-                f'<a href="{park_url}" class="btn btn-secondary ms-2">'
-                f'<i class="fa fa-box-archive"></i> Park</a>'
+        # Park button behavior depends on context:
+        # - For tags in tag detail view: HTML link to park URL
+        # - For dictionary entries in workflow: Submit button for park_and_next
+        park_button = None
+        if hasattr(item, 'is_parked'):
+            if isinstance(item, DictionaryEntry):
+                # Workflow context - use submit button
+                park_button = Submit(
+                    "park_and_next",
+                    "Park & Next",
+                    css_class="btn btn-warning ms-2",
+                )
+            else:
+                # Tag detail context - use link
+                park_url = reverse("twf:tags_park", kwargs={"pk": item.pk})
+                park_button = HTML(
+                    f'<a href="{park_url}" class="btn btn-secondary ms-2">'
+                    f'<i class="fa fa-box-archive"></i> Park</a>'
+                )
+
+        buttons = [
+            Submit(
+                "save_and_next",
+                "Save & Next",
+                css_class="btn btn-primary",
             )
+        ]
+        if park_button:
+            buttons.append(park_button)
 
         self.helper = FormHelper()
         self.helper.form_method = "post"
@@ -87,15 +109,36 @@ class BaseTagEnrichmentForm(forms.Form, metaclass=AbstractFormMeta):
             "item_id",
             self._get_form_fields_layout(),
             ButtonHolder(
-                Submit(
-                    "save_and_next",
-                    "Save & Next",
-                    css_class="btn btn-primary",
-                ),
-                HTML(park_button_html) if park_button_html else None,
+                *buttons,
                 css_class="mt-3",
             ),
         )
+
+    def _get_park_button(self):
+        """
+        Get park button appropriate for the item type.
+
+        Returns:
+            Submit or HTML button, or None if item doesn't support parking
+        """
+        if not hasattr(self.item, 'is_parked'):
+            return None
+
+        # Check item type by class name to avoid circular import issues
+        if self.item.__class__.__name__ == 'DictionaryEntry':
+            # Workflow context - use submit button
+            return Submit(
+                "park_and_next",
+                "Park & Next",
+                css_class="btn btn-warning ms-2",
+            )
+        else:
+            # Tag detail context - use link
+            park_url = reverse("twf:tags_park", kwargs={"pk": self.item.pk})
+            return HTML(
+                f'<a href="{park_url}" class="btn btn-secondary ms-2">'
+                f'<i class="fa fa-box-archive"></i> Park</a>'
+            )
 
     def _get_form_fields_layout(self):
         """
@@ -966,35 +1009,49 @@ class GNDQueryEnrichmentForm(BaseTagEnrichmentForm):
             self.fields["result_choice"].widget = forms.HiddenInput()
 
         # Update helper to include search button
-        park_button_html = ""
-        if hasattr(self.item, 'is_parked'):
-            park_url = reverse("twf:tags_park", kwargs={"pk": self.item.pk})
-            park_button_html = (
-                f'<a href="{park_url}" class="btn btn-secondary ms-2">'
-                f'<i class="fa fa-box-archive"></i> Park</a>'
-            )
+        park_button = self._get_park_button()
 
         self.helper = FormHelper()
         self.helper.form_method = "post"
-        
+
         if not search_results:
             # Show search interface
+            buttons = [
+                Submit(
+                    "search",
+                    "Search GND",
+                    css_class="btn btn-primary",
+                )
+            ]
+            if park_button:
+                buttons.append(park_button)
+
             self.helper.layout = Layout(
                 "item_id",
                 "search_query",
                 HTML('<input type="hidden" name="search_results_json" value="">'),
                 ButtonHolder(
-                    Submit(
-                        "search",
-                        "Search GND",
-                        css_class="btn btn-primary",
-                    ),
-                    HTML(park_button_html) if park_button_html else None,
+                    *buttons,
                     css_class="mt-3",
                 ),
             )
         else:
             # Show results selection
+            buttons = [
+                Submit(
+                    "search",
+                    "Search Again",
+                    css_class="btn btn-secondary",
+                ),
+                Submit(
+                    "save_and_next",
+                    "Save & Next",
+                    css_class="btn btn-primary ms-2",
+                ),
+            ]
+            if park_button:
+                buttons.append(park_button)
+
             self.helper.layout = Layout(
                 "item_id",
                 "search_query",
@@ -1004,17 +1061,7 @@ class GNDQueryEnrichmentForm(BaseTagEnrichmentForm):
                 "result_choice",
                 "normalized_value",
                 ButtonHolder(
-                    Submit(
-                        "search",
-                        "Search Again",
-                        css_class="btn btn-secondary",
-                    ),
-                    Submit(
-                        "save_and_next",
-                        "Save & Next",
-                        css_class="btn btn-primary ms-2",
-                    ),
-                    HTML(park_button_html) if park_button_html else None,
+                    *buttons,
                     css_class="mt-3",
                 ),
             )
@@ -1078,8 +1125,8 @@ class GNDQueryEnrichmentForm(BaseTagEnrichmentForm):
         return super().save(user)
 
     def get_enrichment_type(self):
-        """Return enrichment type."""
-        return "authority_id"
+        """Return enrichment type for GND."""
+        return "gnd"
 
 
 class WikidataQueryEnrichmentForm(BaseTagEnrichmentForm):
@@ -1142,35 +1189,49 @@ class WikidataQueryEnrichmentForm(BaseTagEnrichmentForm):
             self.fields["result_choice"].widget = forms.HiddenInput()
 
         # Update helper to include search button
-        park_button_html = ""
-        if hasattr(self.item, 'is_parked'):
-            park_url = reverse("twf:tags_park", kwargs={"pk": self.item.pk})
-            park_button_html = (
-                f'<a href="{park_url}" class="btn btn-secondary ms-2">'
-                f'<i class="fa fa-box-archive"></i> Park</a>'
-            )
+        park_button = self._get_park_button()
 
         self.helper = FormHelper()
         self.helper.form_method = "post"
 
         if not search_results:
             # Show search interface
+            buttons = [
+                Submit(
+                    "search",
+                    "Search Wikidata",
+                    css_class="btn btn-primary",
+                )
+            ]
+            if park_button:
+                buttons.append(park_button)
+
             self.helper.layout = Layout(
                 "item_id",
                 "search_query",
                 HTML('<input type="hidden" name="search_results_json" value="">'),
                 ButtonHolder(
-                    Submit(
-                        "search",
-                        "Search Wikidata",
-                        css_class="btn btn-primary",
-                    ),
-                    HTML(park_button_html) if park_button_html else None,
+                    *buttons,
                     css_class="mt-3",
                 ),
             )
         else:
             # Show results selection
+            buttons = [
+                Submit(
+                    "search",
+                    "Search Again",
+                    css_class="btn btn-secondary",
+                ),
+                Submit(
+                    "save_and_next",
+                    "Save & Next",
+                    css_class="btn btn-primary ms-2",
+                ),
+            ]
+            if park_button:
+                buttons.append(park_button)
+
             self.helper.layout = Layout(
                 "item_id",
                 "search_query",
@@ -1180,17 +1241,7 @@ class WikidataQueryEnrichmentForm(BaseTagEnrichmentForm):
                 "result_choice",
                 "normalized_value",
                 ButtonHolder(
-                    Submit(
-                        "search",
-                        "Search Again",
-                        css_class="btn btn-secondary",
-                    ),
-                    Submit(
-                        "save_and_next",
-                        "Save & Next",
-                        css_class="btn btn-primary ms-2",
-                    ),
-                    HTML(park_button_html) if park_button_html else None,
+                    *buttons,
                     css_class="mt-3",
                 ),
             )
@@ -1258,8 +1309,8 @@ class WikidataQueryEnrichmentForm(BaseTagEnrichmentForm):
         return super().save(user)
 
     def get_enrichment_type(self):
-        """Return enrichment type."""
-        return "authority_id"
+        """Return enrichment type for Wikidata."""
+        return "wikidata"
 
 
 class GeoNamesQueryEnrichmentForm(BaseTagEnrichmentForm):
@@ -1285,15 +1336,38 @@ class GeoNamesQueryEnrichmentForm(BaseTagEnrichmentForm):
     )
 
     def __init__(self, *args, project=None, item=None, tag=None, **kwargs):
+        import logging
+        logger = logging.getLogger(__name__)
+
         # Get search results from POST data if present
+        # POST data can come from either args[0] (manual form creation) or kwargs['data'] (FormView)
         search_results = None
-        if args and len(args) > 0 and isinstance(args[0], dict):
-            search_results_json = args[0].get('search_results_json')
+        post_data = None
+
+        if args and len(args) > 0:
+            post_data = args[0]
+            logger.debug(f"GeoNames form init: POST data from args[0], type={type(post_data)}")
+        elif 'data' in kwargs:
+            post_data = kwargs['data']
+            logger.debug(f"GeoNames form init: POST data from kwargs['data'], type={type(post_data)}")
+        else:
+            logger.debug("GeoNames form init: No POST data found in args or kwargs")
+
+        if post_data and hasattr(post_data, 'get'):
+            search_results_json = post_data.get('search_results_json')
+            logger.debug(f"GeoNames form init: search_results_json present={bool(search_results_json)}, length={len(search_results_json) if search_results_json else 0}")
+
             if search_results_json:
                 try:
                     search_results = json.loads(search_results_json)
-                except json.JSONDecodeError:
-                    pass
+                    logger.debug(f"GeoNames form init: Successfully parsed {len(search_results)} results")
+                except json.JSONDecodeError as e:
+                    logger.error(f"GeoNames form init: Failed to parse JSON: {e}")
+                    logger.error(f"GeoNames form init: JSON string was: {search_results_json[:200]}")
+            else:
+                logger.debug("GeoNames form init: search_results_json is empty or None")
+        elif post_data:
+            logger.warning(f"GeoNames form init: POST data doesn't have 'get' method: {type(post_data)}")
 
         super().__init__(*args, project=project, item=item, tag=tag, **kwargs)
 
@@ -1321,40 +1395,56 @@ class GeoNamesQueryEnrichmentForm(BaseTagEnrichmentForm):
 
             self.fields["result_choice"].choices = choices
             self.search_results = search_results
+            logger.debug(f"GeoNames form init: Set {len(choices)} choices for result_choice field")
         else:
             self.search_results = []
             self.fields["result_choice"].widget = forms.HiddenInput()
+            logger.debug("GeoNames form init: No search results, hiding result_choice field")
 
         # Update helper to include search button
-        park_button_html = ""
-        if hasattr(self.item, 'is_parked'):
-            park_url = reverse("twf:tags_park", kwargs={"pk": self.item.pk})
-            park_button_html = (
-                f'<a href="{park_url}" class="btn btn-secondary ms-2">'
-                f'<i class="fa fa-box-archive"></i> Park</a>'
-            )
+        park_button = self._get_park_button()
 
         self.helper = FormHelper()
         self.helper.form_method = "post"
 
         if not search_results:
             # Show search interface
+            buttons = [
+                Submit(
+                    "search",
+                    "Search GeoNames",
+                    css_class="btn btn-primary",
+                )
+            ]
+            if park_button:
+                buttons.append(park_button)
+
             self.helper.layout = Layout(
                 "item_id",
                 "search_query",
                 HTML('<input type="hidden" name="search_results_json" value="">'),
                 ButtonHolder(
-                    Submit(
-                        "search",
-                        "Search GeoNames",
-                        css_class="btn btn-primary",
-                    ),
-                    HTML(park_button_html) if park_button_html else None,
+                    *buttons,
                     css_class="mt-3",
                 ),
             )
         else:
             # Show results selection
+            buttons = [
+                Submit(
+                    "search",
+                    "Search Again",
+                    css_class="btn btn-secondary",
+                ),
+                Submit(
+                    "save_and_next",
+                    "Save & Next",
+                    css_class="btn btn-primary ms-2",
+                ),
+            ]
+            if park_button:
+                buttons.append(park_button)
+
             self.helper.layout = Layout(
                 "item_id",
                 "search_query",
@@ -1364,17 +1454,7 @@ class GeoNamesQueryEnrichmentForm(BaseTagEnrichmentForm):
                 "result_choice",
                 "normalized_value",
                 ButtonHolder(
-                    Submit(
-                        "search",
-                        "Search Again",
-                        css_class="btn btn-secondary",
-                    ),
-                    Submit(
-                        "save_and_next",
-                        "Save & Next",
-                        css_class="btn btn-primary ms-2",
-                    ),
-                    HTML(park_button_html) if park_button_html else None,
+                    *buttons,
                     css_class="mt-3",
                 ),
             )
@@ -1394,8 +1474,17 @@ class GeoNamesQueryEnrichmentForm(BaseTagEnrichmentForm):
         # For save action, we need a selected result
         if 'save_and_next' in self.data:
             result_choice = cleaned_data.get('result_choice')
-            if not result_choice and self.search_results:
-                raise forms.ValidationError("Please select a result to save.")
+            # Check if we have search results but no selection
+            if self.search_results and (not result_choice or result_choice == ''):
+                raise forms.ValidationError("Please select a result from the search results before saving.")
+            # Also validate that result_choice is a valid index if provided
+            if result_choice and self.search_results:
+                try:
+                    idx = int(result_choice)
+                    if idx < 0 or idx >= len(self.search_results):
+                        raise forms.ValidationError(f"Invalid result selection: {result_choice}")
+                except (ValueError, TypeError):
+                    raise forms.ValidationError(f"Invalid result selection format: {result_choice}")
 
         return cleaned_data
 
@@ -1436,5 +1525,5 @@ class GeoNamesQueryEnrichmentForm(BaseTagEnrichmentForm):
         return super().save(user)
 
     def get_enrichment_type(self):
-        """Return enrichment type."""
-        return "authority_id"
+        """Return enrichment type for GeoNames."""
+        return "geonames"
