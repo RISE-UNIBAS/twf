@@ -2,8 +2,8 @@
 
 from collections import defaultdict
 
-from django.db.models import Avg, Count
-from twf.models import Document, Page, PageTag, Dictionary, Collection
+from django.db.models import Avg, Count, Q
+from twf.models import Document, Page, PageTag, Dictionary, DictionaryEntry, Collection
 
 
 def get_document_statistics(project):
@@ -130,6 +130,65 @@ def get_dictionary_statistics(project):
         "mostly_referenced_entry": mostly_referenced_entry,
         "mostly_referenced_category": mostly_referenced_category,
     }
+
+
+def get_dictionary_state_statistics(project):
+    """
+    Get per-dictionary entry state counts for the project's connected dictionaries.
+
+    For each dictionary connected to the project, returns:
+    - total: total number of entries
+    - enriched: entries with non-empty metadata
+    - parked: entries marked as parked
+    - unprocessed: entries with no metadata and not parked
+    - enriched_pct / parked_pct / unprocessed_pct: percentages
+
+    Args:
+        project: The Project instance
+
+    Returns:
+        list of dicts, one per connected dictionary, sorted by dictionary label
+    """
+    dictionaries = project.selected_dictionaries.all().order_by("label")
+    result = []
+
+    for dictionary in dictionaries:
+        entries = DictionaryEntry.objects.filter(dictionary=dictionary)
+        total = entries.count()
+
+        if total == 0:
+            result.append({
+                "dictionary": dictionary,
+                "total": 0,
+                "enriched": 0,
+                "parked": 0,
+                "unprocessed": 0,
+                "enriched_pct": 0,
+                "parked_pct": 0,
+                "unprocessed_pct": 0,
+            })
+            continue
+
+        enriched = entries.exclude(metadata={}).exclude(metadata__isnull=True).count()
+        parked = entries.filter(is_parked=True).count()
+        # Unprocessed: no metadata AND not parked
+        unprocessed = entries.filter(
+            Q(metadata={}) | Q(metadata__isnull=True),
+            is_parked=False
+        ).count()
+
+        result.append({
+            "dictionary": dictionary,
+            "total": total,
+            "enriched": enriched,
+            "parked": parked,
+            "unprocessed": unprocessed,
+            "enriched_pct": round(enriched / total * 100, 1),
+            "parked_pct": round(parked / total * 100, 1),
+            "unprocessed_pct": round(unprocessed / total * 100, 1),
+        })
+
+    return result
 
 
 def get_collection_statistics():

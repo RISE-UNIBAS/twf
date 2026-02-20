@@ -854,7 +854,7 @@ class Task(models.Model):
     progress : IntegerField
         Progress percentage (0-100).
     status : CharField
-        The status of the task (PENDING, STARTED, SUCCESS, FAILURE, PROGRESS, CANCELLED).
+        The status of the task (PENDING, STARTED, SUCCESS, FAILURE, PROGRESS, CANCELED).
     start_time : DateTimeField
         The time the task was started.
     end_time : DateTimeField
@@ -889,7 +889,7 @@ class Task(models.Model):
         ("SUCCESS", "Success"),
         ("FAILURE", "Failure"),
         ("PROGRESS", "Progress"),
-        ("CANCELLED", "Cancelled"),
+        ("CANCELED", "Cancelled"),
     ]
 
     TASK_TYPE_CHOICES = [

@@ -19,7 +19,7 @@ from twf.forms.dictionaries.dictionary_settings_forms import DictionarySettingsF
 from twf.forms.enrich_forms import EnrichEntryManualForm, EnrichEntryForm
 from twf.forms.tags.enrichment_forms import get_enrichment_form_class
 from twf.models import Dictionary, DictionaryEntry, Variation, PageTag, Workflow
-from twf.utils.project_statistics import get_dictionary_statistics
+from twf.utils.project_statistics import get_dictionary_statistics, get_dictionary_state_statistics
 from twf.workflows.dictionary_workflows import create_dictionary_enrichment_workflow
 from twf.tasks.instant_tasks import save_instant_task_merge_entries
 from twf.tables.tables_dictionary import (
@@ -165,6 +165,7 @@ class TWFDictionaryOverviewView(TWFDictionaryView):
         context = super().get_context_data(**kwargs)
         project = self.get_project()
         context["dict_stats"] = get_dictionary_statistics(project)
+        context["dict_state_stats"] = get_dictionary_state_statistics(project)
         return context
 
 

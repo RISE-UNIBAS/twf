@@ -363,7 +363,7 @@ def remove_completed_tasks(request):
         messages.error(request, "You do not have permission to remove tasks.")
         return redirect("twf:project_reset")
 
-    completed = project.tasks.filter(status__in=["SUCCESS", "FAILURE", "CANCELLED"])
+    completed = project.tasks.filter(status__in=["SUCCESS", "FAILURE", "CANCELED"])
     count = completed.count()
     completed.delete()
 
