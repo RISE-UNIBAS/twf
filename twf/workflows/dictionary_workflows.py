@@ -186,3 +186,86 @@ def end_dictionary_enrichment_workflow(request):
     end_workflow(request, project, user, "review_dictionary_enrichment", "twf:dictionaries_enrichment")
 
     return redirect("twf:dictionaries_enrichment")
+
+
+def create_dictionary_review_workflow(project, user, dictionary_id, batch_size=20):
+    """
+    Create a workflow for reviewing dictionary entries.
+
+    Finds pending (not yet reviewed, not parked, not reserved) entries in the
+    given dictionary, reserves them, and creates a Workflow of type
+    'review_dictionary_entries'.
+
+    Parameters
+    ----------
+    project : Project
+        The project to create the workflow for.
+    user : User
+        The user creating the workflow.
+    dictionary_id : int
+        The dictionary ID to review entries from.
+    batch_size : int, optional
+        Number of entries to include in the workflow. Defaults to 20.
+
+    Returns
+    -------
+    Workflow or False
+        The created Workflow instance, or False if no entries are available.
+    """
+    try:
+        dictionary = Dictionary.objects.get(id=dictionary_id, selected_projects=project)
+    except Dictionary.DoesNotExist:
+        return False
+
+    available_entries = list(
+        DictionaryEntry.objects.filter(
+            dictionary=dictionary,
+            is_reserved=False,
+            is_parked=False,
+            review_status="pending",
+        ).order_by("pk")[:batch_size].values_list("id", flat=True)
+    )
+
+    if not available_entries:
+        return False
+
+    # Mark entries as reserved
+    DictionaryEntry.objects.filter(id__in=available_entries).update(is_reserved=True)
+
+    # Create related task
+    task = start_related_task(
+        project,
+        user,
+        f"Review {dictionary.label} Entries",
+        f"Review dictionary entries for '{dictionary.label}'.",
+        f"The user started a review workflow for {len(available_entries)} entries from '{dictionary.label}'.",
+    )
+
+    # Create workflow
+    workflow = Workflow.objects.create(
+        project=project,
+        user=user,
+        workflow_type="review_dictionary_entries",
+        item_count=len(available_entries),
+        related_task=task,
+        metadata={
+            "dictionary_id": dictionary_id,
+            "dictionary_title": dictionary.label,
+        },
+    )
+
+    workflow.assigned_dictionary_entries.set(
+        DictionaryEntry.objects.filter(id__in=available_entries)
+    )
+
+    return workflow
+
+
+def end_dictionary_review_workflow(request):
+    """End/cancel the current dictionary entries review workflow."""
+    project = TWFView.s_get_project(request)
+    user = request.user
+
+    end_workflow(request, project, user, "review_dictionary_entries", "twf:dictionaries_review_entries")
+
+    return redirect("twf:dictionaries_review_entries")

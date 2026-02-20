@@ -124,6 +124,7 @@ class DictionaryEntryTable(tables.Table):
     label = tables.Column(verbose_name="Entry Label")
     variations = tables.Column(verbose_name="Variations", orderable=False)
     metadata = tables.Column(verbose_name="Normalization Data", orderable=False)
+    review_status = tables.Column(verbose_name="Review", orderable=True)
     modified_at = tables.DateTimeColumn(format="Y-m-d H:i", verbose_name="Modified")
     actions = tables.Column(empty_values=(), verbose_name="Actions", orderable=False)
 
@@ -132,7 +133,7 @@ class DictionaryEntryTable(tables.Table):
 
         model = DictionaryEntry
         template_name = "django_tables2/bootstrap4.html"
-        fields = ("label", "variations", "metadata", "modified_at")
+        fields = ("label", "variations", "metadata", "review_status", "modified_at")
         attrs = {"class": "table table-striped table-hover"}
 
     def render_variations(self, record):
@@ -200,6 +201,14 @@ class DictionaryEntryTable(tables.Table):
             value,
             record.id,
         )
+
+    def render_review_status(self, record):
+        """Renders the review_status field as a coloured badge."""
+        if record.is_parked:
+            return format_html('<span class="badge bg-warning text-dark">{}</span>', "Parked")
+        if record.review_status == "reviewed":
+            return format_html('<span class="badge bg-success">{}</span>', "Reviewed")
+        return format_html('<span class="badge bg-secondary">{}</span>', "Pending")
 
     def render_modified_at(self, value, record):
         """Renders the modified date with user information."""

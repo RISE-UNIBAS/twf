@@ -37,7 +37,7 @@ class DictionaryEntryForm(forms.ModelForm):
 
     class Meta:
         model = DictionaryEntry
-        fields = ["label", "notes"]
+        fields = ["label", "review_status", "notes"]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -45,6 +45,10 @@ class DictionaryEntryForm(forms.ModelForm):
         self.helper.layout = Layout(
             Row(
                 Column("label", css_class="form-group col-12 mb-0"),
+                css_class="row form-row",
+            ),
+            Row(
+                Column("review_status", css_class="form-group col-12 mb-0"),
                 css_class="row form-row",
             ),
             Row(

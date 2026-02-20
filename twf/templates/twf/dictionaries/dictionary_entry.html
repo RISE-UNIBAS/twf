@@ -43,6 +43,18 @@
                                 <th>Last Modified:</th>
                                 <td>{{ entry.modified_at|date:"Y-m-d H:i" }} by {{ entry.modified_by|default:"—" }}</td>
                             </tr>
+                            <tr>
+                                <th>Review Status:</th>
+                                <td>
+                                    {% if entry.is_parked %}
+                                        <span class="badge bg-warning text-dark">Parked</span>
+                                    {% elif entry.review_status == "reviewed" %}
+                                        <span class="badge bg-success">Reviewed</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">Pending</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>

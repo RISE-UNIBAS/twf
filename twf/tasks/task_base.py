@@ -315,6 +315,7 @@ class BaseTWFTask(CeleryTask):
         metadata_field,
         prompt_mode="text_only",
         model=None,
+        api_key=None,
     ):
         """
         Generalized function to process AI requests for multiple items.
@@ -330,11 +331,12 @@ class BaseTWFTask(CeleryTask):
             metadata_field (str): Field name for storing results in each item's metadata
             prompt_mode (str): One of "text_only", "images_only", or "text_and_images".
             model (str): Optional model name to use. If not provided, uses default_model from credentials.
+            api_key (str): Optional API key override. If provided, overrides project credentials.
         """
         # Set up the task with detailed tracking information
         total_items = len(items)
         self.set_total_items(total_items)
-        self.create_configured_client(client_name, role_description)
+        self.create_configured_client(client_name, role_description, api_key=api_key)
 
         # Use provided model or fall back to default from credentials
         self.model = model if model else self.credentials.get("default_model", "")
@@ -426,6 +428,7 @@ class BaseTWFTask(CeleryTask):
         metadata_field,
         prompt_mode="text_only",
         model=None,
+        api_key=None,
     ):
         """
         Process an AI request with possible multimodal content (text + images).
@@ -472,7 +475,7 @@ class BaseTWFTask(CeleryTask):
             it will fall back to text-only mode.
         """
         self.set_total_items(1)
-        self.create_configured_client(client_name, role_description)
+        self.create_configured_client(client_name, role_description, api_key=api_key)
 
         # Use provided model or fall back to default from credentials
         self.model = model if model else self.credentials.get("default_model", "")
@@ -737,7 +740,7 @@ class BaseTWFTask(CeleryTask):
         summary += "----------------------\n"
         return summary
 
-    def create_configured_client(self, client_name, role_description):
+    def create_configured_client(self, client_name, role_description, api_key=None):
         """
         Create and configure an AI client for the specified provider.
 
@@ -758,7 +761,8 @@ class BaseTWFTask(CeleryTask):
             client_name (str): The name of the AI provider to use
                               ('openai', 'genai', 'anthropic', or 'mistral')
             role_description (str): System role description for the AI model
-
+            api_key (str): Optional API key override. If provided, overrides the key
+                          from project credentials (used by AIConfiguration-based tasks).
 
         Provider-Specific Details:
             - OpenAI: Configured for multimodal support with vision models
@@ -772,6 +776,11 @@ class BaseTWFTask(CeleryTask):
         """
         self.client_name = client_name
         self.credentials = self.project.get_credentials(client_name)
+
+        # Override API key from AIConfiguration if provided
+        if api_key:
+            self.credentials = dict(self.credentials)
+            self.credentials["api_key"] = api_key
 
         # Get generic AI settings from project configuration
         ai_settings = self.project.conf_ai_settings.get("generic", {})

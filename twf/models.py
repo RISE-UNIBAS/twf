@@ -1513,6 +1513,12 @@ class DictionaryEntry(TimeStampedModel):
     is_parked = models.BooleanField(default=False)
     """Whether the entry is parked (temporarily set aside during workflow)."""
 
+    REVIEW_STATUS_CHOICES = [("pending", "Pending"), ("reviewed", "Reviewed")]
+    review_status = models.CharField(
+        max_length=20, choices=REVIEW_STATUS_CHOICES, default="pending"
+    )
+    """Review status of the entry (pending or reviewed)."""
+
     class Meta:
         """Meta options for the DictionaryEntry model."""
 
@@ -2380,6 +2386,7 @@ class Workflow(models.Model):
         ("review_tags_dates", "Review Date Normalization"),  # Backward compatibility
         ("review_tags_enrichment", "Review Tag Enrichment"),  # Generic enrichment
         ("review_dictionary_enrichment", "Review Dictionary Enrichment"),
+        ("review_dictionary_entries", "Review Dictionary Entries"),
         ("review_metadata_documents", "Review Document Metadata"),
         ("review_metadata_pages", "Review Page Metadata"),
     ]
@@ -2521,6 +2528,12 @@ class Workflow(models.Model):
 
                 logger.debug("DICT ENRICH: No unenriched entries found, returning None")
                 return None
+            if self.workflow_type == "review_dictionary_entries":
+                if self.current_item_index < self.item_count:
+                    item = self.assigned_dictionary_entries.all().order_by("pk")[
+                        self.current_item_index
+                    ]
+                    return item
             if self.workflow_type == "review_metadata_documents":
                 if self.current_item_index < self.item_count:
                     item = self.assigned_document_items.all().order_by("pk")[

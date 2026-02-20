@@ -20,7 +20,10 @@ from twf.forms.enrich_forms import EnrichEntryManualForm, EnrichEntryForm
 from twf.forms.tags.enrichment_forms import get_enrichment_form_class
 from twf.models import Dictionary, DictionaryEntry, Variation, PageTag, Workflow
 from twf.utils.project_statistics import get_dictionary_statistics, get_dictionary_state_statistics
-from twf.workflows.dictionary_workflows import create_dictionary_enrichment_workflow
+from twf.workflows.dictionary_workflows import (
+    create_dictionary_enrichment_workflow,
+    create_dictionary_review_workflow,
+)
 from twf.tasks.instant_tasks import save_instant_task_merge_entries
 from twf.tables.tables_dictionary import (
     DictionaryTable,
@@ -58,6 +61,11 @@ class TWFDictionaryView(LoginRequiredMixin, TWFView):
                     {
                         "url": reverse("twf:dictionaries_enrichment"),
                         "value": "Manual Enrichment",
+                        "permission": "dictionary.edit",
+                    },
+                    {
+                        "url": reverse("twf:dictionaries_review_entries"),
+                        "value": "Review Entries",
                         "permission": "dictionary.edit",
                     },
                     {
@@ -1097,4 +1105,93 @@ class TWFDictionarySettingsView(ProjectPermissionMixin, FormView, TWFDictionaryV
         """Add context data."""
         context = super().get_context_data(**kwargs)
         context["page_title"] = "Dictionary Settings"
+        return context
+
+
+class TWFDictionaryEntriesReviewView(ProjectPermissionMixin, TWFDictionaryView):
+    """Supervised workflow for reviewing dictionary entries after batch enrichment."""
+    required_permission = "dictionary.edit"
+
+    template_name = "twf/dictionaries/entries_review.html"
+    page_title = "Review Dictionary Entries"
+
+    def get_active_workflow(self):
+        """Get active dictionary entries review workflow for current user."""
+        return Workflow.objects.filter(
+            project=self.get_project(),
+            user=self.request.user,
+            workflow_type="review_dictionary_entries",
+            status="started",
+        ).first()
+
+    def _advance_or_finish(self, workflow, item_description):
+        """Advance workflow; finish it if no more items remain."""
+        workflow.advance(item_description=item_description)
+        if not workflow.get_next_item():
+            workflow.finish()
+            messages.success(self.request, "Workflow completed — all entries reviewed!")
+
+    def post(self, request, *args, **kwargs):
+        """Handle workflow actions."""
+        workflow = self.get_active_workflow()
+
+        if "start_workflow" in request.POST:
+            dictionary_id = request.POST.get("dictionary_id")
+            batch_size = int(request.POST.get("batch_size", 20))
+            if dictionary_id:
+                created = create_dictionary_review_workflow(
+                    self.get_project(), request.user, int(dictionary_id), batch_size
+                )
+                if created:
+                    messages.success(request, f"Review workflow started with {created.item_count} entries.")
+                else:
+                    messages.error(request, "No pending entries available in this dictionary.")
+            else:
+                messages.error(request, "Please select a dictionary.")
+            return redirect("twf:dictionaries_review_entries")
+
+        if not workflow:
+            messages.error(request, "No active workflow found.")
+            return redirect("twf:dictionaries_review_entries")
+
+        entry = workflow.get_next_item()
+        if not entry:
+            messages.error(request, "No entry to process.")
+            return redirect("twf:dictionaries_review_entries")
+
+        if "mark_reviewed" in request.POST:
+            entry.review_status = "reviewed"
+            entry.is_reserved = False
+            entry.save(current_user=request.user)
+            self._advance_or_finish(workflow, f"Reviewed '{entry.label}'")
+            messages.success(request, f"Entry '{entry.label}' marked as reviewed.")
+
+        elif "park" in request.POST:
+            entry.is_parked = True
+            entry.is_reserved = False
+            entry.save(current_user=request.user)
+            self._advance_or_finish(workflow, f"Parked '{entry.label}'")
+            messages.info(request, f"Entry '{entry.label}' parked.")
+
+        return redirect("twf:dictionaries_review_entries")
+
+    def get_context_data(self, **kwargs):
+        """Build context for the review view."""
+        context = super().get_context_data(**kwargs)
+        workflow = self.get_active_workflow()
+
+        if workflow:
+            context["has_active_workflow"] = True
+            context["workflow"] = workflow
+            context["workflow_definition"] = workflow.get_workflow_definition()
+            context["workflow_progress"] = workflow.get_progress()
+            entry = workflow.get_next_item()
+            context["entry"] = entry
+            context["has_next_entry"] = entry is not None
+        else:
+            context["has_active_workflow"] = False
+            context["dictionaries"] = Dictionary.objects.filter(
+                selected_projects=self.get_project()
+            )
+
         return context

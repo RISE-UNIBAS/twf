@@ -434,6 +434,7 @@ def search_ai_entries(self, project_id, user_id, **kwargs):
         ai_config.system_role,
         ai_config.provider,
         model=ai_config.model,
+        api_key=ai_config.api_key,
     )
 
 
@@ -472,4 +473,5 @@ def search_ai_entry(self, project_id, user_id, **kwargs):
         ai_config.system_role,
         ai_config.provider,
         model=ai_config.model,
+        api_key=ai_config.api_key,
     )

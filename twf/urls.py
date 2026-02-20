@@ -165,6 +165,7 @@ from twf.views.dictionaries.views_dictionaries import (
     TWFDictionaryDictionariesView,
     TWFDictionaryAddView,
     TWFDictionaryEnrichmentView,
+    TWFDictionaryEntriesReviewView,
     TWFDictionaryMergeEntriesView,
     TWFDictionarySettingsView,
 )
@@ -242,7 +243,10 @@ from twf.workflows.tag_workflows import (
     end_tag_grouping_workflow,
     end_tag_enrichment_workflow,
 )
-from twf.workflows.dictionary_workflows import end_dictionary_enrichment_workflow
+from twf.workflows.dictionary_workflows import (
+    end_dictionary_enrichment_workflow,
+    end_dictionary_review_workflow,
+)
 from twf.workflows.metadata_workflows import (
     end_metadata_document_review_workflow,
     end_metadata_page_review_workflow,
@@ -581,6 +585,11 @@ urlpatterns = [
         name="dictionaries_enrichment",
     ),
     path(
+        "dictionaries/review/entries/",
+        TWFDictionaryEntriesReviewView.as_view(),
+        name="dictionaries_review_entries",
+    ),
+    path(
         "dictionaries/settings",
         TWFDictionarySettingsView.as_view(),
         name="dictionaries_settings",
@@ -881,6 +890,11 @@ urlpatterns = [
         "workflows/dictionaries/enrichment/end/",
         end_dictionary_enrichment_workflow,
         name="end_dictionary_enrichment_workflow",
+    ),
+    path(
+        "workflows/dictionaries/review/entries/end/",
+        end_dictionary_review_workflow,
+        name="end_dictionary_review_workflow",
     ),
     path(
         "workflows/metadata/documents/end/",

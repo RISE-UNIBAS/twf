@@ -8,7 +8,7 @@ from django.db import transaction
 from django.utils import timezone
 from django.contrib.auth import get_user_model
 
-from twf.models import Project, Note, Workflow
+from twf.models import Project, Note, Workflow, AIConfiguration
 from twf.tasks.task_base import BaseTWFTask
 
 logger = logging.getLogger(__name__)
@@ -59,6 +59,8 @@ def copy_project(self, project_id, user_id, **kwargs):
                 description=self.project.description,
                 conf_credentials=self.project.conf_credentials,
                 conf_tasks=self.project.conf_tasks,
+                conf_ai_settings=self.project.conf_ai_settings,
+                conf_display=self.project.conf_display,
                 keywords=self.project.keywords,
                 license=self.project.license,
                 version=self.project.version,
@@ -66,6 +68,45 @@ def copy_project(self, project_id, user_id, **kwargs):
                 project_doi=self.project.project_doi,
             )
             new_project.save()
+
+            # Copy AIConfiguration objects
+            ai_config_count = 0
+            for ai_config in self.project.ai_configs.all():
+                AIConfiguration.objects.create(
+                    project=new_project,
+                    name=ai_config.name,
+                    description=ai_config.description,
+                    provider=ai_config.provider,
+                    model=ai_config.model,
+                    api_key=ai_config.api_key,
+                    system_role=ai_config.system_role,
+                    prompt_template=ai_config.prompt_template,
+                    temperature=ai_config.temperature,
+                    max_tokens=ai_config.max_tokens,
+                    top_p=ai_config.top_p,
+                    frequency_penalty=ai_config.frequency_penalty,
+                    presence_penalty=ai_config.presence_penalty,
+                    seed=ai_config.seed,
+                    is_active=ai_config.is_active,
+                    created_by=self.user,
+                    modified_by=self.user,
+                )
+                ai_config_count += 1
+            self.twf_task.text += f"Copied {ai_config_count} AI configurations\n"
+
+            # Copy existing Notes (excluding the copy-info note which is added at the end)
+            note_count = 0
+            for note in self.project.notes.all():
+                Note.objects.create(
+                    project=new_project,
+                    title=note.title,
+                    note=note.note,
+                    created_by=self.user,
+                    modified_by=self.user,
+                )
+                note_count += 1
+            if note_count:
+                self.twf_task.text += f"Copied {note_count} notes\n"
             self.twf_task.text += f"Created new project with ID: {new_project.id}\n"
 
             # Copy selected dictionaries (referencing the same ones)
@@ -492,4 +533,5 @@ def query_project_unified(self, project_id, user_id, **kwargs):
         ai_config.provider,
         prompt_mode=prompt_mode,
         model=ai_config.model,
+        api_key=ai_config.api_key,
     )

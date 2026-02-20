@@ -55,6 +55,7 @@ def search_ai_for_docs(self, project_id, user_id, **kwargs):
         ai_config.provider,
         prompt_mode=prompt_mode,
         model=ai_config.model,
+        api_key=ai_config.api_key,
     )
 
     return {"status": "completed", "documents_processed": doc_count}
