@@ -209,9 +209,9 @@
                                 </div>
                                 <small class="text-muted">
                                     {% if step.completed_at %}
-                                        Completed: {{ step.completed_at|slice:":19"|replace:"T":" " }}
+                                        Completed: {{ step.completed_at|slice:":19"|replace:"T: " }}
                                     {% elif step.started_at %}
-                                        Started: {{ step.started_at|slice:":19"|replace:"T":" " }}
+                                        Started: {{ step.started_at|slice:":19"|replace:"T: " }}
                                     {% endif %}
                                 </small>
                             </div>

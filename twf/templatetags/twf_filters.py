@@ -98,6 +98,27 @@ def get_item(dictionary, key):
 
 
 @register.filter
+def replace(value, arg):
+    """
+    Replace occurrences of a substring in a string value.
+
+    Argument format: 'old:new' where ':' separates the old and new values.
+    Example: {{ value|replace:"T: " }} replaces 'T' with ' '.
+
+    Args:
+        value: The string to perform replacement on
+        arg: Replacement spec in 'old:new' format
+
+    Returns:
+        String with replacements applied
+    """
+    parts = str(arg).split(':', 1)
+    old = parts[0]
+    new = parts[1] if len(parts) > 1 else ''
+    return str(value).replace(old, new)
+
+
+@register.filter
 def highlight_tag_in_context(tag):
     """
     Highlight a tag within its line context using PageTag's built-in method.

@@ -119,6 +119,8 @@ from twf.views.project.views_crud import (
     unpark_all_tags,
     remove_all_prompts,
     remove_all_tasks,
+    remove_completed_tasks,
+    remove_active_tasks,
     remove_all_dictionaries,
     update_user_permissions,
 )
@@ -362,6 +364,16 @@ urlpatterns = [
         "project/setup/reset/remove/tasks/",
         remove_all_tasks,
         name="reset_remove_all_tasks",
+    ),
+    path(
+        "project/setup/reset/remove/tasks/completed/",
+        remove_completed_tasks,
+        name="reset_remove_completed_tasks",
+    ),
+    path(
+        "project/setup/reset/remove/tasks/active/",
+        remove_active_tasks,
+        name="reset_remove_active_tasks",
     ),
     path(
         "project/setup/reset/remove/dictionaries/",

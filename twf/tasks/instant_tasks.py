@@ -121,6 +121,28 @@ def save_instant_task_remove_all_tasks(project, user):
     save_instant_task(project, user, title, description, "All tasks were removed.", category="bulk_delete")
 
 
+def save_instant_task_remove_completed_tasks(project, user, count):
+    """Save an instant task recording deletion of completed tasks."""
+    title = "Remove Completed Tasks"
+    description = "Remove all completed tasks in the project."
+    save_instant_task(
+        project, user, title, description,
+        f"{count} completed tasks were removed.",
+        category="bulk_delete"
+    )
+
+
+def save_instant_task_remove_active_tasks(project, user, count):
+    """Save an instant task recording deletion of active tasks."""
+    title = "Remove Active Tasks"
+    description = "Remove all active tasks in the project."
+    save_instant_task(
+        project, user, title, description,
+        f"{count} active tasks were removed.",
+        category="bulk_delete"
+    )
+
+
 def save_instant_task_remove_all_dictionaries(project, user):
     """Save an instant task to the database."""
     title = "Remove All Dictionaries"

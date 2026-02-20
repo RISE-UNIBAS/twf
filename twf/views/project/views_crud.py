@@ -18,6 +18,8 @@ from twf.tasks.instant_tasks import (
     save_instant_task_unpark_all_tags,
     save_instant_task_remove_all_prompts,
     save_instant_task_remove_all_tasks,
+    save_instant_task_remove_completed_tasks,
+    save_instant_task_remove_active_tasks,
     save_instant_task_remove_all_dictionaries,
     save_instant_task_delete_note,
 )
@@ -349,6 +351,42 @@ def remove_all_tasks(request):
 
     save_instant_task_remove_all_tasks(project, request.user)
     messages.success(request, f"{count} completed tasks were removed.")
+
+    return redirect("twf:project_reset")
+
+
+def remove_completed_tasks(request):
+    """Remove all completed (non-active) tasks from the project."""
+    project = TWFView.s_get_project(request)
+
+    if not check_permission(request.user, "task.manage", project):
+        messages.error(request, "You do not have permission to remove tasks.")
+        return redirect("twf:project_reset")
+
+    completed = project.tasks.filter(status__in=["SUCCESS", "FAILURE", "CANCELLED"])
+    count = completed.count()
+    completed.delete()
+
+    save_instant_task_remove_completed_tasks(project, request.user, count)
+    messages.success(request, f"{count} completed tasks were removed.")
+
+    return redirect("twf:project_reset")
+
+
+def remove_active_tasks(request):
+    """Remove all active (running/pending) tasks from the project."""
+    project = TWFView.s_get_project(request)
+
+    if not check_permission(request.user, "task.manage", project):
+        messages.error(request, "You do not have permission to remove tasks.")
+        return redirect("twf:project_reset")
+
+    active = project.tasks.filter(status__in=["STARTED", "PENDING", "PROGRESS"])
+    count = active.count()
+    active.delete()
+
+    save_instant_task_remove_active_tasks(project, request.user, count)
+    messages.success(request, f"{count} active tasks were removed.")
 
     return redirect("twf:project_reset")
 
