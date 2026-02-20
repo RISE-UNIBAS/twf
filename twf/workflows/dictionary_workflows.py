@@ -223,7 +223,7 @@ def create_dictionary_review_workflow(project, user, dictionary_id, batch_size=2
             is_reserved=False,
             is_parked=False,
             review_status="pending",
-        ).order_by("pk")[:batch_size].values_list("id", flat=True)
+        ).exclude(metadata={}).order_by("pk")[:batch_size].values_list("id", flat=True)
     )
 
     if not available_entries:

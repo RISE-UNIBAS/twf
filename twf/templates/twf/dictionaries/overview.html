@@ -34,6 +34,7 @@
                                 <th>Type</th>
                                 <th class="text-end">Total entries</th>
                                 <th>Enriched</th>
+                                <th>Reviewed</th>
                                 <th>Parked</th>
                                 <th>Unprocessed</th>
                             </tr>
@@ -56,6 +57,20 @@
                                             </div>
                                         </div>
                                         <small class="text-nowrap text-muted">{{ row.enriched }} ({{ row.enriched_pct }}%)</small>
+                                    </div>
+                                </td>
+
+                                <!-- Reviewed -->
+                                <td style="min-width: 160px;">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <div class="progress flex-grow-1" style="height: 18px;">
+                                            <div class="progress-bar bg-primary" role="progressbar"
+                                                 style="width: {{ row.reviewed_pct }}%;"
+                                                 title="{{ row.reviewed }} reviewed">
+                                                {% if row.reviewed_pct >= 10 %}{{ row.reviewed_pct }}%{% endif %}
+                                            </div>
+                                        </div>
+                                        <small class="text-nowrap text-muted">{{ row.reviewed }} ({{ row.reviewed_pct }}%)</small>
                                     </div>
                                 </td>
 

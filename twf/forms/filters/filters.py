@@ -393,20 +393,15 @@ class DictionaryEntryFilter(django_filters.FilterSet):
     has_variations = django_filters.BooleanFilter(
         method="filter_has_variations", label="Has variations", widget=CheckboxInput()
     )
-    modified_by = django_filters.CharFilter(
-        field_name="modified_by", lookup_expr="icontains", label="Modified by"
-    )
-    modified_after = django_filters.DateFilter(
-        field_name="modified_at",
-        lookup_expr="gte",
-        label="Modified after",
-        widget=DateInput(attrs={"type": "date", "class": "form-control"}),
-    )
-    modified_before = django_filters.DateFilter(
-        field_name="modified_at",
-        lookup_expr="lte",
-        label="Modified before",
-        widget=DateInput(attrs={"type": "date", "class": "form-control"}),
+    status = django_filters.ChoiceFilter(
+        choices=[
+            ("pending", "Pending"),
+            ("reviewed", "Reviewed"),
+            ("parked", "Parked"),
+        ],
+        method="filter_by_status",
+        label="Status",
+        empty_label="Any",
     )
 
     class Meta:
@@ -418,9 +413,7 @@ class DictionaryEntryFilter(django_filters.FilterSet):
             "variation",
             "has_metadata",
             "has_variations",
-            "modified_by",
-            "modified_after",
-            "modified_before",
+            "status",
         ]
 
     def filter_has_metadata(self, queryset, name, value):
@@ -439,6 +432,16 @@ class DictionaryEntryFilter(django_filters.FilterSet):
         """Filter entries by variation text."""
         if value:
             return queryset.filter(variations__variation__icontains=value).distinct()
+
+    def filter_by_status(self, queryset, name, value):
+        """Filter entries by combined review/parked status."""
+        if value == "parked":
+            return queryset.filter(is_parked=True)
+        if value == "pending":
+            return queryset.filter(review_status="pending", is_parked=False)
+        if value == "reviewed":
+            return queryset.filter(review_status="reviewed", is_parked=False)
+        return queryset
         return queryset
 
 

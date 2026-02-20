@@ -1159,7 +1159,21 @@ class TWFDictionaryEntriesReviewView(ProjectPermissionMixin, TWFDictionaryView):
             messages.error(request, "No entry to process.")
             return redirect("twf:dictionaries_review_entries")
 
-        if "mark_reviewed" in request.POST:
+        if "update_label" in request.POST:
+            new_label = request.POST.get("new_label", "").strip()
+            if new_label:
+                entry.label = new_label
+                entry.save(current_user=request.user)
+                messages.success(request, f"Label updated to '{new_label}'.")
+            else:
+                messages.error(request, "Label cannot be empty.")
+
+        elif "remove_normalization" in request.POST:
+            entry.metadata = {}
+            entry.save(current_user=request.user)
+            messages.success(request, f"Normalization data removed for '{entry.label}'.")
+
+        elif "mark_reviewed" in request.POST:
             entry.review_status = "reviewed"
             entry.is_reserved = False
             entry.save(current_user=request.user)

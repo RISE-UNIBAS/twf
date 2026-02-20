@@ -161,15 +161,18 @@ def get_dictionary_state_statistics(project):
                 "dictionary": dictionary,
                 "total": 0,
                 "enriched": 0,
+                "reviewed": 0,
                 "parked": 0,
                 "unprocessed": 0,
                 "enriched_pct": 0,
+                "reviewed_pct": 0,
                 "parked_pct": 0,
                 "unprocessed_pct": 0,
             })
             continue
 
         enriched = entries.exclude(metadata={}).exclude(metadata__isnull=True).count()
+        reviewed = entries.filter(review_status="reviewed", is_parked=False).count()
         parked = entries.filter(is_parked=True).count()
         # Unprocessed: no metadata AND not parked
         unprocessed = entries.filter(
@@ -181,9 +184,11 @@ def get_dictionary_state_statistics(project):
             "dictionary": dictionary,
             "total": total,
             "enriched": enriched,
+            "reviewed": reviewed,
             "parked": parked,
             "unprocessed": unprocessed,
             "enriched_pct": round(enriched / total * 100, 1),
+            "reviewed_pct": round(reviewed / total * 100, 1),
             "parked_pct": round(parked / total * 100, 1),
             "unprocessed_pct": round(unprocessed / total * 100, 1),
         })
