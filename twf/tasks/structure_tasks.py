@@ -800,8 +800,9 @@ def sync_documents_and_pages(
             'pages_deleted': int    # Pages removed
         }
     """
-    # Track all documents in the export
+    # Track all documents and pages in the export
     documents_in_export = set()
+    pages_in_export = defaultdict(set)  # doc_instance.id -> set of tk_page_id
 
     # Separate page XML files from metadata files
     page_xml_files = []
@@ -888,6 +889,7 @@ def sync_documents_and_pages(
                 tk_page_number=page_nr,
                 defaults={"created_by": user, "modified_by": user},
             )
+            pages_in_export[doc_instance.id].add(page_id)
 
             # Update the page XML file
             with open(file, "rb") as f:
@@ -935,6 +937,28 @@ def sync_documents_and_pages(
 
     # Parse all pages
     parse_pages(project, user, celery_task)
+
+    # Handle deleted pages within existing documents (if enabled)
+    if delete_removed:
+        for doc_internal_id, seen_page_ids in pages_in_export.items():
+            try:
+                doc = Document.objects.get(id=doc_internal_id)
+                pages_to_delete = Page.objects.filter(document=doc).exclude(
+                    tk_page_id__in=seen_page_ids
+                )
+                deleted_count = pages_to_delete.count()
+                if deleted_count > 0:
+                    for page in pages_to_delete:
+                        doc_changes[doc_internal_id]["pages"]["deleted"].append(page.id)
+                    stats["pages_deleted"] += deleted_count
+                    pages_to_delete.delete()
+                    if celery_task.twf_task:
+                        celery_task.twf_task.text += (
+                            f"  - Deleted {deleted_count} removed page(s) "
+                            f"from document {doc.document_id}\n"
+                        )
+            except Document.DoesNotExist:
+                pass
 
     # Handle deleted documents (if enabled)
     if delete_removed:
